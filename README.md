@@ -1,1 +1,42 @@
 # gem-tracker-maps
+
+* coal-plant
+  * https://globalenergymonitor.org/projects/global-coal-plant-tracker/tracker/
+  * https://greeninfo-network.github.io/coal-tracker-client/data/trackers.json
+* coal-mine
+  * https://globalenergymonitor.org/projects/global-coal-mine-tracker/tracker-map/
+  * https://greeninfo-network.github.io/mine-tracker/data/data.csv
+* coal-terminals
+  * https://globalenergymonitor.org/projects/global-coal-terminals-tracker/tracker-map/
+  * https://greeninfo-network.github.io/global-coal-terminals-tracker/static/data/data.csv
+* oil-gas-extraction
+  * https://globalenergymonitor.org/projects/global-oil-gas-extraction-tracker/tracker-map/
+  * https://greeninfo-network.github.io/global-oil-gas-extraction-tracker/data/data.csv
+* oil-infrastructure
+  * https://globalenergymonitor.org/projects/global-oil-infrastructure-tracker/tracker-map/
+  * https://greeninfo-network.github.io/global-oil-infrastructure-tracker/static/data/data.csv
+* gas-plant
+  * https://globalenergymonitor.org/projects/global-gas-plant-tracker/tracker-map/
+  * https://greeninfo-network.github.io/global-gas-plant-tracker/static/data/data.csv
+* gas-infrastructure
+  * https://globalenergymonitor.org/projects/global-gas-infrastructure-tracker/tracker/
+  * https://greeninfo-network.github.io/global-gas-infrastructure-tracker/data/data.csv?v=2.1
+* solar-power
+  * https://globalenergymonitor.org/projects/global-solar-power-tracker/tracker-map/
+  * https://greeninfo-network.github.io/solar-power-tracker/static/data/data.csv
+* wind-power
+  * https://globalenergymonitor.org/projects/global-wind-power-tracker/tracker-map/
+  * https://greeninfo-network.github.io/wind-power-tracker/static/data/data.csv
+* geothermal-power
+  * https://globalenergymonitor.org/projects/global-geothermal-power-tracker/tracker-map/
+  * https://greeninfo-network.github.io/geothermal-power-tracker/static/data/data.csv
+* bioenergy-power
+  * https://globalenergymonitor.org/projects/global-bioenergy-power-tracker/tracker-map/
+  * https://greeninfo-network.github.io/bioenergy-power-tracker/static/data/data.csv
+* nuclear-power
+  * https://globalenergymonitor.org/projects/global-nuclear-power-tracker/tracker-map/
+  * https://greeninfo-network.github.io/nuclear-power-tracker/static/data/data.csv
+* steel-plant 
+  * https://globalenergymonitor.org/projects/global-steel-plant-tracker/tracker-map/
+  * https://greeninfo-network.github.io/steel-tracker/data/data.csv
+

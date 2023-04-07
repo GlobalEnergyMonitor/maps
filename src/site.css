@@ -78,3 +78,19 @@ body {
     content: '✔';
     margin-right: 5px;
 }
+
+.sidebar {
+    padding: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 408px;
+    height: 100%;
+    z-index: 1;
+    overflow-y:scroll; 
+    max-height: 100%;
+    opacity: 0.9;
+}
+#filter-form {
+    text-transform: capitalize;
+}
