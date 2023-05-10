@@ -102,16 +102,32 @@ function findLinkedAssets() {
     };
     Object.keys(grouped).forEach((key) => {
         let features = JSON.parse(JSON.stringify(grouped[key]));
-        if (features.length == 1) {
-            config.processedGeoJSON.features.push(features[0]);
-        } else {
+       // if (features.length == 1) {
+        //    config.processedGeoJSON.features.push(features[0]);
+        //} else {
             let capacity = features.reduce((previous, current) => {
                 return previous + Number(current.properties[config.capacity_field]);
             }, 0);
-            let feature = features[0];
-            feature.properties[config.capacity_field] = capacity;
-            config.processedGeoJSON.features.push(feature);
-        }
+            features[0].properties[config.capacity_field] = capacity;
+
+            let nonzerofields = 0;
+            let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [k]: 0 })));
+            features.forEach((feature) => {
+                if (icon[feature.properties[config.color.field]] == 0) {
+                    nonzerofields++;
+                    lastfield = feature.properties[config.color.field];
+                }    
+                icon[feature.properties[config.color.field]]++;
+            });
+            if (nonzerofields == 1) {
+                config.processedGeoJSON.features.push(features[0]);
+            } else {
+                features[0].properties['icon'] = JSON.stringify(icon);
+                config.processedGeoJSON.features.push(features[0]);
+                generateIcon(icon);
+            }
+
+        //}
     });
 
 }
@@ -169,6 +185,23 @@ function addLayer() {
         map.on('mouseleave', 'assets', () => {
             map.getCanvas().style.cursor = '';
             popup.remove();
+        });
+
+        map.addLayer({
+            'id': 'assets-symbol',
+            'type': 'symbol',
+            'source': 'assets-source',
+            'layout': {
+                'icon-image': ["get", "icon"],
+                'icon-allow-overlap': true,
+                'icon-size': [
+                    'interpolate',
+                    ['linear'],
+                    ["to-number", ["get", config.capacity_field]],
+                    0, 8/64, // when size is 0, scale the icon to half its original size
+                    10000, .6 // when size is 10, scale the icon to twice its original size
+                  ]
+            }
         });
 
         paint = config.paint;
@@ -237,73 +270,44 @@ function filterGeoJSON() {
     //map.getSource('assets-symbol').setData(filteredGeoJSON);
 }
 
-function customIconTest() {
+function generateIcon(icon) {
+    let label = JSON.stringify(icon);
+    if (map.hasImage(label)) return;
 
-    config.colors.values;
-    const style = {"operating":5,"proposed":2,"cancelled":0,"shelved":1,"closed":4,"mothballed":1};
-    const str = JSON.stringify(style);
-    //style = JSON.parse(str);
-
-
-    // create a canvas element
-    const canvas = document.createElement('canvas');
+    let canvas = document.createElement('canvas');
     canvas.width = 64; // set the size of the canvas
     canvas.height = 64;
 
     // get the canvas context
-    const context = canvas.getContext('2d');
+    let context = canvas.getContext('2d');
 
     // calculate the coordinates of the center of the circle
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    let centerX = canvas.width / 2;
+    let centerY = canvas.height / 2;
 
-    // set the colors for the circle
-    context.fillStyle = 'rgb(85, 187, 85)'; // green
-    context.beginPath();
-    context.moveTo(centerX, centerY);
-    context.arc(centerX, centerY, canvas.width / 2, 0, Math.PI * 2 * 3 / 4);
-    context.fill();
+    let current = 0;
+    let slices = Object.values(icon).reduce((previous, current) => {
+        return previous + Number(current);
+    }, 0);
 
-    context.fillStyle = 'rgb(255, 0, 0)'; // red
-    context.beginPath();
-    context.moveTo(centerX, centerY);
-    context.arc(centerX, centerY, canvas.width / 2, Math.PI * 2 * 3 / 4, Math.PI * 2 * 5 / 12);
-    context.fill();
+    Object.keys(icon).forEach((k) => {
+        let next = current + (icon[k] / slices);
+        context.fillStyle = config.color.values[k];
+        context.beginPath();
+        context.moveTo(centerX, centerY);
+        context.arc(centerX, centerY, canvas.width / 2, Math.PI * 2 * current, Math.PI * 2 * next);
+        context.fill();
 
-    context.fillStyle = 'rgb(0, 153, 255)'; // blue
-    context.beginPath();
-    context.moveTo(centerX, centerY);
-    context.arc(centerX, centerY, canvas.width / 2, Math.PI * 2 * 5 / 12, 0);
-    context.fill();
+        current = next;
+    });
 
     // create a data URI for the canvas image
-    const dataURL = canvas.toDataURL();
+    let dataURL = canvas.toDataURL();
 
     // add the image to the map as a custom icon
     map.loadImage(dataURL, (error, image) => {
         if (error) throw error;
-        map.addImage('custom-icon', image);
+        if (! map.hasImage(label)) map.addImage(label, image);
     });
 }
 
-function addCustomIconLayerTest() {
-    map.addLayer({
-    'id': 'assets-symbol',
-    'type': 'symbol',
-    'source': {
-        'type': 'geojson',
-        'data': config.geojson
-    },
-    'layout': {
-        'icon-image': 'custom-icon',
-        'icon-allow-overlap': true,
-         'icon-size': [
-            'interpolate',
-            ['linear'],
-            ["to-number", ["get", "output"]],
-            0, 8/64, // when size is 0, scale the icon to half its original size
-            60, .25 // when size is 10, scale the icon to twice its original size
-          ]
-    }
-});
-}

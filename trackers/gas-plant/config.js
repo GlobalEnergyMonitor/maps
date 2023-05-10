@@ -8,11 +8,15 @@ var config = {
         values: {
             //update this list
             'operating': '#ff0000',
-            'proposed': '#ffffff',
-            'cancelled': '#ff00ff',
-            'shelved': '#0000ff',
-            'closed': '#00ffff',
-            'mothballed': '#000000'
+            'pre-construction': '#0000ff',
+            'construction': '#00ff00',
+            'retired': '#000000',
+            'cancelled': '#000000',
+            'pre-permit': '#0000ff',
+            'shelved': '#000000',
+            'mothballed': '#000000',
+            'announced': '#0000ff',
+            'permitted': '#00ff00'
             // contining
         }
     },
@@ -24,7 +28,7 @@ var config = {
         {
             field: 'status',
             /* values need to be specified for ordering */
-            values: ['operating','construction','retired','cancelled','pre-permit','shelved','mothballed','announced','permitted']
+            values: ['operating','construction','pre-construction','retired','cancelled','pre-permit','shelved','mothballed','announced','permitted']
         }
     ],
     capacity_field: 'capacity',
