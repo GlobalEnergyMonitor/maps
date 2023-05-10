@@ -16,6 +16,7 @@ var config = {
         }
     },
     paint: {
+        /* this could be made dynamic based on the range of values in the data */
         'circle-radius': ["max", 2, ["/", ["to-number", ["get", "output"]], 5]]
     },
     filters: [
