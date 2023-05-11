@@ -1,3 +1,16 @@
+processConfig();
+
+function processConfig() {
+    // Merge site-config.js and config.js
+    config = Object.assign(site_config, config);
+    if (!('linkField' in config)) config.linkField = 'url';
+    if (!('locationColumns' in config)) {
+        config.locationColumns = {};
+        config.locationColumns['lng'] = 'lng';
+        config.locationColumns['lat'] = 'lat';
+    }
+}
+
 mapboxgl.accessToken = config.accessToken;
 const map = new mapboxgl.Map({
     container: 'map',
@@ -14,8 +27,8 @@ const popup = new mapboxgl.Popup({
 });
 
 $(document).ready(function() {
-    loadData();
     buildFilters();
+    loadData();
 });
 
 function loadData() {
@@ -37,116 +50,105 @@ function loadData() {
         });        
     }
 }
+
 function makeGeoJSON(jsonData) {
     config.geojson = {
         "type": "FeatureCollection",
         "features": []
     };
 
-    //NOTE: consider making lng, lat column name a config option
     jsonData.forEach((asset) => {
         let feature = {
             "type": "Feature",
             "geometry": {
                 "type": "Point",
-                "coordinates": [asset['lng'], asset['lat']]
+                "coordinates": [asset[config.locationColumns['lng']], asset[config.locationColumns['lat']]]
             },
             "properties": {}
         }
         for (let key in asset) {
-            if (key != 'lng' && key != 'lat') {
+            if (key != config.locationColumns['lng'] && key != config.locationColumns['lat']) {
                 feature.properties[key] = asset[key];
             }
         }
         config.geojson.features.push(feature);
     });
 
-    //filters haven't loaded yet so can't call them at this point, and next steps expect it
-    config.filteredGeoJSON = JSON.parse(JSON.stringify(config.geojson));
-
+    // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
+    config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     findLinkedAssets();
-    addLayer();   
+    addLayers();   
 }
 
-
-// iterate through, create lookup with details that lists all of them
-// create new GeoJSON which has only one feature when units/phases at exact same location
-// call this after filters
+// Builds lookup of linked assets by the link column
+//  and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
 function findLinkedAssets() {
-    // if url is shared, common asset. create lookup table
+    // First, create a lookup table for linked assets based on linkField
     config.linked = {};
-    config.filteredGeoJSON.features.forEach((feature) => {
-        if (! (feature.properties.url in config.linked)) {
-            config.linked[feature.properties.url] = [];
+    config.processedGeoJSON.features.forEach((feature) => {
+        if (! (feature.properties[config.linkField] in config.linked)) {
+            config.linked[feature.properties[config.linkField]] = [];
         } 
-        config.linked[feature.properties.url].push(feature);
+        config.linked[feature.properties[config.linkField]].push(feature);
     });
 
-    // if url and location is shared, collect and display as 1 point
+    // Next find linked assets that share location. 
     let grouped = {};
-    config.filteredGeoJSON.features.forEach((feature) => {
-        let key = feature.properties.url + "," + feature.geometry.coordinates[0] + "," + feature.geometry.coordinates[1];
+    config.processedGeoJSON.features.forEach((feature) => {
+        let key = feature.properties[config.linkField] + "," + feature.geometry.coordinates[0] + "," + feature.geometry.coordinates[1];
         if (! (key in grouped)) {
             grouped[key] = [];
         }
         grouped[key].push(feature);
     });
 
-    // 1 feature for shared url/location.
-    // sum up capacity (configure the column).
-    // property for custom icon that represents breakdown of status (configure the column again)
-    // add that custome icon
+    // Rebuild GeoJSON with summed capacity, and custom icon for single point display of the grouped assets
     config.processedGeoJSON = {
         "type": "FeatureCollection",
         "features": []
     };
     Object.keys(grouped).forEach((key) => {
-        let features = JSON.parse(JSON.stringify(grouped[key]));
-       // if (features.length == 1) {
-        //    config.processedGeoJSON.features.push(features[0]);
-        //} else {
-            let capacity = features.reduce((previous, current) => {
-                return previous + Number(current.properties[config.capacity_field]);
-            }, 0);
-            features[0].properties[config.capacity_field] = capacity;
+        let features = JSON.parse(JSON.stringify(grouped[key])); //deep copy
 
-            let nonzerofields = 0;
-            let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [k]: 0 })));
-            features.forEach((feature) => {
-                if (icon[feature.properties[config.color.field]] == 0) {
-                    nonzerofields++;
-                    lastfield = feature.properties[config.color.field];
-                }    
-                icon[feature.properties[config.color.field]]++;
-            });
-            if (nonzerofields == 1) {
-                config.processedGeoJSON.features.push(features[0]);
-            } else {
-                features[0].properties['icon'] = JSON.stringify(icon);
-                config.processedGeoJSON.features.push(features[0]);
-                generateIcon(icon);
-            }
+        // Sum capacity across all linked assets
+        let capacity = features.reduce((previous, current) => {
+            return previous + Number(current.properties[config.capacityField]);
+        }, 0);
+        features[0].properties[config.capacityField] = capacity;
 
-        //}
+        // Build summary count of status across all linked assets
+        //  and generate icon based on that label if more than one status
+        let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [k]: 0 })));
+        features.forEach((feature) => {  
+            icon[feature.properties[config.color.field]]++;
+        });
+        if (Object.values(icon).filter(v => v != 0).length > 1) {
+            features[0].properties['icon'] = JSON.stringify(icon);
+            generateIcon(icon);
+        }
+
+        config.processedGeoJSON.features.push(features[0]);
     });
-
 }
 
-function addLayer() {
+function addLayers() {
     map.on('load', function () {
+        map.addSource('assets-source', {
+            'type': 'geojson',
+            'data': config.processedGeoJSON
+        });
+
+        // First build circle layer
+        //  build style json for circle-color based on config.color
         let paint = config.paint;
         if ('color' in config) {
             paint["circle-color"] = [
                 "match",
                 ["get", config.color.field],
                 ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
-                "#000000" // fallback color if status value not found in hash
+                "#000000"
               ]
         }
-        map.addSource('assets-source', {
-            'type': 'geojson',
-            'data': config.processedGeoJSON
-        });
         map.addLayer({
             'id': 'assets',
             'type': 'circle',
@@ -154,39 +156,8 @@ function addLayer() {
             'layout': {},
             'paint': paint
         });
-        map.on('click', 'assets', (e) => {
-            const bbox = [ [e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]];
-            const selectedFeatures = map.queryRenderedFeatures(bbox, {layers: ['assets']});
 
-            //consider adding linking column name a config option
-            const urls = selectedFeatures.map(
-                (feature) => feature.properties.url
-            );
-
-            map.setFilter('assets-highlighted', [
-                'in',
-                'url',
-                ...urls
-            ]);
-
-            console.log(e.features[0]);
-            console.log(config.linked[e.features[0].properties.url]);
-            //const coordinates = e.features[0].geometry.coordinates.slice();
-            //const description = e.features[0].properties.url;
-            //console.log(coordinates);
-            //console.log(description);
-        });
-        map.on('mouseenter', 'assets', (e) => {
-            map.getCanvas().style.cursor = 'pointer';
-            const coordinates = e.features[0].geometry.coordinates.slice();
-            const description = e.features[0].properties.url;
-            popup.setLngLat(coordinates).setHTML(description).addTo(map);
-        });
-        map.on('mouseleave', 'assets', () => {
-            map.getCanvas().style.cursor = '';
-            popup.remove();
-        });
-
+        // Add layer with proportional icons
         map.addLayer({
             'id': 'assets-symbol',
             'type': 'symbol',
@@ -197,13 +168,16 @@ function addLayer() {
                 'icon-size': [
                     'interpolate',
                     ['linear'],
-                    ["to-number", ["get", config.capacity_field]],
-                    0, 8/64, // when size is 0, scale the icon to half its original size
-                    10000, .6 // when size is 10, scale the icon to twice its original size
+                    ["to-number", ["get", config.capacityField]],
+                    // Note...  this should be generated by a config setting that sets min and max size of dot over value range
+                    // and makes it consistent across the three layers
+                    0, 8/64, 
+                    10000, .6 
                   ]
             }
         });
 
+        // Add highlight layer
         paint = config.paint;
         paint["circle-color"] = '#FFEA00';
         map.addLayer(
@@ -213,12 +187,43 @@ function addLayer() {
                 'source': 'assets-source',
                 'layout': {},
                 'paint': paint,
-                'filter': ['in', 'url', '']
+                'filter': ['in', (config.linkField || 'url'), '']
             }
         );
-        //customIconTest();
-        //addCustomIconLayerTest();  
+
+        addEvents();
     }); 
+}
+
+function addEvents() {
+    map.on('click', 'assets', (e) => {
+        const bbox = [ [e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]];
+        const selectedFeatures = map.queryRenderedFeatures(bbox, {layers: ['assets']});
+
+        const links = selectedFeatures.map(
+            (feature) => feature.properties[config.linkField]
+        );
+
+        map.setFilter('assets-highlighted', [
+            'in',
+            config.linkField,
+            ...links
+        ]);
+
+        //TODO display the features
+        console.log(e.features[0]);
+        console.log(config.linked[e.features[0].properties.url]);
+    });
+    map.on('mouseenter', 'assets', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const description = e.features[0].properties[config.linkField];
+        popup.setLngLat(coordinates).setHTML(description).addTo(map);
+    });
+    map.on('mouseleave', 'assets', () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });    
 }
 
 function buildFilters() {
@@ -264,10 +269,9 @@ function filterGeoJSON() {
             filteredGeoJSON.features.push(feature);
         }
     });
-    config.filteredGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
+    config.processedGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
     findLinkedAssets();
     map.getSource('assets-source').setData(config.processedGeoJSON);
-    //map.getSource('assets-symbol').setData(filteredGeoJSON);
 }
 
 function generateIcon(icon) {
