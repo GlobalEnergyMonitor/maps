@@ -77,7 +77,10 @@ function makeGeoJSON(jsonData) {
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     findLinkedAssets();
-    addLayers();   
+    addLayers();  
+    buildTable(); 
+    buildSummary();
+    enableSearch();
 }
 
 // Builds lookup of linked assets by the link column
@@ -120,7 +123,7 @@ function findLinkedAssets() {
         //  and generate icon based on that label if more than one status
         let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [k]: 0 })));
         features.forEach((feature) => {  
-            icon[feature.properties[config.color.field]]++;
+            icon[feature.properties[config.color.field]] += Number(feature.properties[config.capacityField]);
         });
         if (Object.values(icon).filter(v => v != 0).length > 1) {
             features[0].properties['icon'] = JSON.stringify(icon);
@@ -265,6 +268,9 @@ function filterGeoJSON() {
         for (let field in filterStatus) {
             if (! filterStatus[field].includes(feature.properties[field])) include = false;
         }
+        if (config.searchText.length >= 3) {
+            if (! feature.properties[config.searchField].includes(config.searchText)) include = false;
+        }
         if (include) {
             filteredGeoJSON.features.push(feature);
         }
@@ -272,6 +278,8 @@ function filterGeoJSON() {
     config.processedGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
     findLinkedAssets();
     map.getSource('assets-source').setData(config.processedGeoJSON);
+    config.table.clear(); config.table.rows.add(geoJSON2Table()).draw();
+    buildSummary();
 }
 
 function generateIcon(icon) {
@@ -284,6 +292,7 @@ function generateIcon(icon) {
 
     // get the canvas context
     let context = canvas.getContext('2d');
+    context.globalAlpha = 0.5;
 
     // calculate the coordinates of the center of the circle
     let centerX = canvas.width / 2;
@@ -315,3 +324,63 @@ function generateIcon(icon) {
     });
 }
 
+function buildTable() {
+
+    config.table = $('#table').DataTable({
+        data: geoJSON2Table(),
+        searching: false,
+        pageLength: 100,
+        columns: geoJSON2Headers()
+    });
+
+    $('#table-toggle').on("click", function() {
+        if ($('#table-toggle').text() == "Table view") {
+            $('#table-toggle').text("Map view");
+            $('#map').hide();
+            $('#sidebar').hide();
+            $('#table-container').show();
+        } else {
+            $('#table-toggle').text("Table view");
+            $('#map').show();
+            $('#sidebar').show();
+            $('#table-container').hide();
+        }
+    });
+}
+
+function geoJSON2Table() {
+    return config.processedGeoJSON.features.map(feature => Object.values(feature.properties)
+    ); 
+}
+function geoJSON2Headers() {
+    return Object.keys(config.geojson.features[0].properties).map((k) => {
+        return {'title': k}
+    });
+}
+
+function buildSummary() {
+    var text = config.processedGeoJSON.features.length.toString() + " " + config.assetLabel;
+    $('#summary').text(text);
+}
+
+function enableSearch() {
+    $('#search-text').on('keyup paste', debounce(function() {
+        config.searchText = $('#search-text').val();
+        filterGeoJSON();
+    }, 500));
+}
+
+function debounce(func, wait, immediate) {
+    var timeout;
+    return function() {
+        var context = this, args = arguments;
+        var later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func.apply(context, args);
+    };
+};

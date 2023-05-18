@@ -10,6 +10,13 @@ body {
     width: 100%;
 }
 
+#table {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+}
+
 .map-overlay {
     font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
     position: absolute;
@@ -93,4 +100,20 @@ body {
 }
 #filter-form {
     text-transform: capitalize;
+}
+
+#table-container {
+    display: none;
+    padding: 50px;
+}
+#table-toggle {
+    margin: 10px;
+    position: fixed;
+    top: 0px;
+    right: 50px;
+    z-index: 1;
+}
+
+#search-text {
+    width: 100%;
 }

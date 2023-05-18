@@ -27,7 +27,9 @@ var config = {
     },
     paint: {
         /* this could be made dynamic based on the range of values in the data */
-        'circle-radius': ["max", 3, ["/", ["to-number", ["get", "capacity"]], 500]]
+        'circle-radius': ["max", 3, ["/", ["to-number", ["get", "capacity"]], 500]],
+        'circle-opacity': .5
+
     },
     filters: [
         {
@@ -37,6 +39,7 @@ var config = {
         }
     ],
     capacityField: 'capacity',
-    searchFields: ['name', 'country', 'company'] /* company could be owner, operator or parent, need to specify */
-
+    searchFields: ['name', 'country', 'company'], /* company could be owner, operator or parent, need to specify */
+    searchField: 'project', /* temporary single value rather list */
+    assetLabel: "Gas Plants"
 };
