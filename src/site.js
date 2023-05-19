@@ -269,7 +269,7 @@ function filterGeoJSON() {
             if (! filterStatus[field].includes(feature.properties[field])) include = false;
         }
         if (config.searchText.length >= 3) {
-            if (! feature.properties[config.searchField].includes(config.searchText)) include = false;
+            if (! feature.properties[config.searchField].toLowerCase().includes(config.searchText)) include = false;
         }
         if (include) {
             filteredGeoJSON.features.push(feature);
@@ -365,7 +365,7 @@ function buildSummary() {
 
 function enableSearch() {
     $('#search-text').on('keyup paste', debounce(function() {
-        config.searchText = $('#search-text').val();
+        config.searchText = $('#search-text').val().toLowerCase();
         filterGeoJSON();
     }, 500));
     config.searchText = '';
