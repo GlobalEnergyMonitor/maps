@@ -368,6 +368,7 @@ function enableSearch() {
         config.searchText = $('#search-text').val();
         filterGeoJSON();
     }, 500));
+    config.searchText = '';
 }
 
 function debounce(func, wait, immediate) {
