@@ -29,6 +29,8 @@ const popup = new mapboxgl.Popup({
 $(document).ready(function() {
     buildFilters();
     loadData();
+    enableSearch();
+    enableModal();
 });
 
 function loadData() {
@@ -79,8 +81,7 @@ function makeGeoJSON(jsonData) {
     findLinkedAssets();
     addLayers();  
     buildTable(); 
-    buildSummary();
-    enableSearch();
+    updateSummary();
 }
 
 // Builds lookup of linked assets by the link column
@@ -190,7 +191,7 @@ function addLayers() {
                 'source': 'assets-source',
                 'layout': {},
                 'paint': paint,
-                'filter': ['in', (config.linkField || 'url'), '']
+                'filter': ['in', (config.linkField), '']
             }
         );
 
@@ -213,9 +214,19 @@ function addEvents() {
             ...links
         ]);
 
-        //TODO display the features
-        console.log(e.features[0]);
-        console.log(config.linked[e.features[0].properties.url]);
+        if (selectedFeatures.length == 2) {
+            displayDetails(selectedFeatures[0].properties[config.linkField]);
+        } else {
+            var modalText = "<ul>";
+            selectedFeatures.forEach((feature) => {
+                modalText += "<li class='asset-select-option' onClick=\"displayDetails('" + feature.properties[config.linkField] + "')\">" + feature.properties[config.linkField] + "</li>";
+            });
+            modalText += "</ul>"
+            $('.modal-body').html(modalText);
+            $('.modal-title').text('choose');
+        }
+
+        config.modal.show();
     });
     map.on('mouseenter', 'assets', (e) => {
         map.getCanvas().style.cursor = 'pointer';
@@ -278,8 +289,8 @@ function filterGeoJSON() {
     config.processedGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
     findLinkedAssets();
     map.getSource('assets-source').setData(config.processedGeoJSON);
-    config.table.clear(); config.table.rows.add(geoJSON2Table()).draw();
-    buildSummary();
+    updateTable();
+    updateSummary();
 }
 
 function generateIcon(icon) {
@@ -347,7 +358,10 @@ function buildTable() {
         }
     });
 }
-
+function updateTable() {
+    config.table.clear();
+    config.table.rows.add(geoJSON2Table()).draw();
+}
 function geoJSON2Table() {
     return config.processedGeoJSON.features.map(feature => Object.values(feature.properties)
     ); 
@@ -358,7 +372,7 @@ function geoJSON2Headers() {
     });
 }
 
-function buildSummary() {
+function updateSummary() {
     var text = config.processedGeoJSON.features.length.toString() + " " + config.assetLabel;
     $('#summary').text(text);
 }
@@ -385,3 +399,24 @@ function debounce(func, wait, immediate) {
         if (callNow) func.apply(context, args);
     };
 };
+
+function enableModal() {
+    config.modal = new bootstrap.Modal($('#modal'));
+    $('#modal').on('hidden.bs.modal', function (event) {
+        map.setFilter('assets-highlighted', [
+            '==',
+            config.linkField,
+            ''
+        ]);
+    })
+}
+function displayDetails(link) {
+    $('.modal-body').html(link + "<br/>" + config.linked[link].length);
+    $('.modal-title').text('details');
+
+    map.setFilter('assets-highlighted', [
+        '==',
+        config.linkField,
+        link
+    ]);
+}
