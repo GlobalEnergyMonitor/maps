@@ -400,11 +400,13 @@ function buildTable() {
             $('#map').hide();
             $('#sidebar').hide();
             $('#table-container').show();
+            $('#basemap-toggle').hide();
         } else {
             $('#table-toggle').text("Table view");
             $('#map').show();
             $('#sidebar').show();
             $('#table-container').hide();
+            $('#basemap-toggle').show();
         }
     });
 }
