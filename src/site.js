@@ -4,6 +4,7 @@ function processConfig() {
     // Merge site-config.js and config.js
     config = Object.assign(site_config, config);
     if (!('linkField' in config)) config.linkField = 'url';
+    if (!('countryField' in config)) config.countryField = 'country';
     if (!('locationColumns' in config)) {
         config.locationColumns = {};
         config.locationColumns['lng'] = 'lng';
@@ -195,6 +196,23 @@ function addLayers() {
             }
         );
 
+        map.addSource('countries', {
+            'type': 'vector',
+            'url': 'mapbox://mapbox.country-boundaries-v1'
+        });
+        map.addLayer(
+            {
+                'id': 'country-layer',
+                'type': 'fill',
+                'source': 'countries',
+                'source-layer': 'country_boundaries',
+                'layout': {},
+                'paint': {
+                    'fill-color': 'hsla(219, 0%, 100%, 0%)'
+                }
+            }
+        );
+
         addEvents();
     }); 
 }
@@ -237,7 +255,18 @@ function addEvents() {
     map.on('mouseleave', 'assets', () => {
         map.getCanvas().style.cursor = '';
         popup.remove();
-    });    
+    });  
+    
+    map.on('click', 'country-layer', (e) => {
+        config.selectedCountry = e.features[0].properties.name_en;
+        filterGeoJSON();
+    });
+    config.selectedCountry = '';
+
+    map.on('click', 'water', (e) => {
+        config.selectedCountry = '';
+        filterGeoJSON();
+    })
 }
 
 function buildFilters() {
@@ -281,6 +310,9 @@ function filterGeoJSON() {
         }
         if (config.searchText.length >= 3) {
             if (! feature.properties[config.searchField].toLowerCase().includes(config.searchText)) include = false;
+        }
+        if (config.selectedCountry != '') {
+            if (feature.properties[config.countryField] != config.selectedCountry) include = false;
         }
         if (include) {
             filteredGeoJSON.features.push(feature);
@@ -374,6 +406,7 @@ function geoJSON2Headers() {
 
 function updateSummary() {
     var text = config.processedGeoJSON.features.length.toString() + " " + config.assetLabel;
+    if (config.selectedCountry) text += " in " + config.selectedCountry;
     $('#summary').text(text);
 }
 
