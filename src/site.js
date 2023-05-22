@@ -213,6 +213,14 @@ function addLayers() {
             }
         );
 
+        map.addLayer({
+            id: 'satellite',
+            source: {"type": "raster",  "url": "mapbox://mapbox.satellite", "tileSize": 256},
+            type: "raster",
+            layout: {'visibility': 'none'}
+          }, 'assets');
+          
+
         addEvents();
     }); 
 }
@@ -266,7 +274,17 @@ function addEvents() {
     map.on('click', 'water', (e) => {
         config.selectedCountry = '';
         filterGeoJSON();
-    })
+    });
+
+    $('#basemap-toggle').on("click", function() {
+        if ($('#basemap-toggle').text() == "Satellite") {
+            $('#basemap-toggle').text("Streets");
+            map.setLayoutProperty('satellite', 'visibility', 'visible');
+        } else {
+            $('#basemap-toggle').text("Satellite");
+            map.setLayoutProperty('satellite', 'visibility', 'none');
+        }
+    });
 }
 
 function buildFilters() {

@@ -113,6 +113,14 @@ body {
     right: 50px;
     z-index: 1;
 }
+#basemap-toggle {
+    margin: 10px;
+    position: fixed;
+    top: 40px;
+    right: 50px;
+    z-index: 1;
+}
+
 
 #search-text {
     width: 100%;
