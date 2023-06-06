@@ -319,8 +319,8 @@ function filterGeoJSON() {
         if (config.searchText.length >= 3) {
             if (! feature.properties[config.searchField].toLowerCase().includes(config.searchText)) include = false;
         }
-        if (config.selectedCountry != '') {
-            if (feature.properties[config.countryField] != config.selectedCountry) include = false;
+        if (config.selectedCountries.length > 0) {
+            if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
         }
         if (include) {
             filteredGeoJSON.features.push(feature);
@@ -416,7 +416,7 @@ function geoJSON2Headers() {
 
 function updateSummary() {
     var text = config.processedGeoJSON.features.length.toString() + " " + config.assetLabel;
-    if (config.selectedCountry) text += " in " + config.selectedCountry;
+    if (config.selectedCountryText) text += " in " + config.selectedCountryText;
     $('#summary').text(text);
 }
 
@@ -467,10 +467,13 @@ function displayDetails(link) {
 function enableCountrySelect() {
 
     Object.keys(countries).forEach((continent) => {
-        let dropdown_html = '<li><a class="dropdown-item" href="#">' + continent + '</a><ul class="submenu dropdown-menu">';
-        countries[continent].forEach((country) => {
-            dropdown_html += '<li><a class="dropdown-item" href="#">' + country + '</a></li>';
-
+        let dropdown_html = `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" data-countries="${countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
+        dropdown_html += '<ul class="submenu dropdown-menu">';
+        countries[continent].forEach((country, idx) => {
+            dropdown_html += `<li><a class="dropdown-item" data-countries="${country}" data-countryText="${country}" href="#">${country}</a></li>`;
+            if (idx != countries[continent].length - 1) {
+                dropdown_html += '<li><hr class="dropdown-divider"></li>';
+            }
         });
         dropdown_html += "</ul></li>";
         $('#country_select').append(dropdown_html);
@@ -481,17 +484,17 @@ function enableCountrySelect() {
         if (window.innerWidth < 992) {
         
         // close all inner dropdowns when parent is closed
-         $('.navbar .dropup').forEach(function(everydropdown){
+         $('.navbar .dropup').forEach((everydropdown) => {
             everydropdown.addEventListener('hidden.bs.dropdown', function () {
               // after dropdown is hidden, then find all submenus
-                $('.submenu').forEach(function(everysubmenu){
+                $('.submenu').forEach((everysubmenu) => {
                   // hide every submenu as well
                   everysubmenu.style.display = 'none';
                 });
             })
           });
         
-        $('.dropdown-menu a').forEach(function(element){
+        $('.dropdown-menu a').forEach((element) => {
             element.addEventListener('click', function (e) {
                 let nextEl = this.nextElementSibling;
                 if(nextEl && nextEl.classList.contains('submenu')) {	
@@ -512,10 +515,13 @@ function enableCountrySelect() {
 
     $('.dropdown-item').each(function() {
         this.addEventListener("click", function() {
-            config.selectedCountry = this.text;
+            config.selectedCountryText = this.dataset.countrytext;
+            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []);
+            $('#selectedCountryLabel').text(config.selectedCountryText || "all");
             filterGeoJSON();
         });
     });
 
-    config.selectedCountry = '';
+    config.selectedCountries = [];
+    config.selectedCountryText = '';
 }

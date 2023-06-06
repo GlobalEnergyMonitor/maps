@@ -135,7 +135,7 @@ body {
 	.nav-item .submenu{ 
 		display: none;
 		position: absolute;
-		left:100%; top:-360px;
+		left:100%; top:-300px;
 	}
 	.nav-item .submenu-left{ 
 		right:100%; left:auto;
