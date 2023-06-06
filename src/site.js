@@ -32,6 +32,7 @@ $(document).ready(function() {
     loadData();
     enableSearch();
     enableModal();
+    enableCountrySelect();
 });
 
 function loadData() {
@@ -264,17 +265,6 @@ function addEvents() {
         map.getCanvas().style.cursor = '';
         popup.remove();
     });  
-    
-    map.on('click', 'country-layer', (e) => {
-        config.selectedCountry = e.features[0].properties.name_en;
-        filterGeoJSON();
-    });
-    config.selectedCountry = '';
-
-    map.on('click', 'water', (e) => {
-        config.selectedCountry = '';
-        filterGeoJSON();
-    });
 
     $('#basemap-toggle').on("click", function() {
         if ($('#basemap-toggle').text() == "Satellite") {
@@ -472,4 +462,60 @@ function displayDetails(link) {
         config.linkField,
         link
     ]);
+}
+
+function enableCountrySelect() {
+
+    Object.keys(countries).forEach((continent) => {
+        let dropdown_html = '<li><a class="dropdown-item" href="#">' + continent + '</a><ul class="submenu dropdown-menu">';
+        countries[continent].forEach((country) => {
+            dropdown_html += '<li><a class="dropdown-item" href="#">' + country + '</a></li>';
+
+        });
+        dropdown_html += "</ul></li>";
+        $('#country_select').append(dropdown_html);
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // make it as accordion for smaller screens
+        if (window.innerWidth < 992) {
+        
+        // close all inner dropdowns when parent is closed
+         $('.navbar .dropup').forEach(function(everydropdown){
+            everydropdown.addEventListener('hidden.bs.dropdown', function () {
+              // after dropdown is hidden, then find all submenus
+                $('.submenu').forEach(function(everysubmenu){
+                  // hide every submenu as well
+                  everysubmenu.style.display = 'none';
+                });
+            })
+          });
+        
+        $('.dropdown-menu a').forEach(function(element){
+            element.addEventListener('click', function (e) {
+                let nextEl = this.nextElementSibling;
+                if(nextEl && nextEl.classList.contains('submenu')) {	
+                  // prevent opening link if link needs to open dropdown
+                  e.preventDefault();
+                  if(nextEl.style.display == 'block'){
+                    nextEl.style.display = 'none';
+                  } else {
+                    nextEl.style.display = 'block';
+                  }
+        
+                }
+            });
+          })
+        }
+        // end if innerWidth
+    }); 
+
+    $('.dropdown-item').each(function() {
+        this.addEventListener("click", function() {
+            config.selectedCountry = this.text;
+            filterGeoJSON();
+        });
+    });
+
+    config.selectedCountry = '';
 }

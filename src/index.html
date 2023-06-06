@@ -8,7 +8,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>  
     <script src="../../packages/jquery-csv.js"></script>  
     
-    <link href="../../packages/bootstrap-flatly/bootstrap.min.css" rel="stylesheet" />
+    <link href="../../packages/bootstrap-lux/bootstrap.min.css" rel="stylesheet" />
 
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js"></script>
@@ -34,18 +34,28 @@
                     </form>
             </div>
         </div>
-        <div class="card secondary mb-3 shadom-sm">
-            <div class="card-body">
-                <h3 class="card-title">Search</h3>
-                    <form onSubmit="return false">
-                        <input id="search-text"></input>
-                    </form>
-            </div>
-        </div>
     </div>
 
-    <div id="table-toggle" class="btn btn-secondary">Table view</div>
-    <div id="basemap-toggle" class="btn btn-secondary">Satellite</div>
+    <div class="navbar fixed-bottom navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                  <li class="nav-item dropup" id="country">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Select country
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="country_select">
+                    </ul>
+                  </li>
+                </ul>
+                <form class="d-flex me-auto px-2" onSubmit="return false">
+                  <input class="form-control me-2" placeholder="Search" aria-label="Search" id="search-text"></input>
+                </form>
+                <div id="basemap-toggle" class="btn btn-secondary mx-1">Satellite</div>
+                <div id="table-toggle" class="btn btn-secondary mx-1">Table view</div>
+            </div>        
+        </div>
+    </div>
 
     <div id="map"></div>
     <div id="table-container"><table id="table" class="display primary" width="100%" height="100%"></table></div>
@@ -65,6 +75,7 @@
 
     <script src="../../site-config.js"></script>
     <script src="./config.js"></script>
+    <script src="../../src/countries.js"></script>
     <script src="../../src/site.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>

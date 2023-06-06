@@ -89,10 +89,9 @@ body {
 .sidebar {
     padding: 10px;
     position: fixed;
-    top: 0;
-    left: 0;
+    bottom: 100px;
+    right: 0px;
     width: 408px;
-    height: 100%;
     z-index: 1;
     overflow-y:scroll; 
     max-height: 100%;
@@ -106,21 +105,20 @@ body {
     display: none;
     padding: 50px;
 }
-#table-toggle {
+#tmptable-toggle {
     margin: 10px;
     position: fixed;
     top: 0px;
     right: 50px;
     z-index: 1;
 }
-#basemap-toggle {
+#tmpbasemap-toggle {
     margin: 10px;
     position: fixed;
     top: 40px;
     right: 50px;
     z-index: 1;
 }
-
 
 #search-text {
     width: 100%;
@@ -129,3 +127,39 @@ body {
 .asset-select-option {
     cursor: pointer;
 }
+
+/* Nested Drop Down */
+/* ============ desktop view ============ */
+@media all and (min-width: 992px) {
+	.dropdown-menu li{ position: relative;  text-transform: uppercase;	}
+	.nav-item .submenu{ 
+		display: none;
+		position: absolute;
+		left:100%; top:-360px;
+	}
+	.nav-item .submenu-left{ 
+		right:100%; left:auto;
+	}
+	.dropdown-menu > li:hover{ background-color: #f1f1f1 }
+	.dropdown-menu > li:hover > .submenu{ display: block; }
+}	
+/* ============ desktop view .end// ============ */
+
+/* ============ small devices ============ */
+@media (max-width: 991px) {
+  .dropdown-menu .dropdown-menu{
+      margin-left:0.7rem; margin-right:0.7rem; margin-bottom: .5rem;
+  }
+}	
+/* ============ small devices .end// ============ */
+
+.dropdown-menu.submenu {
+     max-height: 400px;
+     overflow-y: auto;
+}
+
+.navbar {
+    opacity: 0.90; 
+    filter:(opacity=90);
+}
+
