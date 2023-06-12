@@ -12,23 +12,23 @@ var config = {
         field: 'status',
         values: {
             //update this list
-            'operating': '#ff0000',
-            'pre-construction': '#0000ff',
-            'construction': '#00ff00',
-            'retired': '#000000',
-            'cancelled': '#000000',
-            'pre-permit': '#0000ff',
-            'shelved': '#000000',
-            'mothballed': '#000000',
-            'announced': '#0000ff',
-            'permitted': '#00ff00'
+            'operating': '#e37c79',
+            'pre-construction': '#74966c',
+            'construction': '#aaabf2',
+            'retired': '#9c9c9b',
+            'cancelled': '#9c9c9b',
+            'pre-permit': '#74966c',
+            'shelved': '#9c9c9b',
+            'mothballed': '#9c9c9b',
+            'announced': '#74966c',
+            'permitted': '#aaabf2'
             // contining
         }
     },
     paint: {
         /* this could be made dynamic based on the range of values in the data */
         'circle-radius': ["max", 3, ["/", ["to-number", ["get", "capacity"]], 500]],
-        'circle-opacity': .5
+        'circle-opacity': .70
 
     },
     filters: [

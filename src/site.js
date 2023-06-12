@@ -3,6 +3,8 @@ processConfig();
 function processConfig() {
     // Merge site-config.js and config.js
     config = Object.assign(site_config, config);
+
+    // Set defaults
     if (!('linkField' in config)) config.linkField = 'url';
     if (!('countryField' in config)) config.countryField = 'country';
     if (!('locationColumns' in config)) {
@@ -15,7 +17,7 @@ function processConfig() {
 mapboxgl.accessToken = config.accessToken;
 const map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/light-v11',
+    style: config.mapStyle,
     zoom: 2,
     center: [0, 0],
     maxBounds: [[-180,-85],[180,85]],
@@ -343,7 +345,7 @@ function generateIcon(icon) {
 
     // get the canvas context
     let context = canvas.getContext('2d');
-    context.globalAlpha = 0.5;
+    context.globalAlpha = config.paint["circle-opacity"];
 
     // calculate the coordinates of the center of the circle
     let centerX = canvas.width / 2;
