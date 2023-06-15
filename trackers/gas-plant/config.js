@@ -13,14 +13,14 @@ var config = {
         values: {
             //update this list
             'operating': '#e37c79',
-            'pre-construction': '#74966c',
+            'pre-construction': '#b5eaaa',
             'construction': '#aaabf2',
             'retired': '#9c9c9b',
             'cancelled': '#9c9c9b',
-            'pre-permit': '#74966c',
+            'pre-permit': '#b5eaaa',
             'shelved': '#9c9c9b',
             'mothballed': '#9c9c9b',
-            'announced': '#74966c',
+            'announced': '#b5eaaa',
             'permitted': '#aaabf2'
             // contining
         }
@@ -28,14 +28,16 @@ var config = {
     paint: {
         /* this could be made dynamic based on the range of values in the data */
         'circle-radius': ["max", 3, ["/", ["to-number", ["get", "capacity"]], 500]],
-        'circle-opacity': .70
+        'circle-opacity':.85
 
     },
     filters: [
         {
             field: 'status',
             /* values need to be specified for ordering */
-            values: ['operating','construction','pre-construction','retired','cancelled','pre-permit','shelved','mothballed','announced','permitted']
+            values: ['operating','construction','pre-construction','retired','cancelled','shelved','mothballed','announced'],
+            primary: true
+
         }
     ],
     capacityField: 'capacity',

@@ -105,23 +105,15 @@ body {
     display: none;
     padding: 50px;
 }
-#tmptable-toggle {
-    margin: 10px;
-    position: fixed;
-    top: 0px;
-    right: 50px;
-    z-index: 1;
-}
-#tmpbasemap-toggle {
-    margin: 10px;
-    position: fixed;
-    top: 40px;
-    right: 50px;
-    z-index: 1;
-}
 
 #search-text {
-    width: 100%;
+    width: 350px;
+}
+
+/* HACK */
+#search-form {
+    position: relative;
+    top: -3px;
 }
 
 .asset-select-option {
@@ -161,5 +153,35 @@ body {
 .navbar {
     opacity: 0.90; 
     filter:(opacity=90);
+    margin-bottom: 12px;
+    padding: 5px;
 }
 
+#country {
+    min-width:350px;
+    font-family: 'Familjen Grotesk';
+}
+
+.shadow-sm{box-shadow:0 .125rem .25rem rgba(0,0,0,.35)!important}
+
+.rounded-top-left-1 {
+    border-top-left-radius: 1rem;
+}
+.rounded-top-right-1 {
+    border-top-right-radius: 1rem;
+}
+.rounded-bottom-left-1 {
+    border-bottom-left-radius: 1rem;
+}
+.rounded-bottom-right-1 {
+    border-bottom-right-radius: 1rem;
+}
+
+.eye {
+    background: url(../../src/img/eye.svg);
+    background-repeat: no-repeat;
+}
+.eye-slash {
+    background: url(../../src/img/eye-slash.svg);
+    background-repeat: no-repeat;
+}

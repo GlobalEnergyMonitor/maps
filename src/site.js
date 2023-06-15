@@ -12,6 +12,7 @@ function processConfig() {
         config.locationColumns['lng'] = 'lng';
         config.locationColumns['lat'] = 'lat';
     }
+    config.baseMap = "Streets";
 }
 
 mapboxgl.accessToken = config.accessToken;
@@ -30,7 +31,6 @@ const popup = new mapboxgl.Popup({
 });
 
 $(document).ready(function() {
-    buildFilters();
     loadData();
     enableSearch();
     enableModal();
@@ -84,7 +84,8 @@ function makeGeoJSON(jsonData) {
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     findLinkedAssets();
     addLayers();  
-    buildTable(); 
+    buildTable();
+    buildFilters();
     updateSummary();
 }
 
@@ -269,31 +270,56 @@ function addEvents() {
     });  
 
     $('#basemap-toggle').on("click", function() {
-        if ($('#basemap-toggle').text() == "Satellite") {
-            $('#basemap-toggle').text("Streets");
-            map.setLayoutProperty('satellite', 'visibility', 'visible');
+        if (config.baseMap == "Streets") {
+           // $('#basemap-toggle').text("Streets");
+           config.baseMap = "Satellite";
+           map.setLayoutProperty('satellite', 'visibility', 'visible');
         } else {
-            $('#basemap-toggle').text("Satellite");
-            map.setLayoutProperty('satellite', 'visibility', 'none');
+           // $('#basemap-toggle').text("Satellite");
+           config.baseMap = "Streets";
+           map.setLayoutProperty('satellite', 'visibility', 'none');
         }
     });
 }
 
 function buildFilters() {
+    countFilteredFeatures();
     config.filters.forEach(filter => {
-        $('#filter-form').append('<h4 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h4>');
+        if (! filter.primary) {
+            $('#filter-form').append('<h4 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h4>');
+        }
         for (let i=0; i<filter.values.length; i++) {
-            let check = '<div class="form-check"><input type="checkbox" checked class="form-check-input" id="' + filter.field + ':' + filter.values[i] + '">';
-            check += '<label class="form-check-label" for="exampleCheck1">' + 
+            let check_id =  filter.field + '_' + filter.values[i];
+            let check = '<div class="row"><div class="form-check col-sm-8"><input type="checkbox" checked class="form-check-input d-none" id="' + check_id + '">';
+            check += '<label class="form-check-label" for="' + check_id + '">' + 
                 ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) 
-                + '</label></div>';
+                + '</label></div><div class="col-sm-1 eye" id="' + check_id + '-eye"></div><div class="col-sm-3">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
         }
     });
     $('.form-check-input').each(function() {
         this.addEventListener("click", function() {
             filterGeoJSON();
+            $('#' + this.id + '-eye').toggleClass('eye eye-slash');
         });
+    });
+}
+
+function countFilteredFeatures() {
+    config.filterCount = {};
+    config.filters.forEach(filter => {
+        config.filterCount[filter.field] = {};
+        filter.values.forEach(val => {
+            config.filterCount[filter.field][val] = 0;
+        });
+    })
+    config.processedGeoJSON.features.forEach(feature => {
+        config.filters.forEach(filter => {
+            if (! (filter.field in config.filterCount)) config.filterCount[filter.field] = {};
+            if (! (feature.properties[filter.field] in config.filterCount[filter.field]))
+                config.filterCount[filter.field][feature.properties[filter.field]] = 0;
+            config.filterCount[filter.field][feature.properties[filter.field]]++;
+        })
     });
 }
 
@@ -304,7 +330,7 @@ function filterGeoJSON() {
     });
     $('.form-check-input').each(function() {
         if (this.checked) {
-            let [field, value] = this.id.split(':');
+            let [field, value] = this.id.split('_');
             filterStatus[field].push(value);
         }
     });
@@ -417,9 +443,8 @@ function geoJSON2Headers() {
 }
 
 function updateSummary() {
-    var text = config.processedGeoJSON.features.length.toString() + " " + config.assetLabel;
-    if (config.selectedCountryText) text += " in " + config.selectedCountryText;
-    $('#summary').text(text);
+    $('#total_in_view').text(config.processedGeoJSON.features.length.toString())
+    $('#summary').text("Total " + config.assetLabel + " in view");
 }
 
 function enableSearch() {
@@ -469,10 +494,10 @@ function displayDetails(link) {
 function enableCountrySelect() {
 
     Object.keys(countries).forEach((continent) => {
-        let dropdown_html = `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" data-countries="${countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
+        let dropdown_html = `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item h4" data-countries="${countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
         dropdown_html += '<ul class="submenu dropdown-menu">';
         countries[continent].forEach((country, idx) => {
-            dropdown_html += `<li><a class="dropdown-item" data-countries="${country}" data-countryText="${country}" href="#">${country}</a></li>`;
+            dropdown_html += `<li><a class="dropdown-item h5" data-countries="${country}" data-countryText="${country}" href="#">${country}</a></li>`;
             if (idx != countries[continent].length - 1) {
                 dropdown_html += '<li><hr class="dropdown-divider"></li>';
             }
