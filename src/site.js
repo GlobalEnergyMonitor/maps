@@ -13,6 +13,7 @@ function processConfig() {
         config.locationColumns['lat'] = 'lat';
     }
     config.baseMap = "Streets";
+    config.icons = [];
 }
 
 mapboxgl.accessToken = config.accessToken;
@@ -116,6 +117,7 @@ function findLinkedAssets() {
         "type": "FeatureCollection",
         "features": []
     };
+
     Object.keys(grouped).forEach((key) => {
         let features = JSON.parse(JSON.stringify(grouped[key])); //deep copy
 
@@ -127,13 +129,23 @@ function findLinkedAssets() {
 
         // Build summary count of status across all linked assets
         //  and generate icon based on that label if more than one status
-        let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [k]: 0 })));
+        let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [config.color.values[k]]: 0 })));
         features.forEach((feature) => {  
-            icon[feature.properties[config.color.field]] += Number(feature.properties[config.capacityField]);
+            icon[config.color.values[feature.properties[config.color.field]]] += Number(feature.properties[config.capacityField]);
         });
         if (Object.values(icon).filter(v => v != 0).length > 1) {
-            features[0].properties['icon'] = JSON.stringify(icon);
-            generateIcon(icon);
+            // normalize values to 10
+            let current = 0;
+            let total = Object.values(icon).reduce((previous, current) => {
+                return previous + Number(current);
+            }, 0);
+            icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(10 * (icon[k] / total)) })));
+            let string_icon = JSON.stringify(icon)
+            features[0].properties['icon'] = string_icon;
+            if (! config.icons.includes(string_icon)) {
+                generateIcon(icon);
+                config.icons.push(string_icon);
+            }
         }
 
         config.processedGeoJSON.features.push(features[0]);
@@ -391,14 +403,14 @@ function generateIcon(icon) {
     let centerX = canvas.width / 2;
     let centerY = canvas.height / 2;
 
-    let current = 0;
+    let current = .75; //start at vertical
     let slices = Object.values(icon).reduce((previous, current) => {
         return previous + Number(current);
     }, 0);
 
     Object.keys(icon).forEach((k) => {
         let next = current + (icon[k] / slices);
-        context.fillStyle = config.color.values[k];
+        context.fillStyle = k;
         context.beginPath();
         context.moveTo(centerX, centerY);
         context.arc(centerX, centerY, canvas.width / 2, Math.PI * 2 * current, Math.PI * 2 * next);
