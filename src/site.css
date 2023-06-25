@@ -178,11 +178,11 @@ body {
 }
 
 .eye {
-    background: url(../../src/img/eye.svg);
+    background: url(./img/eye.svg);
     background-repeat: no-repeat;
 }
 .eye-slash {
-    background: url(../../src/img/eye-slash.svg);
+    background: url(./img/eye-slash.svg);
     background-repeat: no-repeat;
 }
 
