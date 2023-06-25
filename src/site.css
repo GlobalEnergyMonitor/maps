@@ -185,3 +185,14 @@ body {
     background: url(../../src/img/eye-slash.svg);
     background-repeat: no-repeat;
 }
+
+.modal-content {
+    border-width: 0px;
+}
+.modal-body {
+    padding: 0px;
+    min-height: 300px;
+}
+.modal-body ul {
+    list-style: none;
+}

@@ -232,7 +232,8 @@ function addLayers() {
 function addEvents() {
     map.on('click', 'assets', (e) => {
         const bbox = [ [e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]];
-        const selectedFeatures = map.queryRenderedFeatures(bbox, {layers: ['assets']});
+        const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: ['assets']}), config.linkField).sort((a, b) => a.properties['project'].localeCompare(b.properties['project']))
+        ;
 
         const links = selectedFeatures.map(
             (feature) => feature.properties[config.linkField]
@@ -244,12 +245,12 @@ function addEvents() {
             ...links
         ]);
 
-        if (selectedFeatures.length == 2) {
+        if (selectedFeatures.length == 1) {
             displayDetails(selectedFeatures[0].properties[config.linkField]);
         } else {
             var modalText = "<ul>";
             selectedFeatures.forEach((feature) => {
-                modalText += "<li class='asset-select-option' onClick=\"displayDetails('" + feature.properties[config.linkField] + "')\">" + feature.properties[config.linkField] + "</li>";
+                modalText += "<li class='asset-select-option' onClick=\"displayDetails('" + feature.properties[config.linkField] + "')\">" + feature.properties['project'] + "</li>";
             });
             modalText += "</ul>"
             $('.modal-body').html(modalText);
@@ -261,7 +262,7 @@ function addEvents() {
     map.on('mouseenter', 'assets', (e) => {
         map.getCanvas().style.cursor = 'pointer';
         const coordinates = e.features[0].geometry.coordinates.slice();
-        const description = e.features[0].properties[config.linkField];
+        const description = e.features[0].properties['project'];
         popup.setLngLat(coordinates).setHTML(description).addTo(map);
     });
     map.on('mouseleave', 'assets', () => {
@@ -280,6 +281,19 @@ function addEvents() {
            map.setLayoutProperty('satellite', 'visibility', 'none');
         }
     });
+}
+
+function getUniqueFeatures(features, comparatorProperty) {
+    const uniqueIds = new Set();
+    const uniqueFeatures = [];
+    for (const feature of features) {
+        const id = feature.properties[comparatorProperty];
+        if (!uniqueIds.has(id)) {
+            uniqueIds.add(id);
+            uniqueFeatures.push(feature);
+        }
+    }
+    return uniqueFeatures;
 }
 
 function buildFilters() {
@@ -454,7 +468,6 @@ function enableSearch() {
     }, 500));
     config.searchText = '';
 }
-
 function debounce(func, wait, immediate) {
     var timeout;
     return function() {
@@ -481,8 +494,44 @@ function enableModal() {
     })
 }
 function displayDetails(link) {
-    $('.modal-body').html(link + "<br/>" + config.linked[link].length);
-    $('.modal-title').text('details');
+    var bbox = [];
+    var start_year;
+    config.linked[link].forEach((feature => {
+        var feature_lng = Number(feature.geometry.coordinates[0]);
+        var feature_lat = Number(feature.geometry.coordinates[1]);
+        if (bbox.length == 0) {
+            bbox[0] = feature_lng;
+            bbox[1] = feature_lat;
+            bbox[2] = feature_lng;
+            bbox[3] = feature_lat;
+        } else {
+            if (feature_lng < bbox[0]) bbox[0] = feature_lng;
+            if (feature_lat < bbox[1]) bbox[1] = feature_lat;
+            if (feature_lng > bbox[2]) bbox[2] = feature_lng;
+            if (feature_lat< bbox[3]) bbox[3] = feature_lat;
+        }
+        
+        if ((! start_year) || (feature.properties['start_year'] < start_year)) {
+            start_year = feature.properties['start_year'];
+        }
+    }));
+    var img_lng = (bbox[0] + bbox[2]) / 2;
+    var img_lat = (bbox[1] + bbox[3]) / 2;
+
+    var feature = config.linked[link][0];
+    var detail_text = feature.properties['project'] + '<br/>' +
+        (feature.properties['project_loc'] != '' ? feature.properties['project_loc'] + '<br/>' : '') +
+        "Owner: " + feature.properties['owner'] + '<br/>' + 
+        "Parent: " + feature.properties['parent'] + '<br/>' +
+        "Technology: " + feature.properties['technology'] + '<br/>' +
+        "Fuel type:" + feature.properties['fuel_type'] + '<br/>' +
+        "Start year:" + start_year;
+    $('.modal-body').html('<div class="row m-0">' +
+        '<div class="col-sm-4 rounded-top-left-1" id="detail-satellite" style="height: 300px;background-image:url(https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + img_lng.toString() + ',' + img_lat.toString() + ',' + config.img_detail_zoom.toString() + ',0/200x350?access_token=' + config.accessToken + ')">' +
+        '</div>' +
+        '<div class="col-sm-8" id="total_in_view">' + detail_text + '</div>' +
+        '</div>');
+//    $('.modal-title').text('details');
 
     map.setFilter('assets-highlighted', [
         '==',

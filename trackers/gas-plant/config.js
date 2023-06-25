@@ -1,11 +1,5 @@
 var config = {
     csv: 'data.csv',
-    // default value for locationColumns is lat/lng
-    //locationColumns: {
-    //    'lat': 'lat',
-    //    'lng': 'lng'
-    //},
-    //linkField: 'url',
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
@@ -43,5 +37,6 @@ var config = {
     capacityField: 'capacity',
     searchFields: ['name', 'country', 'company'], /* company could be owner, operator or parent, need to specify */
     searchField: 'project', /* temporary single value rather list */
-    assetLabel: "Gas Plants"
+    assetLabel: "Gas Plants",
+    img_detail_zoom: 15
 };
