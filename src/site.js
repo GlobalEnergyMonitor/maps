@@ -35,7 +35,7 @@ $(document).ready(function() {
     loadData();
     enableSearch();
     enableModal();
-    enableCountrySelect();
+    enableNavSelect();
 });
 
 function loadData() {
@@ -371,7 +371,11 @@ function filterGeoJSON() {
             if (! filterStatus[field].includes(feature.properties[field])) include = false;
         }
         if (config.searchText.length >= 3) {
-            if (! feature.properties[config.searchField].toLowerCase().includes(config.searchText)) include = false;
+            let searchInclude = false;
+            config.selectedSearchFields.split(',').forEach((field) => {
+                if (feature.properties[field].toLowerCase().includes(config.searchText)) searchInclude = true;
+            });
+            if (searchInclude == false) include = false;
         }
         if (config.selectedCountries.length > 0) {
             if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
@@ -552,22 +556,12 @@ function displayDetails(link) {
     ]);
 }
 
-function enableCountrySelect() {
-
-    Object.keys(countries).forEach((continent) => {
-        let dropdown_html = `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item h4" data-countries="${countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
-        dropdown_html += '<ul class="submenu dropdown-menu">';
-        countries[continent].forEach((country, idx) => {
-            dropdown_html += `<li><a class="dropdown-item h5" data-countries="${country}" data-countryText="${country}" href="#">${country}</a></li>`;
-            if (idx != countries[continent].length - 1) {
-                dropdown_html += '<li><hr class="dropdown-divider"></li>';
-            }
-        });
-        dropdown_html += "</ul></li>";
-        $('#country_select').append(dropdown_html);
-    });
+function enableNavSelect() {
+    enableCountrySelect();
+    enableSearchSelect();
 
     document.addEventListener("DOMContentLoaded", function() {
+
         // make it as accordion for smaller screens
         if (window.innerWidth < 992) {
         
@@ -600,8 +594,22 @@ function enableCountrySelect() {
         }
         // end if innerWidth
     }); 
+}
+function enableCountrySelect() {
+    Object.keys(countries).forEach((continent) => {
+        let dropdown_html = `<li><hr class="dropdown-divider"></li><li><a class="country-dropdown-item dropdown-item h4" data-countries="${countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
+        dropdown_html += '<ul class="submenu dropdown-menu">';
+        countries[continent].forEach((country, idx) => {
+            dropdown_html += `<li><a class="h5 country-dropdown-item dropdown-item" data-countries="${country}" data-countryText="${country}" href="#">${country}</a></li>`;
+            if (idx != countries[continent].length - 1) {
+                dropdown_html += '<li><hr class="dropdown-divider"></li>';
+            }
+        });
+        dropdown_html += "</ul></li>";
+        $('#country_select').append(dropdown_html);
+    });
 
-    $('.dropdown-item').each(function() {
+    $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
             config.selectedCountryText = this.dataset.countrytext;
             config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []);
@@ -612,4 +620,26 @@ function enableCountrySelect() {
 
     config.selectedCountries = [];
     config.selectedCountryText = '';
+}
+
+function enableSearchSelect() {
+    let dropdown_html = '';
+    let allSearchFields = [];
+    Object.keys(config.searchFields).forEach((field_label) => {
+        dropdown_html += `<li><a class="h5 search-dropdown-item dropdown-item" data-searchFieldText="${field_label}" data-searchFields="${config.searchFields[field_label].join(',')}" href="#">${field_label}</a></li>`;
+        allSearchFields = allSearchFields.concat(config.searchFields[field_label]);
+    });
+    dropdown_html = `<li><a class="h5 search-dropdown-item dropdown-item" data-searchFieldText="all" data-searchFields="${allSearchFields.join(',')}" href="#">all</a></li>` 
+        + dropdown_html;
+    $('#search_type_select').append(dropdown_html);
+
+    $('.search-dropdown-item').each(function() {
+        this.addEventListener("click", function() {
+            config.selectedSearchFields = this.dataset.searchfields;
+            $('#selectedSearchLabel').text(this.dataset.searchfieldtext);
+            filterGeoJSON();
+        });
+    });
+
+    config.selectedSearchFields = allSearchFields.join(',');
 }

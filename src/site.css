@@ -90,7 +90,7 @@ body {
     padding: 10px;
     position: fixed;
     bottom: 100px;
-    right: 0px;
+    left: 0px;
     width: 408px;
     z-index: 1;
     overflow-y:scroll; 
@@ -115,6 +115,12 @@ body {
     position: relative;
     top: -3px;
 }
+#search-type {
+    position: relative;
+    top: 1px;
+    font-family: 'Familjen Grotesk';
+}
+
 
 .asset-select-option {
     cursor: pointer;

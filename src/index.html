@@ -35,17 +35,29 @@
     <div class="navbar fixed-bottom navbar-expand-sm navbar-light bg-light">
         <div class="container-fluid">
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mb-2 border-top border-dark shadow-sm" id="country">
+
+                <ul class="navbar-nav mb-2 mx-4 border-top border-dark shadow-sm" id="country">
                   <li class="nav-item dropup">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                       <span class="small">Select country</span><br/><span class="h3" id="selectedCountryLabel">All</span>
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="country_select">
-                        <li><a class="dropdown-item h4" data-countries="" data-countryText="" href="#">all</a></li>
+                        <li><a class="country-dropdown-item dropdown-item h4" data-countries="" data-countryText="" href="#">all</a></li>
                     </ul>
                   </li>
                 </ul>
-                <form class="d-flex me-auto px-2" id="search-form" onSubmit="return false">
+
+                <ul class="navbar-nav mb-2 border-dark shadow-sm" id="search-type">
+                 <li class="nav-item dropup">
+                    <a class="nav-link dropdown-toggle" href="#" id="searchbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="small">Search by</span><br/><span class="h3" id="selectedSearchLabel">All</span>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="searchbarDropdown" id="search_type_select">
+                    </ul>
+                  </li>
+                </ul>
+
+                <form class="d-flex me-auto" id="search-form" onSubmit="return false">
                   <input class="form-control p-4 bg-white shadow-sm" placeholder="SEARCH" aria-label="Search" id="search-text"></input>
                 </form>
                 <div id="basemap-toggle" class="btn btn-secondary mx-1 shadow-sm">Adjust Basemap</div>

@@ -35,8 +35,11 @@ var config = {
         }
     ],
     capacityField: 'capacity',
-    searchFields: ['name', 'country', 'company'], /* company could be owner, operator or parent, need to specify */
-    searchField: 'project', /* temporary single value rather list */
+    searchFields: { 'Project': ['project'], 
+        'Companies': ['owner', 'parent'],
+        'Start Year': ['start_year']
+    }, 
+//['project', 'owner', 'start_year'], /* company could be owner, operator or parent, need to specify */
     assetLabel: "Gas Plants",
     img_detail_zoom: 15
 };
