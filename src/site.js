@@ -14,6 +14,10 @@ function processConfig() {
     }
     config.baseMap = "Streets";
     config.icons = [];
+
+    Object.keys(config.color.values).forEach((color_key) => {
+        config.color.values[color_key] = config.colors[ config.color.values[color_key] ];
+    });
 }
 
 mapboxgl.accessToken = config.accessToken;
@@ -262,7 +266,7 @@ function addEvents() {
         if (selectedFeatures.length == 1) {
             displayDetails(selectedFeatures[0].properties[config.linkField]);
         } else {
-            var modalText = "<ul>";
+            var modalText = "<h6 class='p-3'>There are multiple " + config.assetLabel + " near this location. Select one for more details</h6><ul>";
             selectedFeatures.forEach((feature) => {
                 modalText += "<li class='asset-select-option' onClick=\"displayDetails('" + feature.properties[config.linkField] + "')\">" + feature.properties['project'] + "</li>";
             });
@@ -329,6 +333,7 @@ function buildFilters() {
     $('.filter-row').each(function() {
         this.addEventListener("click", function() {
             toggleFilter(this.dataset.checkid);
+
         });
     });
     $('.form-check-input').each(function() {
