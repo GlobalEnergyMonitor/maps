@@ -25,11 +25,13 @@ const map = new mapboxgl.Map({
     maxBounds: [[-180,-85],[180,85]],
     projection: 'naturalEarth'
 });
-map.addControl(new mapboxgl.NavigationControl());
+map.addControl(new mapboxgl.NavigationControl({showCompass: false}));
 const popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false
 });
+map.dragRotate.disable();
+map.touchZoomRotate.disableRotation();
 
 $(document).ready(function() {
     loadData();
@@ -312,23 +314,35 @@ function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
         if (! filter.primary) {
-            $('#filter-form').append('<h4 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h4>');
+            $('#filter-form').append('<hr/><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
         }
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
-            let check = '<div class="row"><div class="form-check col-sm-8"><input type="checkbox" checked class="form-check-input d-none" id="' + check_id + '">';
-            check += '<label class="form-check-label" for="' + check_id + '">' + 
+            let check = `<div class="row filter-row" data-checkid="${check_id}"><div class="form-check col-sm-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
+            check += '<label class="form-check-label" for="' + check_id + '">' +
+                (filter.primary ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "") + 
                 ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) 
-                + '</label></div><div class="col-sm-1 eye" id="' + check_id + '-eye"></div><div class="col-sm-3">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+                + '</label></div><div class="col-sm-1 eye" id="' + check_id + '-eye"></div><div class="col-sm-3" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
         }
     });
-    $('.form-check-input').each(function() {
+    $('.filter-row').each(function() {
         this.addEventListener("click", function() {
-            filterGeoJSON();
-            $('#' + this.id + '-eye').toggleClass('eye eye-slash');
+            toggleFilter(this.dataset.checkid);
         });
     });
+    $('.form-check-input').each(function() {
+        this.addEventListener("click", function() {
+            toggleFilter(this.id);
+        });
+    });
+}
+
+function toggleFilter(id) {
+    filterGeoJSON();
+    $('#' + id + '-eye').toggleClass('eye eye-slash');
+    $("label[for='" + id + "']").toggleClass('text-decoration-line-through');
+    $('#' + id + '-count').toggleClass('text-decoration-line-through');
 }
 
 function countFilteredFeatures() {
@@ -371,11 +385,9 @@ function filterGeoJSON() {
             if (! filterStatus[field].includes(feature.properties[field])) include = false;
         }
         if (config.searchText.length >= 3) {
-            let searchInclude = false;
-            config.selectedSearchFields.split(',').forEach((field) => {
-                if (feature.properties[field].toLowerCase().includes(config.searchText)) searchInclude = true;
-            });
-            if (searchInclude == false) include = false;
+            if (config.selectedSearchFields.split(',').filter((field) => {
+                return feature.properties[field].toLowerCase().includes(config.searchText);
+            }).length == 0) include = false;
         }
         if (config.selectedCountries.length > 0) {
             if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
@@ -474,7 +486,7 @@ function geoJSON2Headers() {
 
 function updateSummary() {
     $('#total_in_view').text(config.processedGeoJSON.features.length.toString())
-    $('#summary').text("Total " + config.assetLabel + " in view");
+    $('#summary').text("Total " + config.assetLabel + " selected");
 }
 
 function enableSearch() {
