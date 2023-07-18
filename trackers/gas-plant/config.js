@@ -6,30 +6,26 @@ var config = {
         field: 'status',
         values: {
             //update this list
-            'operating': '#e37c79',
-            'pre-construction': '#b5eaaa',
-            'construction': '#aaabf2',
-            'retired': '#9c9c9b',
-            'cancelled': '#9c9c9b',
-            'pre-permit': '#b5eaaa',
-            'shelved': '#9c9c9b',
-            'mothballed': '#9c9c9b',
-            'announced': '#b5eaaa',
-            'permitted': '#aaabf2'
+            'operating': 'red',
+            'pre-construction': 'green',
+            'construction': 'blue',
+            'retired': 'grey',
+            'cancelled': 'grey',
+            'shelved': 'grey',
+            'mothballed': 'grey',
+            'announced': 'green'
             // contining
         }
     },
-    paint: {
-        /* this could be made dynamic based on the range of values in the data */
-        'circle-radius': ["max", 3, ["/", ["to-number", ["get", "capacity"]], 500]],
-        'circle-opacity':.85
-
-    },
+    minRadius: 2,
+    maxRadius: 10,
+    highZoomMinRadius: 4,
+    highZoomMaxRadius: 32,
     filters: [
         {
             field: 'status',
             /* values need to be specified for ordering */
-            values: ['operating','construction','pre-construction','retired','cancelled','shelved','mothballed','announced'],
+            values: ['operating','construction','pre-construction','announced','retired','cancelled','shelved','mothballed'],
             primary: true
 
         }
@@ -38,7 +34,7 @@ var config = {
     searchFields: { 'Project': ['project'], 
         'Companies': ['owner', 'parent'],
         'Start Year': ['start_year']
-    }, 
+    },
 //['project', 'owner', 'start_year'], /* company could be owner, operator or parent, need to specify */
     assetLabel: "Gas Plants",
     img_detail_zoom: 15

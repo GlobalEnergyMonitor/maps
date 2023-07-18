@@ -7,5 +7,8 @@ var site_config = {
         'blue': '#aaabf2',
         'green': '#b5eaaa',
         'grey': '#9c9c9b'
-    }
+    },
+    paint: {
+        'circle-opacity':.85
+    },
 };
