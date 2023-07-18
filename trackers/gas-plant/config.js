@@ -5,7 +5,6 @@ var config = {
             should this just be made part of the filter? that might allow to address multiple properties */
         field: 'status',
         values: {
-            //update this list
             'operating': 'red',
             'pre-construction': 'green',
             'construction': 'blue',
@@ -14,7 +13,6 @@ var config = {
             'shelved': 'grey',
             'mothballed': 'grey',
             'announced': 'green'
-            // contining
         }
     },
     minRadius: 2,
