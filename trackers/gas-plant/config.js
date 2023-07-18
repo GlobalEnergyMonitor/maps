@@ -35,5 +35,9 @@ var config = {
     },
 //['project', 'owner', 'start_year'], /* company could be owner, operator or parent, need to specify */
     assetLabel: "Gas Plants",
-    img_detail_zoom: 15
+    img_detail_zoom: 15,
+    tableHeaders: {
+        values: ['url','project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
+        clickColumn: 'url'
+    }
 };

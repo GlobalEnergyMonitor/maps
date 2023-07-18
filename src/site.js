@@ -488,8 +488,10 @@ function buildTable() {
         data: geoJSON2Table(),
         searching: false,
         pageLength: 100,
-        columns: geoJSON2Headers()
+        columns: config.tableHeaders.values.map((header) => { return {'title': header}})
     });
+
+    config.table.column(config.tableHeaders.values.indexOf(config.tableHeaders.clickColumn)).visible(false);
 
     $('#table-toggle').on("click", function() {
         if ($('#table-toggle').text() == "Table view") {
@@ -506,14 +508,21 @@ function buildTable() {
             $('#basemap-toggle').show();
         }
     });
+
+    $('#table tbody tr').click(function() {
+        window.open(config.table.row(this).data()[config.tableHeaders.values.indexOf(config.tableHeaders.clickColumn)], '_blank');
+    });
 }
 function updateTable() {
     config.table.clear();
     config.table.rows.add(geoJSON2Table()).draw();
 }
 function geoJSON2Table() {
-    return config.processedGeoJSON.features.map(feature => Object.values(feature.properties)
-    ); 
+    return config.processedGeoJSON.features.map(feature => {
+        return config.tableHeaders.values.map((header) => { 
+            return feature.properties[header]; 
+        });
+    });
 }
 function geoJSON2Headers() {
     return Object.keys(config.geojson.features[0].properties).map((k) => {
@@ -524,6 +533,7 @@ function geoJSON2Headers() {
 function updateSummary() {
     $('#total_in_view').text(config.processedGeoJSON.features.length.toString())
     $('#summary').text("Total " + config.assetLabel + " selected");
+    //TODO -- update filter counts
 }
 
 function enableSearch() {
