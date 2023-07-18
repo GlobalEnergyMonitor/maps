@@ -5,18 +5,14 @@ var config = {
             should this just be made part of the filter? that might allow to address multiple properties */
         field: 'status',
         values: {
-            //update this list
-            'operating': '#e37c79',
-            'pre-construction': '#b5eaaa',
-            'construction': '#aaabf2',
-            'retired': '#9c9c9b',
-            'cancelled': '#9c9c9b',
-            'pre-permit': '#b5eaaa',
-            'shelved': '#9c9c9b',
-            'mothballed': '#9c9c9b',
-            'announced': '#b5eaaa',
-            'permitted': '#aaabf2'
-            // contining
+            'operating': 'red',
+            'pre-construction': 'green',
+            'construction': 'blue',
+            'retired': 'grey',
+            'cancelled': 'grey',
+            'shelved': 'grey',
+            'mothballed': 'grey',
+            'announced': 'green'
         }
     },
     paint: {
