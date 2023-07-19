@@ -508,6 +508,12 @@ function buildTable() {
     $('#table tbody tr').click(function() {
         window.open(config.table.row(this).data()[config.tableHeaders.values.indexOf(config.tableHeaders.clickColumn)], '_blank');
     });
+    
+    config.table.on( 'draw', function () {
+        $('#table tbody tr').click(function() {
+            window.open(config.table.row(this).data()[config.tableHeaders.values.indexOf(config.tableHeaders.clickColumn)], '_blank');
+        });
+    });
 }
 function updateTable() {
     config.table.clear();
