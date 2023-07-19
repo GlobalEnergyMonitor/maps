@@ -9,6 +9,6 @@ var site_config = {
         'grey': '#9c9c9b'
     },
     paint: {
-        'circle-opacity':.85
+        'circle-opacity':.9
     },
 };

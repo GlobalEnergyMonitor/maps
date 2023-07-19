@@ -107,10 +107,10 @@ table.dataTable>tbody>tr:hover {
     z-index: 1;
     overflow-y:scroll; 
     max-height: 100%;
-    opacity: 0.9;
 }
 #filter-form {
     text-transform: capitalize;
+    cursor: pointer;
 }
 
 #table-container {
@@ -197,18 +197,26 @@ table.dataTable>tbody>tr:hover {
     border-bottom-right-radius: 1rem;
 }
 
+/* Eye by Holger Ziemann from <a href="https://thenounproject.com/browse/icons/term/eye/" target="_blank" title="Eye Icons">Noun Project</a> (CC BY 3.0) */
 .eye {
     background: url(./img/eye.svg);
     background-repeat: no-repeat;
     position: relative;
     top: 3px;
 }
+/* eye crossed by Holger Ziemann from <a href="https://thenounproject.com/browse/icons/term/eye-crossed/" target="_blank" title="eye crossed Icons">Noun Project</a> (CC BY 3.0) */
 .eye-slash {
     background: url(./img/eye-slash.svg);
     background-repeat: no-repeat;
     position: relative;
     top: 3px;
 }
+/* layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) */
+.layer {
+    background: url(./img/layer.svg);
+    background-repeat: no-repeat; 
+}
+
 .legend-dot {
     height: 10px;
     width: 10px;
@@ -235,4 +243,7 @@ table.dataTable>tbody>tr:hover {
 
 #table_length {
     display: none;
+}
+#table-toggle {
+    min-height: 55px;
 }

@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html>
 
 <head>
     <meta charset="utf-8">
@@ -13,8 +12,8 @@
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js"></script>
 
-    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.4/r-2.4.1/datatables.min.css" rel="stylesheet"/>
-    <script src="https://cdn.datatables.net/v/bs5/dt-1.13.4/r-2.4.1/datatables.min.js"></script>
+    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.4/fh-3.4.0/r-2.4.1/datatables.min.css" rel="stylesheet"/>
+    <script src="https://cdn.datatables.net/v/bs5/dt-1.13.4/fh-3.4.0/r-2.4.1/datatables.min.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@700&display=swap" rel="stylesheet">
     <link href="../../src/site.css" rel="stylesheet" />
@@ -60,8 +59,10 @@
                 <form class="d-flex me-auto" id="search-form" onSubmit="return false">
                   <input class="form-control p-4 bg-white shadow-sm" placeholder="SEARCH" aria-label="Search" id="search-text"></input>
                 </form>
-                <div id="basemap-toggle" class="btn btn-secondary mx-1 shadow-sm">Adjust Basemap</div>
-                <div id="table-toggle" class="btn btn-secondary mx-1 shadow-sm shadow-intensity-lg">Table view</div>
+                <!-- layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) -->
+                <div id="basemap-toggle" class="btn btn-secondary mx-1 shadow-sm">Adjust Basemap <img src="../../src/img/layer.svg" width="25" /></div>
+                <!-- Arrow Right by Andrejs Kirma from <a href="https://thenounproject.com/browse/icons/term/arrow-right/" target="_blank" title="Arrow Right Icons">Noun Project</a> (CC BY 3.0) -->
+                <div id="table-toggle" class="btn btn-secondary mx-1 shadow-sm shadow-intensity-lg">Table view <img src="../../src/img/arrow-right.svg" width="15"></div>
             </div>        
         </div>
     </div>

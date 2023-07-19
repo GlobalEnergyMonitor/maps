@@ -33,11 +33,11 @@ var config = {
         'Companies': ['owner', 'parent'],
         'Start Year': ['start_year']
     },
-//['project', 'owner', 'start_year'], /* company could be owner, operator or parent, need to specify */
     assetLabel: "Gas Plants",
     img_detail_zoom: 15,
     tableHeaders: {
         values: ['url','project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
+        labels: ['url', 'Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
         clickColumn: 'url'
     }
 };

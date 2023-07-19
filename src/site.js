@@ -355,22 +355,17 @@ function buildFilters() {
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
             let check = `<div class="row filter-row" data-checkid="${check_id}"><div class="form-check col-sm-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
-            check += '<label class="form-check-label" for="' + check_id + '">' +
-                (filter.primary ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "") + 
-                ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) 
-                + '</label></div><div class="col-sm-1 eye" id="' + check_id + '-eye"></div><div class="col-sm-3" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+            check += (filter.primary ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "") + 
+                `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span>'
+                + '</div><div class="col-sm-1 eye" id="' + check_id + '-eye"></div><div class="col-sm-3" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
         }
     });
     $('.filter-row').each(function() {
         this.addEventListener("click", function() {
+            $('#' + this.dataset.checkid).click();
             toggleFilter(this.dataset.checkid);
 
-        });
-    });
-    $('.form-check-input').each(function() {
-        this.addEventListener("click", function() {
-            toggleFilter(this.id);
         });
     });
 }
@@ -378,7 +373,7 @@ function buildFilters() {
 function toggleFilter(id) {
     filterGeoJSON();
     $('#' + id + '-eye').toggleClass('eye eye-slash');
-    $("label[for='" + id + "']").toggleClass('text-decoration-line-through');
+    $('#' + id + '-label').toggleClass('text-decoration-line-through');
     $('#' + id + '-count').toggleClass('text-decoration-line-through');
 }
 
@@ -488,20 +483,21 @@ function buildTable() {
         data: geoJSON2Table(),
         searching: false,
         pageLength: 100,
-        columns: config.tableHeaders.values.map((header) => { return {'title': header}})
+        fixedHeader: true,
+        columns: config.tableHeaders.labels.map((header) => { return {'title': header}})
     });
 
     config.table.column(config.tableHeaders.values.indexOf(config.tableHeaders.clickColumn)).visible(false);
 
     $('#table-toggle').on("click", function() {
-        if ($('#table-toggle').text() == "Table view") {
-            $('#table-toggle').text("Map view");
+        if ($('#table-toggle').text().includes("Table view")) {
+            $('#table-toggle').html("Map view <img src='../../src/img/arrow-right.svg' width='15'>");
             $('#map').hide();
             $('#sidebar').hide();
             $('#table-container').show();
             $('#basemap-toggle').hide();
         } else {
-            $('#table-toggle').text("Table view");
+            $('#table-toggle').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
             $('#map').show();
             $('#sidebar').show();
             $('#table-container').hide();
@@ -533,7 +529,13 @@ function geoJSON2Headers() {
 function updateSummary() {
     $('#total_in_view').text(config.processedGeoJSON.features.length.toString())
     $('#summary').text("Total " + config.assetLabel + " selected");
-    //TODO -- update filter counts
+    countFilteredFeatures();
+    config.filters.forEach((filter) => {
+        for (let i=0; i<filter.values.length; i++) {
+            let count_id =  filter.field + '_' + filter.values[i] + '-count';
+            $('#' + count_id).text(config.filterCount[filter.field][filter.values[i]]);
+        }
+    });
 }
 
 function enableSearch() {
