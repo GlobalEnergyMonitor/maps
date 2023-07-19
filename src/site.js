@@ -80,7 +80,9 @@ function makeGeoJSON(jsonData) {
             "properties": {}
         }
         for (let key in asset) {
-            if (key != config.locationColumns['lng'] && key != config.locationColumns['lat']) {
+            if (key == config.capacityField) {
+                feature.properties[key] = Number(asset[key]);
+            } else if (key != config.locationColumns['lng'] && key != config.locationColumns['lat']) {
                 feature.properties[key] = asset[key];
             }
         }
