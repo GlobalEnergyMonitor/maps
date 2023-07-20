@@ -492,14 +492,14 @@ function buildTable() {
     config.table.column(config.tableHeaders.values.indexOf(config.tableHeaders.clickColumn)).visible(false);
 
     $('#table-toggle').on("click", function() {
-        if ($('#table-toggle').text().includes("Table view")) {
-            $('#table-toggle').html("Map view <img src='../../src/img/arrow-right.svg' width='15'>");
+        if ($('#table-toggle-label').text().includes("Table view")) {
+            $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15'>");
             $('#map').hide();
             $('#sidebar').hide();
             $('#table-container').show();
             $('#basemap-toggle').hide();
         } else {
-            $('#table-toggle').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
+            $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
             $('#map').show();
             $('#sidebar').show();
             $('#table-container').hide();
