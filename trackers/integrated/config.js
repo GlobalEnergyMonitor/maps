@@ -7,11 +7,13 @@ var config = {
         values: {
             'operating': 'red',
             'pre-construction': 'green',
+            'permitted': 'green',
             'construction': 'blue',
             'retired': 'grey',
             'cancelled': 'grey',
             'shelved': 'grey',
             'mothballed': 'grey',
+            'inactive': 'grey',
             'announced': 'green'
         }
     },
@@ -23,7 +25,7 @@ var config = {
         {
             field: 'status',
             /* values need to be specified for ordering */
-            values: ['operating','construction','pre-construction','announced','retired','cancelled','shelved','mothballed'],
+            values: ['operating','construction','pre-construction','permitted','announced','retired','cancelled','shelved','mothballed','inactive'],
             primary: true
 
         }
