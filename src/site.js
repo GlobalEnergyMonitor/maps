@@ -101,6 +101,8 @@ function makeGeoJSON(jsonData) {
 // Builds lookup of linked assets by the link column
 //  and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
 function findLinkedAssets() {
+    config.totalCount = 0;
+
     // First, create a lookup table for linked assets based on linkField
     config.linked = {};
     config.processedGeoJSON.features.forEach((feature) => {
@@ -135,7 +137,7 @@ function findLinkedAssets() {
         }, 0);
         features[0].properties[config.capacityField] = capacity;
 
-        // Build summary count of status across all linked assets
+        // Build summary count of capacity across all linked assets
         //  and generate icon based on that label if more than one status
         let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [config.color.values[k]]: 0 })));
         features.forEach((feature) => {  
@@ -155,6 +157,17 @@ function findLinkedAssets() {
                 config.icons.push(string_icon);
             }
         }
+
+        // Build summary count of filters for legend
+        let summary_count = {};
+        config.filters.forEach((filter) => {
+            summary_count[filter.field] = Object.assign(...filter.values.map(f => ({[f]: 0})));
+            features.forEach((feature) => {
+                summary_count[filter.field][feature.properties[filter.field]]++;
+            });
+        });
+        features[0].properties['summary_count'] = JSON.stringify(summary_count);
+        config.totalCount += features.length;
 
         config.processedGeoJSON.features.push(features[0]);
     });
@@ -386,14 +399,15 @@ function countFilteredFeatures() {
         filter.values.forEach(val => {
             config.filterCount[filter.field][val] = 0;
         });
-    })
+    });
+
     config.processedGeoJSON.features.forEach(feature => {
-        config.filters.forEach(filter => {
-            if (! (filter.field in config.filterCount)) config.filterCount[filter.field] = {};
-            if (! (feature.properties[filter.field] in config.filterCount[filter.field]))
-                config.filterCount[filter.field][feature.properties[filter.field]] = 0;
-            config.filterCount[filter.field][feature.properties[filter.field]]++;
-        })
+        let summary_count = JSON.parse(feature.properties.summary_count);
+        Object.keys(summary_count).forEach((filter) => {
+            Object.keys(summary_count[filter]).forEach((value) => {
+                config.filterCount[filter][value] += summary_count[filter][value];
+            });
+        });
     });
 }
 
@@ -535,7 +549,7 @@ function geoJSON2Headers() {
 }
 
 function updateSummary() {
-    $('#total_in_view').text(config.processedGeoJSON.features.length.toString())
+    $('#total_in_view').text(config.totalCount.toString())
     $('#summary').text("Total " + config.assetLabel + " selected");
     countFilteredFeatures();
     config.filters.forEach((filter) => {
