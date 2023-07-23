@@ -230,10 +230,41 @@ table.dataTable>tbody>tr:hover {
 }
 .modal-body {
     padding: 0px;
-    min-height: 300px;
+    min-height: 150px;
 }
 .modal-body ul {
     list-style: none;
+}
+.modal-dialog {
+    max-width:600px;
+}
+#detail-satellite {
+    background-size: cover;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding-right: 0px;
+    position: relative;
+    font-family: 'Familjen Grotesk';
+}
+#detail-location-pin, .detail-location {
+    float: right;
+}
+#detail-more-info {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: white;
+}
+#detail-more-info a {
+    text-decoration: none;
+}
+#detail-total-units {
+    border-bottom: 1px solid #000; 
+    line-height: 0.1em;
+}
+#total_in_view {
+    font-size: small;
 }
 
 #table_info, #table_paginate {

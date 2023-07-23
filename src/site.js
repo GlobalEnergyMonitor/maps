@@ -593,8 +593,10 @@ function enableModal() {
     })
 }
 function displayDetails(link) {
-    var bbox = [];
-    var start_year;
+    let bbox = [];
+    let start_year;
+    let capacity = Object.assign(...config.filters[0].values.map(f => ({[f]: 0})));;
+    let count = Object.assign(...config.filters[0].values.map(f => ({[f]: 0})));;; 
     config.linked[link].forEach((feature => {
         var feature_lng = Number(feature.geometry.coordinates[0]);
         var feature_lat = Number(feature.geometry.coordinates[1]);
@@ -613,24 +615,49 @@ function displayDetails(link) {
         if ((! start_year) || (feature.properties['start_year'] < start_year)) {
             start_year = feature.properties['start_year'];
         }
+
+        capacity[feature.properties['status']] += feature.properties['capacity'];
+        count[feature.properties['status']]++;
     }));
     var img_lng = (bbox[0] + bbox[2]) / 2;
     var img_lat = (bbox[1] + bbox[3]) / 2;
 
     var feature = config.linked[link][0];
-    var detail_text = feature.properties['project'] + '<br/>' +
+    var detail_text =     
+        '<h4>' + feature.properties['project'] + '</h4>' +
         (feature.properties['project_loc'] != '' ? feature.properties['project_loc'] + '<br/>' : '') +
-        "Owner: " + feature.properties['owner'] + '<br/>' + 
+        'Owner: <span class="font-weight-bold">' + feature.properties['owner'] + '</span><br/>' + 
         "Parent: " + feature.properties['parent'] + '<br/>' +
+        //TODO: technology and fuel type could be multiple
         "Technology: " + feature.properties['technology'] + '<br/>' +
-        "Fuel type:" + feature.properties['fuel_type'] + '<br/>' +
-        "Start year:" + start_year;
+        "Fuel type: " + feature.properties['fuel_type'] + '<br/>' +
+        "Start year: " + start_year;
+
+    let detail_capacity = '';
+    Object.keys(capacity).forEach((k) => {
+        if (capacity[k] != 0) {
+           detail_capacity += '<div class="row"><div class="col-sm-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-sm-4">' + capacity[k] + '</div><div class="col-sm-3">' + count[k] + " of " + config.linked[link].length + "</div></div>";
+        }
+    });
+    //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
     $('.modal-body').html('<div class="row m-0">' +
-        '<div class="col-sm-4 rounded-top-left-1" id="detail-satellite" style="height: 300px;background-image:url(https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + img_lng.toString() + ',' + img_lat.toString() + ',' + config.img_detail_zoom.toString() + ',0/200x350?access_token=' + config.accessToken + ')">' +
+    //TODO image could be bbox if multiple phases
+        '<div class="col-sm-4 rounded-top-left-1" id="detail-satellite" style="background-image:url(https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + img_lng.toString() + ',' + img_lat.toString() + ',' + config.img_detail_zoom.toString() + ',0/200x350?attribution=false&logo=false&access_token=' + config.accessToken + ')">' +
+            '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
+            '<span class="detail-location">' + (feature.properties['province'] ? feature.properties['province'] + ', ' : '') + feature.properties['country'] + '</span><br/>' +
+            '<span class="detail-location">' + feature.properties['region'] + '</span>' + 
+            '<span class="align-bottom p-1" id="detail-more-info"><a href="' + link + '" target="_blank">MORE INFO</a></span>' +
         '</div>' +
-        '<div class="col-sm-8" id="total_in_view">' + detail_text + '</div>' +
-        '</div>');
+        '<div class="col-sm-8 py-2" id="total_in_view">' + detail_text + 
+            '<div">' + 
+                '<div class="row pt-2 justify-content-md-center">Total units: ' + config.linked[link].length + '</div>' +
+                '<div class="row" style="height: 2px"><hr/></div>' +
+                '<div class="row "><div class="col-sm-5">Status</div><div class="col-sm-4">Capacity&nbsp;(MW)</div><div class="col-sm-3">#&nbsp;of&nbsp;units</div></div>' +
+                detail_capacity +
+            '</div>' +
+        '</div></div>');
 //    $('.modal-title').text('details');
+
 
     map.setFilter('assets-highlighted', [
         '==',
