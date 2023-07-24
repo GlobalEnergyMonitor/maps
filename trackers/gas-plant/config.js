@@ -33,7 +33,7 @@ var config = {
         'Companies': ['owner', 'parent'],
         'Start Year': ['start_year']
     },
-    assetLabel: "Gas Plants",
+    assetLabel: "Gas Units",
     img_detail_zoom: 15,
     tableHeaders: {
         values: ['url','project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
