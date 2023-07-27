@@ -24,9 +24,9 @@ mapboxgl.accessToken = config.accessToken;
 const map = new mapboxgl.Map({
     container: 'map',
     style: config.mapStyle,
-    zoom: 2,
+    zoom: 1.2,
     center: [0, 0],
-    maxBounds: [[-180,-85],[180,85]],
+   // maxBounds: [[-180,-85],[180,85]],
     projection: 'naturalEarth'
 });
 map.addControl(new mapboxgl.NavigationControl({showCompass: false}));
@@ -101,6 +101,7 @@ function makeGeoJSON(jsonData) {
 // Builds lookup of linked assets by the link column
 //  and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
 function findLinkedAssets() {
+    config.preLinkedGeoJSON = JSON.parse(JSON.stringify(config.processedGeoJSON));
     config.totalCount = 0;
 
     // First, create a lookup table for linked assets based on linkField
@@ -249,6 +250,26 @@ function addLayers() {
                 'layout': {},
                 'paint': paint,
                 'filter': ['in', (config.linkField), '']
+            }
+        );
+        map.addLayer (
+            {
+                'id': 'assets-labels',
+                'type': 'symbol',
+                'source': 'assets-source',
+                'minzoom': 7,
+                'layout': {
+                    'text-field': '{project}',
+                    'text-font': ["DIN Pro Italic"],
+                    'text-variable-anchor': ['top'],
+                    'text-offset': [0,1],
+                    'text-size': 11
+                },
+                'paint': {
+                    'text-color': '#000000',
+                    'text-halo-color':   "hsla(220, 8%, 100%, 0.75)",
+                    'text-halo-width': 1
+                }
             }
         );
 
@@ -536,7 +557,7 @@ function updateTable() {
     config.table.rows.add(geoJSON2Table()).draw();
 }
 function geoJSON2Table() {
-    return config.processedGeoJSON.features.map(feature => {
+    return config.preLinkedGeoJSON.features.map(feature => {
         return config.tableHeaders.values.map((header) => { 
             return feature.properties[header]; 
         });
@@ -593,11 +614,101 @@ function enableModal() {
     })
 }
 function displayDetails(link) {
+    let start_year_range = [5000,0];
+    let start_year_text = '';
+    let capacity = Object.assign(...config.filters[0].values.map(f => ({[f]: 0})));
+    let count = Object.assign(...config.filters[0].values.map(f => ({[f]: 0})));
+    let technologies = [];
+    let technology_text;
+    let fuel_types = [];
+    let fuel_type_text;
+
+    config.linked[link].forEach((feature) => {
+        if (feature.properties['start_year'] != '') {
+            if ((feature.properties['start_year'] < start_year_range[0])) {
+                start_year_range[0] = feature.properties['start_year'];
+            }
+            if ((feature.properties['start_year'] > start_year_range[1])) {
+                start_year_range[1] = feature.properties['start_year'];
+            }
+        }
+
+        technologies.push(feature.properties['technology']);
+
+        fuel_types = fuel_types.concat(feature.properties['fuel_type'].split(','));
+        
+        capacity[feature.properties['status']] += feature.properties['capacity'];
+        count[feature.properties['status']]++;
+    });
+
+    if (start_year_range[0] != 5000) {
+        if (start_year_range[0] == start_year_range[1]) {
+            start_year_text =  'Start year: <span class="fw-bold">' + start_year_range[0].toString() + '</span><br/>';
+        } else {
+            start_year_text =  'Start year range: <span class="fw-bold">' + start_year_range[0].toString() + ' - ' + start_year_range[1].toString() + '</span><br/>';
+
+        }
+    }
+
+    technologies = technologies.filter((value, index, array) => array.indexOf(value) === index); //make unique
+    if (technologies.length > 1) {
+        technology_text = 'Technologies: <span class="fw-bold">' + technologies.join(',') + '</span>';
+    } else {
+        technology_text = 'Technology: <span class="fw-bold">' + technologies[0] + '</span>';
+    }
+
+    fuel_types = fuel_types.filter((value, index, array) => array.indexOf(value) === index); //make unique
+    if (fuel_types.length > 1) {
+        fuel_type_text = 'Fuel types: <span class="fw-bold">' + fuel_types.join(',') + '</span>';
+    } else {
+        fuel_type_text = 'Fuel type: <span class="fw-bold">' + fuel_types[0] + '</span>';
+    }
+
+    var feature = config.linked[link][0];
+    var detail_text =     
+   //TODO make this configurable to each map??
+        '<h4>' + feature.properties['project'] + '</h4>' +
+        (feature.properties['project_loc'] != '' ? feature.properties['project_loc'] + '<br/>' : '') +
+        'Owner: <span class="fw-bold">' + feature.properties['owner'] + '</span><br/>' + 
+        'Parent: <span class="fw-bold">' + feature.properties['parent'] + '</span><br/>' +
+        technology_text + '<br/>' +
+        fuel_type_text + '<br/>' +
+        start_year_text;
+
+    let detail_capacity = '';
+    Object.keys(capacity).forEach((k) => {
+        if (capacity[k] != 0) {
+           detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + config.linked[link].length + "</div></div>";
+        }
+    });
+    //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
+    $('.modal-body').html('<div class="row m-0">' +
+    //TODO image could be bbox if multiple phases
+        '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(link) + ')">' +
+            '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
+            '<span class="detail-location">' + (feature.properties['province'] ? feature.properties['province'] + ', ' : '') + feature.properties['country'] + '</span><br/>' +
+            '<span class="align-bottom p-1" id="detail-more-info"><a href="' + link + '" target="_blank">MORE INFO</a></span>' +
+        '</div>' +
+        '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + 
+            '<div">' + 
+                '<div class="row pt-2 justify-content-md-center">Total units: ' + config.linked[link].length + '</div>' +
+                '<div class="row" style="height: 2px"><hr/></div>' +
+                '<div class="row "><div class="col-5">Status</div><div class="col-4">Capacity&nbsp;(MW)</div><div class="col-3">#&nbsp;of&nbsp;units</div></div>' +
+                detail_capacity +
+            '</div>' +
+        '</div></div>');
+
+    map.setFilter('assets-highlighted', [
+        '==',
+        config.linkField,
+        link
+    ]);
+}
+
+function buildSatImage(link) {
+    let location_arg = '';
     let bbox = [];
-    let start_year;
-    let capacity = Object.assign(...config.filters[0].values.map(f => ({[f]: 0})));;
-    let count = Object.assign(...config.filters[0].values.map(f => ({[f]: 0})));;; 
-    config.linked[link].forEach((feature => {
+    config.linked[link].forEach((feature) => {
         var feature_lng = Number(feature.geometry.coordinates[0]);
         var feature_lat = Number(feature.geometry.coordinates[1]);
         if (bbox.length == 0) {
@@ -609,61 +720,16 @@ function displayDetails(link) {
             if (feature_lng < bbox[0]) bbox[0] = feature_lng;
             if (feature_lat < bbox[1]) bbox[1] = feature_lat;
             if (feature_lng > bbox[2]) bbox[2] = feature_lng;
-            if (feature_lat< bbox[3]) bbox[3] = feature_lat;
-        }
-        
-        if ((! start_year) || (feature.properties['start_year'] < start_year)) {
-            start_year = feature.properties['start_year'];
-        }
-
-        capacity[feature.properties['status']] += feature.properties['capacity'];
-        count[feature.properties['status']]++;
-    }));
-    var img_lng = (bbox[0] + bbox[2]) / 2;
-    var img_lat = (bbox[1] + bbox[3]) / 2;
-
-    var feature = config.linked[link][0];
-    var detail_text =     
-        '<h4>' + feature.properties['project'] + '</h4>' +
-        (feature.properties['project_loc'] != '' ? feature.properties['project_loc'] + '<br/>' : '') +
-        'Owner: <span class="font-weight-bold">' + feature.properties['owner'] + '</span><br/>' + 
-        "Parent: " + feature.properties['parent'] + '<br/>' +
-        //TODO: technology and fuel type could be multiple
-        "Technology: " + feature.properties['technology'] + '<br/>' +
-        "Fuel type: " + feature.properties['fuel_type'] + '<br/>' +
-        "Start year: " + start_year;
-
-    let detail_capacity = '';
-    Object.keys(capacity).forEach((k) => {
-        if (capacity[k] != 0) {
-           detail_capacity += '<div class="row"><div class="col-sm-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-sm-4">' + capacity[k] + '</div><div class="col-sm-3">' + count[k] + " of " + config.linked[link].length + "</div></div>";
+            if (feature_lat < bbox[3]) bbox[3] = feature_lat;
         }
     });
-    //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
-    $('.modal-body').html('<div class="row m-0">' +
-    //TODO image could be bbox if multiple phases
-        '<div class="col-sm-4 rounded-top-left-1" id="detail-satellite" style="background-image:url(https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + img_lng.toString() + ',' + img_lat.toString() + ',' + config.img_detail_zoom.toString() + ',0/200x350?attribution=false&logo=false&access_token=' + config.accessToken + ')">' +
-            '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
-            '<span class="detail-location">' + (feature.properties['province'] ? feature.properties['province'] + ', ' : '') + feature.properties['country'] + '</span><br/>' +
-            '<span class="detail-location">' + feature.properties['region'] + '</span>' + 
-            '<span class="align-bottom p-1" id="detail-more-info"><a href="' + link + '" target="_blank">MORE INFO</a></span>' +
-        '</div>' +
-        '<div class="col-sm-8 py-2" id="total_in_view">' + detail_text + 
-            '<div">' + 
-                '<div class="row pt-2 justify-content-md-center">Total units: ' + config.linked[link].length + '</div>' +
-                '<div class="row" style="height: 2px"><hr/></div>' +
-                '<div class="row "><div class="col-sm-5">Status</div><div class="col-sm-4">Capacity&nbsp;(MW)</div><div class="col-sm-3">#&nbsp;of&nbsp;units</div></div>' +
-                detail_capacity +
-            '</div>' +
-        '</div></div>');
-//    $('.modal-title').text('details');
+    if (bbox[0] == bbox[2] && bbox[1] == bbox[3]) {
+        location_arg = bbox[0].toString() + ',' + bbox[1].toString() + ',' + config.img_detail_zoom.toString();
+    } else {
+        location_arg = '[' + bbox.join(',') + ']';
+    }
 
-
-    map.setFilter('assets-highlighted', [
-        '==',
-        config.linkField,
-        link
-    ]);
+    return 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + location_arg + '/350x350?attribution=false&logo=false&access_token=' + config.accessToken;
 }
 
 function enableNavSelect() {

@@ -15,10 +15,6 @@ var config = {
             'announced': 'green'
         }
     },
-    minRadius: 2,
-    maxRadius: 10,
-    highZoomMinRadius: 4,
-    highZoomMaxRadius: 32,
     filters: [
         {
             field: 'status',
@@ -29,12 +25,7 @@ var config = {
         }
     ],
     capacityField: 'capacity',
-    searchFields: { 'Project': ['project'], 
-        'Companies': ['owner', 'parent'],
-        'Start Year': ['start_year']
-    },
     assetLabel: "Gas Units",
-    img_detail_zoom: 15,
     tableHeaders: {
         values: ['url','project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
         labels: ['url', 'Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],

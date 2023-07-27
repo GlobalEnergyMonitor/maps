@@ -108,6 +108,12 @@ table.dataTable>tbody>tr:hover {
     overflow-y:scroll; 
     max-height: 100%;
 }
+@media screen and (max-width: 600px) {
+    .sidebar {
+        visibility: hidden;
+    }
+}
+
 #filter-form {
     text-transform: capitalize;
     cursor: pointer;
@@ -236,7 +242,7 @@ table.dataTable>tbody>tr:hover {
     list-style: none;
 }
 .modal-dialog {
-    max-width:600px;
+    max-width:750px;
 }
 #detail-satellite {
     background-size: cover;
@@ -246,9 +252,18 @@ table.dataTable>tbody>tr:hover {
     padding-right: 0px;
     position: relative;
     font-family: 'Familjen Grotesk';
+    min-height: 250px;
 }
-#detail-location-pin, .detail-location {
+#detail-location-pin {
     float: right;
+}
+
+.detail-location {
+    float: right;
+    background-color: rgba(151, 151, 151, 0.628);
+    position: relative;
+    top: 4px;
+    padding: 5px;
 }
 #detail-more-info {
     position: absolute;
