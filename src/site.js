@@ -24,8 +24,8 @@ mapboxgl.accessToken = config.accessToken;
 const map = new mapboxgl.Map({
     container: 'map',
     style: config.mapStyle,
-    zoom: 1.2,
-    center: [0, 0],
+    zoom: determineZoom(),
+    center: [0, -10],
    // maxBounds: [[-180,-85],[180,85]],
     projection: 'naturalEarth'
 });
@@ -44,6 +44,13 @@ $(document).ready(function() {
     enableNavSelect();
 });
 
+function determineZoom() {
+    let modifier = 650;
+    if (window.innerWidth < 1000) { modifier = 500; } 
+    else if (window.innerWidth < 1500) { modifier = 575; }
+    let zoom = (window.innerWidth-modifier)/modifier;
+    return zoom;
+}
 function loadData() {
     if ("json" in config) {
         $.ajax({
