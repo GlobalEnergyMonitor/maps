@@ -108,9 +108,25 @@ table.dataTable>tbody>tr:hover {
     overflow-y:scroll; 
     max-height: 100%;
 }
-@media screen and (max-width: 600px) {
+.mapboxgl-ctrl-bottom-right {
+    bottom: 90px;
+}
+.mapboxgl-ctrl-bottom-left {
+    bottom: 88px;
+}
+@media screen and (max-width: 900px) {
     .sidebar {
         visibility: hidden;
+    }
+    .navbar {
+        visibility: hidden;
+    }
+    .mapboxgl-ctrl-bottom-left{
+        bottom: 0px;
+    }
+
+    .mapboxgl-ctrl-bottom-right {
+        bottom: 0px;
     }
 }
 
@@ -125,7 +141,7 @@ table.dataTable>tbody>tr:hover {
 }
 
 #search-text {
-    width: 350px;
+    width: 200px;
 }
 
 /* HACK */
@@ -179,12 +195,11 @@ table.dataTable>tbody>tr:hover {
 .navbar {
     opacity: 0.90; 
     filter:(opacity=90);
-    margin-bottom: 12px;
-    padding: 5px;
+    padding: 2px;
 }
 
 #country {
-    min-width:350px;
+    min-width:318px;
     font-family: 'Familjen Grotesk';
 }
 
