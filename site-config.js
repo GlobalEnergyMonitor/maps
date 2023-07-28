@@ -1,6 +1,6 @@
 var site_config = {
     accessToken: 'pk.eyJ1IjoiZWFydGhyaXNlIiwiYSI6ImNsa2d4eGhvaTAxb3gzcHAyem5weDY5bGgifQ.dir6j-9L6fv7Q9g_DwT51w',
-    mapStyle: 'mapbox://styles/earthrise/clit4wm0101wk01pd1nm7gmro',
+    mapStyle: 'mapbox://styles/earthrise/clkmx3xlm018k01qm3ek6auuv',
     img_detail_zoom: 15,
     colors: {
         'red': '#e37c79',
@@ -24,5 +24,5 @@ var site_config = {
     maxRadius: 10,
     highZoomMinRadius: 4,
     highZoomMaxRadius: 32,
-    img_detail_zoom: 14
+    img_detail_zoom: 15
 };
