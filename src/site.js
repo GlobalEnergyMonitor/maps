@@ -3,15 +3,6 @@ processConfig();
 function processConfig() {
     // Merge site-config.js and config.js
     config = Object.assign(site_config, config);
-
-    // Set defaults
-    if (!('linkField' in config)) config.linkField = 'url';
-    if (!('countryField' in config)) config.countryField = 'country';
-    if (!('locationColumns' in config)) {
-        config.locationColumns = {};
-        config.locationColumns['lng'] = 'lng';
-        config.locationColumns['lat'] = 'lat';
-    }
     config.baseMap = "Streets";
     config.icons = [];
 
@@ -264,13 +255,13 @@ function addLayers() {
                 'id': 'assets-labels',
                 'type': 'symbol',
                 'source': 'assets-source',
-                'minzoom': 7,
+                'minzoom': 8,
                 'layout': {
                     'text-field': '{project}',
                     'text-font': ["DIN Pro Italic"],
                     'text-variable-anchor': ['top'],
                     'text-offset': [0,1],
-                    'text-size': 11
+                    'text-size': 14
                 },
                 'paint': {
                     'text-color': '#000000',
@@ -328,7 +319,7 @@ function addEvents() {
         if (selectedFeatures.length == 1) {
             displayDetails(selectedFeatures[0].properties[config.linkField]);
         } else {
-            var modalText = "<h6 class='p-3'>There are multiple " + config.assetLabel + " near this location. Select one for more details</h6><ul>";
+            var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6><ul>";
             selectedFeatures.forEach((feature) => {
                 modalText += "<li class='asset-select-option' onClick=\"displayDetails('" + feature.properties[config.linkField] + "')\">" + feature.properties['project'] + "</li>";
             });
@@ -392,13 +383,13 @@ function getMinMax() {
 function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
-        if (! filter.primary) {
+        if (config.color.field != filter.field) {
             $('#filter-form').append('<hr/><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
         }
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
             let check = `<div class="row filter-row" data-checkid="${check_id}"><div class="form-check col-sm-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
-            check += (filter.primary ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "") + 
+            check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "") + 
                 `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span>'
                 + '</div><div class="col-sm-1 eye" id="' + check_id + '-eye"></div><div class="col-sm-3" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
@@ -446,8 +437,8 @@ function filterGeoJSON() {
     });
     $('.form-check-input').each(function() {
         if (this.checked) {
-            let [field, value] = this.id.split('_');
-            filterStatus[field].push(value);
+            let [field, ...value] = this.id.split('_');
+            filterStatus[field].push(value.join('_'));
         }
     });
 
@@ -578,7 +569,7 @@ function geoJSON2Headers() {
 
 function updateSummary() {
     $('#total_in_view').text(config.totalCount.toString())
-    $('#summary').text("Total " + config.assetLabel + " selected");
+    $('#summary').text("Total " + config.assetFullLabel + " selected");
     countFilteredFeatures();
     config.filters.forEach((filter) => {
         for (let i=0; i<filter.values.length; i++) {
@@ -621,66 +612,81 @@ function enableModal() {
     })
 }
 function displayDetails(link) {
-    let start_year_range = [5000,0];
-    let start_year_text = '';
+    var detail_text = '';
+    var location_text = '';
+    Object.keys(config.detailView).forEach((detail) => {
+        if (Object.keys(config.detailView[detail]).includes('display')) {
+
+            if (config.detailView[detail]['display'] == 'heading') {
+
+                detail_text += '<h4>' + config.linked[link][0].properties[detail] + '</h4>';
+
+            } else if (config.detailView[detail]['display'] == 'join') {
+
+                let join_array = config.linked[link].map((feature) => feature.properties[detail]);
+                join_array = join_array.filter((value, index, array) => array.indexOf(value) === index);
+                if (join_array.length > 1) {
+                    if (Object.keys(config.detailView[detail]).includes('label')) {
+                        detail_text += config.detailView[detail]['label'][1] + ': ';
+                    }
+                    detail_text += '<span class="fw-bold">' + join_array.join(',') + '</span><br/>';
+                } else {
+                    if (Object.keys(config.detailView[detail]).includes('label')) {
+                        detail_text += config.detailView[detail]['label'][0] + ': ';
+                    }
+                    detail_text += '<span class="fw-bold">' + join_array[0] + '</span><br/>';;
+                }
+
+            } else if (config.detailView[detail]['display'] == 'range') {
+
+                let greatest = config.linked[link].reduce((accumulator, feature) => {
+                        return (feature.properties[detail] != '' && feature.properties[detail] > accumulator ?  feature.properties[detail] : accumulator);
+                    },
+                    0
+                ); 
+                let least = config.linked[link].reduce((accumulator, feature) => {
+                        return (feature.properties[detail] != '' && feature.properties[detail] < accumulator ?  feature.properties[detail] : accumulator);
+                 },
+                 5000
+                );
+                if (least != 5000) {
+                    if (least == greatest) {
+                        detail_text += config.detailView[detail]['label'][0] + ': <span class="fw-bold">' + least.toString() + '</span><br/>';
+                    } else {
+                        detail_text += config.detailView[detail]['label'][1] + ': <span class="fw-bold">' + least.toString() + ' - ' + greatest.toString() + '</span><br/>';          
+                    }
+                }
+                
+            } else if (config.detailView[detail]['display'] == 'location') {
+
+                if (Object.keys(config.linked[link][0].properties).includes(detail)) {
+                    if (location_text.length > 0) {
+                        location_text += ', ';
+                    }
+                    location_text += config.linked[link][0].properties[detail];
+                }
+
+            }
+        } else {
+
+            if (Object.keys(config.detailView[detail]).includes('label')) {
+                detail_text += config.detailView[detail]['label'] + ': <span class="fw-bold">' + config.linked[link][0].properties[detail] + '</span><br/>';
+            } else {
+                if (config.linked[link][0].properties[detail] != '') {
+                    detail_text += config.linked[link][0].properties[detail] + '<br/>';
+                }
+            }
+
+        }
+    });
+
     let capacity = Object.assign(...config.filters[0].values.map(f => ({[f]: 0})));
     let count = Object.assign(...config.filters[0].values.map(f => ({[f]: 0})));
-    let technologies = [];
-    let technology_text;
-    let fuel_types = [];
-    let fuel_type_text;
 
     config.linked[link].forEach((feature) => {
-        if (feature.properties['start_year'] != '') {
-            if ((feature.properties['start_year'] < start_year_range[0])) {
-                start_year_range[0] = feature.properties['start_year'];
-            }
-            if ((feature.properties['start_year'] > start_year_range[1])) {
-                start_year_range[1] = feature.properties['start_year'];
-            }
-        }
-
-        technologies.push(feature.properties['technology']);
-
-        fuel_types = fuel_types.concat(feature.properties['fuel_type'].split(','));
-        
         capacity[feature.properties['status']] += feature.properties['capacity'];
         count[feature.properties['status']]++;
     });
-
-    if (start_year_range[0] != 5000) {
-        if (start_year_range[0] == start_year_range[1]) {
-            start_year_text =  'Start year: <span class="fw-bold">' + start_year_range[0].toString() + '</span><br/>';
-        } else {
-            start_year_text =  'Start year range: <span class="fw-bold">' + start_year_range[0].toString() + ' - ' + start_year_range[1].toString() + '</span><br/>';
-
-        }
-    }
-
-    technologies = technologies.filter((value, index, array) => array.indexOf(value) === index); //make unique
-    if (technologies.length > 1) {
-        technology_text = 'Technologies: <span class="fw-bold">' + technologies.join(',') + '</span>';
-    } else {
-        technology_text = 'Technology: <span class="fw-bold">' + technologies[0] + '</span>';
-    }
-
-    fuel_types = fuel_types.filter((value, index, array) => array.indexOf(value) === index); //make unique
-    if (fuel_types.length > 1) {
-        fuel_type_text = 'Fuel types: <span class="fw-bold">' + fuel_types.join(',') + '</span>';
-    } else {
-        fuel_type_text = 'Fuel type: <span class="fw-bold">' + fuel_types[0] + '</span>';
-    }
-
-    var feature = config.linked[link][0];
-    var detail_text =     
-   //TODO make this configurable to each map??
-        '<h4>' + feature.properties['project'] + '</h4>' +
-        (feature.properties['project_loc'] != '' ? feature.properties['project_loc'] + '<br/>' : '') +
-        'Owner: <span class="fw-bold">' + feature.properties['owner'] + '</span><br/>' + 
-        'Parent: <span class="fw-bold">' + feature.properties['parent'] + '</span><br/>' +
-        technology_text + '<br/>' +
-        fuel_type_text + '<br/>' +
-        start_year_text;
 
     let detail_capacity = '';
     Object.keys(capacity).forEach((k) => {
@@ -688,19 +694,19 @@ function displayDetails(link) {
            detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + config.linked[link].length + "</div></div>";
         }
     });
+
     //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
     $('.modal-body').html('<div class="row m-0">' +
-    //TODO image could be bbox if multiple phases
         '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(link) + ')">' +
             '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
-            '<span class="detail-location">' + (feature.properties['province'] ? feature.properties['province'] + ', ' : '') + feature.properties['country'] + '</span><br/>' +
+            '<span class="detail-location">' + location_text + '</span><br/>' +
             '<span class="align-bottom p-1" id="detail-more-info"><a href="' + link + '" target="_blank">MORE INFO</a></span>' +
         '</div>' +
         '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + 
             '<div">' + 
                 '<div class="row pt-2 justify-content-md-center">Total units: ' + config.linked[link].length + '</div>' +
                 '<div class="row" style="height: 2px"><hr/></div>' +
-                '<div class="row "><div class="col-5">Status</div><div class="col-4">Capacity&nbsp;(MW)</div><div class="col-3">#&nbsp;of&nbsp;units</div></div>' +
+                '<div class="row "><div class="col-5 text-capitalize">' + config.color.field + '</div><div class="col-4">' + config.capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + config.assetLabel + '</div></div>' +
                 detail_capacity +
             '</div>' +
         '</div></div>');
@@ -715,6 +721,8 @@ function displayDetails(link) {
 function buildSatImage(link) {
     let location_arg = '';
     let bbox = [];
+    let coords = [];
+    let geojson_arg = '';
     config.linked[link].forEach((feature) => {
         var feature_lng = Number(feature.geometry.coordinates[0]);
         var feature_lat = Number(feature.geometry.coordinates[1]);
@@ -727,16 +735,18 @@ function buildSatImage(link) {
             if (feature_lng < bbox[0]) bbox[0] = feature_lng;
             if (feature_lat < bbox[1]) bbox[1] = feature_lat;
             if (feature_lng > bbox[2]) bbox[2] = feature_lng;
-            if (feature_lat < bbox[3]) bbox[3] = feature_lat;
+            if (feature_lat > bbox[3]) bbox[3] = feature_lat;
         }
+        coords.push([feature_lng,feature_lat]);
     });
     if (bbox[0] == bbox[2] && bbox[1] == bbox[3]) {
         location_arg = bbox[0].toString() + ',' + bbox[1].toString() + ',' + config.img_detail_zoom.toString();
     } else {
         location_arg = '[' + bbox.join(',') + ']';
+       // geojson_arg = 'geojson(' + encodeURIComponent(JSON.stringify({'type': 'Feature','properties':{},'geometry': {'type': 'MultiPoint', 'coordinates': coords}})) + ')/';
     }
 
-    return 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + location_arg + '/350x350?attribution=false&logo=false&access_token=' + config.accessToken;
+    return 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + geojson_arg + location_arg + '/350x350?attribution=false&logo=false&access_token=' + config.accessToken;
 }
 
 function enableNavSelect() {

@@ -1,8 +1,6 @@
 var config = {
     csv: 'data.csv',
-    color: { /* will be processed both into style json for paint circle-color property, and for legend. 
-            what's right property name?? is color also listing values used in the summary? 
-            should this just be made part of the filter? that might allow to address multiple properties */
+    color: {
         field: 'status',
         values: {
             'operating': 'red',
@@ -18,17 +16,31 @@ var config = {
     filters: [
         {
             field: 'status',
-            /* values need to be specified for ordering */
             values: ['operating','construction','pre-construction','announced','retired','cancelled','shelved','mothballed'],
-            primary: true
-
         }
     ],
     capacityField: 'capacity',
-    assetLabel: "Gas Units",
+    capacityLabel: 'Capacity (MW)',
+    assetFullLabel: "Gas Units",
+    assetLabel: 'units',
     tableHeaders: {
         values: ['url','project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
         labels: ['url', 'Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
         clickColumn: 'url'
-    }
+    },
+    searchFields: { 'Project': ['project'], 
+        'Companies': ['owner', 'parent'],
+        'Start Year': ['start_year']
+    },
+    detailView: {
+        'project': {'display': 'heading'},
+        'project_loc': {},
+        'owner': {'label': 'Owner'},
+        'parent': {'label': 'Parent'},
+        'technology': {'display': 'join', 'label': ['Technology', 'Technologies']},
+        'fuel_type': {'display': 'join', 'label': ['Fuel Type', 'Fuel Types']},
+        'start_year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
+        'province': {'display': 'location'},
+        'country': {'display': 'location'}
+    } 
 };
