@@ -257,7 +257,7 @@ function addLayers() {
                 'source': 'assets-source',
                 'minzoom': 8,
                 'layout': {
-                    'text-field': '{project}',
+                    'text-field': '{' + config.nameField + '}',
                     'text-font': ["DIN Pro Italic"],
                     'text-variable-anchor': ['top'],
                     'text-offset': [0,1],
@@ -303,7 +303,7 @@ function addLayers() {
 function addEvents() {
     map.on('click', 'assets', (e) => {
         const bbox = [ [e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]];
-        const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: ['assets']}), config.linkField).sort((a, b) => a.properties['project'].localeCompare(b.properties['project']))
+        const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: ['assets']}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]))
         ;
 
         const links = selectedFeatures.map(
@@ -321,7 +321,7 @@ function addEvents() {
         } else {
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6><ul>";
             selectedFeatures.forEach((feature) => {
-                modalText += "<li class='asset-select-option' onClick=\"displayDetails('" + feature.properties[config.linkField] + "')\">" + feature.properties['project'] + "</li>";
+                modalText += "<li class='asset-select-option' onClick=\"displayDetails('" + feature.properties[config.linkField] + "')\">" + feature.properties[config.nameField] + "</li>";
             });
             modalText += "</ul>"
             $('.modal-body').html(modalText);
@@ -333,7 +333,7 @@ function addEvents() {
     map.on('mouseenter', 'assets', (e) => {
         map.getCanvas().style.cursor = 'pointer';
         const coordinates = e.features[0].geometry.coordinates.slice();
-        const description = e.features[0].properties['project'];
+        const description = e.features[0].properties[config.nameField];
         popup.setLngLat(coordinates).setHTML(description).addTo(map);
     });
     map.on('mouseleave', 'assets', () => {

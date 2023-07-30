@@ -1,20 +1,46 @@
 var config = {
-    accessToken: 'pk.eyJ1IjoiZWFydGhyaXNlIiwiYSI6ImNqeDExNmtrZzAwM2E0OW16eHZ1dzg1eWEifQ.8LTFXyY-n7OsZOoWN9ONPQ',
     json: 'coal.json',
-    paint: {
-        'circle-radius': ["/", ["to-number", ["get", "capacity"]], 200],
-        'circle-color': [
-            'match', ['get', 'status'],
-                'operating', '#845440',
-                'construction', '#ff0000',
-                'retired',  '#58a1a1',
-                'cancelled', '#4cdb4c',
-                'mothballed', '#d6a490',
-                'pre-permit', '#ffa500',
-                'shelved', '#5974a2',
-                'announced', '#f3ff00',
-                'permitted', '#f26c4f',
-                /* other */ '#000000'
-            ]
-    }
+    color: {
+        field: 'status',
+        values: {
+            'operating': 'red',
+            'construction': 'blue',
+            'announced': 'green',
+            'permitted': 'green',
+            'pre-permit': 'green',
+            'retired': 'grey',
+            'cancelled': 'grey',
+            'mothballed': 'grey',
+            'shelved': 'grey'
+        }
+    },
+    filters: [
+        {
+            field: 'status',
+            values: ['operating','construction','announced','permitted','pre-permit','retired','cancelled','mothballed','shelved'],
+        }
+    ],
+    capacityField: 'capacity',
+    capacityLabel: 'Capacity (MW)',
+    assetFullLabel: "Coal-fired Units",
+    assetLabel: 'units',
+    nameField: 'plant',
+    tableHeaders: {
+        values: ['url','plant','unit','chinese_name','owner', 'parent', 'capacity', 'status', 'region', 'country', 'subnational', 'year'],
+        labels: ['url', 'Plant','Unit','Chinese Name','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
+        clickColumn: 'url'
+    },
+    searchFields: { 'Plant': ['plant'], 
+        'Companies': ['owner', 'parent'],
+        'Start Year': ['start_year']
+    },
+    detailView: {
+        'plant': {'display': 'heading'},
+        'chinese_name': {},
+        'owner': {'label': 'Owner'},
+        'parent': {'label': 'Parent'},
+        'year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
+        'subnational': {'display': 'location'},
+        'country': {'display': 'location'}
+    } 
 }

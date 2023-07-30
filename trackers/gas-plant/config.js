@@ -23,12 +23,13 @@ var config = {
     capacityLabel: 'Capacity (MW)',
     assetFullLabel: "Gas Units",
     assetLabel: 'units',
+    nameField: 'project',
     tableHeaders: {
         values: ['url','project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
         labels: ['url', 'Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
         clickColumn: 'url'
     },
-    searchFields: { 'Project': ['project'], 
+    searchFields: { 'Plant': ['project'], 
         'Companies': ['owner', 'parent'],
         'Start Year': ['start_year']
     },
