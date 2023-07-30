@@ -629,12 +629,12 @@ function displayDetails(link) {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
                         detail_text += config.detailView[detail]['label'][1] + ': ';
                     }
-                    detail_text += '<span class="fw-bold">' + join_array.join(',') + '</span><br/>';
+                    detail_text += '<span class="fw-bold text-capitalize">' + join_array.join(',').replaceAll('_',' ') + '</span><br/>';
                 } else {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
                         detail_text += config.detailView[detail]['label'][0] + ': ';
                     }
-                    detail_text += '<span class="fw-bold">' + join_array[0] + '</span><br/>';;
+                    detail_text += '<span class="fw-bold text-capitalize">' + join_array[0].replaceAll('_',' ') + '</span><br/>';;
                 }
 
             } else if (config.detailView[detail]['display'] == 'range') {
@@ -668,15 +668,13 @@ function displayDetails(link) {
 
             }
         } else {
-
-            if (Object.keys(config.detailView[detail]).includes('label')) {
-                detail_text += config.detailView[detail]['label'] + ': <span class="fw-bold">' + config.linked[link][0].properties[detail] + '</span><br/>';
-            } else {
-                if (config.linked[link][0].properties[detail] != '') {
+            if (config.linked[link][0].properties[detail] != '') {
+                if (Object.keys(config.detailView[detail]).includes('label')) {
+                    detail_text += config.detailView[detail]['label'] + ': <span class="fw-bold">' + config.linked[link][0].properties[detail] + '</span><br/>';
+                } else {
                     detail_text += config.linked[link][0].properties[detail] + '<br/>';
                 }
             }
-
         }
     });
 
@@ -704,7 +702,7 @@ function displayDetails(link) {
         '</div>' +
         '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + 
             '<div">' + 
-                '<div class="row pt-2 justify-content-md-center">Total units: ' + config.linked[link].length + '</div>' +
+                '<div class="row pt-2 justify-content-md-center">Total ' + config.assetLabel + ': ' + config.linked[link].length + '</div>' +
                 '<div class="row" style="height: 2px"><hr/></div>' +
                 '<div class="row "><div class="col-5 text-capitalize">' + config.color.field + '</div><div class="col-4">' + config.capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + config.assetLabel + '</div></div>' +
                 detail_capacity +

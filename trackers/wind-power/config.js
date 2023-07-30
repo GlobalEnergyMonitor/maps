@@ -1,24 +1,18 @@
 var config = {
-    accessToken: 'pk.eyJ1IjoiZWFydGhyaXNlIiwiYSI6ImNqeDExNmtrZzAwM2E0OW16eHZ1dzg1eWEifQ.8LTFXyY-n7OsZOoWN9ONPQ',
     csv: 'data.csv',
-    color: { /* will be processed both into style json for paint circle-color property, and for legend. 
-            what's right property name?? is color also listing values used in the summary? 
-            should this just be made part of the filter? that might allow to address multiple properties */
+    color: {
         field: 'status',
         values: {
             //update this list
-            'operating': '#ff0000',
-            'proposed': '#ffffff',
-            'cancelled': '#ff00ff',
-            'shelved': '#0000ff',
-            'closed': '#00ffff',
-            'mothballed': '#000000'
-            // contining
+            'operating': 'red',
+            'construction': 'blue',
+            'pre-construction': 'green',
+            'announced': 'green',
+            'shelved': 'grey',
+            'mothballed': 'grey',
+            'retired': 'grey',
+            'cancelled': 'grey'
         }
-    },
-    paint: {
-        /* this could be made dynamic based on the range of values in the data */
-        'circle-radius': ["max", 3, ["/", ["to-number", ["get", "capacity"]], 500]]
     },
     filters: [
         {
@@ -33,6 +27,27 @@ var config = {
             values: ['offshore_hard_mount','offshore_floating','offshore_mount_unknown','onshore','unknown']
         }
     ],
-    search_fields: ['name', 'country', 'company'] /* company could be owner, operator or parent, need to specify */
-
+    capacityField: 'capacity',
+    capacityLabel: 'Capacity (MW)',
+    assetFullLabel: 'Wind Farm Phases',
+    assetLabel: 'phases',
+    tableHeaders: {
+        values: ['url','project','unit','project_local','type','capacity','status', 'start_year', 'operator', 'owner', 'country'],
+        labels: ['url', 'Project Name','Phase name','Project Name in Local Language / Script','Installation Type','Capacity (MW)' ,'Status','Start Year','Operator', 'Owner','Country'],
+        clickColumn: 'url'
+    },
+    searchFields: { 'Project': ['project'], 
+        'Companies': ['owner', 'operator'],
+        'Start Year': ['start_year']
+    },
+    img_detail_zoom: 13,
+    detailView: {
+        'project': {'display': 'heading'},
+        'project_local': {},
+        'owner': {'label': 'Owner'},
+        'operator': {'label': 'Operator'},
+        'type': {'display': 'join', 'label': ['Type', 'Types']},
+        'start_year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
+        'country': {'display': 'location'}
+    } 
 }
