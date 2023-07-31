@@ -513,7 +513,6 @@ function generateIcon(icon) {
 }
 
 function buildTable() {
-    return;
     config.table = $('#table').DataTable({
         data: geoJSON2Table(),
         searching: false,

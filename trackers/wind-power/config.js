@@ -49,7 +49,8 @@ var config = {
         'operator': {'label': 'Operator'},
         'type': {'display': 'join', 'label': ['Type', 'Types']},
         'start_year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
-        'accuracy': {'display': 'join', 'label': ['Accuracy']},
+        'accuracy': {'display': 'join', 'label': ['Accuracy','Accuracy']},
         'country': {'display': 'location'}
-    } 
+    },
+    showAllPhases: true
 }
