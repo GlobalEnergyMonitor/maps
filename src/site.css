@@ -289,6 +289,17 @@ table.dataTable>tbody>tr:hover {
 #detail-more-info a {
     text-decoration: none;
 }
+#detail-all-phases {
+    position: absolute;
+    bottom: 10px;
+    right: 80px;
+    background-color: white;
+}
+#detail-all-phases a {
+    text-decoration: none;
+    color: black;
+    cursor: pointer;
+}
 #detail-total-units {
     border-bottom: 1px solid #000; 
     line-height: 0.1em;

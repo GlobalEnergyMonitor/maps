@@ -20,5 +20,7 @@ var site_config = {
     locationColumns:{
         lat: 'lat',
         lng: 'lng'
-    }
+    },
+    phasesZoom: 8,
+    showAllPhases: false
 };

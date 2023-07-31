@@ -513,7 +513,7 @@ function generateIcon(icon) {
 }
 
 function buildTable() {
-
+    return;
     config.table = $('#table').DataTable({
         data: geoJSON2Table(),
         searching: false,
@@ -699,6 +699,7 @@ function displayDetails(link) {
             '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
             '<span class="detail-location">' + location_text + '</span><br/>' +
             '<span class="align-bottom p-1" id="detail-more-info"><a href="' + link + '" target="_blank">MORE INFO</a></span>' +
+            (config.showAllPhases && config.linked[link].length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + link + '\')">ALL PHASES</a></span>' : '') +
         '</div>' +
         '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + 
             '<div">' + 
@@ -745,6 +746,31 @@ function buildSatImage(link) {
     }
 
     return 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + geojson_arg + location_arg + '/350x350?attribution=false&logo=false&access_token=' + config.accessToken;
+}
+function showAllPhases(link) {
+    config.modal.hide();
+    map.setFilter('assets-highlighted', [
+        'in',
+        config.linkField,
+        link
+    ]);
+    var bbox = [];
+    config.linked[link].forEach((feature) => {
+        var feature_lng = Number(feature.geometry.coordinates[0]);
+        var feature_lat = Number(feature.geometry.coordinates[1]);
+        if (bbox.length == 0) {
+            bbox[0] = feature_lng;
+            bbox[1] = feature_lat;
+            bbox[2] = feature_lng;
+            bbox[3] = feature_lat;
+        } else {
+            if (feature_lng < bbox[0]) bbox[0] = feature_lng;
+            if (feature_lat < bbox[1]) bbox[1] = feature_lat;
+            if (feature_lng > bbox[2]) bbox[2] = feature_lng;
+            if (feature_lat > bbox[3]) bbox[3] = feature_lat;
+        }
+    });
+    map.flyTo({center: [(bbox[0]+bbox[2])/2,(bbox[1]+bbox[3])/2], zoom: config.phasesZoom});
 }
 
 function enableNavSelect() {
