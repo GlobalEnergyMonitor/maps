@@ -49,6 +49,7 @@ var config = {
         'operator': {'label': 'Operator'},
         'type': {'display': 'join', 'label': ['Type', 'Types']},
         'start_year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
+        'accuracy': {'display': 'join', 'label': ['Accuracy']},
         'country': {'display': 'location'}
     } 
 }
