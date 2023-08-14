@@ -14,7 +14,7 @@ Clone the repo. Create a new directory under `/trackers/`. Place the data for th
 
 First, there are sitewide configurations with [`site-config.js`](site-config.js). Any parameter can be configured site wide. Documentation on the typical site wide parameters is in that site.
 
-The [`config.js for gas-plant`](/trackers/gas-plant/config.js) has documentation on the parameters typically set for a tracker.
+The [`config.js for gas-plant`](/trackers/coal-plant/config.js) has documentation on the parameters typically set for a tracker.
 
 ## Update tracker data
 
