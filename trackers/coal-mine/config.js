@@ -29,7 +29,7 @@ var config = {
             field: 'coal_grade',
             values: ['thermal','met','thermal_and_met',''],
             /* value_labels must match order/number in values */
-            values_labels: ['thermal','met','thermal and met','unknonwn']
+            values_labels: ['thermal','met','thermal and met','unknown']
         }
     ],
     capacityField: 'output',
