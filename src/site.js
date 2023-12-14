@@ -16,7 +16,7 @@ const map = new mapboxgl.Map({
     container: 'map',
     style: config.mapStyle,
     zoom: determineZoom(),
-    center: [0, -10],
+    center: [0, 0],
    // maxBounds: [[-180,-85],[180,85]],
     projection: 'naturalEarth'
 });
@@ -39,7 +39,7 @@ function determineZoom() {
     let modifier = 650;
     if (window.innerWidth < 1000) { modifier = 500; } 
     else if (window.innerWidth < 1500) { modifier = 575; }
-    let zoom = (window.innerWidth-modifier)/modifier;
+    let zoom = 1.1*(window.innerWidth-modifier)/modifier;
     return zoom;
 }
 function loadData() {
@@ -391,7 +391,7 @@ function buildFilters() {
             let check = `<div class="row filter-row" data-checkid="${check_id}"><div class="form-check col-sm-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
             check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "") + 
                 `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span>'
-                + '</div><div class="col-sm-1 eye" id="' + check_id + '-eye"></div><div class="col-sm-3" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+                + '</div><div class="col-sm-1 eye" id="' + check_id + '-eye"></div><div class="col-sm-3 text-end" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
         }
     });
@@ -769,6 +769,7 @@ function showAllPhases(link) {
             if (feature_lat > bbox[3]) bbox[3] = feature_lat;
         }
     });
+
     map.flyTo({center: [(bbox[0]+bbox[2])/2,(bbox[1]+bbox[3])/2], zoom: config.phasesZoom});
 }
 

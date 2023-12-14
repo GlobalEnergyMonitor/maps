@@ -3,7 +3,7 @@ var site_config = {
     accessToken: 'pk.eyJ1IjoiZWFydGhyaXNlIiwiYSI6ImNsa2d4eGhvaTAxb3gzcHAyem5weDY5bGgifQ.dir6j-9L6fv7Q9g_DwT51w',
 
     /* Mapbox Base Map Style */
-    mapStyle: 'mapbox://styles/earthrise/clkmx3xlm018k01qm3ek6auuv',
+    mapStyle: 'mapbox://styles/earthrise/clit4wm0101wk01pd1nm7gmro/',
 
     /* Zoom level that asset detail cards open at; this is a good one to override in tracker config,
      depending on scale of facilities */
@@ -12,15 +12,15 @@ var site_config = {
 
     /* Define labels for sitewide colors, referenced in tracker config */
     colors: {
-        'red': '#e37c79',
-        'blue': '#aaabf2',
-        'green': '#b5eaaa',
+        'red': '#e85d5b',
+        'blue': '#6e74f2',
+        'green': '#5eb663',
         'grey': '#9c9c9b'
     },
 
     /* Mapbox styling applied to all trackers */
     paint: {
-        'circle-opacity':.9
+        'circle-opacity':.8
     },
 
     /* radius associated with minimum/maximum value on map */

@@ -16,13 +16,18 @@ body {
     bottom: 0;
     width: 100%;
     padding-bottom: 150px;
+    font-family: monospace;
+    font-size: medium;
+}
+tr {
+    vertical-align: bottom;
 }
 
 table.dataTable>tbody>tr.odd {
    background-color: #f9f9f9;
 }
 table.dataTable>tbody>tr {
-   border-bottom: 1pt solid #999999;
+   border-bottom: 1pt solid #676767;
    cursor: pointer;
 }
 table.dataTable>tbody>tr:hover {
@@ -99,14 +104,18 @@ table.dataTable>tbody>tr:hover {
 }
 
 .sidebar {
-    padding: 10px;
+    /* padding: 10px; */
     position: fixed;
     bottom: 100px;
     left: 0px;
-    width: 408px;
+    /* width: 408px; */
     z-index: 1;
     overflow-y:scroll; 
     max-height: 100%;
+    white-space: nowrap;
+}
+.sidebar.card-body {
+    padding: 5px;
 }
 .mapboxgl-ctrl-bottom-right {
     bottom: 90px;
