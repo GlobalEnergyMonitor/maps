@@ -25,9 +25,11 @@ var config = {
     assetLabel: 'units',
     nameField: 'project',
     tableHeaders: {
-        values: ['url','project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
-        labels: ['url', 'Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
-        clickColumn: 'url'
+        values: ['project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
+        labels: ['Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
+        clickColumns: ['project'],
+        rightAlign: ['unit','capacity','start_year'],
+        noWrap: ['project']
     },
     searchFields: { 'Plant': ['project'], 
         'Companies': ['owner', 'parent'],

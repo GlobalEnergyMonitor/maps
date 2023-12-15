@@ -521,7 +521,16 @@ function buildTable() {
         columns: config.tableHeaders.labels.map((header) => { return {'title': header}})
     });
 
-    config.table.column(config.tableHeaders.values.indexOf(config.tableHeaders.clickColumn)).visible(false);
+    if ('rightAlign' in config.tableHeaders) {
+        config.tableHeaders.rightAlign.forEach((col) => {
+            $("#site-style").get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { text-align:right }', 0);
+        });
+    }
+    if ('noWrap' in config.tableHeaders) {
+        config.tableHeaders.noWrap.forEach((col) => {
+            $("#site-style").get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { white-space: nowrap }', 0);
+        });        
+    }
 
     $('#table-toggle').on("click", function() {
         if ($('#table-toggle-label').text().includes("Table view")) {
@@ -538,16 +547,6 @@ function buildTable() {
             $('#basemap-toggle').show();
         }
     });
-
-    $('#table tbody tr').click(function() {
-        window.open(config.table.row(this).data()[config.tableHeaders.values.indexOf(config.tableHeaders.clickColumn)], '_blank');
-    });
-    
-    config.table.on( 'draw', function () {
-        $('#table tbody tr').click(function() {
-            window.open(config.table.row(this).data()[config.tableHeaders.values.indexOf(config.tableHeaders.clickColumn)], '_blank');
-        });
-    });
 }
 function updateTable() {
     config.table.clear();
@@ -555,8 +554,12 @@ function updateTable() {
 }
 function geoJSON2Table() {
     return config.preLinkedGeoJSON.features.map(feature => {
-        return config.tableHeaders.values.map((header) => { 
-            return feature.properties[header]; 
+        return config.tableHeaders.values.map((header) => {
+            if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
+                return "<a href='" + feature.properties[config.linkField] + "' target='_blank'>" + feature.properties[header] + '</a>'; 
+            } else {
+                return feature.properties[header];
+            }
         });
     });
 }

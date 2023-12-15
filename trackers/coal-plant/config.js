@@ -45,9 +45,11 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['url','plant','unit','chinese_name','owner', 'parent', 'capacity', 'status', 'region', 'country', 'subnational', 'year'],
-        labels: ['url', 'Plant','Unit','Chinese Name','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
-        clickColumn: 'url'
+        values: ['plant','unit','chinese_name','owner', 'parent', 'capacity', 'status', 'region', 'country', 'subnational', 'year'],
+        labels: ['Plant','Unit','Chinese Name','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
+        clickColumns: ['plant'],
+        rightAlign: ['unit','capacity','year'],
+        noWrap: ['plant']
     },
 
     /* configure the search box; 

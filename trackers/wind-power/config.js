@@ -33,9 +33,11 @@ var config = {
     assetLabel: 'phases',
     nameField: 'project',
     tableHeaders: {
-        values: ['url','project','unit','project_local','type','capacity','status', 'start_year', 'operator', 'owner', 'country'],
-        labels: ['url', 'Project Name','Phase name','Project Name in Local Language / Script','Installation Type','Capacity (MW)' ,'Status','Start Year','Operator', 'Owner','Country'],
-        clickColumn: 'url'
+        values: ['project','unit','project_local','type','capacity','status', 'start_year', 'operator', 'owner', 'country'],
+        labels: ['Project Name','Phase name','Project Name in Local Language / Script','Installation Type','Capacity (MW)' ,'Status','Start Year','Operator', 'Owner','Country'],
+        clickColumns: ['project'],
+        rightAlign: ['unit','capacity','start_year'],
+        noWrap: ['project']
     },
     searchFields: { 'Project': ['project'], 
         'Companies': ['owner', 'operator'],
