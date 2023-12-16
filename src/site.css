@@ -10,14 +10,16 @@ body {
     width: 100%;
 }
 
+#table-container, .page-link {
+    font-family: monospace;
+    font-size: medium;
+}
 #table {
     position: absolute;
     top: 0;
     bottom: 0;
     width: 100%;
     padding-bottom: 150px;
-    font-family: monospace;
-    font-size: medium;
 }
 tr {
     vertical-align: bottom;
