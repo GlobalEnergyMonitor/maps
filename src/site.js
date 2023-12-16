@@ -399,17 +399,36 @@ function buildFilters() {
         this.addEventListener("click", function() {
             $('#' + this.dataset.checkid).click();
             toggleFilter(this.dataset.checkid);
-
+            filterGeoJSON();
         });
     });
 }
 
 function toggleFilter(id) {
-    filterGeoJSON();
     $('#' + id + '-eye').toggleClass('eye eye-slash');
     $('#' + id + '-label').toggleClass('text-decoration-line-through');
     $('#' + id + '-count').toggleClass('text-decoration-line-through');
 }
+
+function selectAllFilter() {
+    $('.filter-row').each(function() {
+        if (! $('#' + this.dataset.checkid)[0].checked) {
+            $('#' + this.dataset.checkid)[0].checked = true;
+            toggleFilter(this.dataset.checkid);
+        }
+    });
+    filterGeoJSON();
+}
+function clearAllFilter() {
+    $('.filter-row').each(function() {
+        if ($('#' + this.dataset.checkid)[0].checked) {
+            $('#' + this.dataset.checkid)[0].checked = false;
+            toggleFilter(this.dataset.checkid);
+        }
+    });
+    filterGeoJSON();
+}
+
 
 function countFilteredFeatures() {
     config.filterCount = {};
