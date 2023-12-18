@@ -117,8 +117,7 @@ table.dataTable td {
     max-height: 100%;
     white-space: nowrap;
 }
-.sidebar.card-body {
-    padding: 5px;
+#card-body {
     min-width: 300px;
 }
 #summary {
