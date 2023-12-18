@@ -112,7 +112,6 @@ table.dataTable td {
     position: fixed;
     bottom: 100px;
     left: 0px;
-    min-width: 300px;
     z-index: 1;
     overflow-y:scroll; 
     max-height: 100%;
@@ -120,6 +119,7 @@ table.dataTable td {
 }
 .sidebar.card-body {
     padding: 5px;
+    min-width: 300px;
 }
 #summary {
     font-size: 9px;
@@ -245,7 +245,6 @@ table.dataTable td {
     position: relative;
     top: 0px;
 }
-/* Checkbox by Chinnaking from <a href="https://thenounproject.com/browse/icons/term/checkbox/" target="_blank" title="Checkbox Icons">Noun Project</a> (CC BY 3.0) */
 .uncheckmark {
     background: url(./img/uncheck.svg);
     background-repeat: no-repeat;
