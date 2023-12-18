@@ -28,8 +28,7 @@ var config = {
         values: ['project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
         labels: ['Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
         clickColumns: ['project'],
-        rightAlign: ['unit','capacity','start_year'],
-        noWrap: ['project']
+        rightAlign: ['unit','capacity','start_year']
     },
     searchFields: { 'Plant': ['project'], 
         'Companies': ['owner', 'parent'],

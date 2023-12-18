@@ -388,10 +388,12 @@ function buildFilters() {
         }
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
-            let check = `<div class="row filter-row" data-checkid="${check_id}"><div class="form-check col-sm-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
-            check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "") + 
-                `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span>'
-                + '</div><div class="col-sm-1 eye" id="' + check_id + '-eye"></div><div class="col-sm-3 text-end" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+            let check = `<div class="row filter-row" data-checkid="${check_id}">`;
+            check += '<div class="col-sm-1 checkmark" id="' + check_id + '-checkmark"></div>';
+            check += `<div class="col-sm-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
+            check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "");
+            check +=  `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
+            check += '<div class="col-sm-3 text-end" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
         }
     });
@@ -405,9 +407,7 @@ function buildFilters() {
 }
 
 function toggleFilter(id) {
-    $('#' + id + '-eye').toggleClass('eye eye-slash');
-    $('#' + id + '-label').toggleClass('text-decoration-line-through');
-    $('#' + id + '-count').toggleClass('text-decoration-line-through');
+    $('#' + id + '-checkmark').toggleClass('checkmark uncheckmark');
 }
 
 function selectAllFilter() {
@@ -648,14 +648,14 @@ function displayDetails(link) {
                 join_array = join_array.filter((value, index, array) => array.indexOf(value) === index);
                 if (join_array.length > 1) {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
-                        detail_text += config.detailView[detail]['label'][1] + ': ';
+                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][1] + '</span>: ';
                     }
-                    detail_text += '<span class="fw-bold text-capitalize">' + join_array.join(',').replaceAll('_',' ') + '</span><br/>';
+                    detail_text += '<span class="text-capitalize">' + join_array.join(',').replaceAll('_',' ') + '</span><br/>';
                 } else {
                     if (Object.keys(config.detailView[detail]).includes('label')) {
-                        detail_text += config.detailView[detail]['label'][0] + ': ';
+                        detail_text += '<span class="fw-bold">' +config.detailView[detail]['label'][0] + '</span>: ';
                     }
-                    detail_text += '<span class="fw-bold text-capitalize">' + join_array[0].replaceAll('_',' ') + '</span><br/>';;
+                    detail_text += '<span class="text-capitalize">' + join_array[0].replaceAll('_',' ') + '</span><br/>';;
                 }
 
             } else if (config.detailView[detail]['display'] == 'range') {
@@ -672,9 +672,9 @@ function displayDetails(link) {
                 );
                 if (least != 5000) {
                     if (least == greatest) {
-                        detail_text += config.detailView[detail]['label'][0] + ': <span class="fw-bold">' + least.toString() + '</span><br/>';
+                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][0] + '</span>: ' + least.toString() + '<br/>';
                     } else {
-                        detail_text += config.detailView[detail]['label'][1] + ': <span class="fw-bold">' + least.toString() + ' - ' + greatest.toString() + '</span><br/>';          
+                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][1] + '</span>: ' + least.toString() + ' - ' + greatest.toString() + '<br/>';          
                     }
                 }
                 
@@ -691,7 +691,7 @@ function displayDetails(link) {
         } else {
             if (config.linked[link][0].properties[detail] != '') {
                 if (Object.keys(config.detailView[detail]).includes('label')) {
-                    detail_text += config.detailView[detail]['label'] + ': <span class="fw-bold">' + config.linked[link][0].properties[detail] + '</span><br/>';
+                    detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + config.linked[link][0].properties[detail] + '<br/>';
                 } else {
                     detail_text += config.linked[link][0].properties[detail] + '<br/>';
                 }

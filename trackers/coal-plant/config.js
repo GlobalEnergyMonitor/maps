@@ -48,8 +48,7 @@ var config = {
         values: ['plant','unit','chinese_name','owner', 'parent', 'capacity', 'status', 'region', 'country', 'subnational', 'year'],
         labels: ['Plant','Unit','Chinese Name','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
         clickColumns: ['plant'],
-        rightAlign: ['unit','capacity','year'],
-        noWrap: ['plant']
+        rightAlign: ['unit','capacity','year']
     },
 
     /* configure the search box; 

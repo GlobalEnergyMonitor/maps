@@ -112,7 +112,7 @@ table.dataTable td {
     position: fixed;
     bottom: 100px;
     left: 0px;
-    /* width: 408px; */
+    min-width: 300px;
     z-index: 1;
     overflow-y:scroll; 
     max-height: 100%;
@@ -121,6 +121,10 @@ table.dataTable td {
 .sidebar.card-body {
     padding: 5px;
 }
+#summary {
+    font-size: 9px;
+}
+
 .mapboxgl-ctrl-bottom-right {
     bottom: 90px;
 }
@@ -151,6 +155,8 @@ table.dataTable td {
 #table-container {
     display: none;
     padding: 50px;
+    color: #000000;
+    font-size: 11px;
 }
 
 #search-text {
@@ -231,19 +237,21 @@ table.dataTable td {
     border-bottom-right-radius: 1rem;
 }
 
-/* Eye by Holger Ziemann from <a href="https://thenounproject.com/browse/icons/term/eye/" target="_blank" title="Eye Icons">Noun Project</a> (CC BY 3.0) */
-.eye {
-    background: url(./img/eye.svg);
+/* Checkbox by Chinnaking from <a href="https://thenounproject.com/browse/icons/term/checkbox/" target="_blank" title="Checkbox Icons">Noun Project</a> (CC BY 3.0) */
+.checkmark {
+    background: url(./img/check.svg);
     background-repeat: no-repeat;
+    background-position: right;
     position: relative;
-    top: 3px;
+    top: 0px;
 }
-/* eye crossed by Holger Ziemann from <a href="https://thenounproject.com/browse/icons/term/eye-crossed/" target="_blank" title="eye crossed Icons">Noun Project</a> (CC BY 3.0) */
-.eye-slash {
-    background: url(./img/eye-slash.svg);
+/* Checkbox by Chinnaking from <a href="https://thenounproject.com/browse/icons/term/checkbox/" target="_blank" title="Checkbox Icons">Noun Project</a> (CC BY 3.0) */
+.uncheckmark {
+    background: url(./img/uncheck.svg);
     background-repeat: no-repeat;
+    background-position: right;
     position: relative;
-    top: 3px;
+    top: 0px;
 }
 /* layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) */
 .layer {
@@ -265,6 +273,7 @@ table.dataTable td {
 .modal-body {
     padding: 0px;
     min-height: 150px;
+    color: #000000;
 }
 .modal-body ul {
     list-style: none;

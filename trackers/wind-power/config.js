@@ -36,8 +36,7 @@ var config = {
         values: ['project','unit','project_local','type','capacity','status', 'start_year', 'operator', 'owner', 'country'],
         labels: ['Project Name','Phase name','Project Name in Local Language / Script','Installation Type','Capacity (MW)' ,'Status','Start Year','Operator', 'Owner','Country'],
         clickColumns: ['project'],
-        rightAlign: ['unit','capacity','start_year'],
-        noWrap: ['project']
+        rightAlign: ['unit','capacity','start_year']
     },
     searchFields: { 'Project': ['project'], 
         'Companies': ['owner', 'operator'],

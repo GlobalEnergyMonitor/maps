@@ -12,15 +12,15 @@ var site_config = {
 
     /* Define labels for sitewide colors, referenced in tracker config */
     colors: {
-        'red': '#e85d5b',
-        'blue': '#6e74f2',
-        'green': '#5eb663',
-        'grey': '#9c9c9b'
+        'red': '#c74a48',
+        'blue': '#5c62cf',
+        'green': '#4c9d4f',
+        'grey': '#8f8f8e'
     },
 
     /* Mapbox styling applied to all trackers */
     paint: {
-        'circle-opacity':.8
+        'circle-opacity':.85
     },
 
     /* radius associated with minimum/maximum value on map */
