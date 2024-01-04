@@ -11,8 +11,13 @@ body {
 }
 
 #table-container, .page-link {
-    font-family: monospace;
-    font-size: medium;
+    font-family: Arial;
+    color: rgb(33,37,41);
+    font-size: 12px;
+}
+#table-container {
+    display: none;
+    padding: 50px;
 }
 #table {
     position: absolute;
@@ -26,10 +31,10 @@ tr {
 }
 
 table.dataTable>tbody>tr.odd {
-   background-color: #f9f9f9;
+   background-color: rgba(0,0,0,0.05);
 }
 table.dataTable>tbody>tr {
-   border-bottom: 1pt solid #676767;
+   border-top: 1pt solid rgb(33,37,41);
 }
 table.dataTable>tbody>tr:hover {
    background-color: #e9e9e9;
@@ -149,13 +154,6 @@ table.dataTable td {
 #filter-form {
     text-transform: capitalize;
     cursor: pointer;
-}
-
-#table-container {
-    display: none;
-    padding: 50px;
-    color: #000000;
-    font-size: 11px;
 }
 
 #search-text {
