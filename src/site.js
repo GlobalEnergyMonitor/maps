@@ -39,7 +39,7 @@ function determineZoom() {
     let modifier = 650;
     if (window.innerWidth < 1000) { modifier = 500; } 
     else if (window.innerWidth < 1500) { modifier = 575; }
-    let zoom = 1.1*(window.innerWidth-modifier)/modifier;
+    let zoom = 1.25*(window.innerWidth-modifier)/modifier;
     return zoom;
 }
 function loadData() {
