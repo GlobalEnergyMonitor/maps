@@ -3,7 +3,8 @@ var site_config = {
     accessToken: 'pk.eyJ1IjoiZ2VtdGVhbTEiLCJhIjoiY2xtbm90dThtMDB2azJrbnhuZ2JhbGZ4NCJ9.eBYvRjhtNJYgZDXQymTmlQ',
 
     /* Mapbox Base Map Style */
-    mapStyle: 'mapbox://styles/gemteam1/clmi71nwz03zm01qr7l04gcu2',
+    mapStyle: 'mapbox://styles/gemteam1/cls98k6sf02li01p2fqtu67lc',
+    //'mapbox://styles/gemteam1/clmi71nwz03zm01qr7l04gcu2',
     //  'mapbox://styles/earthrise/clit4wm0101wk01pd1nm7gmro/',
 
     /* Zoom level that asset detail cards open at; this is a good one to override in tracker config,
