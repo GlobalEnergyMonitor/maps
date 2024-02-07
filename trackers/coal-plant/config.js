@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
-    json: 'GCPT-coal-plant-2024-02-05.json',
+    csv: 'GCPT-coal-plant-2024-02-07.csv',
 
     /* define the column and associated values for color application */
     color: {
