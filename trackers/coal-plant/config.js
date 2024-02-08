@@ -55,7 +55,7 @@ var config = {
         each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: { 'Plant': ['plant'], 
         'Companies': ['owner', 'parent'],
-        'Start Year': ['start_year']
+        'Start Year': ['year']
     },
 
     /* define fields and how they are displayed. 
