@@ -45,17 +45,17 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['plant','unit','chinese_name','owner', 'parent', 'capacity', 'status', 'region', 'country', 'subnational', 'year'],
+        values: ['plant','unit','chinese_name','owner', 'parent', 'capacity', 'status', 'region', 'country', 'subnational', 'start_year'],
         labels: ['Plant','Unit','Chinese Name','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
         clickColumns: ['plant'],
-        rightAlign: ['unit','capacity','year']
+        rightAlign: ['unit','capacity','start_year']
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: { 'Plant': ['plant'], 
         'Companies': ['owner', 'parent'],
-        'Start Year': ['year']
+        'Start Year': ['start_year']
     },
 
     /* define fields and how they are displayed. 
@@ -70,7 +70,7 @@ var config = {
         'chinese_name': {},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
-        'year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
+        'start_year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
         'subnational': {'display': 'location'},
         'country': {'display': 'location'}
     } 
