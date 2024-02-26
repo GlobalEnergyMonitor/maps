@@ -20,6 +20,10 @@ The [`config.js for coal-plant`](/trackers/coal-plant/config.js) has documentati
 
 Fork the repository. Place new data file in the appropriate tracker directory. Test and do quality checks on that fork. When ready, make a pull request to the main repository. And accept the pull request to make the update.
 
+## Building vector tiles
+
+`% csv2geojson --numeric-fields "Capacity (MW)" Global\ Integrated\ Power\ data\ 2024-02-14.xlsx\ -\ Sheet1.csv > integrated.geojson`
+`% tippecanoe -e integrated-2024-02-14.dir --no-tile-compression -r1 -pk -pf --force -l integrated < integrated.geojson`
 ## Hosting 
 
 This can be hosted directly from GitPages.

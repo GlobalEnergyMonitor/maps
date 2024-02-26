@@ -1,20 +1,21 @@
 var config = {
-    csv: 'data.csv',
+    tiles: [
+        'http://127.0.0.1:8000/trackers/integrated/integrated-2024-02-14.dir/{z}/{x}/{y}.pbf'
+        ],
+    tileSourceLayer: 'integrated',
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
-        field: 'status',
+        field: 'Type',
         values: {
-            'operating': 'red',
-            'pre-construction': 'green',
-            'permitted': 'green',
-            'construction': 'blue',
-            'retired': 'grey',
-            'cancelled': 'grey',
-            'shelved': 'grey',
-            'mothballed': 'grey',
-            'inactive': 'grey',
-            'announced': 'green'
+            'bioenergy': 'green',
+            'coal': 'red',
+            'geothermal': 'blue',
+            'hydro': 'blue',
+            'nuclear': 'grey',
+            'oil/gas': 'red',
+            'solar': 'green',
+            'wind': 'green'
         }
     },
     minRadius: 2,
@@ -23,23 +24,41 @@ var config = {
     highZoomMaxRadius: 32,
     filters: [
         {
-            field: 'status',
-            /* values need to be specified for ordering */
-            values: ['operating','construction','pre-construction','permitted','announced','retired','cancelled','shelved','mothballed','inactive'],
+            field: 'Type',
+            values: ['coal','oilgas','nuclear','geothermal','hydro','bioenergy','solar','wind'],
             primary: true
-
+        },
+        {
+            field: 'Status',
+            /* values need to be specified for ordering */
+            values: ['operating','construction','pre-construction','permitted','pre-permit','announced','retired','cancelled','shelved','mothballed','inactive']
         }
     ],
-    capacityField: 'capacity',
-    searchFields: { 'Project': ['project'], 
-        'Companies': ['owner', 'parent'],
-        'Start Year': ['start_year']
+    nameField: 'Plant/project name',
+    capacityField: 'Capacity (MW)',
+    linkField: 'Wiki URL',
+    countryField: 'Country',
+    searchFields: { 'Project': ['Plant/project name'], 
+        'Companies': ['Owner', 'Parent'],
+        'Start Year': ['Start year']
     },
-    assetLabel: "Gas Plants",
+    assetFullLabel: "plants",
+    assetLabel: "Plants",
     img_detail_zoom: 15,
     tableHeaders: {
-        values: ['url','project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
-        labels: ['url', 'Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
-        clickColumn: 'url'
-    }
+        values: ['Plant/project name','Unit/phase name', 'Owner', 'Parent', 'Capacity (MW)', 'Status', 'Subnational unit(s)', 'Country', 'Start year'],
+        labels: ['Plant/project name','Unit/phase name','Owner','Parent','Capacity (MW)','Status','Subnational unit (province/state)','Country','Start year'],
+        clickColumns: 'Plant/project name'
+    },
+    detailView: {
+        'Plant/project name': {'display': 'heading'},
+        'Owner': {'label': 'Owner'},
+        'Parent': {'label': 'Parent'},
+        'Technology': {'display': 'join', 'label': ['Technology', 'Technologies']},
+        'Fuel': {'display': 'join', 'label': ['Fuel Type', 'Fuel Types']},
+        'Start year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
+        'Subnational unit (province/state)': {'display': 'location'},
+        'Country': {'display': 'location'}
+    },
+    zoomFactor: .8
 };
