@@ -1,6 +1,6 @@
 var config = {
     tiles: [
-        'http://gem-vector-tiles.s3-website-us-east-1.amazonaws.com/{z}/{x}/{y}.pbf'
+        'https://gem.dev.c10e.org/{z}/{x}/{y}.pbf'
         ],
     tileSourceLayer: 'integrated',
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
