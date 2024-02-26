@@ -447,11 +447,11 @@ function addEvents() {
         setHighlightFilter(...links);
 
         if (selectedFeatures.length == 1) {
-            //if (config.tiles) {
-            //    displayDetails([selectedFeatures[0]]);
-            //} else {
+            if (config.tiles) {
+                displayDetails([selectedFeatures[0]]); //use clicked point
+            } else {
                 displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
-            //}
+            }
         } else {
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6><ul>";
             selectedFeatures.forEach((feature) => {
