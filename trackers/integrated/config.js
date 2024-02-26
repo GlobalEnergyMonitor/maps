@@ -18,14 +18,15 @@ var config = {
             'wind': 'green'
         }
     },
-    minRadius: 2,
+    minRadius: 1,
     maxRadius: 10,
     highZoomMinRadius: 4,
     highZoomMaxRadius: 32,
+    interpolateExponent: 1.5,
     filters: [
         {
             field: 'Type',
-            values: ['coal','oilgas','nuclear','geothermal','hydro','bioenergy','solar','wind'],
+            values: ['coal','oil/gas','nuclear','geothermal','hydro','bioenergy','solar','wind'],
             primary: true
         },
         {
@@ -35,7 +36,9 @@ var config = {
         }
     ],
     nameField: 'Plant/project name',
+    statusField: 'Status',
     capacityField: 'Capacity (MW)',
+    capacityLabel: 'Capacity (MW)',
     linkField: 'Wiki URL',
     countryField: 'Country',
     searchFields: { 'Project': ['Plant/project name'], 

@@ -319,16 +319,18 @@ function addLayers() {
         ];
     }
 
+    let interpolateExpression = ["linear"];
+    if (config.interpolateExponent) {
+        interpolateExpression = ["exponential", config.interpolateExponent];
+    } 
     paint['circle-radius'] = [
         "interpolate", ["linear"], ["zoom"],
-//        1, ["interpolate", ["exponential", 1.5],
-
-        1, ["interpolate", ["linear"],
+        1, ["interpolate", interpolateExpression,
             ["get", config.capacityField],
             config.minCapacity, config.minRadius,
             config.maxCapacity, config.maxRadius
         ],
-        10, ["interpolate", ["linear"],
+        10, ["interpolate", interpolateExpression,
             ["get", config.capacityField],
             config.minCapacity, config.highZoomMinRadius,
             config.maxCapacity, config.highZoomMaxRadius
@@ -357,11 +359,11 @@ function addLayers() {
             'icon-allow-overlap': true,
             'icon-size': [
                 "interpolate", ["linear"], ["zoom"],
-                1, ['interpolate', ['linear'],
+                1, ['interpolate', interpolateExpression,
                     ["to-number", ["get", config.capacityField]],
                     config.minCapacity, config.minRadius * 2 / 64,
                     config.maxCapacity, config.maxRadius * 2 / 64],
-                10, ['interpolate', ['linear'],
+                10, ['interpolate', interpolateExpression,
                     ["to-number", ["get", config.capacityField]],
                     config.minCapacity, config.highZoomMinRadius * 2 / 64,
                     config.maxCapacity, config.highZoomMaxRadius * 2 / 64]
@@ -442,11 +444,7 @@ function addEvents() {
             (feature) => feature.properties[config.linkField]
         );
 
-        map.setFilter('assets-highlighted', [
-            'in',
-            config.linkField,
-            ...links
-        ]);
+        setHighlightFilter(...links);
 
         if (selectedFeatures.length == 1) {
             //if (config.tiles) {
@@ -457,11 +455,11 @@ function addEvents() {
         } else {
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6><ul>";
             selectedFeatures.forEach((feature) => {
-                if (config.tiles) {
-                    modalText += "<li class='asset-select-option' onClick='displayDetails(\"" + JSON.stringify([feature]).replace(/"/g, '\\"') + "\")'>" + feature.properties[config.nameField] + "</li>";
-                } else {
+                //if (config.tiles) {
+                //    modalText += "<li class='asset-select-option' onClick='displayDetails(\"" + JSON.stringify([feature]).replace(/"/g, '\\"') + "\")'>" + feature.properties[config.nameField] + "</li>";
+                //} else {
                     modalText += "<li class='asset-select-option' onClick='displayDetails(\"" + JSON.stringify(config.linked[feature.properties[config.linkField]]).replace(/"/g, '\\"') + "\")'>" + feature.properties[config.nameField] + "</li>";
-                }
+                //}
             });
             modalText += "</ul>"
             $('.modal-body').html(modalText);
@@ -505,7 +503,7 @@ function buildFilters() {
         }
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
-            let check = `<div class="row filter-row" data-checkid="${check_id}">`;
+            let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
             check += '<div class="col-sm-1 checkmark" id="' + check_id + '-checkmark"></div>';
             check += `<div class="col-sm-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
             check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "");
@@ -595,27 +593,30 @@ function filterTiles() {
         }
     });
 
-    let filterExpression = [];
+    config.filterExpression = [];
     if (config.searchText.length >= 3) {
         let searchExpression = ['any'];
         config.selectedSearchFields.split(',').forEach((field) => {
-            searchExpression.push(['in', ['literal', config.searchText], ["get", field]]);
+            searchExpression.push(['in', ['literal', config.searchText], ['downcase', ["get", field]]]);
 
         });
-        filterExpression.push(searchExpression);
+        config.filterExpression.push(searchExpression);
     }
     if (config.selectedCountries.length > 0) {
-        filterExpression.push(['in', ['get', config.countryField], ['literal', config.selectedCountries]]);
+        config.filterExpression.push(['in', ['get', config.countryField], ['literal', config.selectedCountries]]);
     }
     for (let field in filterStatus) {
-        filterExpression.push(['in', ['get', field], ['literal', filterStatus[field]]]);
+        config.filterExpression.push(['in', ['get', field], ['literal', filterStatus[field]]]);
     }
-    if (filterExpression.length > 0) {
-        filterExpression.unshift("all");
-        map.setFilter('assets', filterExpression);
+    if (config.filterExpression.length == 0) {
+        config.filterExpression = null;
     } else {
-        map.setFilter('assets', null);
+        config.filterExpression.unshift("all");
     }
+    map.setFilter('assets', config.filterExpression);
+    map.setFilter('assets-labels', config.filterExpression);
+
+
     map.on('idle', filterGeoJSON);
 }
 
@@ -668,7 +669,7 @@ function updateSummary() {
     countFilteredFeatures();
     config.filters.forEach((filter) => {
         for (let i=0; i<filter.values.length; i++) {
-            let count_id =  filter.field + '_' + filter.values[i] + '-count';
+            let count_id =  (filter.field + '_' + filter.values[i] + '-count').replace('/','\\/');
             $('#' + count_id).text(config.filterCount[filter.field][filter.values[i]]);
         }
     });
@@ -678,14 +679,24 @@ function updateSummary() {
   table view
 */
 function buildTable() {
-    config.table = $('#table').DataTable({
-        data: geoJSON2Table(),
-        searching: false,
-        pageLength: 100,
-        fixedHeader: true,
-        columns: config.tableHeaders.labels.map((header) => { return {'title': header}})
+    $('#table-toggle').on("click", function() {
+        if ($('#table-toggle-label').text().includes("Table view")) {
+            $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15'>");
+            $('#map').hide();
+            $('#sidebar').hide();
+            $('#table-container').show();
+            $('#basemap-toggle').hide();
+            updateTable(true);
+        } else {
+            $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
+            $('#map').show();
+            $('#sidebar').show();
+            $('#table-container').hide();
+            $('#basemap-toggle').show();
+        }
     });
-
+}
+function createTable() {
     if ('rightAlign' in config.tableHeaders) {
         config.tableHeaders.rightAlign.forEach((col) => {
             $("#site-style").get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { text-align:right }', 0);
@@ -696,26 +707,27 @@ function buildTable() {
             $("#site-style").get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { white-space: nowrap }', 0);
         });        
     }
-
-    $('#table-toggle').on("click", function() {
-        if ($('#table-toggle-label').text().includes("Table view")) {
-            $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15'>");
-            $('#map').hide();
-            $('#sidebar').hide();
-            $('#table-container').show();
-            $('#basemap-toggle').hide();
-        } else {
-            $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
-            $('#map').show();
-            $('#sidebar').show();
-            $('#table-container').hide();
-            $('#basemap-toggle').show();
-        }
+    config.table = $('#table').DataTable({
+        data: geoJSON2Table(),
+        searching: false,
+        pageLength: 100,
+        fixedHeader: true,
+        columns: config.tableHeaders.labels.map((header) => { return {'title': header}})
     });
 }
-function updateTable() {
-    config.table.clear();
-    config.table.rows.add(geoJSON2Table()).draw();
+function updateTable(force) {
+    // table create/update with large number of rows is slow, only do it if visible
+    if ($('#table-container').is(':visible') || force) {
+        if (config.table == null) {
+            createTable();
+        } else if (config.tableDirty) {
+            config.table.clear();
+            config.table.rows.add(geoJSON2Table()).draw();
+        }
+        config.tableDirty = false;
+    } else {
+        config.tableDirty = true;
+    }
 }
 function geoJSON2Table() {
     return config.preLinkedGeoJSON.features.map(feature => {
@@ -740,13 +752,28 @@ function geoJSON2Headers() {
 function enableModal() {
     config.modal = new bootstrap.Modal($('#modal'));
     $('#modal').on('hidden.bs.modal', function (event) {
-        map.setFilter('assets-highlighted', [
-            '==',
-            config.linkField,
-            ''
-        ]);
+        setHighlightFilter('');
     })
 }
+function setHighlightFilter(links) {
+    let filter;
+    if (config.filterExpression != null) {
+        filter = JSON.parse(JSON.stringify(config.filterExpression));
+        filter.push([
+            '==',
+            ["get", config.linkField],
+            ["literal", links]
+        ]);
+    } else {
+        filter = [
+            '==',
+            ["get", config.linkField],
+            ["literal", links]
+        ];
+    }
+    map.setFilter('assets-highlighted',filter);
+}
+
 function displayDetails(features) {
     if (typeof features == "string") {
         features = JSON.parse(features);
@@ -817,12 +844,18 @@ function displayDetails(features) {
         }
     });
 
-    let capacity = Object.assign(...config.filters[0].values.map(f => ({[f]: 0})));
-    let count = Object.assign(...config.filters[0].values.map(f => ({[f]: 0})));
+    let filterIndex = 0;
+    for (const[index, filter] of config.filters.entries()) {
+        if (filter.field == config.statusField) {
+            filterIndex = index;
+        }
+    }
+    let capacity = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
+    let count = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
 
     features.forEach((feature) => {
-        capacity[feature.properties['status']] += feature.properties['capacity'];
-        count[feature.properties['status']]++;
+        capacity[feature.properties[config.statusField]] += feature.properties[config.capacityField];
+        count[feature.properties[config.statusField]]++;
     });
 
     let detail_capacity = '';
@@ -849,11 +882,7 @@ function displayDetails(features) {
             '</div>' +
         '</div></div>');
 
-    map.setFilter('assets-highlighted', [
-        '==',
-        config.linkField,
-        features[0].properties[config.linkField]
-    ]);
+    setHighlightFilter(features[0].properties[config.linkField]);
 }
 function buildSatImage(features) {
     let location_arg = '';
@@ -887,11 +916,7 @@ function buildSatImage(features) {
 }
 function showAllPhases(link) {
     config.modal.hide();
-    map.setFilter('assets-highlighted', [
-        'in',
-        config.linkField,
-        link
-    ]);
+    setHighlightFilter(link);
     var bbox = [];
     config.linked[link].forEach((feature) => {
         var feature_lng = Number(feature.geometry.coordinates[0]);
