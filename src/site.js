@@ -319,10 +319,7 @@ function addLayers() {
         ];
     }
 
-    let interpolateExpression = ["linear"];
-    if (config.interpolateExponent) {
-        interpolateExpression = ["exponential", config.interpolateExponent];
-    } 
+    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
     paint['circle-radius'] = [
         "interpolate", ["linear"], ["zoom"],
         1, ["interpolate", interpolateExpression,

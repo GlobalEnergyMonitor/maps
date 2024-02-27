@@ -8,11 +8,11 @@ var config = {
             should this just be made part of the filter? that might allow to address multiple properties */
         field: 'Type',
         values: {
-            'bioenergy': 'green',
+            'bioenergy': 'blue',
             'coal': 'red',
             'geothermal': 'blue',
             'hydro': 'blue',
-            'nuclear': 'grey',
+            'nuclear': 'blue',
             'oil/gas': 'red',
             'solar': 'green',
             'wind': 'green'
@@ -22,7 +22,7 @@ var config = {
     maxRadius: 10,
     highZoomMinRadius: 4,
     highZoomMaxRadius: 32,
-    interpolateExponent: 1.5,
+    interpolate: ["cubic-bezier", 0, 0, 0, 1],
     filters: [
         {
             field: 'Type',
