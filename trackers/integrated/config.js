@@ -55,6 +55,7 @@ var config = {
     },
     detailView: {
         'Plant/project name': {'display': 'heading'},
+        'Type': {'label': 'Type'},
         'Owner': {'label': 'Owner'},
         'Parent': {'label': 'Parent'},
         'Technology': {'display': 'join', 'label': ['Technology', 'Technologies']},

@@ -874,7 +874,7 @@ function displayDetails(features) {
             '<div">' + 
                 '<div class="row pt-2 justify-content-md-center">Total ' + config.assetLabel + ': ' + features.length + '</div>' +
                 '<div class="row" style="height: 2px"><hr/></div>' +
-                '<div class="row "><div class="col-5 text-capitalize">' + config.color.field + '</div><div class="col-4">' + config.capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + config.assetLabel + '</div></div>' +
+                '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + config.capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + config.assetLabel + '</div></div>' +
                 detail_capacity +
             '</div>' +
         '</div></div>');
