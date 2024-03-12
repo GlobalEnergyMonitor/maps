@@ -496,7 +496,9 @@ function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
         if (config.color.field != filter.field) {
-            $('#filter-form').append('<hr/><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
+            $('#filter-form').append('<hr /><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
+        // } else {
+        //    $('#filter-form').append('<hr class="glyph-down" />');
         }
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
@@ -613,8 +615,11 @@ function filterTiles() {
     map.setFilter('assets', config.filterExpression);
     map.setFilter('assets-labels', config.filterExpression);
 
-
-    map.on('idle', filterGeoJSON);
+    if ($('#table-container').is(':visible')) {
+        filterGeoJSON();
+    } else {
+        map.on('idle', filterGeoJSON);
+    }
 }
 
 function filterGeoJSON() {
@@ -653,6 +658,7 @@ function filterGeoJSON() {
     });
     config.processedGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
     findLinkedAssets();
+    config.tableDirty = true;
     updateTable();
     updateSummary();
 
@@ -677,7 +683,7 @@ function updateSummary() {
 */
 function buildTable() {
     $('#table-toggle').on("click", function() {
-        if ($('#table-toggle-label').text().includes("Table view")) {
+        if (! $('#table-container').is(':visible')) {
             $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15'>");
             $('#map').hide();
             $('#sidebar').hide();
