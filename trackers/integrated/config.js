@@ -1,6 +1,6 @@
 var config = {
     tiles: [
-        'https://gem.dev.c10e.org/{z}/{x}/{y}.pbf'
+        'https://gem.dev.c10e.org/2024-03-12/{z}/{x}/{y}.pbf'
         ],
     tileSourceLayer: 'integrated',
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
