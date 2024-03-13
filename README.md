@@ -20,6 +20,19 @@ The [`config.js for coal-plant`](/trackers/coal-plant/config.js) has documentati
 
 Fork the repository. Place new data file in the appropriate tracker directory. Test and do quality checks on that fork. When ready, make a pull request to the main repository. And accept the pull request to make the update.
 
+## Building vector tiles
+
+Install [csv2geojson](https://github.com/mapbox/csv2geojson) and [tippecanoe](https://github.com/mapbox/tippecanoe)
+
+`% csv2geojson --numeric-fields "Capacity (MW)" Global\ Integrated\ Power\ data\ 2024-02-14.xlsx\ -\ Sheet1.csv > integrated.geojson`
+
+`% tippecanoe -e integrated-2024-02-14.dir --no-tile-compression -r1 -pk -pf --force -l integrated < integrated.geojson`
+
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html
+
+`%aws s3 cp integrated-2024-02-14.dir s3://gem-vector-tiles/ --recursive`
+
+
 ## Hosting 
 
 This can be hosted directly from GitPages.

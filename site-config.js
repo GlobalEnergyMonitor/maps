@@ -35,6 +35,8 @@ var site_config = {
     /* define column names to pull data from */
     linkField: 'url',
     countryField: 'country',
+    statusField: 'status',
+    capacityField: 'capacity',
     locationColumns:{
         lat: 'lat',
         lng: 'lng'
@@ -44,5 +46,8 @@ var site_config = {
     showAllPhases: false,
 
     /* zoom level to set map when viewing all phases */
-    phasesZoom: 8
+    phasesZoom: 8,
+
+    /* initial load zoom multiplier */
+    zoomFactor: 1.25
 };
