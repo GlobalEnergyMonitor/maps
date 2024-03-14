@@ -4,4 +4,8 @@ package-lock.json
 .~lock*
 node_modules/
 npm-debug.log
-*package.json
+*.json
+.env
+*.zip
+*.geojson
+*.dir
