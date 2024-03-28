@@ -1,6 +1,4 @@
 .DS*
-integrated-2024-03-13.dir/
-package-lock.json
 .~lock*
 node_modules/
 npm-debug.log
@@ -9,3 +7,4 @@ npm-debug.log
 *.zip
 *.geojson
 *.dir
+
