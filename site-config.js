@@ -37,6 +37,7 @@ var site_config = {
     countryField: 'country',
     statusField: 'status',
     capacityField: 'capacity',
+    trueCapacityField: 'production_total',
     locationColumns:{
         lat: 'lat',
         lng: 'lng'
