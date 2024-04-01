@@ -1,8 +1,8 @@
 var config = {
 
     /* name of the data file; use key `csv` if data file is CSV format */
-    csv: 'GOGET_Earthgenome_file2024-03-29merged.csv',
-    
+    csv: 'GOGET_Earthgenome_file2024-04-01.csv',
+
     /* define the column and associated values for color application */
     color: {
         field: 'status',
