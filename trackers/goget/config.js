@@ -3,7 +3,19 @@ var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     csv: 'GOGET_Earthgenome_file2024-04-01.csv',
 
+    zoomFactor: 2.25,
+    
+    /* Define labels for sitewide colors, referenced in tracker config */
+    colors: {
+        'red': '#c74a48',
+        'blue': '#5c62cf',
+        'green': '#4c9d4f',
+        'grey': '#8f8f8e',
+        'black': '#000000',
+    },
+
     /* define the column and associated values for color application */
+
     color: {
         field: 'status',
         values: {
@@ -14,7 +26,8 @@ var config = {
             'decommissioned': 'green',
             'cancelled': 'green',
             'abandoned': 'grey',
-            'UGS': 'grey'
+            'UGS': 'grey',
+            '': 'black'
         }
     },
 
@@ -25,7 +38,8 @@ var config = {
     filters: [
         {
             field: 'status',
-            values: ['operating','in_development','discovered','shut_in','decommissioned','cancelled','abandoned','UGS'],
+            values: ['operating', 'in_development', 'discovered', 'shut_in', 'decommissioned', 'cancelled', 'abandoned', 'UGS', ""],
+            values_labels: ['Operating','In development','Discovered','Shut in','Decommissioned','Cancelled','Abandoned','UGS','Unknown']
         }
     ],
 
