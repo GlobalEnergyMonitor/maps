@@ -2,8 +2,6 @@ var config = {
 
     /* name of the data file; use key `csv` if data file is CSV format */
     csv: 'GOGET_Earthgenome_file2024-04-01.csv',
-
-    zoomFactor: 2.25,
     
     /* Define labels for sitewide colors, referenced in tracker config */
     colors: {
