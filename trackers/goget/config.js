@@ -92,6 +92,7 @@ var config = {
         'production_gas': {'label': 'Production - Gas (Million m³/y)'},
         'province': {'display': 'location'},
         'country': {'display': 'location'}
-
-    } 
+    },
+    showCapacityTable: false,
+    countryFile: './countries.js'
 }

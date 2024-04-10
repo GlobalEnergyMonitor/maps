@@ -1,4 +1,4 @@
-var countries = {
+{
   "Africa": [
     "Algeria",
     "Angola",

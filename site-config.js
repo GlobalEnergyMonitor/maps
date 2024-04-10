@@ -44,10 +44,13 @@ var site_config = {
 
     /* by default, no all phases link; override in tracker config where appropriate */
     showAllPhases: false,
+    showCapacityTable: true,
 
     /* zoom level to set map when viewing all phases */
     phasesZoom: 8,
 
     /* initial load zoom multiplier */
-    zoomFactor: 1.25
+    zoomFactor: 1.25,
+
+    countryFile: '../../src/countries.js'
 };
