@@ -444,6 +444,7 @@ function addEvents() {
         setHighlightFilter(...links);
 
         if (selectedFeatures.length == 1) {
+            config.selectModal = '';
             if (config.tiles) {
                 displayDetails([selectedFeatures[0]]); //use clicked point
             } else {
@@ -452,15 +453,11 @@ function addEvents() {
         } else {
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6><ul>";
             selectedFeatures.forEach((feature) => {
-                //if (config.tiles) {
-                //    modalText += "<li class='asset-select-option' onClick='displayDetails(\"" + JSON.stringify([feature]).replace(/"/g, '\\"') + "\")'>" + feature.properties[config.nameField] + "</li>";
-                //} else {
-                    modalText += "<li class='asset-select-option' onClick='displayDetails(\"" + JSON.stringify(config.linked[feature.properties[config.linkField]]).replace(/"/g, '\\"') + "\")'>" + feature.properties[config.nameField] + "</li>";
-                //}
+                modalText += "<li class='asset-select-option' onClick='displayDetails(\"" + JSON.stringify(config.linked[feature.properties[config.linkField]]).replace(/"/g, '\\"') + "\")'>" + feature.properties[config.nameField] + "</li>";
             });
-            modalText += "</ul>"
+            modalText += "</ul>";
+            config.selectModal = modalText;
             $('.modal-body').html(modalText);
-            $('.modal-title').text('choose');
         }
 
         config.modal.show();
@@ -474,8 +471,7 @@ function addEvents() {
     map.on('mouseleave', 'assets', () => {
         map.getCanvas().style.cursor = '';
         popup.remove();
-    });  
-
+    }); 
     $('#basemap-toggle').on("click", function() {
         if (config.baseMap == "Streets") {
            // $('#basemap-toggle').text("Streets");
@@ -486,6 +482,18 @@ function addEvents() {
            config.baseMap = "Streets";
            map.setLayoutProperty('satellite', 'visibility', 'none');
         }
+    });
+    $('#collapse-sidebar').on("click", function() {
+        $('#filter-form').hide();
+        $('#all-select').hide();
+        $('#collapse-sidebar').hide();
+        $('#expand-sidebar').show();
+    });
+    $('#expand-sidebar').on("click", function() {
+        $('#filter-form').show();
+        $('#all-select').show();
+        $('#collapse-sidebar').show();
+        $('#expand-sidebar').hide();
     });
 }
 
@@ -503,11 +511,11 @@ function buildFilters() {
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
             let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
-            check += '<div class="col-sm-1 checkmark" id="' + check_id + '-checkmark"></div>';
-            check += `<div class="col-sm-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
+            check += '<div class="col-1 checkmark" id="' + check_id + '-checkmark"></div>';
+            check += `<div class="col-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
             check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "");
             check +=  `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
-            check += '<div class="col-sm-3 text-end" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+            check += '<div class="col-3 text-end" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
         }
     });
@@ -869,8 +877,10 @@ function displayDetails(features) {
     });
 
     //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
+    //Arrow Back by Nursila from <a href="https://thenounproject.com/browse/icons/term/arrow-back/" target="_blank" title="Arrow Back Icons">Noun Project</a> (CC BY 3.0)
     $('.modal-body').html('<div class="row m-0">' +
         '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(features) + ')">' +
+            (config.selectModal != '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
             '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
             '<span class="detail-location">' + location_text + '</span><br/>' +
             '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.linkField] + '" target="_blank">MORE INFO</a></span>' +
@@ -939,6 +949,9 @@ function showAllPhases(link) {
     });
 
     map.flyTo({center: [(bbox[0]+bbox[2])/2,(bbox[1]+bbox[3])/2], zoom: config.phasesZoom});
+}
+function showSelectModal() {
+    $('.modal-body').html(config.selectModal);
 }
 
 /* 
