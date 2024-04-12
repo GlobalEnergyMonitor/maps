@@ -862,8 +862,8 @@ function displayDetails(features) {
     });
 
     let detail_capacity = '';
-    Object.keys(capacity).forEach((k) => {
-        if (capacity[k] != 0) {
+    Object.keys(count).forEach((k) => {
+        if (count[k] != 0) {
            detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
         }
     });
@@ -876,13 +876,14 @@ function displayDetails(features) {
             '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.linkField] + '" target="_blank">MORE INFO</a></span>' +
             (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + link + '\')">ALL PHASES</a></span>' : '') +
         '</div>' +
-        '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + 
-            '<div">' + 
+        '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text +
+            (config.showCapacityTable ?
+            '<div>' + 
                 '<div class="row pt-2 justify-content-md-center">Total ' + config.assetLabel + ': ' + features.length + '</div>' +
                 '<div class="row" style="height: 2px"><hr/></div>' +
                 '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + config.capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + config.assetLabel + '</div></div>' +
                 detail_capacity +
-            '</div>' +
+            '</div>' : '') +
         '</div></div>');
 
     setHighlightFilter(features[0].properties[config.linkField]);
@@ -985,12 +986,20 @@ function enableNavFilters() {
     }); 
 }
 function enableCountrySelect() {
-    Object.keys(countries).forEach((continent) => {
-        let dropdown_html = `<li><hr class="dropdown-divider"></li><li><a class="country-dropdown-item dropdown-item h4" data-countries="${countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
+    $.ajax({
+        type: "GET",
+        url: config.countryFile,
+        dataType: "json",
+        success: function(jsonData) { config.countries = jsonData; buildCountrySelect();}
+    });
+}
+function buildCountrySelect() {
+    Object.keys(config.countries).forEach((continent) => {
+        let dropdown_html = `<li><hr class="dropdown-divider"></li><li><a class="country-dropdown-item dropdown-item h4" data-countries="${config.countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
         dropdown_html += '<ul class="submenu dropdown-menu">';
-        countries[continent].forEach((country, idx) => {
+        config.countries[continent].forEach((country, idx) => {
             dropdown_html += `<li><a class="h5 country-dropdown-item dropdown-item" data-countries="${country}" data-countryText="${country}" href="#">${country}</a></li>`;
-            if (idx != countries[continent].length - 1) {
+            if (idx != config.countries[continent].length - 1) {
                 dropdown_html += '<li><hr class="dropdown-divider"></li>';
             }
         });

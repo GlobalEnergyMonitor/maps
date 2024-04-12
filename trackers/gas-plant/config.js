@@ -44,5 +44,5 @@ var config = {
         'start_year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
         'province': {'display': 'location'},
         'country': {'display': 'location'}
-    } 
+    }
 };
