@@ -3,26 +3,28 @@ var config = {
     csv: 'data.csv',
 
     colors: {
-        'red': '#c74a48',
-        'blue': '#5c62cf',
-        'green': '#4c9d4f',
-        'grey': '#8f8f8e',
-        'orange': '#fd7e14',
-        'yellow': '#f3ff00'
+        'red greeninfo': '#c00',
+        'light blue greeninfo': '#74add1',
+        'blue greeninfo': '#4575b4',
+        'green greeninfo': '#7dd47d',
+        'light grey greeninfo': '#ccc',
+        'grey greeninfo': '#666',
+        'orange greeninfo': '#fd7e14',
+        'yellow greeninfo': '#f3ff00'
     },
 
     /* define the column and associated values for color application */
     color: {
         field: 'status',
         values: {
-            'operating': 'green',
-            'construction': 'orange',
-            'pre-construction': 'yellow',
-            'announced': 'red',
-            'mothballed': 'blue',
-            'shelved': 'blue',
-            'retired': 'grey',
-            'cancelled': 'grey',
+            'operating': 'green greeninfo',
+            'construction': 'yellow greeninfo',
+            'pre-construction': 'orange greeninfo',
+            'announced': 'red greeninfo',
+            'mothballed': 'blue greeninfo',
+            'shelved': 'light blue greeninfo',
+            'retired': 'grey greeninfo',
+            'cancelled': 'light grey greeninfo',
         }
     },
 
@@ -33,7 +35,7 @@ var config = {
     filters: [
         {
             field: 'status',
-            values: ['operating','construction','pre-construction', 'announced','mothballed','shelved','retired','cancelled'],
+            values: ['operating','construction','pre-construction', 'announced','shelved','mothballed','retired','cancelled'],
         }
     ],
 
@@ -75,14 +77,18 @@ var config = {
     */
     detailView: {
         'project_name': {'display': 'heading'},
+        'status': {'label': 'Status'},
+        'capacity_(mw)': {'label': 'Capacity (MW)'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'start_year': {'label': 'Start Year'},
         'country' : {'label': 'Country 1'},
+        'binational': {'label': 'Binational'},
         'country_2' : {'label': 'Country 2'},
         'location_accuracy': {'label': 'Location Accuracy'},
         'state/province_1': {'display': 'location'},
         'country': {'display': 'location'},
 
-    } 
+    },
+    showCapacityTable: false, 
 }
