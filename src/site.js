@@ -64,7 +64,7 @@ function loadData() {
     } else {
         $.ajax({
             type: "GET",
-            url: config.csv,
+            url: config.csv, 
             dataType: "text",
             success: function(csvData) {
                 addGeoJSON($.csv.toObjects(csvData));
@@ -220,6 +220,7 @@ function findLinkedAssets() {
         // Build summary count of filters for legend
         let summary_count = {};
         config.filters.forEach((filter) => {
+            console.log(filter)
             summary_count[filter.field] = Object.assign(...filter.values.map(f => ({[f]: 0})));
             features.forEach((feature) => {
                 summary_count[filter.field][feature.properties[filter.field]]++;
@@ -508,6 +509,9 @@ function buildFilters() {
         // } else {
         //    $('#filter-form').append('<hr class="glyph-down" />');
         }
+        // console.log(filters)
+        console.log(filter)
+
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
             let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
@@ -636,11 +640,14 @@ function filterGeoJSON() {
     let filterStatus = {};
     config.filters.forEach(filter => {
         filterStatus[filter.field] = [];
+        
     });
+    
     $('.form-check-input').each(function () {
         if (this.checked) {
             let [field, ...value] = this.id.split('_');
             filterStatus[field].push(value.join('_'));
+            console.log(value)
         }
     });
     let filteredGeoJSON = {

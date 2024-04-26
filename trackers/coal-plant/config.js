@@ -1,7 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     csv: 'GCPT-coal-plant-2024-02-08.csv',
-
     /* define the column and associated values for color application */
     color: {
         field: 'status',
@@ -36,7 +35,7 @@ var config = {
 
     /* Labels for describing the assets */
     assetFullLabel: "Coal-fired Units",
-    assetLabel: 'units',
+    assetLabel: 'unit',
 
     /* the column that contains the asset name. this varies between trackers */
     nameField: 'plant',
