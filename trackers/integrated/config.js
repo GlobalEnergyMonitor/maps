@@ -67,5 +67,6 @@ var config = {
         'Subnational unit (province/state)': {'display': 'location'},
         'Country': {'display': 'location'}
     },
-    zoomFactor: .8
+    // zoomFactor: .8
+    zoomFactor: 5
 };
