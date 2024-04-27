@@ -1,19 +1,18 @@
 var config = {
-    // csv: 'coal-mine.csv',
+    // csv: 'coal-mine.csv', (Mikel's file)
     csv: 'data.csv',
-    // csv: 'Coal_Mine_Data_for_Map_2024-04-26.csv',
+
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
         field: 'status',
         values: {
             'operating': 'red',
-            'proposed': 'red',
+            'proposed': 'blue',
             'cancelled': 'green',
             'retired': 'green',
-            'shelved': 'blue',
+            'shelved': 'grey',
             'mothballed': 'grey'
-            // contining
         }
     },
     filters: [
@@ -26,8 +25,8 @@ var config = {
         {
             field: 'mine-type',
             label: 'Mine Type',
-            values: ['surface','underground','underground-and-surface','Unknown'],
-            values_labels: ['Surface','Underground','Underground and Surface', 'Unknown']
+            values: ['surface','underground','underground-and-surface'],
+            values_labels: ['Surface','Underground','Underground & Surface']
 
         },
         {
@@ -35,7 +34,7 @@ var config = {
             label: 'Coal Type',
             values: ['thermal','met','thermal-and-met','Unknown'],
             /* value_labels must match order/number in values */
-            values_labels: ['thermal','met','thermal and met','Unknown']
+            values_labels: ['thermal','met','thermal & met','Unknown']
         }
     ],
     capacityField: 'circle_value',
