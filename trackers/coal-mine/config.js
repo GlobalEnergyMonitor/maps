@@ -25,20 +25,20 @@ var config = {
         {
             field: 'mine-type',
             label: 'Mine Type',
-            values: ['surface','underground','underground-and-surface'],
+            values: ['surface','underground','underground_and_surface'],
             values_labels: ['Surface','Underground','Underground & Surface']
 
         },
         {
             field: 'coal-grade',
-            label: 'Coal Type',
-            values: ['thermal','met','thermal-and-met','Unknown'],
+            label: 'Coal Grade',
+            values: ['thermal','met','thermal_and_met','unknown'],
             /* value_labels must match order/number in values */
-            values_labels: ['thermal','met','thermal & met','Unknown']
+            values_labels: ['Thermal','Met','Thermal & Met','Unknown']
         }
     ],
     capacityField: 'circle_value',
-    capacityLabel: '(MW)',
+    capacityLabel: '(Mt)',
 
     // context_layers: [
     //     {
@@ -62,7 +62,7 @@ var config = {
         and designated which column has the link */
     tableHeaders: {
         values: ['project','owner', 'parent', 'capacity', 'production', 'status', 'workforce', 'coalfield', 'country', 'region', 'opening_year', 'closing_year'],
-        labels: ['Project','Owner','Parent','Capacity (MW)', 'Production (MW)', 'Status', 'Workforce', 'Coal Field', 'Country', 'Region','Opening year', 'Closing year'],
+        labels: ['Project','Owner','Parent','Capacity (Mt)', 'Production (Mt)', 'Status', 'Workforce', 'Coal Field', 'Country', 'Region','Opening year', 'Closing year'],
         clickColumns: ['project'],
         rightAlign: ['production','capacity','opening_year, closing_year']
     },
