@@ -1,18 +1,18 @@
 var config = {
-    // csv: 'coal-mine.csv',
+    // csv: 'coal-mine.csv', (Mikel's file)
     csv: 'data.csv',
+
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
         field: 'status',
         values: {
             'operating': 'red',
-            'proposed': 'red',
+            'proposed': 'blue',
             'cancelled': 'green',
             'retired': 'green',
-            'shelved': 'blue',
+            'shelved': 'grey',
             'mothballed': 'grey'
-            // contining
         }
     },
     filters: [
@@ -20,22 +20,22 @@ var config = {
             field: 'status',
             /* values need to be specified for ordering */
             values: ['operating','proposed','cancelled','retired','shelved','mothballed'],
-            // primary: true
+            primary: true
         },
-        // # when I add this in I lose the ability to filter
-        // {
-        //     field: 'mine_type',
-        //     label: 'Mine Type',
-        //     values: ['surface','underground','underground_and_surface','refuse'],
-        //     values_labels: ['Surface','Underground','Underground and Surface','Refuse']
+        {
+            field: 'mine-type',
+            label: 'Mine Type',
+            values: ['surface','underground','underground-and-surface'],
+            values_labels: ['Surface','Underground','Underground & Surface']
 
-        // },
-        // {
-        //     field: 'coal_grade',
-        //     values: ['thermal','met','thermal_and_met','Unknown'],
-        //     /* value_labels must match order/number in values */
-        //     values_labels: ['thermal','met','thermal and met','Unknown']
-        // }
+        },
+        {
+            field: 'coal-grade',
+            label: 'Coal Type',
+            values: ['thermal','met','thermal-and-met','Unknown'],
+            /* value_labels must match order/number in values */
+            values_labels: ['thermal','met','thermal & met','Unknown']
+        }
     ],
     capacityField: 'circle_value',
     capacityLabel: '(MW)',
