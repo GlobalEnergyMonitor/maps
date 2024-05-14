@@ -2,6 +2,18 @@ var config = {
     // csv: 'coal-mine.csv', (Mikel's file)
     csv: 'data.csv',
 
+    colors: {
+        'red': '#c74a48',
+        'light blue greeninfo': '#74add1',
+        'blue': '#5c62cf',
+        'green': '#4c9d4f',
+        'light grey greeninfo': '#ccc',
+        'grey': '#8f8f8e',
+        'dark grey': '#4B4B4B',
+        'orange': '#FF8C00',
+        'yellow': '#f3ff00'
+    },
+
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
@@ -10,8 +22,8 @@ var config = {
             'operating': 'red',
             'proposed': 'blue',
             'cancelled': 'green',
-            'retired': 'green',
-            'shelved': 'grey',
+            'retired': 'orange',
+            'shelved': 'dark grey',
             'mothballed': 'grey'
         }
     },
