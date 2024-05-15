@@ -1,6 +1,7 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
-    csv: 'data.csv',
+    // csv: 'data.csv',
+    csv: 'Global-Hydropower-Tracker-May-2024_2024-05-15.csv',
 
     colors: {
         'red greeninfo': '#c00',
