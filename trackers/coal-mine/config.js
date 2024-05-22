@@ -37,8 +37,8 @@ var config = {
         {
             field: 'mine-type',
             label: 'Mine Type',
-            values: ['surface','underground','underground_and_surface'],
-            values_labels: ['Surface','Underground','Underground & Surface']
+            values: ['surface','underground','underground_and_surface', 'unknown'],
+            values_labels: ['Surface','Underground','Underground & Surface', 'Unknown']
 
         },
         {
@@ -97,10 +97,12 @@ var config = {
         'project': {'display': 'heading'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
+        'capacity': {'label': 'Capacity (Mt)'},
+        'production': {'label': 'Production (Mt)'},
         'workforce': {'label': 'Estimated Workforce'},
         'opening_year': {'label': 'Opening Year'},
         'coalfield': {'display': 'location'},
         'country': {'display': 'location'}
     }, 
-
+    showCapacityTable: false
 }
