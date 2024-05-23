@@ -98,7 +98,7 @@ var config = {
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'capacity': {'label': 'Capacity (Mt)'},
-        'production': {'label': 'Production (Mt)'},
+        'production': { 'label': 'Production (Mt)' },
         'workforce': {'label': 'Estimated Workforce'},
         'opening_year': {'label': 'Opening Year'},
         'coalfield': {'display': 'location'},
