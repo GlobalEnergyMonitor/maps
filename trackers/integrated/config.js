@@ -2,8 +2,8 @@ var config = {
     tiles: [
         // 'https://gem.dev.c10e.org/2024-03-12/{z}/{x}/{y}.pbf'
         // 'https://bucketeer-cf25e1cc-bfe0-4e0f-957c-65e8e9492475.s3.amazonaws.com/maps/integrated-2024-03-14/{z}/{x}/{y}.pbf'
-        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-03-14/{z}/{x}/{y}.pbf'
-
+        // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-03-14/{z}/{x}/{y}.pbf'
+        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-05-23/{z}/{x}/{y}.pbf'
         ],
     tileSourceLayer: 'integrated',
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
