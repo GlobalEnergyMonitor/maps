@@ -30,7 +30,9 @@ Install [csv2geojson](https://github.com/mapbox/csv2geojson) and [tippecanoe](ht
 
 Copy local files to digital ocean spaces recursively and set public
 `aws s3 cp --endpoint-url https://nyc3.digitaloceanspaces.com PATH/TO/DIR/TILES/FROM/TIPPECANOE s3://$BUCKETEER_BUCKET_NAME/NAME_OF_FOLDER_IN_DIGITAL_OCEAN/NAME_OF_SUB_FOLDER_IN_DIGITAL_OCEAN --recursive --acl public-read`
-[Instructions for creating and updating GIPT tiles]([url](https://docs.google.com/document/d/1Lh2GbscAGpM-UKx2UIo2ajHrmII_RWDDiLvGfhMktZg/edit))
+
+
+[Instructions for creating and updating GIPT tiles]([[url](https://docs.google.com/document/d/1Lh2GbscAGpM-UKx2UIo2ajHrmII_RWDDiLvGfhMktZg/edit))])
 
 ## Hosting 
 
