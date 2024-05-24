@@ -14,7 +14,7 @@ var config = {
             'bioenergy': 'blue',
             'coal': 'red',
             'geothermal': 'blue',
-            'hydro': 'blue',
+            'hydropower': 'blue',
             'nuclear': 'blue',
             'oil/gas': 'red',
             'solar': 'green',
@@ -29,13 +29,13 @@ var config = {
     filters: [
         {
             field: 'Type',
-            values: ['coal','oil/gas','nuclear','geothermal','hydro','bioenergy','solar','wind'],
+            values: ['coal','oil/gas','nuclear','geothermal','hydropower','bioenergy','solar','wind'],
             primary: true
         },
         {
             field: 'Status',
             /* values need to be specified for ordering */
-            values: ['operating','construction','pre-construction','permitted','pre-permit','announced','retired','cancelled','shelved','mothballed','inactive']
+            values: ['operating','construction','pre-construction','permitted','pre-permit','announced','retired','cancelled','shelved','mothballed']
         }
     ],
     nameField: 'Plant/project name',
