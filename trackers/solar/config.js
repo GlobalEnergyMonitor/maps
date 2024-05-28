@@ -26,8 +26,6 @@ var config = {
             'shelved': 'blue greeninfo',
             'retired': 'grey greeninfo',
             'cancelled': 'grey greeninfo',
-            'shelved - inferred 2 y': 'blue greeninfo',
-            'cancelled - inferred 4 y': 'grey greeninfo'
 
         }
     },
@@ -39,8 +37,8 @@ var config = {
     filters: [
         {
             field: 'Status',
-            values: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved', 'shelved - inferred 2 y',  'cancelled', 'cancelled - inferred 4 y', 'retired'],
-            values_labels: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved', 'shelved - inferred 2 y',  'cancelled', 'cancelled - inferred 4 y', 'retired'],
+            values: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved', 'cancelled', 'retired'],
+            values_labels: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved',  'cancelled', 'retired'],
             primary: true
         },
         {
