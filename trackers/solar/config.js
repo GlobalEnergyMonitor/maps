@@ -26,8 +26,6 @@ var config = {
             'shelved': 'blue greeninfo',
             'retired': 'grey greeninfo',
             'cancelled': 'grey greeninfo',
-            'shelved - inferred 2 y': 'blue greeninfo',
-            'cancelled - inferred 4 y': 'grey greeninfo'
 
         }
     },
