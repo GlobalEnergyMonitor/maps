@@ -21,7 +21,7 @@
 
 <body>
     <div class="sidebar card secondary m-3 shadow rounded-top-left-1 rounded-bottom-right-1" id="sidebar">
-        <div id="card-body" class="card-body">
+        <div id="card-body" class="card-body pb-0">
             <!-- Arrow by Calvin Goodman from <a href="https://thenounproject.com/browse/icons/term/arrow/" target="_blank" title="Arrow Icons">Noun Project</a> (CC BY 3.0)-->
             <!-- Arrow by Calvin Goodman from <a href="https://thenounproject.com/browse/icons/term/arrow/" target="_blank" title="Arrow Icons">Noun Project</a> (CC BY 3.0)-->
             <img id="collapse-sidebar" src="../../src/img/collapse.svg" />
@@ -29,8 +29,11 @@
             <div class="row">
                 <div class="col-9 h6 font-weight-bold" id="summary"></div><div class="col-3 h5 font-weight-bold text-end" id="total_in_view"></div>
             </div>
-            <form id="filter-form">
+            <form id="filter-form" class="pb-3">
             </form>
+            <div class="row">
+                <div class="col-9 h6 font-weight-bold" id="capacity_summary"></div><div class="col-3 h5 font-weight-bold text-end" id="max_capacity"></div>
+            </div>
         </div>
         <div class="col-12 text-center small" id="all-select">
             <a href="" onclick="selectAllFilter(); return false;">select all</a> | <a href="" onclick="clearAllFilter(); return false;">clear all</a>

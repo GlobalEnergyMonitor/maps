@@ -64,7 +64,7 @@ function loadData() {
     } else {
         $.ajax({
             type: "GET",
-            url: config.csv, 
+            url: config.csv,
             dataType: "text",
             success: function(csvData) {
                 addGeoJSON($.csv.toObjects(csvData));
@@ -124,16 +124,28 @@ function addTiles() {
         });
 
         /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
-        let paint = config.paint;
-        paint['circle-radius'] = 0;
-        map.addLayer({
-            'id': 'assets-minmax',
-            'type': 'circle',
-            'source': 'assets-source',
-            'source-layer': 'integrated',
-            'layout': {},
-            'paint': paint
-        });
+        if (config.lines) {
+            let paint = {'line-width': 0, 'line-color': 'red'};
+            map.addLayer({
+                'id': 'assets-minmax',
+                'type': 'line',
+                'source': 'assets-source',
+                'source-layer': config.tileSourceLayer,
+                'layout': {},
+                'paint': paint
+            });
+        } else {
+            let paint = config.paint;
+            paint['circle-radius'] = 0;
+            map.addLayer({
+                'id': 'assets-minmax',
+                'type': 'circle',
+                'source': 'assets-source',
+                'source-layer': config.tileSourceLayer,
+                'layout': {},
+                'paint': paint
+            });
+        }
         map.on('idle', geoJSONFromTiles);
     });
 }
@@ -287,6 +299,9 @@ function setMinMax() {
             config.minCapacity =  parseFloat(feature.properties[config.capacityField]);
         }       
     });
+
+    $('#max_capacity').text(config.maxCapacity.toString())
+    $('#capacity_summary').html("Maximum " + config.capacityLabel);
 }
 
 /*
@@ -307,7 +322,40 @@ function enableUX() {
 }
 
 function addLayers() {
-    // First build circle layer
+ 
+    if (config.lines) {
+        addLineLayer();
+    } else {
+        addPointLayer();
+    }
+    map.addSource('countries', {
+        'type': 'vector',
+        'url': 'mapbox://mapbox.country-boundaries-v1'
+    });
+    map.addLayer(
+        {
+            'id': 'country-layer',
+            'type': 'fill',
+            'source': 'countries',
+            'source-layer': 'country_boundaries',
+            'layout': {},
+            'paint': {
+                'fill-color': 'hsla(219, 0%, 100%, 0%)'
+            }
+        }
+    );
+
+    map.addLayer({
+        id: 'satellite',
+        source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
+        type: "raster",
+        layout: { 'visibility': 'none' }
+    }, 'assets');
+
+    addEvents();
+}
+function addPointLayer() {
+     // First build circle layer
     //  build style json for circle-color based on config.color
     let paint = config.paint;
     if ('color' in config) {
@@ -403,45 +451,71 @@ function addLayers() {
             }
         }
     );
+}
+function addLineLayer() {
+    let paint = {};
+    let layout =  {'line-cap': 'round'};
+    if ('color' in config) {
+        paint["line-color"] = [
+            "match",
+            ["get", config.color.field],
+            ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
+            "#000000"
+        ];
+    }
 
-    map.addSource('countries', {
-        'type': 'vector',
-        'url': 'mapbox://mapbox.country-boundaries-v1'
-    });
-    map.addLayer(
-        {
-            'id': 'country-layer',
-            'type': 'fill',
-            'source': 'countries',
-            'source-layer': 'country_boundaries',
-            'layout': {},
-            'paint': {
-                'fill-color': 'hsla(219, 0%, 100%, 0%)'
-            }
-        }
-    );
+    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
+    paint['line-width'] = [
+        "interpolate", ["linear"], ["zoom"],
+        1, ["interpolate", interpolateExpression,
+            ["get", config.capacityField],
+            config.minCapacity, config.minLineWidth,
+            config.maxCapacity, config.maxLineWidth
+        ],
+        10, ["interpolate", interpolateExpression,
+            ["get", config.capacityField],
+            config.minCapacity, config.highZoomMinLineWidth,
+            config.maxCapacity, config.highZoomMaxLineWidth
+        ],
+
+    ];
 
     map.addLayer({
-        id: 'satellite',
-        source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
-        type: "raster",
-        layout: { 'visibility': 'none' }
-    }, 'assets');
+        'id': 'assets',
+        'type': 'line',
+        'source': 'assets-source',
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': layout,
+        'paint': paint
+    }); 
 
-    addEvents();
+
+    paint["line-color"] = '#FFEA00';
+    map.addLayer(
+        {
+            'id': 'assets-highlighted',
+            'type': 'line',
+            'source': 'assets-source',
+            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+            'layout': layout,
+            'paint': paint,
+            'filter': ['in', (config.linkField), '']
+        }
+    );
 }
 
 function addEvents() {
-    map.on('click', 'assets', (e) => {
-        const bbox = [ [e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]];
-        const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: ['assets']}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]))
-        ;
+    map.on('click', (e) => {
+        const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea]];
+        const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: ['assets']}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
 
+        if (selectedFeatures.length == 0) return;
+        
         const links = selectedFeatures.map(
             (feature) => feature.properties[config.linkField]
         );
 
-        setHighlightFilter(...links);
+        setHighlightFilter(links);
 
         if (selectedFeatures.length == 1) {
             config.selectModal = '';
@@ -464,7 +538,7 @@ function addEvents() {
     });
     map.on('mouseenter', 'assets', (e) => {
         map.getCanvas().style.cursor = 'pointer';
-        const coordinates = e.features[0].geometry.coordinates.slice();
+        const coordinates = (config.lines ? e.lngLat : e.features[0].geometry.coordinates.slice());
         const description = e.features[0].properties[config.nameField];
         popup.setLngLat(coordinates).setHTML(description).addTo(map);
     });
@@ -505,11 +579,7 @@ function buildFilters() {
     config.filters.forEach(filter => {
         if (config.color.field != filter.field) {
             $('#filter-form').append('<hr /><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
-        // } else {
-        //    $('#filter-form').append('<hr class="glyph-down" />');
         }
-        // console.log(filters)
-
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
             let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
@@ -559,10 +629,11 @@ function countFilteredFeatures() {
         });
     });
 
-    let ref = "config.processedGeoJSON.features"
-    //if (config.tiles) {
-    //    ref = "map.queryRenderedFeatures({layers: ['assets']})"
-    //} 
+    config.maxFilteredCapacity = 0;
+    config.minFilteredCapacity = 1000000;
+
+    let ref = "config.processedGeoJSON.features";
+
     eval(ref).forEach(feature => {
         if ('summary_count' in feature.properties) {
             let summary_count = JSON.parse(feature.properties.summary_count);
@@ -580,6 +651,13 @@ function countFilteredFeatures() {
                 });
             });
         }
+
+        if (parseFloat(feature.properties[config.capacityField]) > config.maxFilteredCapacity) {
+            config.maxFilteredCapacity =  parseFloat(feature.properties[config.capacityField]);
+        }
+        if (parseFloat(feature.properties[config.capacityField]) < config.minFilteredCapacity) {
+            config.minFilteredCapacity =  parseFloat(feature.properties[config.capacityField]);
+        }       
     });
 }
 function filterData() {
@@ -623,7 +701,9 @@ function filterTiles() {
         config.filterExpression.unshift("all");
     }
     map.setFilter('assets', config.filterExpression);
-    map.setFilter('assets-labels', config.filterExpression);
+    if (! config.lines) {
+        map.setFilter('assets-labels', config.filterExpression);
+    }
 
     if ($('#table-container').is(':visible')) {
         filterGeoJSON();
@@ -638,9 +718,7 @@ function filterGeoJSON() {
     let filterStatus = {};
     config.filters.forEach(filter => {
         filterStatus[filter.field] = [];
-        
     });
-    
     $('.form-check-input').each(function () {
         if (this.checked) {
             let [field, ...value] = this.id.split('_');
@@ -680,7 +758,7 @@ function filterGeoJSON() {
 }
 function updateSummary() {
     $('#total_in_view').text(config.totalCount.toString())
-    $('#summary').text("Total " + config.assetFullLabel + " selected");
+    $('#summary').html("Total " + config.assetFullLabel + " selected");
     countFilteredFeatures();
     config.filters.forEach((filter) => {
         for (let i=0; i<filter.values.length; i++) {
@@ -688,6 +766,9 @@ function updateSummary() {
             $('#' + count_id).text(config.filterCount[filter.field][filter.values[i]]);
         }
     });
+
+    $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString())
+    $('#capacity_summary').html("Maximum " + config.capacityLabel);
 }
 
 /*
@@ -771,20 +852,18 @@ function enableModal() {
     })
 }
 function setHighlightFilter(links) {
+    if (! Array.isArray(links)) links = [links];
     let filter;
+    let highlightExpression = [
+        'in',
+        ["get", config.linkField],
+        ["literal", links]
+    ];
     if (config.filterExpression != null) {
         filter = JSON.parse(JSON.stringify(config.filterExpression));
-        filter.push([
-            '==',
-            ["get", config.linkField],
-            ["literal", links]
-        ]);
+        filter.push(highlightExpression);
     } else {
-        filter = [
-            '==',
-            ["get", config.linkField],
-            ["literal", links]
-        ];
+        filter = highlightExpression;
     }
     map.setFilter('assets-highlighted',filter);
 }
@@ -888,7 +967,7 @@ function displayDetails(features) {
             '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
             '<span class="detail-location">' + location_text + '</span><br/>' +
             '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.linkField] + '" target="_blank">MORE INFO</a></span>' +
-            (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + link + '\')">ALL PHASES</a></span>' : '') +
+            (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
         '</div>' +
         '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text +
             (config.showCapacityTable ?
@@ -904,54 +983,20 @@ function displayDetails(features) {
 }
 function buildSatImage(features) {
     let location_arg = '';
-    let bbox = [];
-    let coords = [];
-    let geojson_arg = '';
-    features.forEach((feature) => {
-        var feature_lng = Number(feature.geometry.coordinates[0]);
-        var feature_lat = Number(feature.geometry.coordinates[1]);
-        if (bbox.length == 0) {
-            bbox[0] = feature_lng;
-            bbox[1] = feature_lat;
-            bbox[2] = feature_lng;
-            bbox[3] = feature_lat;
-        } else {
-            if (feature_lng < bbox[0]) bbox[0] = feature_lng;
-            if (feature_lat < bbox[1]) bbox[1] = feature_lat;
-            if (feature_lng > bbox[2]) bbox[2] = feature_lng;
-            if (feature_lat > bbox[3]) bbox[3] = feature_lat;
-        }
-        coords.push([feature_lng,feature_lat]);
-    });
+    let bbox = geoJSONBBox({'type': 'FeatureCollection', features: features });
+
     if (bbox[0] == bbox[2] && bbox[1] == bbox[3]) {
         location_arg = bbox[0].toString() + ',' + bbox[1].toString() + ',' + config.img_detail_zoom.toString();
     } else {
         location_arg = '[' + bbox.join(',') + ']';
-       // geojson_arg = 'geojson(' + encodeURIComponent(JSON.stringify({'type': 'Feature','properties':{},'geometry': {'type': 'MultiPoint', 'coordinates': coords}})) + ')/';
     }
 
-    return 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + geojson_arg + location_arg + '/350x350?attribution=false&logo=false&access_token=' + config.accessToken;
+    return 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + location_arg + '/350x350?attribution=false&logo=false&access_token=' + config.accessToken;
 }
 function showAllPhases(link) {
     config.modal.hide();
     setHighlightFilter(link);
-    var bbox = [];
-    config.linked[link].forEach((feature) => {
-        var feature_lng = Number(feature.geometry.coordinates[0]);
-        var feature_lat = Number(feature.geometry.coordinates[1]);
-        if (bbox.length == 0) {
-            bbox[0] = feature_lng;
-            bbox[1] = feature_lat;
-            bbox[2] = feature_lng;
-            bbox[3] = feature_lat;
-        } else {
-            if (feature_lng < bbox[0]) bbox[0] = feature_lng;
-            if (feature_lat < bbox[1]) bbox[1] = feature_lat;
-            if (feature_lng > bbox[2]) bbox[2] = feature_lng;
-            if (feature_lat > bbox[3]) bbox[3] = feature_lat;
-        }
-    });
-
+    var bbox = geoJSONBBox({'type': 'FeatureCollection', features: config.linked[link] });
     map.flyTo({center: [(bbox[0]+bbox[2])/2,(bbox[1]+bbox[3])/2], zoom: config.phasesZoom});
 }
 function showSelectModal() {
@@ -1096,3 +1141,50 @@ function debounce(func, wait, immediate) {
         if (callNow) func.apply(context, args);
     };
 };
+
+/* from https://github.com/geosquare/geojson-bbox */
+function geoJSONBBox (gj) {
+    var coords, bbox;
+    if (!gj.hasOwnProperty('type')) return;
+    coords = getCoordinatesDump(gj);
+    bbox = [ Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY,
+        Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY,];
+    return coords.reduce(function(prev,coord) {
+      return [
+        Math.min(coord[0], prev[0]),
+        Math.min(coord[1], prev[1]),
+        Math.max(coord[0], prev[2]),
+        Math.max(coord[1], prev[3])
+      ];
+    }, bbox);
+  };
+  
+function getCoordinatesDump(gj) {
+    var coords;
+    if (gj.type == 'Point') {
+      coords = [gj.coordinates];
+    } else if (gj.type == 'LineString' || gj.type == 'MultiPoint') {
+      coords = gj.coordinates;
+    } else if (gj.type == 'Polygon' || gj.type == 'MultiLineString') {
+      coords = gj.coordinates.reduce(function(dump,part) {
+        return dump.concat(part);
+      }, []);
+    } else if (gj.type == 'MultiPolygon') {
+      coords = gj.coordinates.reduce(function(dump,poly) {
+        return dump.concat(poly.reduce(function(points,part) {
+          return points.concat(part);
+        },[]));
+      },[]);
+    } else if (gj.type == 'Feature') {
+      coords =  getCoordinatesDump(gj.geometry);
+    } else if (gj.type == 'GeometryCollection') {
+      coords = gj.geometries.reduce(function(dump,g) {
+        return dump.concat(getCoordinatesDump(g));
+      },[]);
+    } else if (gj.type == 'FeatureCollection') {
+      coords = gj.features.reduce(function(dump,f) {
+        return dump.concat(getCoordinatesDump(f));
+      },[]);
+    }
+    return coords;
+}

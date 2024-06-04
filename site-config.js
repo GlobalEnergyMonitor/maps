@@ -27,11 +27,15 @@ var site_config = {
     /* radius associated with minimum/maximum value on map */
     minRadius: 2,
     maxRadius: 10,
+    minLineWidth: 1,
+    maxLineWidth: 10,
 
     /* radius to increase min/max to under high zoom */
     highZoomMinRadius: 4,
     highZoomMaxRadius: 32,
-
+    highZoomMinLineWidth: 4,
+    highZoomMaxLineWidth: 32,
+    
     /* define column names to pull data from */
     linkField: 'url',
     countryField: 'country',
@@ -52,5 +56,7 @@ var site_config = {
     /* initial load zoom multiplier */
     zoomFactor: 1.25,
 
-    countryFile: '../../src/countries.js'
+    countryFile: '../../src/countries.js', 
+
+    hitArea: 5
 };
