@@ -20,7 +20,7 @@ const map = new mapboxgl.Map({
     zoom: determineZoom(),
     center: [0, 0],
     // maxBounds: [[-180,-85],[180,85]],
-    projection: 'naturalEarth'
+    projection: 'globe'
 });
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
