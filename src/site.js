@@ -105,6 +105,7 @@ function addGeoJSON(jsonData) {
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
+    findLinkedAssets();
     map.on('load', function () {
         map.addSource('assets-source', {
             'type': 'geojson',
@@ -147,6 +148,7 @@ function geoJSONFromTiles() {
     setMinMax();
     map.removeLayer('assets-minmax');
     
+    findLinkedAssets();
     addLayers();
     map.on('idle', enableUX);
 }
@@ -294,8 +296,6 @@ function setMinMax() {
 */
 function enableUX() {
     map.off('idle', enableUX);
-
-    findLinkedAssets();
 
     buildFilters();
     updateSummary();
