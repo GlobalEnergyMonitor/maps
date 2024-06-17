@@ -362,12 +362,12 @@ function addPointLayer() {
     paint['circle-radius'] = [
         "interpolate", ["linear"], ["zoom"],
         1, ["interpolate", interpolateExpression,
-            ["get", config.capacityField],
+            ["to-number",["get", config.capacityField]],
             config.minCapacity, config.minRadius,
             config.maxCapacity, config.maxRadius
         ],
         10, ["interpolate", interpolateExpression,
-            ["get", config.capacityField],
+            ["to-number",["get", config.capacityField]],
             config.minCapacity, config.highZoomMinRadius,
             config.maxCapacity, config.highZoomMaxRadius
         ],
@@ -464,12 +464,12 @@ function addLineLayer() {
     paint['line-width'] = [
         "interpolate", ["linear"], ["zoom"],
         1, ["interpolate", interpolateExpression,
-            ["get", config.capacityField],
+            ["to-number",["get", config.capacityField]],
             config.minCapacity, config.minLineWidth,
             config.maxCapacity, config.maxLineWidth
         ],
         10, ["interpolate", interpolateExpression,
-            ["get", config.capacityField],
+            ["to-number",["get", config.capacityField]],
             config.minCapacity, config.highZoomMinLineWidth,
             config.maxCapacity, config.highZoomMaxLineWidth
         ],
