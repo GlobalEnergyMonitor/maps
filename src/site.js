@@ -19,8 +19,7 @@ const map = new mapboxgl.Map({
     style: config.mapStyle,
     zoom: determineZoom(),
     center: [0, 0],
-    // maxBounds: [[-180,-85],[180,85]],
-    projection: 'globe'
+    projection: 'naturalEarth'
 });
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
@@ -105,6 +104,7 @@ function addGeoJSON(jsonData) {
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
+    findLinkedAssets();
     map.on('load', function () {
         map.addSource('assets-source', {
             'type': 'geojson',
@@ -124,41 +124,36 @@ function addTiles() {
         });
 
         /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
-        if (config.lines) {
-            let paint = {'line-width': 0, 'line-color': 'red'};
+        config.geometries.forEach(geometry => {
             map.addLayer({
-                'id': 'assets-minmax',
-                'type': 'line',
+                'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
+                'type': geometry == "LineString" ? 'line' : 'circle',
                 'source': 'assets-source',
                 'source-layer': config.tileSourceLayer,
                 'layout': {},
-                'paint': paint
+                'filter': ["==",["geometry-type"],geometry],
+                'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
             });
-        } else {
-            let paint = config.paint;
-            paint['circle-radius'] = 0;
-            map.addLayer({
-                'id': 'assets-minmax',
-                'type': 'circle',
-                'source': 'assets-source',
-                'source-layer': config.tileSourceLayer,
-                'layout': {},
-                'paint': paint
-            });
-        }
+        });
+
         map.on('idle', geoJSONFromTiles);
     });
 }
 function geoJSONFromTiles() {
     map.off('idle', geoJSONFromTiles);
+    let layers = [];
+    if (config.geometries.includes('Point')) layers.push('assets-minmax-point');
+    if (config.geometries.includes('LineString')) layers.push('assets-minmax-line');
     config.geojson = {
         "type": "FeatureCollection", 
-        "features": map.queryRenderedFeatures({layers: ['assets-minmax']}) 
+        "features": map.queryRenderedFeatures({layers: layers})  
     }
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
-    map.removeLayer('assets-minmax');
-    
+    layers.forEach(layer => {
+        map.removeLayer(layer);
+    });
+    findLinkedAssets();
     addLayers();
     map.on('idle', enableUX);
 }
@@ -180,6 +175,7 @@ function findLinkedAssets() {
     });
 
     // Next find linked assets that share location. 
+    // TODO: skip this for lines, only for points???
     let grouped = {};
     config.processedGeoJSON.features.forEach((feature) => {
         if ('geometry' in feature && feature.geometry != null) {
@@ -210,22 +206,24 @@ function findLinkedAssets() {
 
         // Build summary count of capacity across all linked assets
         //  and generate icon based on that label if more than one status
-        let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [config.color.values[k]]: 0 })));
-        features.forEach((feature) => {  
-            icon[config.color.values[feature.properties[config.color.field]]] += Number(feature.properties[config.capacityField]);
-        });
-        if (Object.values(icon).filter(v => v != 0).length > 1) {
-            // normalize values to 10
-            let current = 0;
-            let total = Object.values(icon).reduce((previous, current) => {
-                return previous + Number(current);
-            }, 0);
-            icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(10 * (icon[k] / total)) })));
-            let string_icon = JSON.stringify(icon)
-            features[0].properties['icon'] = string_icon;
-            if (! config.icons.includes(string_icon)) {
-                generateIcon(icon);
-                config.icons.push(string_icon);
+        if (features[0].geometry.type == 'Point') {
+            let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [config.color.values[k]]: 0 })));
+            features.forEach((feature) => {  
+                icon[config.color.values[feature.properties[config.color.field]]] += Number(feature.properties[config.capacityField]);
+            });
+            if (Object.values(icon).filter(v => v != 0).length > 1) {
+                // normalize values to 10
+                let current = 0;
+                let total = Object.values(icon).reduce((previous, current) => {
+                    return previous + Number(current);
+                }, 0);
+                icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(10 * (icon[k] / total)) })));
+                let string_icon = JSON.stringify(icon)
+                features[0].properties['icon'] = string_icon;
+                if (! config.icons.includes(string_icon)) {
+                    generateIcon(icon);
+                    config.icons.push(string_icon);
+                }
             }
         }
 
@@ -287,11 +285,7 @@ function generateIcon(icon) {
 function setMinMax() {
     config.maxCapacity = 0;
     config.minCapacity = 1000000;
-    let ref = "config.processedGeoJSON.features"
-    if (config.tiles) {
-        ref = "map.queryRenderedFeatures({layers: ['assets-minmax']})"
-    } 
-    eval(ref).forEach((feature) => {
+    config.processedGeoJSON.features.forEach((feature) => {
         if (parseFloat(feature.properties[config.capacityField]) > config.maxCapacity) {
             config.maxCapacity =  parseFloat(feature.properties[config.capacityField]);
         }
@@ -310,8 +304,6 @@ function setMinMax() {
 function enableUX() {
     map.off('idle', enableUX);
 
-    findLinkedAssets();
-
     buildFilters();
     updateSummary();
     
@@ -323,11 +315,10 @@ function enableUX() {
 
 function addLayers() {
  
-    if (config.lines) {
-        addLineLayer();
-    } else {
-        addPointLayer();
-    }
+    config.layers = [];
+    if (config.geometries.includes('LineString')) addLineLayer();
+    if (config.geometries.includes('Point')) addPointLayer();
+
     map.addSource('countries', {
         'type': 'vector',
         'url': 'mapbox://mapbox.country-boundaries-v1'
@@ -350,7 +341,7 @@ function addLayers() {
         source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
         type: "raster",
         layout: { 'visibility': 'none' }
-    }, 'assets');
+    });
 
     addEvents();
 }
@@ -385,19 +376,22 @@ function addPointLayer() {
 
     
     map.addLayer({
-        'id': 'assets',
+        'id': 'assets-points',
         'type': 'circle',
         'source': 'assets-source',
+        'filter': ["==",["geometry-type"],'Point'],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': {},
         'paint': paint
     });
+    config.layers.push('assets-points');
 
     // Add layer with proportional icons
     map.addLayer({
-        'id': 'assets-symbol',
+        'id': 'assets-symbol', 
         'type': 'symbol',
         'source': 'assets-source',
+        'filter': ["==",["geometry-type"],'Point'],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': {
             'icon-image': ["get", "icon"],
@@ -421,9 +415,10 @@ function addPointLayer() {
     paint["circle-color"] = '#FFEA00';
     map.addLayer(
         {
-            'id': 'assets-highlighted',
+            'id': 'assets-points-highlighted',
             'type': 'circle',
             'source': 'assets-source',
+            'filter': ["==",["geometry-type"],'Point'],
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
             'layout': {},
             'paint': paint,
@@ -435,6 +430,7 @@ function addPointLayer() {
             'id': 'assets-labels',
             'type': 'symbol',
             'source': 'assets-source',
+            'filter': ["==",["geometry-type"],'Point'],
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
             'minzoom': 8,
             'layout': {
@@ -481,21 +477,23 @@ function addLineLayer() {
     ];
 
     map.addLayer({
-        'id': 'assets',
+        'id': 'assets-lines', //assets-lines
         'type': 'line',
         'source': 'assets-source',
+        'filter': ["==",["geometry-type"],'LineString'],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
         'layout': layout,
         'paint': paint
     }); 
-
+    config.layers.push('assets-lines');
 
     paint["line-color"] = '#FFEA00';
     map.addLayer(
         {
-            'id': 'assets-highlighted',
+            'id': 'assets-lines-highlighted', //assets-lines-highlighted
             'type': 'line',
             'source': 'assets-source',
+            'filter': ["==",["geometry-type"],'LineString'],
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
             'layout': layout,
             'paint': paint,
@@ -507,7 +505,7 @@ function addLineLayer() {
 function addEvents() {
     map.on('click', (e) => {
         const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea]];
-        const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: ['assets']}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
+        const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
 
         if (selectedFeatures.length == 0) return;
         
@@ -536,16 +534,20 @@ function addEvents() {
 
         config.modal.show();
     });
-    map.on('mouseenter', 'assets', (e) => {
-        map.getCanvas().style.cursor = 'pointer';
-        const coordinates = (config.lines ? e.lngLat : e.features[0].geometry.coordinates.slice());
-        const description = e.features[0].properties[config.nameField];
-        popup.setLngLat(coordinates).setHTML(description).addTo(map);
+    config.layers.forEach(layer => {
+        map.on('mouseenter', layer, (e) => {
+            map.getCanvas().style.cursor = 'pointer';
+            const coordinates = (map.getLayer(layer).type == "line" ? e.lngLat : e.features[0].geometry.coordinates.slice());
+            const description = e.features[0].properties[config.nameField];
+            popup.setLngLat(coordinates).setHTML(description).addTo(map);
+        });
     });
-    map.on('mouseleave', 'assets', () => {
-        map.getCanvas().style.cursor = '';
-        popup.remove();
-    }); 
+    config.layers.forEach(layer => {
+        map.on('mouseleave', layer, () => {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        }); 
+    });
     $('#basemap-toggle').on("click", function() {
         if (config.baseMap == "Streets") {
            // $('#basemap-toggle').text("Streets");
@@ -690,7 +692,13 @@ function filterTiles() {
         config.filterExpression.push(searchExpression);
     }
     if (config.selectedCountries.length > 0) {
-        config.filterExpression.push(['in', ['get', config.countryField], ['literal', config.selectedCountries]]);
+        //update to handle so doesn't catch when countries are substrings of each other (Niger/Nigeria)
+        //easy solve could be to add "," at end
+        let countryExpression = ['any'];
+        config.selectedCountries.forEach(country => {
+            countryExpression.push(['in', ['string', country], ['string',['get', config.countryField]]]);
+        })
+        config.filterExpression.push(countryExpression);
     }
     for (let field in filterStatus) {
         config.filterExpression.push(['in', ['get', field], ['literal', filterStatus[field]]]);
@@ -700,8 +708,14 @@ function filterTiles() {
     } else {
         config.filterExpression.unshift("all");
     }
-    map.setFilter('assets', config.filterExpression);
-    if (! config.lines) {
+    config.layers.forEach(layer => {
+        config.filterExpression.push(["==",["geometry-type"],
+            map.getLayer(layer).type == "line" ? "LineString" : "Point"
+        ]);
+        map.setFilter(layer, config.filterExpression);
+        config.filterExpression.pop();
+    });
+    if (config.geometries.includes('Point')) {
         map.setFilter('assets-labels', config.filterExpression);
     }
 
@@ -740,7 +754,10 @@ function filterGeoJSON() {
             }).length == 0) include = false;
         }
         if (config.selectedCountries.length > 0) {
-            if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
+            //update to handle multiple countries selected, and handle when countries are substrings of each other
+            if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(', ').includes(value)).length == 0) include = false;
+            //if (! (feature.properties[config.countryField].includes( config.selectedCountries.join(',')))) include = false;
+            //if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
         }
         if (include) {
             filteredGeoJSON.features.push(feature);
@@ -752,7 +769,7 @@ function filterGeoJSON() {
     updateTable();
     updateSummary();
 
-    if (! config.tiles) {
+    if (! config.tiles) { //maybe just use map filter for points and lines, no matter if tiles of geojson
         map.getSource('assets-source').setData(config.processedGeoJSON);
     }
 }
@@ -863,9 +880,14 @@ function setHighlightFilter(links) {
         filter = JSON.parse(JSON.stringify(config.filterExpression));
         filter.push(highlightExpression);
     } else {
-        filter = highlightExpression;
+        filter = ['all', highlightExpression];
     }
-    map.setFilter('assets-highlighted',filter);
+    config.layers.forEach(layer => {
+        filter.push(["==",["geometry-type"],
+            map.getLayer(layer).type == "line" ? "LineString" : "Point"
+        ]);
+        map.setFilter(layer + '-highlighted',filter);
+    });
 }
 
 function displayDetails(features) {

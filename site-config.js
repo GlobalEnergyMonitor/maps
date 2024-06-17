@@ -58,5 +58,7 @@ var site_config = {
 
     countryFile: '../../src/countries.js', 
 
-    hitArea: 5
+    hitArea: 5, 
+
+    geometries: ['Point']
 };
