@@ -4,7 +4,9 @@ var site_config = {
 
     /* Mapbox Base Map Style */
     mapStyle: 'mapbox://styles/gemteam1/cls98k6sf02li01p2fqtu67lc',
-    //'mapbox://styles/gemteam1/clmi71nwz03zm01qr7l04gcu2',
+
+    center: [0, 0],
+    projection: 'naturalEarth',
 
     /* Zoom level that asset detail cards open at; this is a good one to override in tracker config,
      depending on scale of facilities */
@@ -20,10 +22,17 @@ var site_config = {
     },
 
     /* Mapbox styling applied to all trackers */
-    paint: {
+    pointPaint: {
         'circle-opacity':.85
     },
-
+    linePaint: {
+        'line-opacity':.85
+    },
+    lineLayout: {
+        'line-cap': 'round', 
+        'line-join': 'round'
+    },
+    
     /* radius associated with minimum/maximum value on map */
     minRadius: 2,
     maxRadius: 10,
@@ -48,7 +57,7 @@ var site_config = {
 
     /* by default, no all phases link; override in tracker config where appropriate */
     showAllPhases: false,
-    showCapacityTable: true,
+    showMaxCapacity: true,
 
     /* zoom level to set map when viewing all phases */
     phasesZoom: 8,
@@ -57,6 +66,8 @@ var site_config = {
     zoomFactor: 1.25,
 
     countryFile: '../../src/countries.js', 
+    allCountrySelect: true,
+    multiCountry: false,
 
     hitArea: 5, 
 

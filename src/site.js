@@ -18,8 +18,8 @@ const map = new mapboxgl.Map({
     container: 'map',
     style: config.mapStyle,
     zoom: determineZoom(),
-    center: [0, 0],
-    projection: 'naturalEarth'
+    center: config.center,
+    projection: config.projection
 });
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
@@ -251,7 +251,7 @@ function generateIcon(icon) {
 
     // get the canvas context
     let context = canvas.getContext('2d');
-    context.globalAlpha = config.paint["circle-opacity"];
+    context.globalAlpha = config.pointPaint["circle-opacity"];
 
     // calculate the coordinates of the center of the circle
     let centerX = canvas.width / 2;
@@ -293,9 +293,6 @@ function setMinMax() {
             config.minCapacity =  parseFloat(feature.properties[config.capacityField]);
         }       
     });
-
-    $('#max_capacity').text(config.maxCapacity.toString())
-    $('#capacity_summary').html("Maximum " + config.capacityLabel);
 }
 
 /*
@@ -348,7 +345,7 @@ function addLayers() {
 function addPointLayer() {
      // First build circle layer
     //  build style json for circle-color based on config.color
-    let paint = config.paint;
+    let paint = config.pointPaint;
     if ('color' in config) {
         paint["circle-color"] = [
             "match",
@@ -411,7 +408,7 @@ function addPointLayer() {
     });
 
     // Add highlight layer
-    paint = config.paint;
+    paint = config.pointPaint;
     paint["circle-color"] = '#FFEA00';
     map.addLayer(
         {
@@ -449,8 +446,7 @@ function addPointLayer() {
     );
 }
 function addLineLayer() {
-    let paint = {};
-    let layout =  {'line-cap': 'round'};
+    let paint = config.linePaint;
     if ('color' in config) {
         paint["line-color"] = [
             "match",
@@ -482,7 +478,7 @@ function addLineLayer() {
         'source': 'assets-source',
         'filter': ["==",["geometry-type"],'LineString'],
         ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-        'layout': layout,
+        'layout': config.lineLayout,
         'paint': paint
     }); 
     config.layers.push('assets-lines');
@@ -495,7 +491,7 @@ function addLineLayer() {
             'source': 'assets-source',
             'filter': ["==",["geometry-type"],'LineString'],
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-            'layout': layout,
+            'layout': config.lineLayout,
             'paint': paint,
             'filter': ['in', (config.linkField), '']
         }
@@ -696,7 +692,12 @@ function filterTiles() {
         //easy solve could be to add "," at end
         let countryExpression = ['any'];
         config.selectedCountries.forEach(country => {
-            countryExpression.push(['in', ['string', country], ['string',['get', config.countryField]]]);
+            if (config.multiCountry) {
+                country = country + ',';
+                countryExpression.push(['in', ['string', country], ['string',['get', config.countryField]]]);
+            } else {
+                countryExpression.push(['==', ['string', country], ['string',['get', config.countryField]]]);
+            }
         })
         config.filterExpression.push(countryExpression);
     }
@@ -784,8 +785,10 @@ function updateSummary() {
         }
     });
 
-    $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString())
-    $('#capacity_summary').html("Maximum " + config.capacityLabel);
+    if (config.showMaxCapacity) {
+        $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString())
+        $('#capacity_summary').html("Maximum " + config.capacityLabel);
+    }
 }
 
 /*
@@ -960,26 +963,47 @@ function displayDetails(features) {
         }
     });
 
-    let filterIndex = 0;
-    for (const[index, filter] of config.filters.entries()) {
-        if (filter.field == config.statusField) {
-            filterIndex = index;
+    let assetLabel = typeof config.assetLabel === 'string'
+        ? config.assetLabel 
+        : config.assetLabel.values[features[0].properties[config.assetLabel.field]];
+
+    let capacityLabel = typeof config.capacityLabel === 'string'
+        ? config.capacityLabel 
+        : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];
+
+    // Build capacity summary
+    if (features.length > 1) {   
+       let filterIndex = 0;
+        for (const[index, filter] of config.filters.entries()) {
+            if (filter.field == config.statusField) {
+                filterIndex = index;
+            }
         }
+        let capacity = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
+        let count = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
+
+        features.forEach((feature) => {
+            capacity[feature.properties[config.statusField]] += feature.properties[config.capacityField];
+            count[feature.properties[config.statusField]]++;
+        });
+
+        let detail_capacity = '';
+        Object.keys(count).forEach((k) => {
+            if (count[k] != 0) {
+                detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+            }
+        });
+        detail_text += '<div>' + 
+            '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
+            '<div class="row" style="height: 2px"><hr/></div>' +
+            '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
+            detail_capacity +
+            '</div>';
+    } else {
+        detail_text += '<span class="fw-bold text-capitalize">' + config.statusField + '</span>: ' +
+            '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span>' + features[0].properties[config.statusField] + '<br/>';
+        detail_text += '<span class="fw-bold text-capitalize">' + capacityLabel + '</span>: ' + features[0].properties[config.capacityField];
     }
-    let capacity = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
-    let count = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
-
-    features.forEach((feature) => {
-        capacity[feature.properties[config.statusField]] += feature.properties[config.capacityField];
-        count[feature.properties[config.statusField]]++;
-    });
-
-    let detail_capacity = '';
-    Object.keys(count).forEach((k) => {
-        if (count[k] != 0) {
-           detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
-        }
-    });
 
     //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
     //Arrow Back by Nursila from <a href="https://thenounproject.com/browse/icons/term/arrow-back/" target="_blank" title="Arrow Back Icons">Noun Project</a> (CC BY 3.0)
@@ -987,19 +1011,12 @@ function displayDetails(features) {
         '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(features) + ')">' +
             (config.selectModal != '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
             '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
-            '<span class="detail-location">' + location_text + '</span><br/>' +
+            '<span class="detail-location">' + removeLastComma(location_text) + '</span><br/>' +
             '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.linkField] + '" target="_blank">MORE INFO</a></span>' +
             (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
         '</div>' +
-        '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text +
-            (config.showCapacityTable ?
-            '<div>' + 
-                '<div class="row pt-2 justify-content-md-center">Total ' + config.assetLabel + ': ' + features.length + '</div>' +
-                '<div class="row" style="height: 2px"><hr/></div>' +
-                '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + config.capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + config.assetLabel + '</div></div>' +
-                detail_capacity +
-            '</div>' : '') +
-        '</div></div>');
+        '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +
+        '</div>');
 
     setHighlightFilter(features[0].properties[config.linkField]);
 }
@@ -1078,16 +1095,21 @@ function enableCountrySelect() {
     });
 }
 function buildCountrySelect() {
-    Object.keys(config.countries).forEach((continent) => {
-        let dropdown_html = `<li><hr class="dropdown-divider"></li><li><a class="country-dropdown-item dropdown-item h4" data-countries="${config.countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
+    if (config.allCountrySelect) $('#country_select').append('<li><a class="country-dropdown-item dropdown-item h4" data-countries="" data-countryText="" href="#">all</a></li>');
+    Object.keys(config.countries).forEach((continent, continent_idx) => {
+        let dropdown_html = '';
+        dropdown_html += `<li><a class="country-dropdown-item dropdown-item h4" data-countries="${config.countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
         dropdown_html += '<ul class="submenu dropdown-menu">';
-        config.countries[continent].forEach((country, idx) => {
+        config.countries[continent].forEach((country, country_idx) => {
             dropdown_html += `<li><a class="h5 country-dropdown-item dropdown-item" data-countries="${country}" data-countryText="${country}" href="#">${country}</a></li>`;
-            if (idx != config.countries[continent].length - 1) {
+            if (country_idx != config.countries[continent].length - 1) {
                 dropdown_html += '<li><hr class="dropdown-divider"></li>';
             }
         });
         dropdown_html += "</ul></li>";
+        if (continent_idx != Object.keys(config.countries).length - 1) {
+            dropdown_html += '<li><hr class="dropdown-divider"></li>';
+        }
         $('#country_select').append(dropdown_html);
     });
 
@@ -1209,4 +1231,11 @@ function getCoordinatesDump(gj) {
       },[]);
     }
     return coords;
+}
+
+function removeLastComma(str) {
+    if (str.charAt(str.length - 1) === ',') {
+        str = str.slice(0, -1);
+    }
+    return str;
 }
