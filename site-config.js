@@ -47,6 +47,7 @@ var site_config = {
     
     /* define column names to pull data from */
     linkField: 'url',
+    urlField: 'url',
     countryField: 'country',
     statusField: 'status',
     capacityField: 'capacity',

@@ -283,14 +283,25 @@ function generateIcon(icon) {
     });
 }
 function setMinMax() {
-    config.maxCapacity = 0;
-    config.minCapacity = 1000000;
+    config.maxPointCapacity = 0;
+    config.minPointCapacity = 1000000;
+    config.maxLineCapacity = 0;
+    config.minLineCapacity = 1000000;
+    let maxCapacityKey;
+    let minCapacityKey;
     config.processedGeoJSON.features.forEach((feature) => {
-        if (parseFloat(feature.properties[config.capacityField]) > config.maxCapacity) {
-            config.maxCapacity =  parseFloat(feature.properties[config.capacityField]);
+        if (feature.geometry.type == "LineString") {
+            minCapacityKey = 'minLineCapacity';
+            maxCapacityKey = 'maxLineCapacity';
+        } else {
+            minCapacityKey = 'minPointCapacity';
+            maxCapacityKey = 'maxPointCapacity';
         }
-        if (parseFloat(feature.properties[config.capacityField]) < config.minCapacity) {
-            config.minCapacity =  parseFloat(feature.properties[config.capacityField]);
+        if (parseFloat(feature.properties[config.capacityField]) > config[maxCapacityKey]) {
+            config[maxCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
+        }
+        if (parseFloat(feature.properties[config.capacityField]) < config[minCapacityKey]) {
+            config[minCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
         }       
     });
 }
@@ -360,13 +371,13 @@ function addPointLayer() {
         "interpolate", ["linear"], ["zoom"],
         1, ["interpolate", interpolateExpression,
             ["to-number",["get", config.capacityField]],
-            config.minCapacity, config.minRadius,
-            config.maxCapacity, config.maxRadius
+            config.minPointCapacity, config.minRadius,
+            config.maxPointCapacity, config.maxRadius
         ],
         10, ["interpolate", interpolateExpression,
             ["to-number",["get", config.capacityField]],
-            config.minCapacity, config.highZoomMinRadius,
-            config.maxCapacity, config.highZoomMaxRadius
+            config.minPointCapacity, config.highZoomMinRadius,
+            config.maxPointCapacity, config.highZoomMaxRadius
         ],
 
     ];
@@ -397,12 +408,12 @@ function addPointLayer() {
                 "interpolate", ["linear"], ["zoom"],
                 1, ['interpolate', interpolateExpression,
                     ["to-number", ["get", config.capacityField]],
-                    config.minCapacity, config.minRadius * 2 / 64,
-                    config.maxCapacity, config.maxRadius * 2 / 64],
+                    config.minPointCapacity, config.minRadius * 2 / 64,
+                    config.maxPointCapacity, config.maxRadius * 2 / 64],
                 10, ['interpolate', interpolateExpression,
                     ["to-number", ["get", config.capacityField]],
-                    config.minCapacity, config.highZoomMinRadius * 2 / 64,
-                    config.maxCapacity, config.highZoomMaxRadius * 2 / 64]
+                    config.minPointCapacity, config.highZoomMinRadius * 2 / 64,
+                    config.maxPointCapacity, config.highZoomMaxRadius * 2 / 64]
             ]
         }
     });
@@ -461,13 +472,13 @@ function addLineLayer() {
         "interpolate", ["linear"], ["zoom"],
         1, ["interpolate", interpolateExpression,
             ["to-number",["get", config.capacityField]],
-            config.minCapacity, config.minLineWidth,
-            config.maxCapacity, config.maxLineWidth
+            config.minLineCapacity, config.minLineWidth,
+            config.maxLineCapacity, config.maxLineWidth
         ],
         10, ["interpolate", interpolateExpression,
             ["to-number",["get", config.capacityField]],
-            config.minCapacity, config.highZoomMinLineWidth,
-            config.maxCapacity, config.highZoomMaxLineWidth
+            config.minLineCapacity, config.highZoomMinLineWidth,
+            config.maxLineCapacity, config.highZoomMaxLineWidth
         ],
 
     ];
@@ -756,7 +767,7 @@ function filterGeoJSON() {
         }
         if (config.selectedCountries.length > 0) {
             //update to handle multiple countries selected, and handle when countries are substrings of each other
-            if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(', ').includes(value)).length == 0) include = false;
+            if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(',').includes(value)).length == 0) include = false;
             //if (! (feature.properties[config.countryField].includes( config.selectedCountries.join(',')))) include = false;
             //if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
         }
@@ -849,7 +860,7 @@ function geoJSON2Table() {
     return config.preLinkedGeoJSON.features.map(feature => {
         return config.tableHeaders.values.map((header) => {
             if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
-                return "<a href='" + feature.properties[config.linkField] + "' target='_blank'>" + feature.properties[header] + '</a>'; 
+                return "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + feature.properties[header] + '</a>'; 
             } else {
                 return feature.properties[header];
             }
@@ -1012,7 +1023,7 @@ function displayDetails(features) {
             (config.selectModal != '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
             '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
             '<span class="detail-location">' + removeLastComma(location_text) + '</span><br/>' +
-            '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.linkField] + '" target="_blank">MORE INFO</a></span>' +
+            '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>' +
             (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
         '</div>' +
         '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +

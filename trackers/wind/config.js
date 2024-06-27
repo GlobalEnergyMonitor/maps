@@ -63,6 +63,7 @@ var config = {
     /* the column that contains the asset name. this varies between trackers */
     nameField: 'Project Name',
     linkField: 'Wiki URL',
+    urlField: 'Wiki URL',
     countryField: 'Country',
 
     /* configure the table view, selecting which columns to show, how to label them, 

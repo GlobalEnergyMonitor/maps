@@ -63,6 +63,7 @@ var config = {
     nameField: 'Project Name',
     nameField: 'Project Name',
     linkField: 'Wiki URL',
+    urlField: 'Wiki URL',
     countryField: 'Country',
 
 

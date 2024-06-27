@@ -45,6 +45,7 @@ var config = {
     capacityField: 'Capacity (MW)',
     capacityLabel: 'Capacity (MW)',
     linkField: 'Wiki URL',
+    urlField: 'Wiki URL',
     countryField: 'Country',
     searchFields: { 'Project': ['Plant/project name'], 
         'Companies': ['Owner', 'Parent'],
