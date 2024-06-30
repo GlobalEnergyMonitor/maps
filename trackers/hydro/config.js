@@ -43,6 +43,7 @@ var config = {
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
     capacityField: 'capacity_(mw)',
+    capacityDisplayField: 'capacity_(mw)',
     capacityLabel: 'Capacity (MW)',
 
     /* Labels for describing the assets */

@@ -135,7 +135,7 @@ table.dataTable td {
 #card-body {
     min-width: 300px;
 }
-#summary {
+#summary, #capacity_summary {
     font-size: 9px;
 }
 
@@ -345,7 +345,7 @@ table.dataTable td {
     border-bottom: 1px solid #000; 
     line-height: 0.1em;
 }
-#total_in_view {
+#total_in_view, #max_capacity {
     font-size: small;
 }
 
