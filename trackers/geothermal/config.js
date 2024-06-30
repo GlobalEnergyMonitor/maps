@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
-    csv: 'data.csv',
+    csv: 'data_2024-06-10.csv',
     // csv: 'Geothermal_Power_Tracker_May_2024_FINAL_2024-05-14.csv',
 
     colors: {
@@ -26,8 +26,6 @@ var config = {
             'shelved': 'light blue greeninfo',
             'retired': 'grey greeninfo',
             'cancelled': 'light grey greeninfo',
-            'cancelled - inferred 4 y': 'light grey greeninfo',
-            'shelved - inferred 2 y': 'light blue greeninfo'
 
         }
     },
@@ -39,7 +37,7 @@ var config = {
     filters: [
         {
             field: 'status',
-            values: ['operating','construction','pre-construction', 'announced','shelved', 'shelved - inferred 2 y','mothballed','retired','cancelled', 'cancelled - inferred 4 y'],
+            values: ['operating','construction','pre-construction', 'announced','shelved', 'mothballed','retired','cancelled'],
         }
     ],
 
