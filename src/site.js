@@ -994,7 +994,7 @@ function displayDetails(features) {
         let count = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
 
         features.forEach((feature) => {
-            capacity[feature.properties[config.statusField]] += feature.properties[config.capacityField];
+            capacity[feature.properties[config.statusField]] += feature.properties[config.capacityDisplayField];
             count[feature.properties[config.statusField]]++;
         });
 
@@ -1011,9 +1011,9 @@ function displayDetails(features) {
             detail_capacity +
             '</div>';
     } else {
-        detail_text += '<span class="fw-bold text-capitalize">' + config.statusField + '</span>: ' +
-            '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span>' + features[0].properties[config.statusField] + '<br/>';
-        detail_text += '<span class="fw-bold text-capitalize">' + capacityLabel + '</span>: ' + features[0].properties[config.capacityField];
+        detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
+            '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
+        detail_text += '<span class="fw-bold text-capitalize">' + capacityLabel + '</span>: ' + features[0].properties[config.capacityDisplayField];
     }
 
     //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)

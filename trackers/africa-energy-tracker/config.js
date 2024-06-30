@@ -3,6 +3,8 @@ var config = {
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
+    statusField: 'status-legend',
+    statusDisplayField: 'status',
     color: {
         field: 'status-legend',
         values: {
@@ -87,7 +89,7 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker','name','unit_name', 'parent', 'capacity', 'status_legend', 'areas', 'start_year'],
+        values: ['tracker','name','unit_name', 'parent', 'capacity', 'status', 'areas', 'start_year'],
         labels: ['Tracker', 'Name','Unit','Parent','Capacity','Status','Countries','Start year'],
         clickColumns: ['project'],
         rightAlign: ['unit','capacity','start_year']
@@ -103,8 +105,7 @@ var config = {
         'river': {'label': 'River'},
         'tracker': {'label': 'Tracker'},
         'subnat': {'display': 'location'},
-        'areas': {'display': 'location'},
-        'status_legend': {'label': 'Status Legend'}
+        'areas': {'display': 'location'}
     }
 
 };

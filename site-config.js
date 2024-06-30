@@ -50,7 +50,9 @@ var site_config = {
     urlField: 'url',
     countryField: 'country',
     statusField: 'status',
+    statusDisplayField: 'status',
     capacityField: 'capacity',
+    capacityDisplayField: 'capacity',
     locationColumns:{
         lat: 'lat',
         lng: 'lng'
