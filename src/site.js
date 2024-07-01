@@ -150,6 +150,7 @@ function geoJSONFromTiles() {
     }
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
+
     layers.forEach(layer => {
         map.removeLayer(layer);
     });
@@ -861,9 +862,11 @@ function updateTable(force) {
 function geoJSON2Table() {
     return config.preLinkedGeoJSON.features.map(feature => {
         return config.tableHeaders.values.map((header) => {
+
             value = feature.properties[header];
             if ('displayValue' in config.tableHeaders && Object.keys(config.tableHeaders.displayValue).includes(header)) {
                 value = config[config.tableHeaders.displayValue[header]].values[value];
+
             }
             if ('appendValue' in config.tableHeaders && Object.keys(config.tableHeaders.appendValue).includes(header)) {
                 value += ' ' + config[config.tableHeaders.appendValue[header]].values[
@@ -986,7 +989,20 @@ function displayDetails(features) {
                 } else {
                     detail_text += features[0].properties[detail] + '<br/>';
                 }
+
+            } else if (features[0].properties[detail] == 'undefined') {
+
+
+                detail_text += '';
+                
+            } else if (features[0].properties[detail] == ' ') {
+
+
+                detail_text += '';
+                
             }
+            
+
         }
     });
 
@@ -1038,9 +1054,11 @@ function displayDetails(features) {
         '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(features) + ')">' +
             (config.selectModal != '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
             '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
+
             '<span class="detail-location">' + removeLastComma(location_text) + '</span><br/>' +
             '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>' +
             (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
+
         '</div>' +
         '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +
         '</div>');
