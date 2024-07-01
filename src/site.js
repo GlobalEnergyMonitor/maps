@@ -327,13 +327,6 @@ function addLayers() {
     if (config.geometries.includes('LineString')) addLineLayer();
     if (config.geometries.includes('Point')) addPointLayer();
 
-    map.addLayer({
-        id: 'satellite',
-        source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
-        type: "raster",
-        layout: { 'visibility': 'none' }
-    }, config.layers[0]);
-
     map.addSource('countries', {
         'type': 'vector',
         'url': 'mapbox://mapbox.country-boundaries-v1'
@@ -349,9 +342,14 @@ function addLayers() {
                 'fill-color': 'hsla(219, 0%, 100%, 0%)'
             }
         }
-    , config.layers[0]);
+    );
 
-
+    map.addLayer({
+        id: 'satellite',
+        source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
+        type: "raster",
+        layout: { 'visibility': 'none' }
+    });
 
     addEvents();
 }
@@ -861,22 +859,11 @@ function updateTable(force) {
 function geoJSON2Table() {
     return config.preLinkedGeoJSON.features.map(feature => {
         return config.tableHeaders.values.map((header) => {
-            value = feature.properties[header];
-            if ('displayValue' in config.tableHeaders && Object.keys(config.tableHeaders.displayValue).includes(header)) {
-                value = config[config.tableHeaders.displayValue[header]].values[value];
-            }
-            if ('appendValue' in config.tableHeaders && Object.keys(config.tableHeaders.appendValue).includes(header)) {
-                value += ' ' + config[config.tableHeaders.appendValue[header]].values[
-                    feature.properties[config[config.tableHeaders.appendValue[header]].field]
-                    ];
-            }
-            if ('removeLastComma' in config.tableHeaders && config.tableHeaders.removeLastComma.includes(header)) {
-                value = removeLastComma(value);
-            }
             if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
-                value =  "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + value + '</a>'; 
-            } 
-            return value;
+                return "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + feature.properties[header] + '</a>'; 
+            } else {
+                return feature.properties[header];
+            }
         });
     });
 }
@@ -1026,7 +1013,7 @@ function displayDetails(features) {
     } else {
         detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
             '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-        detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + features[0].properties[config.capacityDisplayField] + ' ' + capacityLabel;
+        detail_text += '<span class="fw-bold text-capitalize">' + capacityLabel + '</span>: ' + features[0].properties[config.capacityDisplayField];
     }
 
     //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
