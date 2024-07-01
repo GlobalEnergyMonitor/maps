@@ -18,9 +18,8 @@ const map = new mapboxgl.Map({
     container: 'map',
     style: config.mapStyle,
     zoom: determineZoom(),
-    center: [0, 0],
-    // maxBounds: [[-180,-85],[180,85]],
-    projection: 'naturalEarth'
+    center: config.center,
+    projection: config.projection
 });
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
@@ -64,7 +63,7 @@ function loadData() {
     } else {
         $.ajax({
             type: "GET",
-            url: config.csv, 
+            url: config.csv,
             dataType: "text",
             success: function(csvData) {
                 addGeoJSON($.csv.toObjects(csvData));
@@ -125,29 +124,36 @@ function addTiles() {
         });
 
         /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
-        let paint = config.paint;
-        paint['circle-radius'] = 0;
-        map.addLayer({
-            'id': 'assets-minmax',
-            'type': 'circle',
-            'source': 'assets-source',
-            'source-layer': 'integrated',
-            'layout': {},
-            'paint': paint
+        config.geometries.forEach(geometry => {
+            map.addLayer({
+                'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
+                'type': geometry == "LineString" ? 'line' : 'circle',
+                'source': 'assets-source',
+                'source-layer': config.tileSourceLayer,
+                'layout': {},
+                'filter': ["==",["geometry-type"],geometry],
+                'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
+            });
         });
+
         map.on('idle', geoJSONFromTiles);
     });
 }
 function geoJSONFromTiles() {
     map.off('idle', geoJSONFromTiles);
+    let layers = [];
+    if (config.geometries.includes('Point')) layers.push('assets-minmax-point');
+    if (config.geometries.includes('LineString')) layers.push('assets-minmax-line');
     config.geojson = {
         "type": "FeatureCollection", 
-        "features": map.queryRenderedFeatures({layers: ['assets-minmax']}) 
+        "features": map.queryRenderedFeatures({layers: layers})  
     }
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
-    map.removeLayer('assets-minmax');
-    
+
+    layers.forEach(layer => {
+        map.removeLayer(layer);
+    });
     findLinkedAssets();
     addLayers();
     map.on('idle', enableUX);
@@ -170,6 +176,7 @@ function findLinkedAssets() {
     });
 
     // Next find linked assets that share location. 
+    // TODO: skip this for lines, only for points???
     let grouped = {};
     config.processedGeoJSON.features.forEach((feature) => {
         if ('geometry' in feature && feature.geometry != null) {
@@ -200,22 +207,24 @@ function findLinkedAssets() {
 
         // Build summary count of capacity across all linked assets
         //  and generate icon based on that label if more than one status
-        let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [config.color.values[k]]: 0 })));
-        features.forEach((feature) => {  
-            icon[config.color.values[feature.properties[config.color.field]]] += Number(feature.properties[config.capacityField]);
-        });
-        if (Object.values(icon).filter(v => v != 0).length > 1) {
-            // normalize values to 10
-            let current = 0;
-            let total = Object.values(icon).reduce((previous, current) => {
-                return previous + Number(current);
-            }, 0);
-            icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(10 * (icon[k] / total)) })));
-            let string_icon = JSON.stringify(icon)
-            features[0].properties['icon'] = string_icon;
-            if (! config.icons.includes(string_icon)) {
-                generateIcon(icon);
-                config.icons.push(string_icon);
+        if (features[0].geometry.type == 'Point') {
+            let icon = Object.assign(...Object.keys(config.color.values).map(k => ({ [config.color.values[k]]: 0 })));
+            features.forEach((feature) => {  
+                icon[config.color.values[feature.properties[config.color.field]]] += Number(feature.properties[config.capacityField]);
+            });
+            if (Object.values(icon).filter(v => v != 0).length > 1) {
+                // normalize values to 10
+                let current = 0;
+                let total = Object.values(icon).reduce((previous, current) => {
+                    return previous + Number(current);
+                }, 0);
+                icon = Object.assign(...Object.keys(icon).map(k => ({[k]: Math.ceil(10 * (icon[k] / total)) })));
+                let string_icon = JSON.stringify(icon)
+                features[0].properties['icon'] = string_icon;
+                if (! config.icons.includes(string_icon)) {
+                    generateIcon(icon);
+                    config.icons.push(string_icon);
+                }
             }
         }
 
@@ -243,7 +252,7 @@ function generateIcon(icon) {
 
     // get the canvas context
     let context = canvas.getContext('2d');
-    context.globalAlpha = config.paint["circle-opacity"];
+    context.globalAlpha = config.pointPaint["circle-opacity"];
 
     // calculate the coordinates of the center of the circle
     let centerX = canvas.width / 2;
@@ -275,18 +284,25 @@ function generateIcon(icon) {
     });
 }
 function setMinMax() {
-    config.maxCapacity = 0;
-    config.minCapacity = 1000000;
-    let ref = "config.processedGeoJSON.features"
-    if (config.tiles) {
-        ref = "map.queryRenderedFeatures({layers: ['assets-minmax']})"
-    } 
-    eval(ref).forEach((feature) => {
-        if (parseFloat(feature.properties[config.capacityField]) > config.maxCapacity) {
-            config.maxCapacity =  parseFloat(feature.properties[config.capacityField]);
+    config.maxPointCapacity = 0;
+    config.minPointCapacity = 1000000;
+    config.maxLineCapacity = 0;
+    config.minLineCapacity = 1000000;
+    let maxCapacityKey;
+    let minCapacityKey;
+    config.processedGeoJSON.features.forEach((feature) => {
+        if (feature.geometry.type == "LineString") {
+            minCapacityKey = 'minLineCapacity';
+            maxCapacityKey = 'maxLineCapacity';
+        } else {
+            minCapacityKey = 'minPointCapacity';
+            maxCapacityKey = 'maxPointCapacity';
         }
-        if (parseFloat(feature.properties[config.capacityField]) < config.minCapacity) {
-            config.minCapacity =  parseFloat(feature.properties[config.capacityField]);
+        if (parseFloat(feature.properties[config.capacityField]) > config[maxCapacityKey]) {
+            config[maxCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
+        }
+        if (parseFloat(feature.properties[config.capacityField]) < config[minCapacityKey]) {
+            config[minCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
         }       
     });
 }
@@ -307,102 +323,17 @@ function enableUX() {
 }
 
 function addLayers() {
-    // First build circle layer
-    //  build style json for circle-color based on config.color
-    let paint = config.paint;
-    if ('color' in config) {
-        paint["circle-color"] = [
-            "match",
-            ["get", config.color.field],
-            ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
-            "#000000"
-        ];
-    }
+ 
+    config.layers = [];
+    if (config.geometries.includes('LineString')) addLineLayer();
+    if (config.geometries.includes('Point')) addPointLayer();
 
-    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
-    paint['circle-radius'] = [
-        "interpolate", ["linear"], ["zoom"],
-        1, ["interpolate", interpolateExpression,
-            ["get", config.capacityField],
-            config.minCapacity, config.minRadius,
-            config.maxCapacity, config.maxRadius
-        ],
-        10, ["interpolate", interpolateExpression,
-            ["get", config.capacityField],
-            config.minCapacity, config.highZoomMinRadius,
-            config.maxCapacity, config.highZoomMaxRadius
-        ],
-
-    ];
-
-    
     map.addLayer({
-        'id': 'assets',
-        'type': 'circle',
-        'source': 'assets-source',
-        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-        'layout': {},
-        'paint': paint
-    });
-
-    // Add layer with proportional icons
-    map.addLayer({
-        'id': 'assets-symbol',
-        'type': 'symbol',
-        'source': 'assets-source',
-        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-        'layout': {
-            'icon-image': ["get", "icon"],
-            'icon-allow-overlap': true,
-            'icon-size': [
-                "interpolate", ["linear"], ["zoom"],
-                1, ['interpolate', interpolateExpression,
-                    ["to-number", ["get", config.capacityField]],
-                    config.minCapacity, config.minRadius * 2 / 64,
-                    config.maxCapacity, config.maxRadius * 2 / 64],
-                10, ['interpolate', interpolateExpression,
-                    ["to-number", ["get", config.capacityField]],
-                    config.minCapacity, config.highZoomMinRadius * 2 / 64,
-                    config.maxCapacity, config.highZoomMaxRadius * 2 / 64]
-            ]
-        }
-    });
-
-    // Add highlight layer
-    paint = config.paint;
-    paint["circle-color"] = '#FFEA00';
-    map.addLayer(
-        {
-            'id': 'assets-highlighted',
-            'type': 'circle',
-            'source': 'assets-source',
-            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-            'layout': {},
-            'paint': paint,
-            'filter': ['in', (config.linkField), '']
-        }
-    );
-    map.addLayer(
-        {
-            'id': 'assets-labels',
-            'type': 'symbol',
-            'source': 'assets-source',
-            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-            'minzoom': 8,
-            'layout': {
-                'text-field': '{' + config.nameField + '}',
-                'text-font': ["DIN Pro Italic"],
-                'text-variable-anchor': ['top'],
-                'text-offset': [0, 1],
-                'text-size': 14
-            },
-            'paint': {
-                'text-color': '#000000',
-                'text-halo-color': "hsla(220, 8%, 100%, 0.75)",
-                'text-halo-width': 1
-            }
-        }
-    );
+        id: 'satellite',
+        source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
+        type: "raster",
+        layout: { 'visibility': 'none' }
+    }, config.layers[0]);
 
     map.addSource('countries', {
         'type': 'vector',
@@ -419,29 +350,180 @@ function addLayers() {
                 'fill-color': 'hsla(219, 0%, 100%, 0%)'
             }
         }
-    );
+    , config.layers[0]);
 
-    map.addLayer({
-        id: 'satellite',
-        source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
-        type: "raster",
-        layout: { 'visibility': 'none' }
-    }, 'assets');
+
 
     addEvents();
 }
+function addPointLayer() {
+     // First build circle layer
+    //  build style json for circle-color based on config.color
+    let paint = config.pointPaint;
+    if ('color' in config) {
+        paint["circle-color"] = [
+            "match",
+            ["get", config.color.field],
+            ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
+            "#000000"
+        ];
+    }
+
+    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
+    paint['circle-radius'] = [
+        "interpolate", ["linear"], ["zoom"],
+        1, ["interpolate", interpolateExpression,
+            ["to-number",["get", config.capacityField]],
+            config.minPointCapacity, config.minRadius,
+            config.maxPointCapacity, config.maxRadius
+        ],
+        10, ["interpolate", interpolateExpression,
+            ["to-number",["get", config.capacityField]],
+            config.minPointCapacity, config.highZoomMinRadius,
+            config.maxPointCapacity, config.highZoomMaxRadius
+        ],
+
+    ];
+
+    
+    map.addLayer({
+        'id': 'assets-points',
+        'type': 'circle',
+        'source': 'assets-source',
+        'filter': ["==",["geometry-type"],'Point'],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': {},
+        'paint': paint
+    });
+    config.layers.push('assets-points');
+
+    // Add layer with proportional icons
+    map.addLayer({
+        'id': 'assets-symbol', 
+        'type': 'symbol',
+        'source': 'assets-source',
+        'filter': ["==",["geometry-type"],'Point'],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': {
+            'icon-image': ["get", "icon"],
+            'icon-allow-overlap': true,
+            'icon-size': [
+                "interpolate", ["linear"], ["zoom"],
+                1, ['interpolate', interpolateExpression,
+                    ["to-number", ["get", config.capacityField]],
+                    config.minPointCapacity, config.minRadius * 2 / 64,
+                    config.maxPointCapacity, config.maxRadius * 2 / 64],
+                10, ['interpolate', interpolateExpression,
+                    ["to-number", ["get", config.capacityField]],
+                    config.minPointCapacity, config.highZoomMinRadius * 2 / 64,
+                    config.maxPointCapacity, config.highZoomMaxRadius * 2 / 64]
+            ]
+        }
+    });
+
+    // Add highlight layer
+    paint = config.pointPaint;
+    paint["circle-color"] = '#FFEA00';
+    map.addLayer(
+        {
+            'id': 'assets-points-highlighted',
+            'type': 'circle',
+            'source': 'assets-source',
+            'filter': ["==",["geometry-type"],'Point'],
+            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+            'layout': {},
+            'paint': paint,
+            'filter': ['in', (config.linkField), '']
+        }
+    );
+    map.addLayer(
+        {
+            'id': 'assets-labels',
+            'type': 'symbol',
+            'source': 'assets-source',
+            'filter': ["==",["geometry-type"],'Point'],
+            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+            'minzoom': 8,
+            'layout': {
+                'text-field': '{' + config.nameField + '}',
+                'text-font': ["DIN Pro Italic"],
+                'text-variable-anchor': ['top'],
+                'text-offset': [0, 1],
+                'text-size': 14
+            },
+            'paint': {
+                'text-color': '#000000',
+                'text-halo-color': "hsla(220, 8%, 100%, 0.75)",
+                'text-halo-width': 1
+            }
+        }
+    );
+}
+function addLineLayer() {
+    let paint = config.linePaint;
+    if ('color' in config) {
+        paint["line-color"] = [
+            "match",
+            ["get", config.color.field],
+            ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
+            "#000000"
+        ];
+    }
+
+    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
+    paint['line-width'] = [
+        "interpolate", ["linear"], ["zoom"],
+        1, ["interpolate", interpolateExpression,
+            ["to-number",["get", config.capacityField]],
+            config.minLineCapacity, config.minLineWidth,
+            config.maxLineCapacity, config.maxLineWidth
+        ],
+        10, ["interpolate", interpolateExpression,
+            ["to-number",["get", config.capacityField]],
+            config.minLineCapacity, config.highZoomMinLineWidth,
+            config.maxLineCapacity, config.highZoomMaxLineWidth
+        ],
+
+    ];
+
+    map.addLayer({
+        'id': 'assets-lines', //assets-lines
+        'type': 'line',
+        'source': 'assets-source',
+        'filter': ["==",["geometry-type"],'LineString'],
+        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+        'layout': config.lineLayout,
+        'paint': paint
+    }); 
+    config.layers.push('assets-lines');
+
+    paint["line-color"] = '#FFEA00';
+    map.addLayer(
+        {
+            'id': 'assets-lines-highlighted', //assets-lines-highlighted
+            'type': 'line',
+            'source': 'assets-source',
+            'filter': ["==",["geometry-type"],'LineString'],
+            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+            'layout': config.lineLayout,
+            'paint': paint,
+            'filter': ['in', (config.linkField), '']
+        }
+    );
+}
 
 function addEvents() {
-    map.on('click', 'assets', (e) => {
-        const bbox = [ [e.point.x - 5, e.point.y - 5], [e.point.x + 5, e.point.y + 5]];
-        const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: ['assets']}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]))
-        ;
+    map.on('click', (e) => {
+        const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea]];
+        const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
 
+        if (selectedFeatures.length == 0) return;
+        
         const links = selectedFeatures.map(
             (feature) => feature.properties[config.linkField]
         );
 
-        setHighlightFilter(...links);
+        setHighlightFilter(links);
 
         if (selectedFeatures.length == 1) {
             config.selectModal = '';
@@ -462,16 +544,20 @@ function addEvents() {
 
         config.modal.show();
     });
-    map.on('mouseenter', 'assets', (e) => {
-        map.getCanvas().style.cursor = 'pointer';
-        const coordinates = e.features[0].geometry.coordinates.slice();
-        const description = e.features[0].properties[config.nameField];
-        popup.setLngLat(coordinates).setHTML(description).addTo(map);
+    config.layers.forEach(layer => {
+        map.on('mouseenter', layer, (e) => {
+            map.getCanvas().style.cursor = 'pointer';
+            const coordinates = (map.getLayer(layer).type == "line" ? e.lngLat : e.features[0].geometry.coordinates.slice());
+            const description = e.features[0].properties[config.nameField];
+            popup.setLngLat(coordinates).setHTML(description).addTo(map);
+        });
     });
-    map.on('mouseleave', 'assets', () => {
-        map.getCanvas().style.cursor = '';
-        popup.remove();
-    }); 
+    config.layers.forEach(layer => {
+        map.on('mouseleave', layer, () => {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        }); 
+    });
     $('#basemap-toggle').on("click", function() {
         if (config.baseMap == "Streets") {
            // $('#basemap-toggle').text("Streets");
@@ -505,11 +591,7 @@ function buildFilters() {
     config.filters.forEach(filter => {
         if (config.color.field != filter.field) {
             $('#filter-form').append('<hr /><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
-        // } else {
-        //    $('#filter-form').append('<hr class="glyph-down" />');
         }
-        // console.log(filters)
-
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
             let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
@@ -559,10 +641,11 @@ function countFilteredFeatures() {
         });
     });
 
-    let ref = "config.processedGeoJSON.features"
-    //if (config.tiles) {
-    //    ref = "map.queryRenderedFeatures({layers: ['assets']})"
-    //} 
+    config.maxFilteredCapacity = 0;
+    config.minFilteredCapacity = 1000000;
+
+    let ref = "config.processedGeoJSON.features";
+
     eval(ref).forEach(feature => {
         if ('summary_count' in feature.properties) {
             let summary_count = JSON.parse(feature.properties.summary_count);
@@ -580,6 +663,13 @@ function countFilteredFeatures() {
                 });
             });
         }
+
+        if (parseFloat(feature.properties[config.capacityField]) > config.maxFilteredCapacity) {
+            config.maxFilteredCapacity =  parseFloat(feature.properties[config.capacityField]);
+        }
+        if (parseFloat(feature.properties[config.capacityField]) < config.minFilteredCapacity) {
+            config.minFilteredCapacity =  parseFloat(feature.properties[config.capacityField]);
+        }       
     });
 }
 function filterData() {
@@ -612,7 +702,18 @@ function filterTiles() {
         config.filterExpression.push(searchExpression);
     }
     if (config.selectedCountries.length > 0) {
-        config.filterExpression.push(['in', ['get', config.countryField], ['literal', config.selectedCountries]]);
+        //update to handle so doesn't catch when countries are substrings of each other (Niger/Nigeria)
+        //easy solve could be to add "," at end
+        let countryExpression = ['any'];
+        config.selectedCountries.forEach(country => {
+            if (config.multiCountry) {
+                country = country + ',';
+                countryExpression.push(['in', ['string', country], ['string',['get', config.countryField]]]);
+            } else {
+                countryExpression.push(['==', ['string', country], ['string',['get', config.countryField]]]);
+            }
+        })
+        config.filterExpression.push(countryExpression);
     }
     for (let field in filterStatus) {
         config.filterExpression.push(['in', ['get', field], ['literal', filterStatus[field]]]);
@@ -622,8 +723,16 @@ function filterTiles() {
     } else {
         config.filterExpression.unshift("all");
     }
-    map.setFilter('assets', config.filterExpression);
-    map.setFilter('assets-labels', config.filterExpression);
+    config.layers.forEach(layer => {
+        config.filterExpression.push(["==",["geometry-type"],
+            map.getLayer(layer).type == "line" ? "LineString" : "Point"
+        ]);
+        map.setFilter(layer, config.filterExpression);
+        config.filterExpression.pop();
+    });
+    if (config.geometries.includes('Point')) {
+        map.setFilter('assets-labels', config.filterExpression);
+    }
 
     if ($('#table-container').is(':visible')) {
         filterGeoJSON();
@@ -638,9 +747,7 @@ function filterGeoJSON() {
     let filterStatus = {};
     config.filters.forEach(filter => {
         filterStatus[filter.field] = [];
-        
     });
-    
     $('.form-check-input').each(function () {
         if (this.checked) {
             let [field, ...value] = this.id.split('_');
@@ -662,7 +769,10 @@ function filterGeoJSON() {
             }).length == 0) include = false;
         }
         if (config.selectedCountries.length > 0) {
-            if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
+            //update to handle multiple countries selected, and handle when countries are substrings of each other
+            if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(',').includes(value)).length == 0) include = false;
+            //if (! (feature.properties[config.countryField].includes( config.selectedCountries.join(',')))) include = false;
+            //if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
         }
         if (include) {
             filteredGeoJSON.features.push(feature);
@@ -674,13 +784,13 @@ function filterGeoJSON() {
     updateTable();
     updateSummary();
 
-    if (! config.tiles) {
+    if (! config.tiles) { //maybe just use map filter for points and lines, no matter if tiles of geojson
         map.getSource('assets-source').setData(config.processedGeoJSON);
     }
 }
 function updateSummary() {
     $('#total_in_view').text(config.totalCount.toString())
-    $('#summary').text("Total " + config.assetFullLabel + " selected");
+    $('#summary').html("Total " + config.assetFullLabel + " selected");
     countFilteredFeatures();
     config.filters.forEach((filter) => {
         for (let i=0; i<filter.values.length; i++) {
@@ -688,6 +798,11 @@ function updateSummary() {
             $('#' + count_id).text(config.filterCount[filter.field][filter.values[i]]);
         }
     });
+
+    if (config.showMaxCapacity) {
+        $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString())
+        $('#capacity_summary').html("Maximum " + config.capacityLabel);
+    }
 }
 
 /*
@@ -747,11 +862,24 @@ function updateTable(force) {
 function geoJSON2Table() {
     return config.preLinkedGeoJSON.features.map(feature => {
         return config.tableHeaders.values.map((header) => {
-            if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
-                return "<a href='" + feature.properties[config.wikiField] + "' target='_blank'>" + feature.properties[header] + '</a>'; 
-            } else {
-                return feature.properties[header];
+
+            value = feature.properties[header];
+            if ('displayValue' in config.tableHeaders && Object.keys(config.tableHeaders.displayValue).includes(header)) {
+                value = config[config.tableHeaders.displayValue[header]].values[value];
+
             }
+            if ('appendValue' in config.tableHeaders && Object.keys(config.tableHeaders.appendValue).includes(header)) {
+                value += ' ' + config[config.tableHeaders.appendValue[header]].values[
+                    feature.properties[config[config.tableHeaders.appendValue[header]].field]
+                    ];
+            }
+            if ('removeLastComma' in config.tableHeaders && config.tableHeaders.removeLastComma.includes(header)) {
+                value = removeLastComma(value);
+            }
+            if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
+                value =  "<a href='" + feature.properties[config.urlField] + "' target='_blank'>" + value + '</a>'; 
+            } 
+            return value;
         });
     });
 }
@@ -771,22 +899,25 @@ function enableModal() {
     })
 }
 function setHighlightFilter(links) {
+    if (! Array.isArray(links)) links = [links];
     let filter;
+    let highlightExpression = [
+        'in',
+        ["get", config.linkField],
+        ["literal", links]
+    ];
     if (config.filterExpression != null) {
         filter = JSON.parse(JSON.stringify(config.filterExpression));
-        filter.push([
-            '==',
-            ["get", config.linkField],
-            ["literal", links]
-        ]);
+        filter.push(highlightExpression);
     } else {
-        filter = [
-            '==',
-            ["get", config.linkField],
-            ["literal", links]
-        ];
+        filter = ['all', highlightExpression];
     }
-    map.setFilter('assets-highlighted',filter);
+    config.layers.forEach(layer => {
+        filter.push(["==",["geometry-type"],
+            map.getLayer(layer).type == "line" ? "LineString" : "Point"
+        ]);
+        map.setFilter(layer + '-highlighted',filter);
+    });
 }
 
 function displayDetails(features) {
@@ -875,26 +1006,47 @@ function displayDetails(features) {
         }
     });
 
-    let filterIndex = 0;
-    for (const[index, filter] of config.filters.entries()) {
-        if (filter.field == config.statusField) {
-            filterIndex = index;
+    let assetLabel = typeof config.assetLabel === 'string'
+        ? config.assetLabel 
+        : config.assetLabel.values[features[0].properties[config.assetLabel.field]];
+
+    let capacityLabel = typeof config.capacityLabel === 'string'
+        ? config.capacityLabel 
+        : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];
+
+    // Build capacity summary
+    if (features.length > 1) {   
+       let filterIndex = 0;
+        for (const[index, filter] of config.filters.entries()) {
+            if (filter.field == config.statusField) {
+                filterIndex = index;
+            }
         }
+        let capacity = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
+        let count = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
+
+        features.forEach((feature) => {
+            capacity[feature.properties[config.statusField]] += feature.properties[config.capacityDisplayField];
+            count[feature.properties[config.statusField]]++;
+        });
+
+        let detail_capacity = '';
+        Object.keys(count).forEach((k) => {
+            if (count[k] != 0) {
+                detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+            }
+        });
+        detail_text += '<div>' + 
+            '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
+            '<div class="row" style="height: 2px"><hr/></div>' +
+            '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
+            detail_capacity +
+            '</div>';
+    } else {
+        detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
+            '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
+        detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + features[0].properties[config.capacityDisplayField] + ' ' + capacityLabel;
     }
-    let capacity = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
-    let count = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
-
-    features.forEach((feature) => {
-        capacity[feature.properties[config.statusField]] += feature.properties[config.capacityField];
-        count[feature.properties[config.statusField]]++;
-    });
-
-    let detail_capacity = '';
-    Object.keys(count).forEach((k) => {
-        if (count[k] != 0) {
-           detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
-        }
-    });
 
     //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
     //Arrow Back by Nursila from <a href="https://thenounproject.com/browse/icons/term/arrow-back/" target="_blank" title="Arrow Back Icons">Noun Project</a> (CC BY 3.0)
@@ -902,72 +1054,33 @@ function displayDetails(features) {
         '<div class="col-sm-5 rounded-top-left-1" id="detail-satellite" style="background-image:url(' + buildSatImage(features) + ')">' +
             (config.selectModal != '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
             '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
-            '<span class="detail-location">' + location_text + '</span><br/>' +
-            '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.wikiField] + '" target="_blank">MORE INFO</a></span>' +
-            (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + link + '\')">ALL PHASES</a></span>' : '') +
+
+            '<span class="detail-location">' + removeLastComma(location_text) + '</span><br/>' +
+            '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.urlField] + '" target="_blank">MORE INFO</a></span>' +
+            (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + features[0].properties[config.linkField] + '\')">ALL PHASES</a></span>' : '') +
+
         '</div>' +
-        '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text +
-            (config.showCapacityTable ?
-            '<div>' + 
-                '<div class="row pt-2 justify-content-md-center">Total ' + config.assetLabel + ': ' + features.length + '</div>' +
-                '<div class="row" style="height: 2px"><hr/></div>' +
-                '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + config.capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + config.assetLabel + '</div></div>' +
-                detail_capacity +
-            '</div>' : '') +
-        '</div></div>');
+        '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text + '</div>' +
+        '</div>');
 
     setHighlightFilter(features[0].properties[config.linkField]);
 }
 function buildSatImage(features) {
     let location_arg = '';
-    let bbox = [];
-    let coords = [];
-    let geojson_arg = '';
-    features.forEach((feature) => {
-        var feature_lng = Number(feature.geometry.coordinates[0]);
-        var feature_lat = Number(feature.geometry.coordinates[1]);
-        if (bbox.length == 0) {
-            bbox[0] = feature_lng;
-            bbox[1] = feature_lat;
-            bbox[2] = feature_lng;
-            bbox[3] = feature_lat;
-        } else {
-            if (feature_lng < bbox[0]) bbox[0] = feature_lng;
-            if (feature_lat < bbox[1]) bbox[1] = feature_lat;
-            if (feature_lng > bbox[2]) bbox[2] = feature_lng;
-            if (feature_lat > bbox[3]) bbox[3] = feature_lat;
-        }
-        coords.push([feature_lng,feature_lat]);
-    });
+    let bbox = geoJSONBBox({'type': 'FeatureCollection', features: features });
+
     if (bbox[0] == bbox[2] && bbox[1] == bbox[3]) {
         location_arg = bbox[0].toString() + ',' + bbox[1].toString() + ',' + config.img_detail_zoom.toString();
     } else {
         location_arg = '[' + bbox.join(',') + ']';
-       // geojson_arg = 'geojson(' + encodeURIComponent(JSON.stringify({'type': 'Feature','properties':{},'geometry': {'type': 'MultiPoint', 'coordinates': coords}})) + ')/';
     }
 
-    return 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + geojson_arg + location_arg + '/350x350?attribution=false&logo=false&access_token=' + config.accessToken;
+    return 'https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/' + location_arg + '/350x350?attribution=false&logo=false&access_token=' + config.accessToken;
 }
 function showAllPhases(link) {
     config.modal.hide();
     setHighlightFilter(link);
-    var bbox = [];
-    config.linked[link].forEach((feature) => {
-        var feature_lng = Number(feature.geometry.coordinates[0]);
-        var feature_lat = Number(feature.geometry.coordinates[1]);
-        if (bbox.length == 0) {
-            bbox[0] = feature_lng;
-            bbox[1] = feature_lat;
-            bbox[2] = feature_lng;
-            bbox[3] = feature_lat;
-        } else {
-            if (feature_lng < bbox[0]) bbox[0] = feature_lng;
-            if (feature_lat < bbox[1]) bbox[1] = feature_lat;
-            if (feature_lng > bbox[2]) bbox[2] = feature_lng;
-            if (feature_lat > bbox[3]) bbox[3] = feature_lat;
-        }
-    });
-
+    var bbox = geoJSONBBox({'type': 'FeatureCollection', features: config.linked[link] });
     map.flyTo({center: [(bbox[0]+bbox[2])/2,(bbox[1]+bbox[3])/2], zoom: config.phasesZoom});
 }
 function showSelectModal() {
@@ -1027,16 +1140,21 @@ function enableCountrySelect() {
     });
 }
 function buildCountrySelect() {
-    Object.keys(config.countries).forEach((continent) => {
-        let dropdown_html = `<li><hr class="dropdown-divider"></li><li><a class="country-dropdown-item dropdown-item h4" data-countries="${config.countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
+    if (config.allCountrySelect) $('#country_select').append('<li><a class="country-dropdown-item dropdown-item h4" data-countries="" data-countryText="" href="#">all</a></li>');
+    Object.keys(config.countries).forEach((continent, continent_idx) => {
+        let dropdown_html = '';
+        dropdown_html += `<li><a class="country-dropdown-item dropdown-item h4" data-countries="${config.countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
         dropdown_html += '<ul class="submenu dropdown-menu">';
-        config.countries[continent].forEach((country, idx) => {
+        config.countries[continent].forEach((country, country_idx) => {
             dropdown_html += `<li><a class="h5 country-dropdown-item dropdown-item" data-countries="${country}" data-countryText="${country}" href="#">${country}</a></li>`;
-            if (idx != config.countries[continent].length - 1) {
+            if (country_idx != config.countries[continent].length - 1) {
                 dropdown_html += '<li><hr class="dropdown-divider"></li>';
             }
         });
         dropdown_html += "</ul></li>";
+        if (continent_idx != Object.keys(config.countries).length - 1) {
+            dropdown_html += '<li><hr class="dropdown-divider"></li>';
+        }
         $('#country_select').append(dropdown_html);
     });
 
@@ -1112,3 +1230,57 @@ function debounce(func, wait, immediate) {
         if (callNow) func.apply(context, args);
     };
 };
+
+/* from https://github.com/geosquare/geojson-bbox */
+function geoJSONBBox (gj) {
+    var coords, bbox;
+    if (!gj.hasOwnProperty('type')) return;
+    coords = getCoordinatesDump(gj);
+    bbox = [ Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY,
+        Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY,];
+    return coords.reduce(function(prev,coord) {
+      return [
+        Math.min(coord[0], prev[0]),
+        Math.min(coord[1], prev[1]),
+        Math.max(coord[0], prev[2]),
+        Math.max(coord[1], prev[3])
+      ];
+    }, bbox);
+  };
+  
+function getCoordinatesDump(gj) {
+    var coords;
+    if (gj.type == 'Point') {
+      coords = [gj.coordinates];
+    } else if (gj.type == 'LineString' || gj.type == 'MultiPoint') {
+      coords = gj.coordinates;
+    } else if (gj.type == 'Polygon' || gj.type == 'MultiLineString') {
+      coords = gj.coordinates.reduce(function(dump,part) {
+        return dump.concat(part);
+      }, []);
+    } else if (gj.type == 'MultiPolygon') {
+      coords = gj.coordinates.reduce(function(dump,poly) {
+        return dump.concat(poly.reduce(function(points,part) {
+          return points.concat(part);
+        },[]));
+      },[]);
+    } else if (gj.type == 'Feature') {
+      coords =  getCoordinatesDump(gj.geometry);
+    } else if (gj.type == 'GeometryCollection') {
+      coords = gj.geometries.reduce(function(dump,g) {
+        return dump.concat(getCoordinatesDump(g));
+      },[]);
+    } else if (gj.type == 'FeatureCollection') {
+      coords = gj.features.reduce(function(dump,f) {
+        return dump.concat(getCoordinatesDump(f));
+      },[]);
+    }
+    return coords;
+}
+
+function removeLastComma(str) {
+    if (str.charAt(str.length - 1) === ',') {
+        str = str.slice(0, -1);
+    }
+    return str;
+}

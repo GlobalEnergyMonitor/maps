@@ -50,6 +50,7 @@ var config = {
         }
     ],
     capacityField: 'circle_value',
+    capacityDisplayField: 'circle_value',
     capacityLabel: '(Mt)',
 
     // context_layers: [
