@@ -28,10 +28,11 @@ var config = {
         }
     ],
     capacityField: 'scaling_capacity',
+    capacityDisplayField: 'capacity',
     //interpolate: ["cubic-bezier", 0, 0, 0, 1],
     //can be string for single value, or hash. always single value is showMaxCapacity is true
     capacityLabel: {
-        field: 'tracker',
+        field: 'tracker_custom',
         values: {
             'GCPT': 'MW',
             'GOGPT': 'MW',
@@ -58,7 +59,7 @@ var config = {
     assetFullLabel: "",
     //can be string for single value, or hash
     assetLabel: {
-        field: 'tracker',
+        field: 'tracker_custom',
         values: {
             'GCPT': 'coal power',
             'GOGPT': 'oil/gas power',
@@ -83,16 +84,19 @@ var config = {
 //    linkField: 'id',
 
     countryFile: 'countries.js',
-    //allCountrySelect: false,
+    allCountrySelect: false,
     countryField: 'areas',
     //if multicountry, always end values with a comma
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker','name','unit_name', 'parent', 'capacity', 'status', 'areas', 'start_year'],
-        labels: ['Tracker', 'Name','Unit','Parent','Capacity','Status','Countries','Start year'],
+        values: ['tracker_custom','name','unit_name', 'owner', 'parent', 'capacity', 'status', 'areas', 'start_year'],
+        labels: ['Tracker', 'Name','Unit','Owner', 'Parent','Capacity','Status','Countries','Start year'],
         clickColumns: ['project'],
-        rightAlign: ['unit','capacity','start_year']
+        rightAlign: ['unit','capacity','start_year'],
+        removeLastComma: ['areas'],
+        displayValue: {'tracker_custom': "assetLabel"},
+        appendValue: {'capacity': "capacityLabel"}
     },
     searchFields: { 'Project': ['name'], 
         'Companies': ['owner', 'parent'],
