@@ -1,60 +1,61 @@
 var config = {
     // csv: 'coal-mine.csv', (Mikel's file)
-    csv: 'data.csv',
+    csv: 'data/data.csv',
 
     colors: {
         'red': '#c74a48',
         'light blue greeninfo': '#74add1',
         'blue': '#5c62cf',
-        'green': '#4c9d4f',
+        // 'green': '#4c9d4f',
         'light grey greeninfo': '#ccc',
         'grey': '#8f8f8e',
         'dark grey': '#4B4B4B',
         'orange': '#FF8C00',
-        'yellow': '#f3ff00'
+        // 'yellow': '#f3ff00'
     },
 
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
-        field: 'status',
+        field: 'tracker',
+        label: 'Plume and Infrastructure Projects',
         values: {
-            'operating': 'red',
-            'proposed': 'blue',
-            'cancelled': 'green',
-            'retired': 'orange',
-            'shelved': 'dark grey',
-            'mothballed': 'grey'
+            'plumes-attrib': 'red',
+            'plumes-unattrib': 'orange',
+            'oil-and-gas-extraction-areas': 'blue',
+            'coal-mines': 'blue',
         }
     },
+    filters: [
+        {
+            field: 'tracker',
+            label: 'Plume and Infrastructure Projects',
+            values: ['plumes-attrib', 'plumes-unattrib','oil-and-gas-extraction-areas', 'coal-mines'],
+            values_labels: ['Plumes Attributed', 'Plumes Unattributed','Oil and Gas Extraction Areas', 'Coal Mines'],
+            primary: true
+        },
+        // {
+        //     field: 'infra-filter',
+        //     label: 'Attributed Plume',
+        //     values: ['Y', 'N'],
+        //     values_labels: ['Yes', 'No'],
+        //     // primary: true
+        // },
+        {
+            field: 'status-legend',
+            label: 'Infrastructure Status',
+            values: ['proposed-plus','construction-plus','mothballed-plus', 'retired-plus', 'unknown-plus'], // pre-construction-plus
+            /* value_labels must match order/number in values */
+            values_labels: ['Proposed / Announced / Discovered' ,'Construction / In development','Mothballed / Idle / Shut in','Retired / Closed / Decommissioned','Not applicable / Unknown'] // 'Pre-construction / Pre-permit / Permitted'
+        }
+    ],
 
     // # O&G extraction areas and coal mines by status 
     // plumes by "has attribution information"
     // infrastructure emissions estimates
-    filters: [
-        {
-            field: 'status',
-            /* values need to be specified for ordering */
-            values: ['operating','proposed','cancelled','retired','shelved','mothballed'],
-            primary: true
-        },
-        {
-            field: 'mine-type',
-            label: 'Mine Type',
-            values: ['surface','underground','underground_and_surface', 'unknown'],
-            values_labels: ['Surface','Underground','Underground & Surface', 'Unknown']
-
-        },
-        {
-            field: 'coal-grade',
-            label: 'Coal Grade',
-            values: ['thermal','met','thermal_and_met','unknown'],
-            /* value_labels must match order/number in values */
-            values_labels: ['Thermal','Met','Thermal & Met','Unknown']
-        }
-    ],
-    capacityField: 'circle_value',
-    capacityLabel: '(Mt)',
+    
+    capacityField: 'scaling_col',
+    capacityLabel: 'Emissions (kg/hr)',
 
     // context_layers: [
     //     {
@@ -67,27 +68,30 @@ var config = {
 
 
     /* Labels for describing the assets */
-    assetFullLabel: "Coal Mine Projects",
+    assetFullLabel: "Projects",
     assetLabel: 'projects',
 
     /* the column that contains the asset name. this varies between trackers */
-    nameField: 'project',
+    nameField: 'name',
 
-    
+    wikiField: 'url',
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['project','owner', 'parent', 'capacity', 'production', 'status', 'workforce', 'coalfield', 'country', 'region', 'opening_year', 'closing_year'],
-        labels: ['Project','Owner','Parent','Capacity (Mt)', 'Production (Mt)', 'Status', 'Workforce', 'Coal Field', 'Country', 'Region','Opening year', 'Closing year'],
-        clickColumns: ['project'],
-        rightAlign: ['production','capacity','opening_year, closing_year']
+        values: ['name','plume_emissions', 'emission_uncertainty','infra_type', 'date','infra_name','well_id', 'gov_assets', 'infra_url', 'subnational', 'areas'],
+        labels: ['Project', 'Emissions (kg/hr)', 'Emissions Uncertainity (kg/hr)','Type of Infrastructure','Observation Date','GEM Infrastructure Name', 'Government Well ID', 'California VISTA and other Government ID Assets','Infrastructure Wiki', 'Subnational', 'Country/Area'],
+        clickColumns: ['name'],
+        rightAlign: ['Government Well ID','plume_emissions','date']
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Project': ['project'], 
-        'Companies': ['owner', 'parent'],
-        'Opening Year': ['opening_year']
+    searchFields: { 'Country': ['country']
+        // 'Project': ['name'], 
+        // 'Companies': ['owners'],
+        // 'Type of Infrastructure': ['infra_type'],
+        // 'Government Well ID': ['well_id'],
+        // // 'California VISTA and other Government ID Assets': ['gov_assets']
     },
 
     /* define fields and how they are displayed. 
@@ -98,15 +102,23 @@ var config = {
         `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'project': {'display': 'heading'},
-        'owner': {'label': 'Owner'},
-        'parent': {'label': 'Parent'},
-        'capacity': {'label': 'Capacity (Mt)'},
-        'production': { 'label': 'Production (Mt)' },
-        'workforce': {'label': 'Estimated Workforce'},
-        'opening_year': {'label': 'Opening Year'},
-        'coalfield': {'display': 'location'},
+        'name': {'display': 'heading'},
+        // 'tracker': {'label': 'Tracker Type'},
+        'owners': {'label': 'Owner'},
+        'est_emissions': {'label': 'Estimated emissions'},
+        'plume_emissions': {'label': 'Emissions (kg/hr)'},
+        'emission_uncertainty': {'label': 'Emissions Uncertainity (kg/hr)'},
+        'infra_type': {'label': 'Type of Infrastructure'},
+        'infra_name': { 'label': 'Attributed Infrastructure Project Name'},
+        'date': {'label': 'Observation Date'},
+        'status': {'label': 'Status'},
+        'instrument': {'label': 'Instrument'},
+        'infra_url': {'display': 'hyperlink'},
+        'subnational': {'display': 'location'},
         'country': {'display': 'location'}
     }, 
+
+    linkField: 'map_id',
+
     showCapacityTable: false
 }

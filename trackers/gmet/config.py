@@ -17,6 +17,9 @@ gem_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-
 
 tracker = 'gmet'
 
+
+local_file_path = f'/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gmet/test/{today_date}ready_to_be_manipulated.csv'
+
 path_for_download_and_map_files = gem_path + tracker + '/compilation_output/' + iso_today_date_folder
 os.makedirs(path_for_download_and_map_files, exist_ok=True)
 path_for_download_and_map_files_test = gem_path + tracker + '/test/'
@@ -24,4 +27,31 @@ os.makedirs(path_for_download_and_map_files_test, exist_ok=True)
 
 
 gmet_key = '12ldx50_HANStnL5bwYDDrbo08jsb2-KM53rOyLVNE3Q'
-gmet_tabs = ['Coal Mines', 'Oil and Gas Extraction Areas', 'Oil and Gas Reserves', 'Pipelines', 'Plumes']
+gmet_tabs = ['Coal Mines', 'Oil and Gas Extraction Areas', 'Oil and Gas Reserves', 'Plumes'] # Pipelines
+
+filler_wiki_url = 'https://globalenergymonitor.org/projects/global-methane-emitters-tracker/'
+
+status_legend = {
+                # proposed-plus
+                'proposed': 'proposed-plus',
+                'announced': 'proposed-plus',
+                'discovered': 'proposed-plus',
+                # pre-construction-plus
+                'pre-construction': 'pre-construction-plus',
+                'pre-permit': 'pre-construction-plus',
+                'permitted': 'pre-construction-plus',
+                # construction-plus
+                'construction': 'construction-plus',
+                'in development': 'construction-plus',
+                # mothballed
+                'mothballed': 'mothballed-plus',
+                'idle': 'mothballed-plus',
+                'shut in': 'mothballed-plus',
+                # retired
+                'retired': 'retired-plus',
+                'closed': 'retired-plus',
+                'decommissioned': 'retired-plus',
+                # unknown
+                'n/a': 'unknown-plus',
+                '': 'unknown-plus'
+                }

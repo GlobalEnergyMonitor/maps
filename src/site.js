@@ -748,7 +748,7 @@ function geoJSON2Table() {
     return config.preLinkedGeoJSON.features.map(feature => {
         return config.tableHeaders.values.map((header) => {
             if ('clickColumns' in config.tableHeaders && config.tableHeaders.clickColumns.includes(header)) {
-                return "<a href='" + feature.properties[config.linkField] + "' target='_blank'>" + feature.properties[header] + '</a>'; 
+                return "<a href='" + feature.properties[config.wikiField] + "' target='_blank'>" + feature.properties[header] + '</a>'; 
             } else {
                 return feature.properties[header];
             }
@@ -837,7 +837,11 @@ function displayDetails(features) {
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'][1] + '</span>: ' + least.toString() + ' - ' + greatest.toString() + '<br/>';          
                     }
                 }
-                
+            } else if (config.detailView[detail]['display'] == 'hyperlink') {
+
+                // detail_text += '<span class="fw-bold">' + 'Infrastructure Wiki' + '</span>: ' + '<a href="' + features[0].properties[detail] + '" target="_blank"></a><br/>';
+                detail_text += '<br/><a href="' + features[0].properties[detail] + '" target="_blank">More Info on the related infrastructure project here</a><br/>';
+            
             } else if (config.detailView[detail]['display'] == 'location') {
 
                 if (Object.keys(features[0].properties).includes(detail)) {
@@ -846,7 +850,6 @@ function displayDetails(features) {
                     }
                     location_text += features[0].properties[detail];
                 }
-
             }
         } else {
             if (features[0].properties[detail] != '') {
@@ -855,7 +858,20 @@ function displayDetails(features) {
                 } else {
                     detail_text += features[0].properties[detail] + '<br/>';
                 }
+
+            } else if (features[0].properties[detail] == 'undefined') {
+
+
+                detail_text += '';
+                
+            } else if (features[0].properties[detail] == ' ') {
+
+
+                detail_text += '';
+                
             }
+            
+
         }
     });
 
@@ -887,7 +903,7 @@ function displayDetails(features) {
             (config.selectModal != '' ? '<span onClick="showSelectModal()"><img id="modal-back" src="../../src/img/back-arrow.svg" /></span>' : '') +
             '<img id="detail-location-pin" src="../../src/img/location.svg" width="30">' +
             '<span class="detail-location">' + location_text + '</span><br/>' +
-            '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.linkField] + '" target="_blank">MORE INFO</a></span>' +
+            '<span class="align-bottom p-1" id="detail-more-info"><a href="' + features[0].properties[config.wikiField] + '" target="_blank">MORE INFO</a></span>' +
             (config.showAllPhases && features.length > 1 ? '<span class="align-bottom p-1" id="detail-all-phases"><a onClick="showAllPhases(\'' + link + '\')">ALL PHASES</a></span>' : '') +
         '</div>' +
         '<div class="col-sm-7 py-2" id="total_in_view">' + detail_text +

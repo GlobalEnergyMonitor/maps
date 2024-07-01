@@ -298,6 +298,7 @@ def find_missing_coords(df):
     if df['tracker'].loc[0] == 'GOGET':
         print('Matzen')
         print(df[df['Unit ID']=='OG0000001'])
+    # TODO 
     df = df.dropna(subset = ['float_col_clean_lat', 'float_col_clean_lng'])
     if df['tracker'].loc[0] == 'GOGET':
         print('Matzen')
@@ -842,3 +843,5 @@ gdf_to_geojson(africa_gdf_country_update, f'{path_for_download_and_map_files}{ge
 # #     print(df_africa[df_africa['tracker']== tracker]['capacity'])
 # #     print(df_africa[df_africa['tracker']== tracker]['conversion_factor'])
 africa_gdf_country_update.to_excel(f'{path_for_download_and_map_files}{geojson_file_of_all_africa.split(".geojson")[0]}.xlsx', index=False)
+
+
