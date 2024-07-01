@@ -9,6 +9,7 @@ var config = {
 
         ],
     tileSourceLayer: 'integrated',
+    projection: 'globe',
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
@@ -43,9 +44,12 @@ var config = {
     ],
     nameField: 'Plant/project name',
     statusField: 'Status',
+    statusDisplayField: 'Status',
     capacityField: 'Capacity (MW)',
+    capacityDisplayField: 'Capacity (MW)',
     capacityLabel: 'Capacity (MW)',
     linkField: 'Wiki URL',
+    urlField: 'Wiki URL',
     countryField: 'Country',
     searchFields: { 'Project': ['Plant/project name'], 
         'Companies': ['Owner', 'Parent'],
@@ -70,5 +74,5 @@ var config = {
         'Subnational unit (province/state)': {'display': 'location'},
         'Country': {'display': 'location'}
     },
-    zoomFactor: .8
+    zoomFactor: 1
 };
