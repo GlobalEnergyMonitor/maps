@@ -770,7 +770,7 @@ function filterGeoJSON() {
         }
         if (config.selectedCountries.length > 0) {
             //update to handle multiple countries selected, and handle when countries are substrings of each other
-            if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(',').includes(value)).length == 0) include = false;
+            if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(';').includes(value)).length == 0) include = false;
             //if (! (feature.properties[config.countryField].includes( config.selectedCountries.join(',')))) include = false;
             //if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
         }

@@ -95,11 +95,19 @@ var config = {
             values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
             values_labels: ['Operating','Proposed / Announced / Discovered','Pre-construction / Pre-permit / Permitted', 'Construction / In development','Retired / Closed / Decommissioned','Cancelled','Mothballed / Idle / Shut in','Shelved']
 
-        }
+        },
+
+        // {
+        //     field: 'tracker-display',
+        //     values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
+        //     values_labels: ['Operating','Proposed / Announced / Discovered','Pre-construction / Pre-permit / Permitted', 'Construction / In development','Retired / Closed / Decommissioned','Cancelled','Mothballed / Idle / Shut in','Shelved']
+
+        // }
     ],
     capacityField: 'scaling-capacity',
     
     capacityDisplayField: 'capacity',
+    capacityLabel: '',
     //interpolate: ["cubic-bezier", 0, 0, 0, 1],
     //can be string for single value, or hash. always single value is showMaxCapacity is true
     // capacityLabel: {
@@ -124,7 +132,8 @@ var config = {
     //         'GCTT':	'million tonnes coal/y'
     //     }
     // },
-    capacityLabel: '',
+    // skipCapacitySum: '',
+
     capItemLabel:  {
             field: 'tracker-custom',
             values: {
@@ -186,22 +195,25 @@ var config = {
 //    linkField: 'id',
 
     countryFile: 'countries.js',
-    allCountrySelect: false,
+    allCountrySelect: true, //why was this false? 
     countryField: 'areas',
     //if multicountry, always end values with a comma
     multiCountry: true,
 
     tableHeaders: {
         values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity', 'production','status', 'areas', 'start-year'],
-        labels: ['Tracker', 'Name','Unit','Owner', 'Parent','Capacity', 'Production','Status','Countries','Start year'],
+        labels: ['Tracker', 'Name','Unit','Owner', 'Parent','Capacity', 'Production','Status','Countries','Start year', ],
+        
+        // 'capacity-oil', 'capacity-gas'
+        // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
         clickColumns: ['project'],
-        rightAlign: ['unit','capacity','production','start-year'],
-        removeLastComma: ['areas'], // TODO change this to ;
+        rightAlign: ['unit','capacity','production','start-year'], 
+        removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
-        appendValue: {'capacity': "capItemLabel"},
-        appendValue: {'production': "prodItemLabel"},
-        appendValue: {'capacity-oil': "prodItemLabel"},
-        appendValue: {'capacity-gas': "prodItemLabel"},
+        // appendValue: {'capacity': "capItemLabel"},
+        // appendValue: {'production': "prodItemLabel"},
+        // appendValue: {'capacity-oil ': "prodItemLabel"},
+        // appendValue: {'capacity-gas': "prodItemLabel"},
 
     },
     searchFields: { 'Project': ['name'], 
@@ -216,10 +228,10 @@ var config = {
         'capacity-gas': {'label': 'Production Gas'},
         'prod-year-oil': {'label': 'Production year - oil (Million bbl/y)'},
         'prod-year-gas': {'label': 'Production year - gas (Milliion m³/y)'},
-        'start-year': {'label': 'Start Year'},
-        'owner': {'label': 'Owner'},
-        'parent': {'label': 'Parent'},
-        'river': {'label': 'River'},
+        // 'start-year': {'label': 'Start Year'},
+        // 'owner': {'label': 'Owner'},
+        // 'parent': {'label': 'Parent'},
+        // 'river': {'label': 'River'},
         'tracker-display': {'label': 'Tracker'},
         'subnat': {'display': 'location'},
         'areas': {'display': 'location'}
