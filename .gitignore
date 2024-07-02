@@ -2,9 +2,9 @@
 .~lock*
 node_modules/
 npm-debug.log
-*.json
+
 .env
 *.zip
-*.geojson
+
 *.dir
 

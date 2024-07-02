@@ -59,6 +59,7 @@ def gspread_access_file_read_only(key, tab_list):
         df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
         df = df.replace('*', pd.NA).replace('Unknown', pd.NA) # TODO maybe deal in another way?
         df = df.dropna()
+        df = df.fillna('')
         list_of_dfs.append(df)
 
     if len(list_of_dfs) > 1: 
@@ -430,8 +431,8 @@ def assign_conversion_factors(list_of_gdfs, conversion_df):
     augmented_list_of_gdfs = []
     for gdf in list_of_gdfs:
         gdf = gdf.copy()
-        print(gdf['tracker'].loc[0])
-        print(gdf['geometry'])
+        # print(gdf['tracker'].loc[0])
+        # print(gdf['geometry'])
         # print(type(df))
         # print(df.columns.to_list()) # it's saying tracker is equalt to custom_tracker for ggit-lng shouldn't be the case 
 
@@ -460,8 +461,8 @@ def assign_conversion_factors(list_of_gdfs, conversion_df):
                     gdf.loc[row, 'conversion_factor'] = conversion_df[conversion_df['tracker']=='GGIT - import']['conversion_factor'].values[0]
             # now let's rename GGIT tracker so lng is not needed
             # df['tracker'] = 'GGIT'
-            print(gdf['tracker'])
-            print(gdf['tracker_custom'])
+            # print(gdf['tracker'])
+            # print(gdf['tracker_custom'])
             augmented_list_of_gdfs.append(gdf)
 
         else:
@@ -478,13 +479,12 @@ def assign_conversion_factors(list_of_gdfs, conversion_df):
 list_of_gdfs_with_conversion = assign_conversion_factors(custom_list_of_gdfs, conversion_df)
 
 
-
-
 def rename_dfs(list_of_dfs_with_conversion):
     # renaming_cols_dict['GGIT -lng'] = {renaming dict}
     # renaming_dict = {} # GOGPT: {col:newcol, col2:newcol2}
     renamed_dfs = []
     all_trackers = []
+    len_africa = 0 # initialize
     print(f'Length of original gdfs: {len(list_of_dfs_with_conversion)}')
     # print(list_of_gdfs)
     for df in list_of_dfs_with_conversion:
@@ -493,10 +493,14 @@ def rename_dfs(list_of_dfs_with_conversion):
         # print(item['tracker_custom'])
         tracker_sel = df['tracker'].iloc[0] # GOGPT, GGIT, GGIT - lng, GOGET
         print(tracker_sel)
+        
         # tracker_sel = tracker_sel.split('-')[0]
         all_trackers.append(tracker_sel)
         renaming_dict_sel = renaming_cols_dict[tracker_sel]
         df = df.rename(columns=renaming_dict_sel) 
+        # print(f"Len of df name col: {len(df['name'])}")
+        print(f"Len of df region africa:{len(df[df['region']=='Africa'])}")
+        len_africa += (len(df[df['region']=='Africa']))
 
         # df = find_missing_cap(df) # no need them will fill in average ... still remember for GOGET to differentiate use cap-gas if custom_tracker gas etc
 
@@ -511,7 +515,10 @@ def rename_dfs(list_of_dfs_with_conversion):
     # concat all gdfs 
     one_df = pd.concat(renamed_dfs, sort=False).reset_index(drop=True)
     one_df = one_df.drop_duplicates(subset=['id', 'geometry'])
-    # print(one_df.columns)
+    
+    
+    
+    print(f'This is oned_df columns lets see if there are two names: {one_df.columns}')
     df = one_df[final_cols]
     print(df.columns)
     df.to_csv(f'concatted_df{today_date}.csv')
@@ -523,6 +530,43 @@ concatted_gdf = rename_dfs(list_of_gdfs_with_conversion)
 
 # END HERE FOR NEW PULL ##
 
+# TODO 
+def handle_multiple_countries(gdf):
+    # replace separate , with ;
+    # parse out so that area1 has an appropriate africa_countries
+    gdf = gdf.copy()
+    
+    country_exceptions = ['Saint Helena, Ascension and Tristan da Cunha (UK)', 'Guinea-Bissau']
+    
+    print(f"List of areas before handle mult countries: {set(gdf['areas'].to_list())}")
+    # goget
+    gdf['areas'] = gdf['areas'].fillna('')
+    # assign first one to area like all other countries 
+    gdf['area'] = gdf.apply(lambda row: row['areas'] if row['areas'] in country_exceptions or '-' not in row['areas'] else row['areas'].split('-')[0], axis=1)
+    # assign second one to new column so can merge together later if needed for goget list
+    gdf['area_extra'] = gdf.apply(lambda row: row['areas'].split('-')[1] if '-' in row['areas'] and row['areas'] not in country_exceptions else '', axis=1)
+    
+    # pipelines 
+    # assign first one to area like all other countries 
+    # assign actual coutnry if its in exceptions otherwise split on -
+    gdf['area'] = gdf.apply(lambda row: row['areas'] if row['areas'] in country_exceptions else row['areas'].split('-')[0], axis=1)
+    # assign actual coutnry declared in previous line if its in exceptions, otherwise split on ,
+
+    gdf['area'] = gdf.apply(lambda row: row['area'] if row['area'] in country_exceptions else row['areas'].split(',')[0], axis=1)
+
+    # now make it so that areas will be a good list of them all separated by ;
+    gdf['areas'] = gdf['areas'].apply(lambda x: x if x in country_exceptions else x.strip().replace('-',';'))
+    gdf['areas'] = gdf['areas'].apply(lambda x: x if x in country_exceptions else x.strip().replace(',',';'))
+    gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('; ', ';'))
+    print(f"List of areas after handle mult countries: {set(gdf['areas'].to_list())}")
+
+    print(f"List of area after handle mult countries: {set(gdf['area'].to_list())}")
+
+    
+    return gdf
+
+concatted_gdf = handle_multiple_countries(concatted_gdf)
+
 def filter_by_country_all_gdfs(gdf):
     # df = pd.read_csv(file_path) # file_path in config file
     print(f'length of df at start of filter by country: {len(gdf)}')
@@ -532,12 +576,15 @@ def filter_by_country_all_gdfs(gdf):
     # df['areas'] = df['areas'].apply(lambda x: x.split(','))
     # df['areas'] = df[df['tracker']=='GOGET']['areas'].apply(lambda x: x.split('-'))
     
-    africa_df1 = gdf[gdf['areas'].isin(africa_countries)]  
-    africa_df2 = gdf[gdf['area1'].isin(africa_countries)]
-    africa_df3 = gdf[gdf['region']=='Africa']
-    africa_df = pd.concat([africa_df1, africa_df2])
-    africa_df = pd.concat([africa_df, africa_df3])
-    africa_df = africa_df.drop_duplicates(subset='id')
+    africa_df1 = gdf[gdf['area'].isin(africa_countries)] 
+    # don't need this anymore because should have all fixed so no need to use region 
+    # africa_df2 = gdf[gdf['area1'].isin(africa_countries)]
+    # africa_df3 = gdf[gdf['region']=='Africa']
+    # africa_df = pd.concat([africa_df1, africa_df2])
+    # africa_df = pd.concat([africa_df, africa_df3])
+    print(f'filter by country before drop dup on id: {len(africa_df1)}')
+
+    africa_df = africa_df1.drop_duplicates(subset='id')
     # africa_df = df['areas'].apply_row(lambda x: row.drop() if x not in africa_countries else row) 
     print(f'filter by country: {len(africa_df)}')
 
@@ -557,7 +604,7 @@ def remove_null_geo(concatted_gdf):
     print(f'length of df at after filter for point and line geo: {len(filtered_geo)}')
     dropped_geo = pd.concat([concatted_gdf, filtered_geo], ignore_index=True).drop_duplicates(keep=False)
     print(dropped_geo)
-    print(dropped_geo[['tracker','name', 'geometry']])
+    print(dropped_geo[['tracker', 'name', 'geometry']])
     
     return filtered_geo
 
@@ -743,30 +790,17 @@ def map_ready_countries(gdf):
     # GOIT has comma separated in countries
     # hydropower has two columns country1 and country2
     # GGIT has comma separated in countries
-    print(set(gdf_map_ready['areas'].to_list()))
-    test = gdf_map_ready[gdf_map_ready['areas']=='Senegal-Mauritania'] 
-    print(test)
-    gdf_map_ready['areas'] = gdf_map_ready['areas'].apply(lambda x: x.replace('-', ',')) # for goget
 
+    gdf_map_ready['area2'] = gdf_map_ready['area2'].fillna('')
     for row in gdf_map_ready.index:
-        # for ggit, goit
-        if ',' in gdf_map_ready.loc[row, 'areas']:
-            gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'areas']},"
-            print(f"Found a comma! GGIT or GOIT? {gdf_map_ready.loc[row, 'areas']}{gdf_map_ready.loc[row, 'area2']} {gdf_map_ready.loc[row, 'tracker']} {gdf_map_ready.loc[row, 'name']}")
 
-        # for goget
-        elif '-' in gdf_map_ready.loc[row, 'areas']:
-            gdf_map_ready.loc[row, 'areas'] = gdf_map_ready.loc[row, 'areas'].replace('-', ',')
-            gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'areas']},"
-            print(f"Found a hyphen! GOGET? {gdf_map_ready.loc[row, 'areas']} {gdf_map_ready.loc[row, 'tracker']} {gdf_map_ready.loc[row, 'name']}")
-            
-        elif gdf_map_ready.loc[row, 'area2'] != '':
-            gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'area1']},{gdf_map_ready.loc[row, 'area2']},"
-            print(f"Found a area2! Hydro? {gdf_map_ready.loc[row, 'areas']}  {gdf_map_ready.loc[row, 'tracker']} {gdf_map_ready.loc[row, 'name']}")
+        if gdf_map_ready.loc[row, 'area2'] != '':
+            gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'area1'].strip()};{gdf_map_ready.loc[row, 'area2'].strip()};"
+            print(f"Found a area2! Hydro? {gdf_map_ready.loc[row, 'areas']} {gdf_map_ready.loc[row, 'tracker']} {gdf_map_ready.loc[row, 'name']}")
 
         else:
             # make it so all areas even just one end with a comma 
-            gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'areas']},"
+            gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'areas'].strip()};"
 
             pass
 
@@ -775,13 +809,37 @@ def map_ready_countries(gdf):
 
 def last_min_fixes(africa_gdf_country_update):
     gdf = africa_gdf_country_update.copy()
-    
-    gdf = gdf.drop(['original_units','conversion_factor', 'area1', 'area2', 'region1', 'region2', 'subnat1', 'subnat2', 'capacity1', 'capacity2', 'Latitude', 'Longitude', 'cleaned_cap'], axis=1)
+    gdf['name'] = gdf['name'].fillna('')
+    gdf['url'] = gdf['url'].fillna('')
+
+    gdf = gdf.drop(['original_units','conversion_factor', 'area1', 'area2', 'region2', 'subnat1', 'subnat2', 'capacity1', 'capacity2', 'Latitude', 'Longitude', 'cleaned_cap'], axis=1)
     # handle countries/areas ? 
     # gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Guinea,Bissau','Guinea-Bissau')) # reverse this one special case back 
     print(gdf[gdf['areas']=='']) # check if missing!!   
     # handle situation where Guinea-Bissau IS official and ok not to be split into separate countries 
     gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Guinea,Bissau','Guinea-Bissau')) 
+    
+    # something is happening when we concat, we lose goget's name ... 
+    # gdf_empty_name = gdf[gdf['name']=='']
+    mask_empty_url= gdf['url'] == ''
+    print(f"This is cols for gdf: {gdf.columns}")
+    gdf['wiki-from-name'] = gdf.apply(lambda row: f"https://www.gem.wiki/{row['name'].strip().replace(' ', '_')}", axis=1)
+    # row['url'] if row['url'] != '' else 
+    gdf['url'] = gdf.apply(lambda row: row['wiki-from-name'] if row['url'] == '' else row['url'], axis=1)
+    
+    # gdf['name'] = gdf.apply(lambda row: row['name'] if row['name'] != '' else row['url'].split('www.gem.wiki/')[1].replace('_', ' '))
+
+    gdf_empty_url = gdf[gdf['url'] == '']
+    
+    print(gdf_empty_url[['tracker', 'wiki-from-name', 'url']])
+    
+    # assign Africa to all regions
+    gdf['region'] = 'Africa'
+    
+    gdf.columns = [col.replace('_', '-') for col in gdf.columns]    
+    # let's also look into empty url, by tracker I can assign a filler
+    
+    # gdf['url'] = gdf['url'].apply(lambda row: row[filler_url] if row['url'] == '' else row['url'])
     
     return gdf
 
