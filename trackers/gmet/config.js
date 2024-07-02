@@ -31,7 +31,7 @@ var config = {
             field: 'tracker',
             label: 'Plume and Infrastructure Projects',
             values: ['plumes-attrib', 'plumes-unattrib','oil-and-gas-extraction-areas', 'coal-mines'],
-            values_labels: ['Plumes Attributed', 'Plumes Unattributed','Oil and Gas Extraction Areas', 'Coal Mines'],
+            values_labels: ['Plumes (has attribution information) ', 'Plumes (no attribution information)','Oil and Gas Extraction Areas', 'Coal Mines'],
             primary: true
         },
         // {
@@ -55,7 +55,9 @@ var config = {
     // infrastructure emissions estimates
     
     capacityField: 'scaling_col',
-    capacityLabel: 'Emissions (kg/hr)',
+    capacityLabel: '', // for gmet that has no capacity but only emissions data
+
+    // capacityLabel: 'not applicable'
 
     // context_layers: [
     //     {
@@ -88,8 +90,8 @@ var config = {
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Country': ['country']
-        // 'Project': ['name'], 
+    searchFields: { 'Country': ['country'],
+        'Project': ['name'], 
         // 'Companies': ['owners'],
         // 'Type of Infrastructure': ['infra_type'],
         // 'Government Well ID': ['well_id'],
@@ -115,7 +117,7 @@ var config = {
         'date': {'label': 'Observation Date'},
         'status': {'label': 'Status'},
         'instrument': {'label': 'Instrument'},
-        'infra_url': {'display': 'hyperlink'},
+        // 'infra_url': {'display': 'hyperlink'},
         'subnational': {'display': 'location'},
         'country': {'display': 'location'}
     }, 

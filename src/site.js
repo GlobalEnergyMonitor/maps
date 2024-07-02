@@ -1042,7 +1042,11 @@ function displayDetails(features) {
             '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
             detail_capacity +
             '</div>';
-    } else {
+    } else if (capacityLabel == ''){ //for gmet emissions has no capacity field 
+        detail_text += '';
+
+    } 
+    else {
         detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
             '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
         detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + features[0].properties[config.capacityDisplayField] + ' ' + capacityLabel;

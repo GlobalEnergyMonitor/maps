@@ -44,7 +44,7 @@ def fix_coords(df, lat='Latitude', lng='Longitude'):
     print("Check which rows will be dropped because nan coords:")
     print(df[df.isna().any(axis=1)])
     nan_df = df[df.isna().any(axis=1)]
-    nan_df.to_csv(f'{df["tracker"].loc[0]}_nan_coords_{today_date}.csv')
+    nan_df.to_csv(f'test/{df["tracker"].loc[0]}_nan_coords_{today_date}.csv')
 
     print(f"This is tracker: {df['tracker'].loc[0]}")
     print(f"This is lat: {lat}")
@@ -96,7 +96,7 @@ def gspread_access_file_read_only(key, tab_list):
             # filter out -- geom
             df = df[df['WKTFormat']!= '--']
             df_na = df[df['WKTFormat']== '--']
-            df_na.to_csv(f'{tab}_nan_coords_{today_date}.csv')
+            df_na.to_csv(f'test/{tab}_nan_coords_{today_date}.csv')
             list_of_dfs.append(df)
 
         elif tab == 'Plumes':
@@ -242,7 +242,7 @@ def rename_dfs(list_of_dfs):
     else: 
         for i in renamed_list_of_dfs:
             df = i
-    df.to_csv('gmet_concatted.csv')
+    df.to_csv('test/gmet_concatted.csv')
     return df
 
 gmet_df = rename_dfs(list_of_dfs)
@@ -359,7 +359,7 @@ def inspect_goget(df):
     goget_merged_df = goget_merged_df.drop_duplicates(subset='goget_id')
     goget_merged_df = goget_merged_df.fillna('')
     goget_merged_df = goget_merged_df[goget_merged_df['tracker']!='']
-    goget_merged_df.to_csv('goget_merged_df.csv')
+    goget_merged_df.to_csv('test/goget_merged_df.csv')
     print(f"len of all other df: {len(all_other_df)}")
     new_list_to_concat = []
     for tracker in set(all_other_df['tracker'].to_list()):
@@ -367,7 +367,7 @@ def inspect_goget(df):
         print(tracker)
     
     goget_merged_df = goget_merged_df[goget_merged_df['tracker']!='']    
-    goget_merged_df.to_csv('goget_merged_df_after_drop.csv')
+    goget_merged_df.to_csv('test/goget_merged_df_after_drop.csv')
 
         # now we don't need reserves so drop it
     for tracker in set(goget_merged_df['tracker'].to_list()):
