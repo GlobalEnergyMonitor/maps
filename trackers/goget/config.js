@@ -44,8 +44,8 @@ var config = {
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
     capacityField: 'capacity',
-    capacityLabel: 'million boe/y',
-
+    // capacityLabel: 'million boe/y',
+    capacityLabel: '',
     /* Labels for describing the assets */
     assetFullLabel: "Oil & Gas Extraction Areas",
     assetLabel: 'areas',

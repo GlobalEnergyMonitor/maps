@@ -1015,7 +1015,10 @@ function displayDetails(features) {
         : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];
 
     // Build capacity summary
-    if (features.length > 1) {   
+    if (capacityLabel == ''){
+        detail_text += '';
+    }
+    else if (features.length > 1) {   
        let filterIndex = 0;
         for (const[index, filter] of config.filters.entries()) {
             if (filter.field == config.statusField) {
@@ -1042,10 +1045,7 @@ function displayDetails(features) {
             '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
             detail_capacity +
             '</div>';
-    } else if (capacityLabel == ''){ //for gmet emissions has no capacity field 
-        detail_text += '';
-
-    } 
+    }
     else {
         detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
             '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
@@ -1283,7 +1283,7 @@ function getCoordinatesDump(gj) {
 }
 
 function removeLastComma(str) {
-    if (str.charAt(str.length - 1) === ',') {
+    if (str.charAt(str.length - 1) === ';') {
         str = str.slice(0, -1);
     }
     return str;
