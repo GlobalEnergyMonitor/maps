@@ -13,6 +13,7 @@ client_secret_full_path = os.path.expanduser("~/") + client_secret
 gem_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
 
 tracker_folder = 'africa-energy'
+path_for_test_results = gem_path + tracker_folder + '/test_results/'
 geojson_file_of_all_africa = f'africa_energy_tracker_{iso_today_date}.geojson'
 path_for_download_and_map_files = gem_path + tracker_folder + '/compilation_output/' + iso_today_date_folder
 
@@ -97,6 +98,25 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country':
                                    'UnitName': 'unit_name', 'Status': 'status', 'Country': 'areas', 'Owner': 'owner', 
                                    'Parent': 'parent', 'CapacityInMtpa': 'capacity', 'StartYearEarliest': 'start_year', 'Region': 'region', 
                                    'State/Province': 'subnat'}}
+
+tracker_to_fullname = {
+                    "GCPT": "coal power station",
+                    "GOGPT": "oil & gas power station",
+                    "GBPT": "bioenergy power station",
+                    "GNPT": "nuclear power plant",
+                    "GSPT": "solar power plant",  # GSPT is used for both "solar thermal" and "solar PV"
+                    "GWPT": "wind power plant",
+                    "GHPT": "hydropower plant",
+                    "GGPT": "geothermal power plant",
+                    "GOGET - oil": "oil extraction area",
+                    "GOGET - gas": "gas extraction area",
+                    "GOIT": "oil pipeline",
+                    "GGIT": "gas pipeline",
+                    "GGIT - import": "LNG import terminal",
+                    "GGIT - export": "LNG export terminal",
+                    "GCMT": "coal mine",
+                    "GCTT": "coal terminal"
+}
 
 # concatted_file_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/concatted_df2024-06-24.csv'
 

@@ -73,7 +73,7 @@ var config = {
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
-    statusField: 'status-legend',
+    statusField: 'status',
     statusDisplayField: 'status',
     color: {
         field: 'status-legend',
@@ -92,38 +92,70 @@ var config = {
     filters: [
         {
             field: 'status-legend',
-            values: ['operating','proposed-plus','construction-plus','pre-construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
-            values_labels: ['Operating','Proposed+','Construction+','Pre-Construction+','Retired+','Cancelled','Mothballed+','Shelved']
+            values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
+            values_labels: ['Operating','Proposed / Announced / Discovered','Pre-construction / Pre-permit / Permitted', 'Construction / In development','Retired / Closed / Decommissioned','Cancelled','Mothballed / Idle / Shut in','Shelved']
 
         }
     ],
     capacityField: 'scaling-capacity',
+    
     capacityDisplayField: 'capacity',
     //interpolate: ["cubic-bezier", 0, 0, 0, 1],
     //can be string for single value, or hash. always single value is showMaxCapacity is true
-    capacityLabel: {
+    // capacityLabel: {
+    //     field: 'tracker-custom',
+    //     values: {
+    //         'GCPT': 'MW',
+    //         'GOGPT': 'MW',
+    //         'GBPT':	'MW',
+    //         'GNPT':	'MW',
+    //         'GSPT':	'MW',
+    //         'GSPT':	'MW',
+    //         'GWPT':	'MW',
+    //         'GHPT':	'MW',
+    //         'GGPT':	'MW',
+    //         'GOGET - oil':	'million boe/y',
+    //         'GOGET - gas':	'million m³/y',
+    //         'GOIT': 'boe/d',
+    //         'GGIT':	'Bcm/y of natural gas',
+    //         'GGIT - import': 'MTPA of natural gas',
+    //         'GGIT - export': 'MTPA of natural gas',
+    //         'GCMT':	'million tonnes coal/y',
+    //         'GCTT':	'million tonnes coal/y'
+    //     }
+    // },
+    capacityLabel: '',
+    capItemLabel:  {
+            field: 'tracker-custom',
+            values: {
+                'GCPT': 'MW',
+                'GOGPT': 'MW',
+                'GBPT':	'MW',
+                'GNPT':	'MW',
+                'GSPT':	'MW',
+                'GSPT':	'MW',
+                'GWPT':	'MW',
+                'GHPT':	'MW',
+                'GGPT':	'MW',
+                // 'GOGET - oil':	'million boe/y',
+                // 'GOGET - gas':	'million m³/y',
+                'GOIT': 'boe/d',
+                'GGIT':	'Bcm/y of natural gas',
+                'GGIT - import': 'MTPA of natural gas',
+                'GGIT - export': 'MTPA of natural gas',
+                // 'GCMT':	'million tonnes coal/y',
+                'GCTT':	'million tonnes coal/y'
+            }
+        },
+    prodItemLabel: {
         field: 'tracker-custom',
-        values: {
-            'GCPT': 'MW',
-            'GOGPT': 'MW',
-            'GBPT':	'MW',
-            'GNPT':	'MW',
-            'GSPT':	'MW',
-            'GSPT':	'MW',
-            'GWPT':	'MW',
-            'GHPT':	'MW',
-            'GGPT':	'MW',
-            'GOGET - oil':	'million boe/y',
-            'GOGET - gas':	'million m³/y',
-            'GOIT': 'boe/d',
-            'GGIT':	'Bcm/y of natural gas',
-            'GGIT - import': 'MTPA of natural gas',
-            'GGIT - export': 'MTPA of natural gas',
-            'GCMT':	'million tonnes coal/y',
-            'GCTT':	'million tonnes coal/y'
-        }
+            values: {
+                'GOGET - oil':	'million boe/y',
+                'GOGET - gas':	'million m³/y',
+                'GCMT':	'million tonnes coal/y'
+            }
     },
-    
+    //productionLabel NEED a productionLabel
     showMaxCapacity: false,
 
     assetFullLabel: "",
@@ -160,13 +192,17 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker-custom','name','unit-name', 'owner', 'parent', 'capacity', 'status', 'areas', 'start-year'],
-        labels: ['Tracker', 'Name','Unit','Owner', 'Parent','Capacity','Status','Countries','Start year'],
+        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity', 'production','status', 'areas', 'start-year'],
+        labels: ['Tracker', 'Name','Unit','Owner', 'Parent','Capacity', 'Production','Status','Countries','Start year'],
         clickColumns: ['project'],
-        rightAlign: ['unit','capacity','start-year'],
+        rightAlign: ['unit','capacity','production','start-year'],
         removeLastComma: ['areas'], // TODO change this to ;
-        displayValue: {'tracker-custom': "assetLabel"},
-        appendValue: {'capacity': "capacityLabel"}
+        // displayValue: {'tracker-display': "assetLabel"},
+        appendValue: {'capacity': "capItemLabel"},
+        appendValue: {'production': "prodItemLabel"},
+        appendValue: {'capacity-oil': "prodItemLabel"},
+        appendValue: {'capacity-gas': "prodItemLabel"},
+
     },
     searchFields: { 'Project': ['name'], 
         'Companies': ['owner', 'parent'],
@@ -174,10 +210,17 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
+        'production': {'label': 'Production'},
+        'capacity': {'label': 'Capacity'},
+        'capacity-oil': {'label': 'Production Oil'},
+        'capacity-gas': {'label': 'Production Gas'},
+        'prod-year-oil': {'label': 'Production year - oil (Million bbl/y)'},
+        'prod-year-gas': {'label': 'Production year - gas (Milliion m³/y)'},
+        'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'river': {'label': 'River'},
-        'tracker': {'label': 'Tracker'},
+        'tracker-display': {'label': 'Tracker'},
         'subnat': {'display': 'location'},
         'areas': {'display': 'location'}
     }

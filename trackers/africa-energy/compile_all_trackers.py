@@ -57,7 +57,7 @@ def gspread_access_file_read_only(key, tab_list):
         # Access a specific tab
         spreadsheet = gsheets.worksheet(tab)
         df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-        df = df.replace('*', pd.NA).replace('Unknown', pd.NA) # TODO maybe deal in another way?
+        df = df.replace('*', pd.NA).replace('Unknown', pd.NA).replace('--', pd.NA) # TODO maybe deal in another way?
         df = df.dropna()
         df = df.fillna('')
         list_of_dfs.append(df)
@@ -116,7 +116,7 @@ def clean_dfs(df):
 
     print("\nNon-Numeric DataFrame:")
     print(non_numeric_df)
-    non_numeric_df.to_csv(f'non_numeric_df_coords_{today_date}.csv')
+    non_numeric_df.to_csv(f'{path_for_test_results}non_numeric_df_coords_{today_date}.csv')
 
                 
     print(f'length of df at end of cleand_dfs removed lat and long empty which is good because all point data:{len(cleaned_df)}')
@@ -126,40 +126,10 @@ def lat_lng_to_Point(df):
 
     df = clean_dfs(df)
     df = df.fillna('')
-    # df = df.drop_duplicates()
-    
-    # for row in df.index:
 
-    #     if df.loc[row,'geometry'] == '':
-    #         # print(df.loc[row,'geometry'])
-
-    #         #             # to rename cols 
-    #         # pass
-    #         if df.loc[row, 'Latitude'] == '':
-
-    #             # df.loc[row, 'Latitude'] = filler_Angola[0]
-    #             # df.loc[row, 'Longitude'] = filler_Angola[1]
-    #             df.loc[row,'geometry'] = Point(filler_Angola[0], filler_Angola[1])
-    #             print(df.loc[row,'geometry'])
-    #             print(f'we had to fill in with filler lat long probably goget mystery')
-
-
-    #         elif df.loc[row, 'Latitude'] != '':
-
-    #             df.loc[row,'geometry'] = Point(df.loc[row,'Longitude'], df.loc[row,'Latitude'])
-    #             print(df.loc[row,'geometry'])
-    #             # print(f'we transformed a lat lng pair to a Point!')
-    #         else:
-    #             print("unsure")
-                    
 
     print('Successfully created a geometry column')
-    # print(df['geometry'])
-    # else:
-    #     # no change needed because already in geojson
-    #     print(f'This was a pipelines dataset, heres the columns: {df.columns}')
-    
-    # print(df.columns)
+
 
     return df
 
@@ -168,18 +138,7 @@ def df_to_gdf(df, geometry_col, crs='EPSG:4326'):
     # gdf = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df[geometry_col]))
     # print(crs)
     gdf = gpd.GeoDataFrame(df, geometry=geometry_col, crs=crs)
-    # gdf.set_crs(epsg=int(crs), inplace=True)  # EPSG:4326  WGS 84
-    
-    # # Convert the GeoDataFrame to GeoJSON format
-    # geojson = gdf.to_json()
-    
-    # # Save the GeoJSON to a file
-    # with open(output_file, 'w') as f:
-    #     f.write(geojson)
-    
-    # gdf.to_file(output_file, driver="GeoJSON")
-    
-    # print(f"GeoJSON file saved to {output_file}")
+
     return gdf
 
 def gdf_to_geojson(gdf, output_file):
@@ -198,33 +157,9 @@ def geojson_to_gdf(geojson_file):
 
     # get crs for final export
     crs = gdf.crs
-    # print(crs)
 
-    # print(gdf.columns)
-    # print(len(gdf))
     pipes_without_geo = gdf[gdf['geometry']==None]
-    # print(len(pipes_without_geo))
-    # pipes_without_geo.to_csv('pipes_without_geo_GOIT_2024-05-22.csv')
-    # gdf = gdf[gdf['geometry']!= None]
-    # print(len(gdf))
 
-
-    # Convert geometries to WKT
-    # gdf['geometry_wkt'] = gdf['geometry'].apply(lambda geom: geom.wkt)
-
-    # # # Convert each geometry to GeoJSON
-    # # gdf['geometry_geojson'] = gdf['geometry'].apply(lambda geom: json.loads(geom.to_json()))
-
-    # # Apply the conversion from multistring and linestring geometry to encoded polylines
-    # gdf['geometry_polyline'] = gdf['geometry'].apply(geom_to_polyline)
-
-    # Display the updated GeoDataFrame
-    # print(gdf[['geometry', 'geometry_wkt', 'geometry_polyline']].head())
-    # gdf[['geometry', 'geometry_wkt', 'geometry_polyline']].to_csv('check_geom_formats.csv')
-
-
-    # If you want to include geometry data as well, you can keep it in the GeoDataFrame or convert it
-    # df_with_geometry = pd.DataFrame(gdf)
     return gdf, crs
 
 
@@ -233,7 +168,18 @@ def geojson_to_gdf(geojson_file):
 #### export functions ####
 
 ####
-# START HERE FOR NEW PULL #
+def get_standard_country_names():
+    
+    df = gspread_access_file_read_only(
+        '1mtlwSJfWy1gbIwXVgpP3d6CcUEWo2OM0IvPD6yztGXI', 
+        ['Countries'],
+    )
+    gem_standard_country_names = df['GEM Standard Country Name'].tolist()
+    
+    return gem_standard_country_names
+
+gem_standard_country_names = get_standard_country_names()
+
 def create_prep_file(key, tab):
     df = gspread_access_file_read_only(key, tab)
 
@@ -295,15 +241,10 @@ def find_missing_coords(df):
     print("Check which rows will be dropped because nan coords:")
     print(df[df.isna().any(axis=1)])
     nan_df = df[df.isna().any(axis=1)]
-    nan_df.to_csv(f'{df["tracker"].loc[0]}_nan_coords_{today_date}.csv')
-    if df['tracker'].loc[0] == 'GOGET':
-        print('Matzen')
-        print(df[df['Unit ID']=='OG0000001'])
-    # TODO 
+    # nan_df.to_csv(f'{path_for_test_results}{df["tracker"].loc[0]}_nan_coords_{today_date}.csv')
+
     df = df.dropna(subset = ['float_col_clean_lat', 'float_col_clean_lng'])
-    if df['tracker'].loc[0] == 'GOGET':
-        print('Matzen')
-        print(df[df['Unit ID']=='OG0000001'])
+
     
     return df
     
@@ -318,7 +259,7 @@ def find_missing_cap(df):
         print("Check which rows will be dropped because nan capacity:")
         print(df[df.isna().any(axis=1)])
         nan_df = df[df.isna().any(axis=1)]
-        nan_df.to_csv(f'{df["tracker"].loc[0]}_nan_capacity_{today_date}.csv')
+        # nan_df.to_csv(f'{path_for_test_results}{df["tracker"].loc[0]}_nan_capacity_{today_date}.csv')
         df = df.dropna(subset = ['float_col_clean_cap'])
         
     return df
@@ -521,16 +462,83 @@ def rename_dfs(list_of_dfs_with_conversion):
     print(f'This is oned_df columns lets see if there are two names: {one_df.columns}')
     df = one_df[final_cols]
     print(df.columns)
-    df.to_csv(f'concatted_df{today_date}.csv')
+    df.to_csv(f'{path_for_test_results}concatted_df{today_date}.csv')
     
     return df
 
 concatted_gdf = rename_dfs(list_of_gdfs_with_conversion)
 
 
-# END HERE FOR NEW PULL ##
+def harmonize_countries(gdf):
+    gdf = gdf.copy()
 
-# TODO 
+
+    """
+    Standardize country names, based on file "GEM Country Naming Conventions"
+    """
+
+    country_col = 'areas'
+        
+    # strip white space
+    gdf[country_col] = gdf[country_col].str.strip()
+        
+    # harmonize countries:
+    country_harm_dict = {
+        'Czechia': 'Czech Republic',
+        'Ivory Coast': "Côte d'Ivoire",
+        "Cote d'Ivoire": "Côte d'Ivoire", # adds accent
+        "Republic of Congo": "Republic of the Congo", # adds "the"
+        "Rep Congo": "Republic of the Congo",
+        "Democratic Republic of Congo": "DR Congo",
+        "Democratic Republic of the Congo": "DR Congo", # in case step above adds "the"
+        "Republic of Guinea": "Guinea",
+        "Republic of Sudan": "Sudan",
+        "FYROM": "North Macedonia",
+        "Chinese Taipei": "Taiwan",
+        "East Timor": "Timor-Leste",
+        "USA": "United States",
+        'Turkey': 'Türkiye',
+        'Canary Islands': 'Spain', 
+    }
+    for key in country_harm_dict.keys():
+        sel = gdf[gdf[country_col]==key]
+        if len(sel) > 0:
+            print(f"Found non-standardized country name before trying to standardize: {key} ({len(sel)} rows)")
+        gdf[country_col] = gdf[country_col].str.replace(key, country_harm_dict[key])
+        
+    # clean up, checking if countries are in standard GEM list
+    hyphenated_countries = ['Timor-Leste', 'Guinea-Bissau']
+    for row in gdf.index:
+        if pd.isna(gdf.at[row, country_col])==False:    
+            try:
+                countries_list = gdf.at[row, country_col].split(', ')
+                countries_list = [x.split('-') for x in countries_list if x not in hyphenated_countries]
+            except:
+                print("Error!" + f" Exception for row {row}, country_col: {df.at[row, country_col]}")
+                countries_list = []
+                
+            # flatten list
+            countries_list = [
+                country
+                for group in countries_list
+                for country in group
+            ]
+            # clean up
+            countries_list = [x.strip() for x in countries_list]
+        
+            # check that countries are standardized
+            for country in countries_list:
+                if country not in gem_standard_country_names:
+                    print(f"For row {row}, non-standard country name after trying to standardize: {country}")
+        else:
+            continue
+            # print(f"No countries listed for row {row}")
+
+
+    return gdf
+
+harmonized_gdf = harmonize_countries(concatted_gdf)
+
 def handle_multiple_countries(gdf):
     # replace separate , with ;
     # parse out so that area1 has an appropriate africa_countries
@@ -565,7 +573,7 @@ def handle_multiple_countries(gdf):
     
     return gdf
 
-concatted_gdf = handle_multiple_countries(concatted_gdf)
+concatted_gdf = handle_multiple_countries(harmonized_gdf)
 
 def filter_by_country_all_gdfs(gdf):
     # df = pd.read_csv(file_path) # file_path in config file
@@ -586,7 +594,7 @@ def filter_by_country_all_gdfs(gdf):
 
     africa_df = africa_df1.drop_duplicates(subset='id')
     # africa_df = df['areas'].apply_row(lambda x: row.drop() if x not in africa_countries else row) 
-    print(f'filter by country: {len(africa_df)}')
+    print(f'Africa filter by country: {len(africa_df)}')
 
     return africa_df
 
@@ -690,11 +698,11 @@ def capacity_conversions(gdf):
         avg_pair = (tracker, avg)
         avg_trackers.append(avg_pair)
 
-    print(total_counts_trackers)
-    print(avg_trackers)
+    # print(total_counts_trackers)
+    # print(avg_trackers)
  
-    print(total_counts_trackers)
-    print(avg_trackers) 
+    # print(total_counts_trackers)
+    # print(avg_trackers) 
     
     for row in gdf_converted.index:
         cap_cleaned = gdf_converted.loc[row, 'cleaned_cap']
@@ -710,9 +718,9 @@ def capacity_conversions(gdf):
 
     pd.options.display.float_format = '{:.0f}'.format
     gdf_converted['scaling_capacity'] = gdf_converted.apply(lambda row: conversion_multiply(row), axis=1)
-    print(f"{gdf_converted['scaling_capacity'].min().round(2)}")
-    print(f"{gdf_converted['scaling_capacity'].max().round(2)}")
-    print(f"scaling_cap stats: {gdf_converted['scaling_capacity'].describe()}")
+    # print(f"{gdf_converted['scaling_capacity'].min().round(2)}")
+    # print(f"{gdf_converted['scaling_capacity'].max().round(2)}")
+    # print(f"scaling_cap stats: {gdf_converted['scaling_capacity'].describe()}")
 
 
     return gdf_converted
@@ -733,7 +741,6 @@ def fix_status_inferred(df):
     #     if 'shelved - inferred' in df.loc[row, 'status']:
     #         df.loc[row, 'status'] = 'shelved'
     
-
     print(f"Statuses after: {set(df['status'].to_list())}")
 
     return df
@@ -772,7 +779,7 @@ def map_ready_statuses(gdf):
     gdf_map_ready_no_status = gdf_map_ready[gdf_map_ready['status']== '']
     gdf_map_ready= gdf_map_ready[gdf_map_ready['status']!= '']
     # print(len(gdf_map_ready))
-    gdf_map_ready_no_status.to_csv('no-status-africa-energy.csv')
+    gdf_map_ready_no_status.to_csv(f'{path_for_test_results}no-status-africa-energy.csv')
     gdf_map_ready = gdf_map_ready.fillna('')
     print(set(gdf_map_ready['status'].to_list()))
     gdf_map_ready['status'] = gdf_map_ready['status'].apply(lambda x: x.lower())
@@ -821,7 +828,6 @@ def last_min_fixes(africa_gdf_country_update):
     
     # something is happening when we concat, we lose goget's name ... 
     # gdf_empty_name = gdf[gdf['name']=='']
-    mask_empty_url= gdf['url'] == ''
     print(f"This is cols for gdf: {gdf.columns}")
     gdf['wiki-from-name'] = gdf.apply(lambda row: f"https://www.gem.wiki/{row['name'].strip().replace(' ', '_')}", axis=1)
     # row['url'] if row['url'] != '' else 
@@ -840,6 +846,23 @@ def last_min_fixes(africa_gdf_country_update):
     # let's also look into empty url, by tracker I can assign a filler
     
     # gdf['url'] = gdf['url'].apply(lambda row: row[filler_url] if row['url'] == '' else row['url'])
+    
+    # gdf['capacity'] = gdf['capacity'].apply(lambda x: x.replace('--', '')) # can't do that ... 
+    
+    # translate acronyms to full names 
+    
+    gdf['tracker-display'] = gdf['tracker-custom'].map(tracker_to_fullname)
+    print(set(gdf['tracker-display'].to_list()))
+    print(f'Figure out capacity dtype: {gdf.dtypes}')
+    gdf['capacity'] = gdf['capacity'].apply(lambda x: str(x).replace('--', ''))
+    # gdf['capacity'] = gdf['capacity'].apply(lambda x: x.replace('', pd.NA))
+    # gdf['capacity'] = gdf['capacity'].astype(float) # Stuck with concatting like strings for now? ValueError: could not convert string to float: ''
+     
+     
+    # goget, and GCMT need to not have anything in capacity
+    
+    # make capacity == ''
+    production_mask = gdf[gdf['tracker']=='GOGET' or 'GCMT'] 
     
     return gdf
 
