@@ -38,7 +38,7 @@ africa_countries = [
     'Western Sahara', 'Zambia', 'Zimbabwe', 
 ]
 
-
+filler_url_tracker = {}
 
 bbox_africa = '-24.433851,-45.706179,69.257813,39.232253' #lng lat epsg 4326
 prep_file_key = '12ltof1T1pxwc_iDTN4PpkcfygLXhAHJ7Or0caJvbmNk'
@@ -48,15 +48,18 @@ conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']
 
 final_cols = ['url', 'areas','name', 'unit_name', 'capacity', 'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
-       'original_units', 'conversion_factor', 'geometry', 'river', 'area1', 'area2', 'region1', 'region2', 'subnat1', 'subnat2', 'capacity1', 'capacity2',
+       'original_units', 'conversion_factor', 'geometry', 'river', 'area1', 'area2', 'region2', 'subnat1', 'subnat2', 'capacity1', 'capacity2',
        'production', 'Latitude', 'Longitude', 'id', 'capacity_oil', 'capacity_gas', 'prod_year_oil', 'prod_year_gas']
+
+
+
 renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country': 'areas', 'Plant name': 'name', 'Unit name': 'unit_name', 
                                 'Capacity (MW)': 'capacity', 'Status': 'status',
                                 'Start year': 'start_year', 'Subnational unit (province, state)': 'subnat', 'Region': 'region', 'Owner':'owner', 'Parent': 'parent'},
                       'GCPT': {'GEM unit/phase ID': 'id','Country': 'areas', 'Wiki URL':' url',
-       'Plant name': 'name', 'Unit name':'unit_name',
-       'Owner': 'owner', 'Parent': 'parent', 'Capacity (MW)': 'capacity', 'Status': 'status', 
-       'Start year': 'start_year', 'Subnational unit (province, state)': 'subnat', 'Region': 'region'},
+                                   'Plant name': 'name', 'Unit name':'unit_name',
+                                   'Owner': 'owner', 'Parent': 'parent', 'Capacity (MW)': 'capacity', 'Status': 'status', 
+                                   'Start year': 'start_year', 'Subnational unit (province, state)': 'subnat', 'Region': 'region'},
                       'GSPT': {'GEM phase ID':'id','Country/Area': 'areas', 'Project Name': 'name', 'Phase Name': 'unit_name',
                                'Capacity (MW)': 'capacity', 'Status': 'status', 'Start year': 'start_year', 'Owner': 'owner',
                                'Region': 'region', 'State/Province':'subnat', 'Wiki URL': 'url'},
@@ -68,9 +71,9 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country':
                                'Region': 'region', 'State/Province':'subnat', 'Wiki URL': 'url'},
                       'GHPT': {'GEM unit ID':'id','Country 1': 'area1', 'Country 2': 'area2','Project Name': 'name', 'Country 1 Capacity (MW)': 'capacity1', 'Country 2 Capacity (MW)': 'capacity2',
                                'Status': 'status', 'Start year': 'start_year', 'Owner': 'owner',
-                               'Region 1': 'region1', 'Region 2': 'region2','State/Province 1':'subnat1', 'State/Province 2':'subnat2', 
+                               'Region 1': 'region', 'Region 2': 'region2','State/Province 1':'subnat1', 'State/Province 2':'subnat2', 
                                'Wiki URL': 'url', 'River / Watercourse': 'river'},
-                      'GBPT': {'GEM phase ID':'id','Country': 'areas', 'Project Name': 'name', 'Unit Name': 'unit_name',
+                      'GBPT': {'GEM phase ID':'id','Country': 'areas', 'Project name': 'name', 'Unit Name': 'unit_name',
                                'Capacity (MW)': 'capacity', 'Operating status': 'status', 'Unit start year': 'start_year', 'Owner': 'owner',
                                'Region': 'region', 'State/Province':'subnat', 'Wiki URL': 'url'},
                       'GGPT': {'GEM unit ID':'id','Country': 'areas', 'Project Name': 'name', 'Unit Name': 'unit_name',
@@ -78,21 +81,23 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country':
                                'Region': 'region', 'State/Province':'subnat', 'Wiki URL': 'url'},
                       'GCTT': {'Terminal ID':'id','Coal Terminal Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Owner': 'owner', 'Capacity (Mt)':'capacity',
                                'Opening Year': 'start_year', 'Region': 'region', 'State/Province':'subnat',},
-                      'GOGET': {'Unit ID':'id','Unit name': 'name', 'Country': 'areas', 'Subnational unit (province, state)': 'subnat', 'Status': 'status', 'Discovery year': 'start_year', 
-                                'Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'capacity_oil', 'Production - Gas (Million m³/y)': 'capacity_gas','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'},
+                      'GOGET': {'Unit ID':'id', 'Wiki name': 'name', 'Country': 'areas', 'Subnational unit (province, state)': 'subnat', 'Status': 'status', 'Discovery year': 'start_year', 'Production start year': 'prod_start_year',
+                                'GEM region': 'region','Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'capacity_oil', 'Production - Gas (Million m³/y)': 'capacity_gas','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'},
                       'GCMT': {'GEM Mine ID':'id','Country': 'areas', 'Mine Name': 'name', 'Status': 'status', 'Owners': 'owner', 'Parent Company': 'parent', 'Capacity (Mtpa)': 'capacity', 
                                'Production (Mtpa)':'production', 'Opening Year': 'start_year', 'State, Province': 'subnat', 'Region': 'region', },
                       'GOIT': {'ProjectID':'id','Countries': 'areas', 'Wiki': 'url', 'PipelineName': 'name', 'SegmentName': 'unit_name', 'Status': 'status', 'Owner': 'owner',
-                               'Parent': 'parent', 'CapacityBOEd': 'capacity', 'StartYear1': 'start_year', 'StartState/Province':'subnat1', 'StartRegion': 'region1',
+                               'Parent': 'parent', 'CapacityBOEd': 'capacity', 'StartYear1': 'start_year', 'StartState/Province':'subnat1', 'StartRegion': 'region',
                                'EndState/Province': 'subnat2', 'EndRegion': 'region2',},
                       'GGIT': {'ProjectID':'id','Countries': 'areas','Wiki': 'url',
-       'PipelineName':'name', 'SegmentName':'unit_name', 'Status':'status', 'Owner':'owner', 'Parent': 'parent',
-       'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat1',
-       'StartRegion': 'region1', 'EndState/Province': 'subnat2', 'EndRegion': 'region2',
-       }, 
+                                   'PipelineName':'name', 'SegmentName':'unit_name', 'Status':'status', 'Owner':'owner', 'Parent': 'parent',
+                                   'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat1',
+                                   'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2',
+                                   }, 
                       'GGIT - lng': {'ProjectID':'id','Wiki': 'url', 'TerminalName': 'name',
-       'UnitName': 'unit_name', 'Status': 'status', 'Country': 'areas', 'Owner': 'owner', 'Parent': 'parent', 'CapacityInMtpa': 'capacity', 'StartYearEarliest': 'start_year', 'Region': 'region', 'State/Province': 'subnat'}}
+                                   'UnitName': 'unit_name', 'Status': 'status', 'Country': 'areas', 'Owner': 'owner', 
+                                   'Parent': 'parent', 'CapacityInMtpa': 'capacity', 'StartYearEarliest': 'start_year', 'Region': 'region', 
+                                   'State/Province': 'subnat'}}
 
-concatted_file_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/concatted_df2024-06-24.csv'
+# concatted_file_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/concatted_df2024-06-24.csv'
 
 filler_Angola = [17.47057255231345, -12.24586903613316]
