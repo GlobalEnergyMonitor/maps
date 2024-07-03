@@ -26,7 +26,7 @@ path_for_download_and_map_files_test = gem_path + tracker + '/test/'
 os.makedirs(path_for_download_and_map_files_test, exist_ok=True)
 
 
-gmet_key = '12ldx50_HANStnL5bwYDDrbo08jsb2-KM53rOyLVNE3Q'
+gmet_key = '10dMKhNtHh6gPDZllkLX1Yj7HBlKa9UP7h66AU9D1B8w'
 gmet_tabs = ['Coal Mines', 'Oil and Gas Extraction Areas', 'Oil and Gas Reserves', 'Plumes'] # Pipelines
 
 filler_wiki_url = 'https://globalenergymonitor.org/projects/global-methane-emitters-tracker/'
@@ -55,3 +55,21 @@ status_legend = {
                 'n/a': 'unknown-plus',
                 '': 'unknown-plus'
                 }
+
+country_harm_dict = {
+        'Czechia': 'Czech Republic',
+        'Ivory Coast': "Côte d'Ivoire",
+        "Cote d'Ivoire": "Côte d'Ivoire", # adds accent
+        "Republic of Congo": "Republic of the Congo", # adds "the"
+        "Rep Congo": "Republic of the Congo",
+        "Democratic Republic of Congo": "DR Congo",
+        "Democratic Republic of the Congo": "DR Congo", # in case step above adds "the"
+        "Republic of Guinea": "Guinea",
+        "Republic of Sudan": "Sudan",
+        "FYROM": "North Macedonia",
+        "Chinese Taipei": "Taiwan",
+        "East Timor": "Timor-Leste",
+        "USA": "United States",
+        'Turkey': 'Türkiye',
+        'Canary Islands': 'Spain', 
+    }

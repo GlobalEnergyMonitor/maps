@@ -122,16 +122,16 @@ def clean_dfs(df):
     print(f'length of df at end of cleand_dfs removed lat and long empty which is good because all point data:{len(cleaned_df)}')
     return cleaned_df
 
-def lat_lng_to_Point(df):
+# def lat_lng_to_Point(df):
 
-    df = clean_dfs(df)
-    df = df.fillna('')
-
-
-    print('Successfully created a geometry column')
+#     df = clean_dfs(df)
+#     df = df.fillna('')
 
 
-    return df
+#     print('Successfully created a geometry column')
+
+
+#     return df
 
 def df_to_gdf(df, geometry_col, crs='EPSG:4326'):
     # Ensure the geometry column contains valid geometries
@@ -514,7 +514,7 @@ def harmonize_countries(gdf):
                 countries_list = gdf.at[row, country_col].split(', ')
                 countries_list = [x.split('-') for x in countries_list if x not in hyphenated_countries]
             except:
-                print("Error!" + f" Exception for row {row}, country_col: {df.at[row, country_col]}")
+                print("Error!" + f" Exception for row {row}, country_col: {gdf.at[row, country_col]}")
                 countries_list = []
                 
             # flatten list

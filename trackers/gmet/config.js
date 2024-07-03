@@ -1,6 +1,6 @@
 var config = {
-    // csv: 'coal-mine.csv', (Mikel's file)
-    csv: 'data/data.csv',
+    // csv: 'data/data.csv',
+    json: 'data/data.geojson',
 
     colors: {
         'red': '#c74a48',
@@ -82,10 +82,11 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['name','plume_emissions', 'emission_uncertainty','infra_type', 'date','infra_name','well_id', 'gov_assets', 'infra_url', 'subnational', 'areas'],
-        labels: ['Project', 'Emissions (kg/hr)', 'Emissions Uncertainity (kg/hr)','Type of Infrastructure','Observation Date','GEM Infrastructure Name', 'Government Well ID', 'California VISTA and other Government ID Assets','Infrastructure Wiki', 'Subnational', 'Country/Area'],
+        values: ['name','plume_emissions', 'emission_uncertainty','infra_type', 'date','subnational', 'country','infra_name','well_id', 'gov_assets', 'infra_url'],
+        labels: ['Project', 'Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)','Type of Infrastructure','Observation Date', 'Subnational', 'Country/Area','Infrastructure Name', 'Government Well ID', 'California VISTA and other Government ID Assets','Infrastructure Wiki'],
         clickColumns: ['name'],
-        rightAlign: ['Government Well ID','plume_emissions','date']
+        rightAlign: ['Government Well ID','plume_emissions','date'],
+        removeLastComma: ['country']
     },
 
     /* configure the search box; 
@@ -108,12 +109,21 @@ var config = {
     detailView: {
         'name': {'display': 'heading'},
         // 'tracker': {'label': 'Tracker Type'},
-        'owners': {'label': 'Owner'},
-        'est_emissions': {'label': 'Estimated emissions'},
+        'owner': {'label': 'Owner'},
+        'operator': {'label': 'Operator'},
         'plume_emissions': {'label': 'Emissions (kg/hr)'},
         'emission_uncertainty': {'label': 'Emissions Uncertainity (kg/hr)'},
         'infra_type': {'label': 'Type of Infrastructure'},
         'infra_name': { 'label': 'Attributed Infrastructure Project Name'},
+        'related_cm_field': {'label': 'ClimateTrace Field'},
+        'mtyr-gcmt_emissions': {'label': 'GEM Coal Mine Methane Emissions Estimate (Mt/yr)'},
+        'capacity_output': {'label': 'Coal Output (Annual, Mst)'},
+        'capacity_prod': {'label': 'Production (Mtpa)'},
+        'tonnesyr-pipes_emissions': {'label': 'Emissions if Operational (tonnes/yr)'},
+        'length': {'label': 'Length (km)'},
+        'capacity': {'label': 'Capacity (cubic meters/day)'},
+        'tonnes-goget_emissions': {'label': 'Climate TRACE Field Emissions (tonnes)'},
+        'tonnes-goget-reserves_emissions': {'label': 'Emissions for whole reserves (tonnes)'},
         'date': {'label': 'Observation Date'},
         'status': {'label': 'Status'},
         'instrument': {'label': 'Instrument'},
@@ -124,5 +134,7 @@ var config = {
 
     linkField: 'map_id',
 
-    showCapacityTable: false
+    showCapacityTable: false,
+
+    multiCountry: true,
 }

@@ -983,23 +983,23 @@ function displayDetails(features) {
                 }
             }
         } else {
-            if (features[0].properties[detail] != '') {
-                if (Object.keys(config.detailView[detail]).includes('label')) {
-                    detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
-                } else {
-                    detail_text += features[0].properties[detail] + '<br/>';
-                }
-
-            } else if (features[0].properties[detail] == 'undefined') {
-
-
+            if (features[0].properties[detail] == 'undefined') {
+                console.log(features[0].properties[detail])
                 detail_text += '';
                 
-            } else if (features[0].properties[detail] == ' ') {
-
-
+            } else if (features[0].properties[detail] == ' '){
+                console.log(features[0].properties[detail])
                 detail_text += '';
-                
+            }
+            
+            else if (features[0].properties[detail] != '') {
+                    if (Object.keys(config.detailView[detail]).includes('label')) {
+                        // console.log(features[0].properties[detail])
+                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
+                    } else {
+                        console.log(features[0].properties[detail])
+                        // detail_text += features[0].properties[detail] + '<br/>';
+                    }
             }
             
 

@@ -90,6 +90,13 @@ var config = {
     },
     //filter values should have no spaces
     filters: [
+
+        {
+            field: 'tracker-display',
+            values: ["coal power station", "oil/gas power station", "bioenergy power station", "nuclear power plant", "solar power plant", "wind power plant", "hydropower plant", "geothermal plant", "oil pipeline", "gas pipeline", "LNG import terminal", "LNG export terminal", "coal terminal", "oil extraction area", "gas extraction area","coal mine"], 
+            values_labels: ['coal power stations', 'oil/gas power stations', 'bioenergy power stations', 'nuclear power plants', 'solar (thermal and PV) power plants', 'wind power plants', 'hydropower plants', 'geothermal power plants', 'oil pipelines', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'coal terminals', 'oil extraction areas', 'gas extraction areas', 'coal mines'],
+            primary: true
+        },
         {
             field: 'status-legend',
             values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
@@ -142,7 +149,6 @@ var config = {
                 'GBPT':	'MW',
                 'GNPT':	'MW',
                 'GSPT':	'MW',
-                'GSPT':	'MW',
                 'GWPT':	'MW',
                 'GHPT':	'MW',
                 'GGPT':	'MW',
@@ -176,8 +182,7 @@ var config = {
             'GOGPT': 'oil/gas power',
             'GBPT': 'bioenergy power',
             'GNPT': 'nuclear',
-            'GSPT': 'solar thermal',
-            'GSPT':	'solar PV',
+            'GSPT': 'solar',
             'GWPT':	'wind',
             'GHPT':	'hydropower',
             'GGPT':	'geothermal',

@@ -1,8 +1,12 @@
 # import sqlalchemy as sa
 import pandas as pd
 import numpy as np
+import geopandas as gpd
 import math
 import os
+from shapely.geometry import Point, LineString
+from shapely import wkt
+import polyline
 from datetime import date
 import csv
 import gspread
@@ -108,6 +112,8 @@ def gspread_access_file_read_only(key, tab_list):
         elif tab == 'Global Coal Mine Tracker (Non-C':
             print(f'Skipping so can handle justs for coal mine merge')
             list_of_dfs = df
+        elif tab == 'Countries':
+            list_of_dfs = df
         else:
             print(tab)
             df = fix_coords(df, 'Latitude', 'Longitude')   
@@ -197,41 +203,35 @@ def rename_dfs(list_of_dfs):
     for df in list_of_dfs:
         df = df.copy()
         df.reset_index(drop=True, inplace=True)
-        
-        # est_emissions_cols = [] # old way! 
-        # for col_name in est_emissions_cols:
-        #     if col_name in df.columns:
-        #         df = df.rename(columns={col_name: 'est_emissions'})
-        #         print("renamed estimated emissions minus reserves!")
-        
+                
         if df.loc[0,'tracker']=='Plumes':
-            df = df.rename(columns={'Emissions (kg/hr)': 'plume_emissions', 'GEM Infrastructure Name': 'infra_name', 'Subnational Unit': 'subnational',
+            df = df.rename(columns={'Emissions (kg/hr)': 'plume_emissions', 'GEM Infrastructure Name (Nearby)': 'infra_name', 'Subnational Unit': 'subnational',
                                 'Country/Area': 'areas', 'Plume Origin Latitude': 'lat', 'Plume Origin Longitude': 'lng', 
                                 'Observation Date': 'date', 'GEM Wiki': 'url', 'Name': 'name', 'For map only (has attribution information)': 'infra_filter'})
             print("renamed Plumes!")
             renamed_list_of_dfs.append(df) # 'California VISTA and other Government ID Assets (Nearby)': 'cal_gov_assets', 'Government Well ID (Nearby)': 'gov_well','GEM Infrastructure Wiki': 'infra_wiki',
 
         if df.loc[0,'tracker'] == 'Coal Mines':
-            df = df.rename(columns = {'GEM Coal Mine Methane Emissions Estimate (Mt/yr)': 'est_emissions','Mine Name': 'name', 'GEM Wiki URLs': 'url', 'Status': 'status', 'Production (Mtpa)': 'capacity_prod', 
-                                    'Coal Output (Annual, Mst)': 'capacity_output', 'Owners': 'owners', 'Latitude' : 'lat', 'Longitude': 'lng'})
+            df = df.rename(columns = {'GEM Coal Mine Methane Emissions Estimate (Mt/yr)': 'mtyr-gcmt_emissions','Mine Name': 'name', 'GEM Wiki URLs': 'url', 'Status': 'status', 'Production (Mtpa)': 'capacity_prod', 
+                                    'Coal Output (Annual, Mst)': 'capacity_output', 'Owners': 'owner', 'Latitude' : 'lat', 'Longitude': 'lng'})
             
             print("renamed Coal Mines!")
             renamed_list_of_dfs.append(df)
 
         if df.loc[0,'tracker'] == 'Pipelines':
-            df = df.rename(columns = {'Emissions if Operational (tonnes/yr)':'est_emissions','Pipeline Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Length Merged Km': 'length', 
-                                    'Capacity (cubic meters/day)': 'capacity', 'Countries': 'areas', 'WKTFormat': 'geometry'})
+            df = df.rename(columns = {'Emissions if Operational (tonnes/yr)':'tonnesyr-pipes_emissions','Pipeline Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Length Merged Km': 'length', 
+                                    'Capacity (cubic meters/day)': 'capacity', 'Countries/Areas': 'areas', 'WKTFormat': 'geometry'})
             print("renamed Pipelines!")
             renamed_list_of_dfs.append(df)
 
         if df.loc[0,'tracker'] == 'Oil and Gas Extraction Areas':
-            df = df.rename(columns = {'Climate TRACE Field Emissions (tonnes)':'est_emissions','GEM GOGET ID': 'goget_id','Unit name':'name', 'GEM Wiki': 'url', 'Status': 'status', 'Status Year': 'status_year', 'Operator': 'owners',
-                                    'ClimateTrace Field': 'subnational', 'Country': 'areas', 'Latitude':'lat', 'Longitude': 'lng'})
+            df = df.rename(columns = {'Climate TRACE Field Emissions (tonnes)':'tonnes-goget_emissions','GEM GOGET ID': 'goget_id','Unit name':'name', 'GEM Wiki': 'url', 'Status': 'status', 'Status Year': 'status_year', 'Operator': 'operator',
+                                    'ClimateTrace Field (encompasses GEM field)': 'related_cm_field', 'Country/Area': 'areas', 'Latitude':'lat', 'Longitude': 'lng'})
             print("renamed Oil and Gas Extraction Areas!")
             renamed_list_of_dfs.append(df)
 
         if df.loc[0,'tracker'] == 'Oil and Gas Reserves':
-            df = df.rename(columns = {'GEM GOGET ID': 'goget_id', 'Emissions for whole reserves with latest emissions factors (tonnes)': 'reserves_emissions', 'Country': 'areas'})
+            df = df.rename(columns = {'GEM GOGET ID': 'goget_id', 'Emissions for whole reserves with latest emissions factors (tonnes)': 'tonnes-goget-reserves_emissions', 'Country/Area': 'areas'})
             # print(df.columns)
             print("renamed Oil and Gas Reserves!")
             renamed_list_of_dfs.append(df)
@@ -350,9 +350,9 @@ def inspect_goget(df):
     # print(f"Cols in Extraction: {extraction_df.columns}")
     # print(len(reserves_df))
     # print(len(extraction_df))
-    # only bring in reserves_emissions
-    reserves_df = reserves_df[['goget_id', 'reserves_emissions']]
-    extraction_df = extraction_df.drop('reserves_emissions', axis=1)
+    # only bring in other_emissions
+    reserves_df = reserves_df[['goget_id', 'tonnes-goget-reserves_emissions']]
+    extraction_df = extraction_df.drop('tonnes-goget-reserves_emissions', axis=1)
     goget_merged_df = pd.merge(left=reserves_df, right=extraction_df, on='goget_id', how='outer')
     print(f"This is len of goget merged: {len(goget_merged_df)}")
     print(goget_merged_df.shape) 
@@ -598,15 +598,7 @@ def last_min_fixes(df):
     df_finaler['url'] = df_finaler['url'].apply(lambda x: filler_wiki_url if x == '' else x)
     # df_finaler['url'] = df_finaler['url'].apply(lambda x: filler_wiki_url if pd.isna(x) else x)
 
-    
-    # fix mult countries
-    # kuwait-iran to kuwait, iran and main being kuwait
-    df_finaler['country'] = df_finaler['areas'] 
-    # row['areas'].split('-')[0] else areas 
-    # if there are multiple split and take the first for ease
-    df_finaler['country'] = df_finaler['country'].apply(lambda x: x.split('-')[0])
-    # let's make areas have the list of areas, when we pull in pipelines we'll have to adjust this
-    
+
     # replace scaling cap at 0 with .01
     # df_finaler['scaling_col'] = df_finaler['scaling_col'].apply(lambda x: (x).replace('0', '0.1'))
     
@@ -617,12 +609,11 @@ df = last_min_fixes(df)
 def clean_col_names(df):
     
     # delete first two columns
-    cols_tobedropped = ['GEM Mine ID','Unnamed: 0','Climate TRACE Field Estimate Year', 'Climate TRACE Field Emissions Factor','Fuel description',
-    'Reserves Classification (Converted)','Quantity (Converted)', 'Units (Converted)',
+    cols_tobedropped = ['Quantity (conveted)', 'Units (converted)', 'Reserves Classification (Original)','GEM Mine ID','Unnamed: 0','Climate TRACE Field Estimate Year', 'Climate TRACE Field Emissions Factor (T CH4 per T of product produced)','Fuel description',
     'Upstream methane intensity (kg/boe)','Reserves Data Year','Quantity (boe)', 'GEM Methane Plume ID', 
     'Satellite Data Provider', 'Provider ID', 'Satellite Data Provider Ref', 'Infrastructure Notes']
     
-    tbrenamed = {'status_legend':'status-legend','infra_filter':'infra-filter','Instrument': 'instrument','Emissions Uncertainity (kg/hr)': 'emission_uncertainty','Type of Infrastructure': 'infra_type',  'GEM Infrastructure Wiki': 'infra_url', 'Government Well ID (Nearby)': 'well_id', 'California VISTA and other Government ID Assets (Nearby)': 'gov_assets'}
+    tbrenamed = {'status_legend':'status-legend','infra_filter':'infra-filter','Instrument': 'instrument','Emissions Uncertainty (kg/hr)': 'emission_uncertainty','Type of Infrastructure': 'infra_type',  'GEM Infrastructure Wiki': 'infra_url', 'Government Well ID (Nearby)': 'well_id', 'California VISTA and other Government ID Assets (Nearby)': 'gov_assets'}
     df = df.rename(tbrenamed, axis=1)
     df = df.drop(labels=cols_tobedropped, axis=1)
     cols = df.columns.to_list() 
@@ -661,6 +652,96 @@ def split_plumes_out_attrib(df):
 
 df = split_plumes_out_attrib(df)
 
+def get_standard_country_names():
+    
+    df = gspread_access_file_read_only(
+        '1mtlwSJfWy1gbIwXVgpP3d6CcUEWo2OM0IvPD6yztGXI', 
+        ['Countries'],
+    )
+    print(f'this is coutnry df: {df}')
+    print(df.columns)
+    gem_standard_country_names = df['GEM Standard Country Name'].tolist()
+    
+    return gem_standard_country_names
+
+gem_standard_country_names = get_standard_country_names()
+
+def fix_countries(df):
+    df = df.copy()
+    # add ; and split on - or , 
+    # account for exceptions
+    country_col = 'areas'
+    hyphenated_countries = ['Timor-Leste', 'Guinea-Bissau']
+    comma_countries = ['Bonaire, Sint Eustatius, and Saba']
+    for row in df.index:
+            if df.at[row, country_col] in comma_countries:
+                continue
+            elif pd.isna(df.at[row, country_col])==False:    
+                try:
+        
+                    countries_list = gdf.at[row, country_col].split(', ') 
+                    countries_list = [x.split('-') for x in countries_list if x not in hyphenated_countries]
+                    
+                except:
+                    # print("Error!" + f" Exception for row {row}, country_col: {df.at[row, country_col]}")
+                    countries_list = df.at[row, country_col]
+                    
+                # flatten list
+                countries_list = [
+                    country
+                    for group in countries_list
+                    for country in group
+                ]
+                # clean up
+                countries_list = [x.strip() for x in countries_list]
+            
+                # check that countries are standardized
+                for country in countries_list:
+                    if country not in gem_standard_country_names:
+                        print(f"For row {row}, non-standard country name after trying to standardize: {country}")
+            else:
+                continue
+    # fix mult countries
+    # kuwait-iran to kuwait, iran and main being kuwait
+    df['country'] = df['areas']
+    for row in df.index:
+        if df.at[row, 'country'] in hyphenated_countries or df.at[row, 'country'] in comma_countries:
+            continue
+        else:
+            df.at[row,'country'] = df.at[row,'country'].replace('-',';')
+            df.at[row,'country'] = df.at[row,'country'].replace(',',';')
+    
+    df['country'] = df['country'].apply(lambda x: f"{x};")
+
+    # let's make areas have the list of areas, when we pull in pipelines we'll have to adjust this
+    print(set(df['country'].to_list()))
+
+    # print(set(df['areas'].to_list()))
+    # lenfirst = len(set(df['areas'].to_list()))
+
+    # # df['areas'] = df['areas'].apply(lambda x: x.split['-'])
+    # print(set(df['areas'].to_list()))
+    
+    # lensec = len(set(df['areas'].to_list()))
+    # print(f'{lenfirst} to {lensec}')
+    
+    return df
+
+df = fix_countries(df)
+
+
+def create_geo(df):
+# def convert_coords_to_point(df): from compile all trackers for AET
+    crs = 'EPSG: 4326'
+    geometry_col = 'geometry'
+    for row in df.index:
+        df.loc[row,'geometry'] = Point(df.loc[row,'lng'], df.loc[row,'lat'])
+    gdf = gpd.GeoDataFrame(df, geometry=geometry_col, crs=crs)
+    
+    return gdf
+
+gdf = create_geo(df)
+
 def check_length_and_other_end(df):
     
     for tracker in set(df['tracker'].to_list()):
@@ -675,6 +756,12 @@ def check_length_and_other_end(df):
 
 check_length_and_other_end(df)
 
+def gdf_to_geojson(gdf, output_file):
+    gdf.to_file(output_file, driver="GeoJSON")
+    
+    print(f"GeoJSON file saved to {output_file}")
+
+gdf_to_geojson(gdf, f"{path_for_download_and_map_files}data.geojson")
 
 df.to_excel(f"{path_for_download_and_map_files}data.xlsx",index=False) 
 
