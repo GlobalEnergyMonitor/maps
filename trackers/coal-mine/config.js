@@ -50,7 +50,7 @@ var config = {
         }
     ],
     capacityField: 'circle_value',
-    capacityDisplayField: 'circle_value',
+    // capacityDisplayField: 'circle_value',
     // capacityLabel: '(Mt)', # to accomodate new feature Mikel put in, 
     capacityLabel: ''
     // context_layers: [
