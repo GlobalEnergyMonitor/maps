@@ -445,7 +445,7 @@ function addPointLayer() {
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
             'minzoom': 8,
             'layout': {
-                'text-field': '{' + config.nameField + '}',
+                'text-field': '{' + config.nameField + '}', // .replace() hyphens and apostrophes
                 'text-font': ["DIN Pro Italic"],
                 'text-variable-anchor': ['top'],
                 'text-offset': [0, 1],
@@ -589,6 +589,7 @@ function addEvents() {
 function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
+        
         if (config.color.field != filter.field) {
             $('#filter-form').append('<hr /><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
         }
@@ -983,16 +984,8 @@ function displayDetails(features) {
                 }
             }
         } else {
-            if (features[0].properties[detail] == 'undefined') {
-                console.log(features[0].properties[detail])
-                detail_text += '';
-                
-            } else if (features[0].properties[detail] == ' '){
-                console.log(features[0].properties[detail])
-                detail_text += '';
-            }
-            
-            else if (features[0].properties[detail] != '') {
+
+            if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null){
                     if (Object.keys(config.detailView[detail]).includes('label')) {
                         // console.log(features[0].properties[detail])
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';

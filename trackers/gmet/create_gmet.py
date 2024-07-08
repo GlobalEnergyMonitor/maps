@@ -730,6 +730,8 @@ def fix_countries(df):
 df = fix_countries(df)
 
 
+# TODO fix start year if not stated replace with ''
+
 def create_geo(df):
 # def convert_coords_to_point(df): from compile all trackers for AET
     crs = 'EPSG: 4326'

@@ -34,13 +34,6 @@ var config = {
             values_labels: ['Plumes (has attribution information) ', 'Plumes (no attribution information)','Oil and Gas Extraction Areas', 'Coal Mines'],
             primary: true
         },
-        // {
-        //     field: 'infra-filter',
-        //     label: 'Attributed Plume',
-        //     values: ['Y', 'N'],
-        //     values_labels: ['Yes', 'No'],
-        //     // primary: true
-        // },
         {
             field: 'status-legend',
             label: 'Infrastructure Status',
@@ -77,7 +70,7 @@ var config = {
     nameField: 'name',
 
 
-    urlField: 'url', // wikiField
+    urlField: 'map_id', // wikiField
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
@@ -137,4 +130,6 @@ var config = {
     showCapacityTable: false,
 
     multiCountry: true,
+    
+    showMaxCapacity: false
 }
