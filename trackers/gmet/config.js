@@ -70,7 +70,7 @@ var config = {
     nameField: 'name',
 
 
-    urlField: 'map_id', // wikiField
+    // urlField: 'url', // wikiField
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
@@ -130,6 +130,6 @@ var config = {
     showCapacityTable: false,
 
     multiCountry: true,
-    
+
     showMaxCapacity: false
 }
