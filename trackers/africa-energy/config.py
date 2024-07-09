@@ -14,6 +14,8 @@ gem_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-
 
 tracker_folder = 'africa-energy'
 path_for_test_results = gem_path + tracker_folder + '/test_results/'
+path_for_data_dwnld = gem_path + tracker_folder + '/dt_dwnld/'
+
 geojson_file_of_all_africa = f'africa_energy_tracker_{iso_today_date}.geojson'
 path_for_download_and_map_files = gem_path + tracker_folder + '/compilation_output/' + iso_today_date_folder
 
@@ -22,6 +24,8 @@ ggit_lng_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-
 ggit_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GGIT-Gas-Pipelines-2023-12.geojson'
 
 os.makedirs(path_for_download_and_map_files, exist_ok=True)
+os.makedirs(path_for_data_dwnld, exist_ok=True)
+
 
 africa_countries = [
     'Algeria', 'Angola', 'Benin', 'Botswana', 'Burkina Faso',
@@ -118,6 +122,31 @@ tracker_to_fullname = {
                     "GCTT": "coal terminal"
 }
 
+
+tracker_to_legendname = {
+                    "GCPT": "coal-power-station",
+                    "GOGPT": "oil-gas-power-station",
+                    "GBPT": "bioenergy-power-station",
+                    "GNPT": "nuclear-power-plant",
+                    "GSPT": "solar-power-plant",  # GSPT is used for both "solar thermal" and "solar PV"
+                    "GWPT": "wind-power-plant",
+                    "GHPT": "hydropower-plant",
+                    "GGPT": "geothermal-power-plant",
+                    "GOGET - oil": "oil-extraction-area",
+                    "GOGET - gas": "gas-extraction-area",
+                    "GOIT": "oil-pipeline",
+                    "GGIT": "gas-pipeline",
+                    "GGIT - import": "LNG-import-terminal",
+                    "GGIT - export": "LNG-export-terminal",
+                    "GCMT": "coal-mine",
+                    "GCTT": "coal-terminal"
+}
+
+
 # concatted_file_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/concatted_df2024-06-24.csv'
 
 filler_Angola = [17.47057255231345, -12.24586903613316]
+
+
+# TODO get list of all google sheet keys and tabs including GGIT, GOIT and GGIT lng
+list_of_keys_tabs = []

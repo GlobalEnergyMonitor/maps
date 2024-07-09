@@ -1,115 +1,49 @@
-// TODO: continue adjusting this based on live version of AET
-// this is combo of integrated new and geothermal 
-// add in new params and make sure it'll work as expected 
-
-// var config = {
-//     geojson: '',
-//     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
-//             what's right property name?? is color also listing values used in the summary? 
-//             should this just be made part of the filter? that might allow to address multiple properties */
-//         field: 'Type',
-//         values: {
-//             'bioenergy': 'blue',
-//             'coal': 'red',
-//             'geothermal': 'blue',
-//             'hydropower': 'blue',
-//             'nuclear': 'blue',
-//             'oil/gas': 'red',
-//             'solar': 'green',
-//             'wind': 'green'
-//         }
-//     },
-    
-//     filters: [
-//         {
-//             field: 'Type',
-//             values: ['coal','oil/gas','nuclear','geothermal','hydropower','bioenergy','solar','wind'],
-//             primary: true
-//         },
-//         {
-//             field: 'Status',
-//             /* values need to be specified for ordering */
-//             values: ['operating','construction','pre-construction','announced','retired','cancelled','shelved','mothballed']
-//         }
-//     ],
-//     nameField: 'Plant/project name',
-//     statusField: 'Status',
-//     statusDisplayField: 'Status',
-//     capacityField: 'Capacity (MW)',
-//     capacityDisplayField: 'Capacity (MW)',
-//     capacityLabel: 'Capacity (MW)',
-//     linkField: 'Wiki URL',
-//     urlField: 'Wiki URL',
-//     countryField: 'Country',
-//     searchFields: { 'Project': ['Plant/project name'], 
-//         'Companies': ['Owner', 'Parent'],
-//         'Start Year': ['Start year']
-//     },
-//     assetFullLabel: "plants",
-//     assetLabel: "Plants",
-//     img_detail_zoom: 15,
-//     tableHeaders: {
-//         values: ['Plant/project name','Unit/phase name', 'Owner', 'Parent', 'Capacity (MW)', 'Status', 'Subnational unit(s)', 'Country', 'Start year'],
-//         labels: ['Plant/project name','Unit/phase name','Owner','Parent','Capacity (MW)','Status','Subnational unit (province/state)','Country','Start year'],
-//         clickColumns: 'Plant/project name'
-//     },
-//     detailView: {
-//         'Plant/project name': {'display': 'heading'},
-//         'Type': {'label': 'Type'},
-//         'Owner': {'label': 'Owner'},
-//         'Parent': {'label': 'Parent'},
-//         'Technology': {'display': 'join', 'label': ['Technology', 'Technologies']},
-//         'Fuel': {'display': 'join', 'label': ['Fuel Type', 'Fuel Types']},
-//         'Start year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
-//         'Subnational unit (province/state)': {'display': 'location'},
-//         'Country': {'display': 'location'}
-//     },
-
-//     showCapacityTable: false, 
-
-// };
 var config = {
-    json: './data/africa_energy_tracker_2024-07-02.geojson',
+    json: './data/africa_energy_tracker_2024-07-08.geojson',
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
-    statusField: 'status',
+    statusField: 'status-legend',
     statusDisplayField: 'status',
     color: {
-        field: 'status-legend',
+
+        field: 'tracker-legend',
         values: {
-            'operating': 'red',
-            'pre-construction-plus': 'blue',
-            'proposed-plus': 'green',
-            'construction-plus': 'blue',
-            'retired-plus': 'grey',
-            'cancelled': 'grey',
-            'mothballed-plus': 'grey',
-            'shelved': 'grey'
+            'oil-gas-power-station': 'blue',
+            'oil-extraction-area': 'red',
+            'oil-pipeline': 'green',
+            'gas-pipeline': 'green',
+            'gas-extraction-area': 'red',
+            'LNG-import-terminal': 'green',
+            'LNG-export-terminal': 'green',
+            'coal-power-station': 'blue',
+            'coal-mine': 'red',
+            'coal-terminal': 'green',
+            'bioenergy-power-station': 'blue',
+            'geothermal-power-plant': 'blue',
+            'nuclear-power-plant': 'blue',
+            'solar-power-plant': 'blue',
+            'wind-power-plant': 'blue',
+            'hydropower-plant': 'blue'
         }
     },
     //filter values should have no spaces
     filters: [
 
         {
-            field: 'tracker-display',
-            values: ["coal power station", "oil/gas power station", "bioenergy power station", "nuclear power plant", "solar power plant", "wind power plant", "hydropower plant", "geothermal plant", "oil pipeline", "gas pipeline", "LNG import terminal", "LNG export terminal", "coal terminal", "oil extraction area", "gas extraction area","coal mine"], 
-            values_labels: ['coal power stations', 'oil/gas power stations', 'bioenergy power stations', 'nuclear power plants', 'solar (thermal and PV) power plants', 'wind power plants', 'hydropower plants', 'geothermal power plants', 'oil pipelines', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'coal terminals', 'oil extraction areas', 'gas extraction areas', 'coal mines'],
+            field: 'tracker-legend',
+            values: ["coal-power-station", "oil-gas-power-station", "bioenergy-power-station", "nuclear-power-plant", "solar-power-plant", "wind-power-plant", "hydropower-plant", "geothermal-power-plant", "oil-pipeline", "gas-pipeline", "LNG-import-terminal", "LNG-export-terminal", "coal-terminal", "oil-extraction-area", "gas-extraction-area","coal-mine"], 
+            values_labels: ['coal power stations', 'oil & gas power stations', 'bioenergy power stations', 'nuclear power plants', 'solar (thermal and PV) power plants', 'wind power plants', 'hydropower plants', 'geothermal power plants', 'oil pipelines', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'coal terminals', 'oil extraction areas', 'gas extraction areas', 'coal mines'],
             primary: true
         },
         {
             field: 'status-legend',
+            label: 'Status',
             values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
             values_labels: ['Operating','Proposed / Announced / Discovered','Pre-construction / Pre-permit / Permitted', 'Construction / In development','Retired / Closed / Decommissioned','Cancelled','Mothballed / Idle / Shut in','Shelved']
 
         },
 
-        // {
-        //     field: 'tracker-display',
-        //     values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
-        //     values_labels: ['Operating','Proposed / Announced / Discovered','Pre-construction / Pre-permit / Permitted', 'Construction / In development','Retired / Closed / Decommissioned','Cancelled','Mothballed / Idle / Shut in','Shelved']
-
-        // }
     ],
     capacityField: 'scaling-capacity',
     
@@ -178,26 +112,26 @@ var config = {
     assetLabel: {
         field: 'tracker-custom',
         values: {
-            'GCPT': 'coal power',
-            'GOGPT': 'oil/gas power',
-            'GBPT': 'bioenergy power',
-            'GNPT': 'nuclear',
-            'GSPT': 'solar',
-            'GWPT':	'wind',
-            'GHPT':	'hydropower',
-            'GGPT':	'geothermal',
-            'GOGET - oil': 'oil and gas extraction - oil',
-            'GOGET - gas': 'oil and gas extraction - gas',
-            'GOIT': 'oil pipelines',
-            'GGIT': 'gas pipelines',
-            'GGIT - import': 'LNG terminals - import',
-            'GGIT - export': 'LNG terminals - export',
-            'GCMT': 'coal mines',
-            'GCTT': 'coal terminals'
+            'GCPT': 'units',
+            'GOGPT': 'units',
+            'GBPT': 'units',
+            'GNPT': 'units',
+            'GSPT': 'phases',
+            'GWPT':	'phases',
+            'GHPT':	'units',
+            'GGPT':	'units',
+            'GOGET - oil': 'areas',
+            'GOGET - gas': 'areas',
+            'GOIT': 'projects',
+            'GGIT': 'projects',
+            'GGIT - import': 'projects',
+            'GGIT - export': 'projects',
+            'GCMT': 'projects',
+            'GCTT': 'projects'
         }
     },
     nameField: 'name',
-//    linkField: 'id',
+//    linkField: 'id',  
 
     countryFile: 'countries.js',
     allCountrySelect: true, //why was this false? 
@@ -207,7 +141,7 @@ var config = {
 
     tableHeaders: {
         values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity', 'production','status', 'areas', 'start-year'],
-        labels: ['Tracker', 'Name','Unit','Owner', 'Parent','Capacity', 'Production','Status','Countries','Start year', ],
+        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Production','Status','Countries','Start year', ],
         
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
@@ -236,10 +170,11 @@ var config = {
         // 'start-year': {'label': 'Start Year'},
         // 'owner': {'label': 'Owner'},
         // 'parent': {'label': 'Parent'},
-        // 'river': {'label': 'River'},
+        'river': {'label': 'River'},
         'tracker-display': {'label': 'Tracker'},
-        'subnat': {'display': 'location'},
-        'areas': {'display': 'location'}
+        'areas': {'label': 'Country/Area(s)'},
+        // 'subnat-display': {'display': 'location'}, // TODO pull out first one only if ; in it 
+        // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
     }
 
 };

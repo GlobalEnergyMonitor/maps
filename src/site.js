@@ -445,7 +445,7 @@ function addPointLayer() {
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
             'minzoom': 8,
             'layout': {
-                'text-field': '{' + config.nameField + '}', // .replace() hyphens and apostrophes
+                'text-field': '{' + config.nameField + '}', 
                 'text-font': ["DIN Pro Italic"],
                 'text-variable-anchor': ['top'],
                 'text-offset': [0, 1],
@@ -533,9 +533,10 @@ function addEvents() {
                 displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
             }
         } else {
+            // console.log(displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]))
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6><ul>";
             selectedFeatures.forEach((feature) => {
-                modalText += "<li class='asset-select-option' onClick='displayDetails(\"" + JSON.stringify(config.linked[feature.properties[config.linkField]]).replace(/"/g, '\\"') + "\")'>" + feature.properties[config.nameField] + "</li>";
+                modalText += "<li class='asset-select-option' onClick='displayDetails(\"" + JSON.stringify(config.linked[feature.properties[config.linkField]]).replace(/"/g, '\\"').replace(/'/g, "\\'") + "\")'>" + feature.properties[config.nameField] + "</li>";
             });
             modalText += "</ul>";
             config.selectModal = modalText;
@@ -928,6 +929,9 @@ function displayDetails(features) {
     var detail_text = '';
     var location_text = '';
     Object.keys(config.detailView).forEach((detail) => {
+        // replace apostrophe in displayDetails to resolve invalid or unexpected token
+        // features[0].properties[detail] = features[0].properties[detail].replace("'", "\'")
+
         if (Object.keys(config.detailView[detail]).includes('display')) {
 
             if (config.detailView[detail]['display'] == 'heading') {
@@ -986,7 +990,15 @@ function displayDetails(features) {
         } else {
 
             if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null){
-                    if (Object.keys(config.detailView[detail]).includes('label')) {
+                    if (features[0].properties[detail].includes(';') && config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
+                        // console.log(config.detailView[detail]['label'])
+                        // remove semi colon in areas country for multi country
+                        // features[0].properties[detail] = removeLastComma(features[0].properties[detail])
+                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
+
+
+                    }
+                    else if (Object.keys(config.detailView[detail]).includes('label')) {
                         // console.log(features[0].properties[detail])
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
                     } else {
