@@ -43,6 +43,8 @@ var config = {
         }
     ],
 
+    statusDisplayField: 'status',
+    statusField: 'status-legend',
     // # O&G extraction areas and coal mines by status 
     // plumes by "has attribution information"
     // infrastructure emissions estimates
@@ -75,8 +77,8 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['name','plume_emissions', 'emission_uncertainty','infra_type', 'date','subnational', 'country','infra_name','well_id', 'gov_assets', 'infra_url'],
-        labels: ['Project', 'Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)','Type of Infrastructure','Observation Date', 'Subnational', 'Country/Area','Infrastructure Name', 'Government Well ID', 'California VISTA and other Government ID Assets','Infrastructure Wiki'],
+        values: ['name', 'status','plume_emissions', 'emission_uncertainty','infra_type', 'date','subnational', 'country','infra_name','well_id', 'gov_assets', 'infra_url'],
+        labels: ['Project', 'Status','Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)','Type of Infrastructure','Observation Date', 'Subnational', 'Country/Area','Nearby Infrastructure Project Name', 'Government Well ID', 'California VISTA and other Government ID Assets','Infrastructure Wiki'],
         clickColumns: ['name'],
         rightAlign: ['Government Well ID','plume_emissions','date'],
         removeLastComma: ['country']
@@ -107,7 +109,7 @@ var config = {
         'plume_emissions': {'label': 'Emissions (kg/hr)'},
         'emission_uncertainty': {'label': 'Emissions Uncertainity (kg/hr)'},
         'infra_type': {'label': 'Type of Infrastructure'},
-        'infra_name': { 'label': 'Attributed Infrastructure Project Name'},
+        'infra_name': { 'label': 'Nearby Infrastructure Project Name'},
         'related_cm_field': {'label': 'ClimateTrace Field'},
         'mtyr-gcmt_emissions': {'label': 'GEM Coal Mine Methane Emissions Estimate (Mt/yr)'},
         'capacity_output': {'label': 'Coal Output (Annual, Mst)'},
