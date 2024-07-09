@@ -1,5 +1,5 @@
 var config = {
-    json: './data/africa_energy_tracker_2024-07-08.geojson',
+    json: './data/africa_energy_tracker_2024-07-09.geojson',
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
@@ -29,11 +29,10 @@ var config = {
     },
     //filter values should have no spaces
     filters: [
-
         {
-            field: 'tracker-legend',
-            values: ["coal-power-station", "oil-gas-power-station", "bioenergy-power-station", "nuclear-power-plant", "solar-power-plant", "wind-power-plant", "hydropower-plant", "geothermal-power-plant", "oil-pipeline", "gas-pipeline", "LNG-import-terminal", "LNG-export-terminal", "coal-terminal", "oil-extraction-area", "gas-extraction-area","coal-mine"], 
-            values_labels: ['coal power stations', 'oil & gas power stations', 'bioenergy power stations', 'nuclear power plants', 'solar (thermal and PV) power plants', 'wind power plants', 'hydropower plants', 'geothermal power plants', 'oil pipelines', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'coal terminals', 'oil extraction areas', 'gas extraction areas', 'coal mines'],
+            field: 'tracker',
+            values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
+            values_labels: ['coal power stations', 'oil & gas power stations', 'bioenergy power stations', 'nuclear power plants', 'solar (thermal and PV) power plants', 'wind power plants', 'hydropower plants', 'geothermal power plants', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil & gas extraction areas','coal mines'],
             primary: true
         },
         {
@@ -47,7 +46,7 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     
-    capacityDisplayField: 'capacity',
+    capacityDisplayField: 'capacity-display',
     capacityLabel: '',
     //interpolate: ["cubic-bezier", 0, 0, 0, 1],
     //can be string for single value, or hash. always single value is showMaxCapacity is true
@@ -140,7 +139,7 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity', 'production','status', 'areas', 'start-year'],
+        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-display', 'production','status', 'areas', 'start-year'],
         labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Production','Status','Countries','Start year', ],
         
         // 'capacity-oil', 'capacity-gas'
@@ -157,12 +156,13 @@ var config = {
     },
     searchFields: { 'Project': ['name'], 
         'Companies': ['owner', 'parent'],
-        'Start Year': ['start-year']
+        'Start Year': ['start-year'],
+        'Infrastructure Type': ['tracker-display']
     },
     detailView: {
         'name': {'display': 'heading'},
         'production': {'label': 'Production'},
-        'capacity': {'label': 'Capacity'},
+        'cap_total': {'label': 'Capacity'},
         'capacity-oil': {'label': 'Production Oil'},
         'capacity-gas': {'label': 'Production Gas'},
         'prod-year-oil': {'label': 'Production year - oil (Million bbl/y)'},

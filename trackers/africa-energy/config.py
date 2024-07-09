@@ -76,7 +76,7 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country':
                                'Region': 'region', 'State/Province':'subnat', 'Wiki URL': 'url'},
                       'GHPT': {'GEM unit ID':'id','Country 1': 'area1', 'Country 2': 'area2','Project Name': 'name', 'Country 1 Capacity (MW)': 'capacity1', 'Country 2 Capacity (MW)': 'capacity2',
                                'Status': 'status', 'Start year': 'start_year', 'Owner': 'owner',
-                               'Region 1': 'region', 'Region 2': 'region2','State/Province 1':'subnat1', 'State/Province 2':'subnat2', 
+                               'Region 1': 'region', 'Region 2': 'region2','State/Province 1':'subnat', 'State/Province 2':'subnat2', 
                                'Wiki URL': 'url', 'River / Watercourse': 'river'},
                       'GBPT': {'GEM phase ID':'id','Country': 'areas', 'Project name': 'name', 'Unit Name': 'unit_name',
                                'Capacity (MW)': 'capacity', 'Operating status': 'status', 'Unit start year': 'start_year', 'Owner': 'owner',
@@ -85,7 +85,7 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country':
                                'Unit Capacity (MW)': 'capacity', 'Status': 'status', 'Start year': 'start_year', 'Owner': 'owner',
                                'Region': 'region', 'State/Province':'subnat', 'Wiki URL': 'url'},
                       'GCTT': {'Terminal ID':'id','Coal Terminal Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Owner': 'owner', 'Capacity (Mt)':'capacity',
-                               'Opening Year': 'start_year', 'Region': 'region', 'State/Province':'subnat',},
+                               'Opening Year': 'start_year', 'Region': 'region', 'State/Province':'subnat', 'Country': 'areas'},
                       'GOGET': {'Unit ID':'id', 'Wiki name': 'name', 'Country': 'areas', 'Subnational unit (province, state)': 'subnat', 'Status': 'status', 'Discovery year': 'start_year', 'Production start year': 'prod_start_year',
                                 'GEM region': 'region','Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'capacity_oil', 'Production - Gas (Million m³/y)': 'capacity_gas','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'},
                       'GCMT': {'GEM Mine ID':'id','Country': 'areas', 'Mine Name': 'name', 'Status': 'status', 'Owners': 'owner', 'Parent Company': 'parent', 'Capacity (Mtpa)': 'capacity', 
@@ -98,7 +98,7 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country':
                                    'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat1',
                                    'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2',
                                    }, 
-                      'GGIT - lng': {'ProjectID':'id','Wiki': 'url', 'TerminalName': 'name',
+                      'GGIT - lng': {'ComboID':'id','Wiki': 'url', 'TerminalName': 'name',
                                    'UnitName': 'unit_name', 'Status': 'status', 'Country': 'areas', 'Owner': 'owner', 
                                    'Parent': 'parent', 'CapacityInMtpa': 'capacity', 'StartYearEarliest': 'start_year', 'Region': 'region', 
                                    'State/Province': 'subnat'}}
@@ -142,6 +142,22 @@ tracker_to_legendname = {
                     "GCTT": "coal-terminal"
 }
 
+# tracker_to_dwnld_name = {
+#                     "GCPT": "coal plants",
+#                     "GOGPT": "oil & gas power station",
+#                     "GBPT": "bioenergy power station",
+#                     "GNPT": "nuclear power plant",
+#                     "GSPT": "solar power plant",  # GSPT is used for both "solar thermal" and "solar PV"
+#                     "GWPT": "wind power plant",
+#                     "GHPT": "hydropower plant",
+#                     "GGPT": "geothermal power plant",
+#                     "GOGET":,
+#                     "GOIT": "oil pipeline",
+#                     "GGIT": "Gas Pipelines",
+#                     "GGIT": "",
+#                     "GCMT": "coal mine",
+#                     "GCTT": "coal terminal"
+# }
 
 # concatted_file_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/concatted_df2024-06-24.csv'
 
