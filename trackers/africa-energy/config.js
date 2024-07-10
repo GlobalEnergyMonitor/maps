@@ -137,13 +137,12 @@ var config = {
 
     tableHeaders: {
         values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-oil-table', 'prod-year-oil', 'prod-gas-table', 'prod-year-gas'],
-        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Status','Countries','Start year', 'Production (oil)','Production year (oil)', 'Production (gas)', 'Production year (gas)'],
+        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Status','Countries','Start year', 'Production - oil','Production year - oil', 'Production - gas', 'Production year - gas'],
         
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
         clickColumns: ['project'],
-        rightAlign: ['unit','capacity','prod-oil-table', 'prod-gas-table','start-year', 'prod-year-oil', 'prod-year-gas'
-        ], 
+        rightAlign: ['unit','capacity','prod-oil-table', 'prod-gas-table','start-year'], 
         removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
         // appendValue: {'capacity': "capItemLabel"},
@@ -155,10 +154,7 @@ var config = {
     searchFields: { 'Project': ['name'], 
         'Companies': ['owner', 'parent'],
         'Start Year': ['start-year'],
-        'Infrastructure Type': ['tracker-display'],
-        'Country/Area': ['areas'],
-        'Status': ['status'],
-        'State/Province': ['subnat']
+        'Infrastructure Type': ['tracker-display']
     },
     detailView: {
         'name': {'display': 'heading'},
@@ -174,8 +170,8 @@ var config = {
         'parent': {'label': 'Parent'},
         'river': {'label': 'River'},
         'tracker-display': {'label': 'Type'},
-        'areas': {'label': 'Country/Area'},
-        'subnat': {'display': 'location'}, // TODO pull out first one only if ; in it 
+        'areas': {'label': 'Country/Area(s)'},
+        'subnat-display': {'display': 'location'}, // TODO pull out first one only if ; in it 
         // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
     }
 
