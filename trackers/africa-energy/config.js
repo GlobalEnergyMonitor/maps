@@ -7,24 +7,22 @@ var config = {
     statusDisplayField: 'status',
     color: {
 
-        field: 'tracker-legend',
+        field: 'tracker',
         values: {
-            'oil-gas-power-station': 'blue',
-            'oil-extraction-area': 'red',
-            'oil-pipeline': 'green',
-            'gas-pipeline': 'green',
-            'gas-extraction-area': 'red',
-            'LNG-import-terminal': 'green',
-            'LNG-export-terminal': 'green',
-            'coal-power-station': 'blue',
-            'coal-mine': 'red',
-            'coal-terminal': 'green',
-            'bioenergy-power-station': 'blue',
-            'geothermal-power-plant': 'blue',
-            'nuclear-power-plant': 'blue',
-            'solar-power-plant': 'blue',
-            'wind-power-plant': 'blue',
-            'hydropower-plant': 'blue'
+            'GOGPT': 'blue',
+            'GOGET': 'red',
+            'GOIT': 'green',
+            'GGIT': 'green',
+            'GGIT-lng': 'green',
+            'GCPT': 'blue',
+            'GCMT': 'red',
+            'GCTT': 'green',
+            'GBPT': 'blue',
+            'GGPT': 'blue',
+            'GNPT': 'blue',
+            'GSPT': 'blue',
+            'GWPT': 'blue',
+            'GHPT': 'blue'
         }
     },
     //filter values should have no spaces
