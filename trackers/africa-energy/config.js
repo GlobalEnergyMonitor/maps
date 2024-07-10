@@ -29,7 +29,7 @@ var config = {
         {
             field: 'tracker',
             values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
-            values_labels: ['coal power station units', 'oil/gas power station units', 'bioenergy power station phases', 'nuclear plant units', 'solar plant phases', 'wind plant phases', 'hydro plant units', 'geothermal plant units', 'oil pipelines', 'gas pipelines', 'LNG terminal units', 'coal terminal units', 'oil & gas extraction areas','coal mine areas'],
+            values_labels: ['coal power station units', 'oil/gas power station units', 'bioenergy power station phases', 'nuclear plant units', 'solar plant phases', 'wind plant phases', 'hydro plant units', 'geothermal plant units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil & gas extraction areas','coal mines'],
             primary: true
         },
         {
@@ -103,7 +103,7 @@ var config = {
     //productionLabel NEED a productionLabel
     showMaxCapacity: false,
 
-    assetFullLabel: "Units / Phases / Areas / Pipelines",
+    assetFullLabel: "Units / Phases / Areas",
     //can be string for single value, or hash
     assetLabel: {
         field: 'tracker-custom',
