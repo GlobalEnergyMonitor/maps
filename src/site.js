@@ -989,7 +989,7 @@ function displayDetails(features) {
             }
         } else {
 
-            if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null){
+            if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null &&  features[0].properties[detail] != 'not found'){
                     if (features[0].properties[detail].includes(';') && config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
                         // console.log(config.detailView[detail]['label'])
                         // remove semi colon in areas country for multi country

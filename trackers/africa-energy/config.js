@@ -1,5 +1,5 @@
 var config = {
-    json: './data/africa_energy_tracker_2024-07-09.geojson',
+    json: './data/africa_energy_tracker_2024-07-10.geojson',
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
@@ -12,7 +12,7 @@ var config = {
             'GOGET': 'red',
             'GOIT': 'green',
             'GGIT': 'green',
-            'GGIT-lng': 'green',
+            'GGIT-lng':'green',
             'GCPT': 'blue',
             'GCMT': 'red',
             'GCTT': 'green',
@@ -29,7 +29,7 @@ var config = {
         {
             field: 'tracker',
             values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
-            values_labels: ['coal power stations', 'oil & gas power stations', 'bioenergy power stations', 'nuclear power plants', 'solar (thermal and PV) power plants', 'wind power plants', 'hydropower plants', 'geothermal power plants', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil & gas extraction areas','coal mines'],
+            values_labels: ['coal power station units', 'oil/gas power station units', 'bioenergy power station phases', 'nuclear plant units', 'solar plant phases', 'wind plant phases', 'hydro plant units', 'geothermal plant units', 'oil pipelines', 'gas pipelines', 'LNG terminal units', 'coal terminal units', 'oil & gas extraction areas','coal mine areas'],
             primary: true
         },
         {
@@ -103,7 +103,7 @@ var config = {
     //productionLabel NEED a productionLabel
     showMaxCapacity: false,
 
-    assetFullLabel: "",
+    assetFullLabel: "Units / Phases / Areas / Pipelines",
     //can be string for single value, or hash
     assetLabel: {
         field: 'tracker-custom',
@@ -136,13 +136,13 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'prod-table','status', 'areas', 'start-year'],
-        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Production','Status','Countries','Start year', ],
+        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-oil-table', 'prod-year-oil', 'prod-gas-table', 'prod-year-gas'],
+        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Status','Countries','Start year', 'Production - oil','Production year - oil', 'Production - gas', 'Production year - gas'],
         
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
         clickColumns: ['project'],
-        rightAlign: ['unit','capacity','production','start-year'], 
+        rightAlign: ['unit','capacity','prod-oil-table', 'prod-gas-table','start-year'], 
         removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
         // appendValue: {'capacity': "capItemLabel"},
@@ -159,17 +159,17 @@ var config = {
     detailView: {
         'name': {'display': 'heading'},
         // 'status': {'lable': 'Status'},
-        'prod-details': {'label': 'Production'}, // if its GCMT or GOGET should be 
-        'capacity-details': {'label': 'Capacity'}, // interim until summary capacity can be customized by tracker
-        // 'capacity-oil': {'label': 'Production Oil (Million bbl/y)'},
-        // 'capacity-gas': {'label': 'Production Gas (Milliion m³/y)'},
-        'prod-year-oil': {'label': 'Production year - oil'},
-        'prod-year-gas': {'label': 'Production year - gas'},
+        // 'prod-gcmt': {'label': 'Production (MTPA)'}, // if its GCMT or GOGET should be 
+        'capacity-details': {'label': 'Project Level Capacity'}, // interim until summary capacity can be customized by tracker
+        'prod-oil-details': {'label': 'Production - Oil'},
+        'prod-gas-details': {'label': 'Production - Gas'},
+        'prod-year-oil': {'label': 'Production Year - Oil'},
+        'prod-year-gas': {'label': 'Production Year - Gas'},
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'river': {'label': 'River'},
-        'tracker-display': {'label': 'Tracker'},
+        'tracker-display': {'label': 'Type'},
         'areas': {'label': 'Country/Area(s)'},
         'subnat-display': {'display': 'location'}, // TODO pull out first one only if ; in it 
         // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it

@@ -55,8 +55,8 @@ var config = {
         'Companies': ['Owner', 'Parent'],
         'Start Year': ['Start year']
     },
-    assetFullLabel: "plants",
-    assetLabel: "Plants",
+    assetFullLabel: "units / phases / areas",
+    assetLabel: "Units / Phases / Areas",
     img_detail_zoom: 15,
     tableHeaders: {
         values: ['Plant/project name','Unit/phase name', 'Owner', 'Parent', 'Capacity (MW)', 'Status', 'Subnational unit(s)', 'Country', 'Start year'],
