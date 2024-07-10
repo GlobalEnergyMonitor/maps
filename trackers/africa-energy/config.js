@@ -6,7 +6,6 @@ var config = {
     statusField: 'status-legend',
     statusDisplayField: 'status',
     color: {
-
         field: 'tracker',
         values: {
             'GOGPT': 'blue',
@@ -137,7 +136,7 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-display', 'production','status', 'areas', 'start-year'],
+        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'prod-table','status', 'areas', 'start-year'],
         labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Production','Status','Countries','Start year', ],
         
         // 'capacity-oil', 'capacity-gas'
@@ -159,19 +158,20 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        'production': {'label': 'Production'},
-        'cap_total': {'label': 'Capacity'},
-        'capacity-oil': {'label': 'Production Oil'},
-        'capacity-gas': {'label': 'Production Gas'},
-        'prod-year-oil': {'label': 'Production year - oil (Million bbl/y)'},
-        'prod-year-gas': {'label': 'Production year - gas (Milliion m³/y)'},
-        // 'start-year': {'label': 'Start Year'},
-        // 'owner': {'label': 'Owner'},
-        // 'parent': {'label': 'Parent'},
+        // 'status': {'lable': 'Status'},
+        'prod-details': {'label': 'Production'}, // if its GCMT or GOGET should be 
+        'capacity-details': {'label': 'Capacity'}, // interim until summary capacity can be customized by tracker
+        // 'capacity-oil': {'label': 'Production Oil (Million bbl/y)'},
+        // 'capacity-gas': {'label': 'Production Gas (Milliion m³/y)'},
+        'prod-year-oil': {'label': 'Production year - oil'},
+        'prod-year-gas': {'label': 'Production year - gas'},
+        'start-year': {'label': 'Start Year'},
+        'owner': {'label': 'Owner'},
+        'parent': {'label': 'Parent'},
         'river': {'label': 'River'},
         'tracker-display': {'label': 'Tracker'},
         'areas': {'label': 'Country/Area(s)'},
-        // 'subnat-display': {'display': 'location'}, // TODO pull out first one only if ; in it 
+        'subnat-display': {'display': 'location'}, // TODO pull out first one only if ; in it 
         // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
     }
 

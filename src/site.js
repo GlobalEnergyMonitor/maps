@@ -1019,6 +1019,7 @@ function displayDetails(features) {
         ? config.capacityLabel 
         : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];
 
+    // Need this to be customizable for trackers that do not need summary because no units 
     // Build capacity summary
     if (capacityLabel == ''){
         detail_text += '';
