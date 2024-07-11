@@ -53,8 +53,8 @@ conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']
 
 final_cols = ['url', 'areas','name', 'unit_name', 'capacity', 'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
-       'original_units', 'conversion_factor', 'geometry', 'river', 'area1', 'area2', 'region2', 'subnat1', 'subnat2', 'capacity1', 'capacity2',
-       'production', 'Latitude', 'Longitude', 'id', 'capacity_oil', 'capacity_gas', 'prod_year_oil', 'prod_year_gas']
+       'original_units', 'conversion_factor', 'geometry', 'river', 'area', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
+       'production', 'Latitude', 'Longitude', 'id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas']
 
 
 
@@ -74,7 +74,7 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country':
                       'GNPT': {'GEM unit ID': 'id','Country': 'areas', 'Project Name': 'name', 'Phase Name': 'unit_name',
                                'Capacity (MW)': 'capacity', 'Status': 'status', 'Start year': 'start_year', 'Owner': 'owner',
                                'Region': 'region', 'State/Province':'subnat', 'Wiki URL': 'url'},
-                      'GHPT': {'GEM unit ID':'id','Country 1': 'area1', 'Country 2': 'area2','Project Name': 'name', 'Country 1 Capacity (MW)': 'capacity1', 'Country 2 Capacity (MW)': 'capacity2',
+                      'GHPT': {'GEM unit ID':'id','Country 1': 'area', 'Country 2': 'area2','Project Name': 'name', 'Country 1 Capacity (MW)': 'capacity1', 'Country 2 Capacity (MW)': 'capacity2',
                                'Status': 'status', 'Start year': 'start_year', 'Owner': 'owner',
                                'Region 1': 'region', 'Region 2': 'region2','State/Province 1':'subnat', 'State/Province 2':'subnat2', 
                                'Wiki URL': 'url', 'River / Watercourse': 'river'},
@@ -87,18 +87,18 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country':
                       'GCTT': {'Terminal ID':'id','Coal Terminal Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Owner': 'owner', 'Capacity (Mt)':'capacity',
                                'Opening Year': 'start_year', 'Region': 'region', 'State/Province':'subnat', 'Country': 'areas'},
                       'GOGET': {'Unit ID':'id', 'Wiki name': 'name', 'Country': 'areas', 'Subnational unit (province, state)': 'subnat', 'Status': 'status', 'Discovery year': 'start_year', 'Production start year': 'prod_start_year',
-                                'GEM region': 'region','Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'capacity_oil', 'Production - Gas (Million m³/y)': 'capacity_gas','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'},
+                                'GEM region': 'region','Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'prod_oil', 'Production - Gas (Million m³/y)': 'prod_gas','Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)': 'capacity','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'},
                       'GCMT': {'GEM Mine ID':'id','Country': 'areas', 'Mine Name': 'name', 'Status': 'status', 'Owners': 'owner', 'Parent Company': 'parent', 'Capacity (Mtpa)': 'capacity', 
                                'Production (Mtpa)':'production', 'Opening Year': 'start_year', 'State, Province': 'subnat', 'Region': 'region', },
                       'GOIT': {'ProjectID':'id','Countries': 'areas', 'Wiki': 'url', 'PipelineName': 'name', 'SegmentName': 'unit_name', 'Status': 'status', 'Owner': 'owner',
-                               'Parent': 'parent', 'CapacityBOEd': 'capacity', 'StartYear1': 'start_year', 'StartState/Province':'subnat1', 'StartRegion': 'region',
+                               'Parent': 'parent', 'CapacityBOEd': 'capacity', 'StartYear1': 'start_year', 'StartState/Province':'subnat', 'StartRegion': 'region',
                                'EndState/Province': 'subnat2', 'EndRegion': 'region2',},
                       'GGIT': {'ProjectID':'id','Countries': 'areas','Wiki': 'url',
                                    'PipelineName':'name', 'SegmentName':'unit_name', 'Status':'status', 'Owner':'owner', 'Parent': 'parent',
-                                   'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat1',
+                                   'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat',
                                    'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2',
                                    }, 
-                      'GGIT - lng': {'ComboID':'id','Wiki': 'url', 'TerminalName': 'name',
+                      'GGIT-lng': {'ComboID':'id','Wiki': 'url', 'TerminalName': 'name',
                                    'UnitName': 'unit_name', 'Status': 'status', 'Country': 'areas', 'Owner': 'owner', 
                                    'Parent': 'parent', 'CapacityInMtpa': 'capacity', 'StartYearEarliest': 'start_year', 'Region': 'region', 
                                    'State/Province': 'subnat'}}
@@ -112,8 +112,8 @@ tracker_to_fullname = {
                     "GWPT": "wind power plant",
                     "GHPT": "hydropower plant",
                     "GGPT": "geothermal power plant",
-                    "GOGET - oil": "oil extraction area",
-                    "GOGET - gas": "gas extraction area",
+                    "GOGET - oil": "oil & gas extraction area",
+                    # "GOGET - gas": "gas extraction area",
                     "GOIT": "oil pipeline",
                     "GGIT": "gas pipeline",
                     "GGIT - import": "LNG import terminal",
@@ -132,8 +132,8 @@ tracker_to_legendname = {
                     "GWPT": "wind-power-plant",
                     "GHPT": "hydropower-plant",
                     "GGPT": "geothermal-power-plant",
-                    "GOGET - oil": "oil-extraction-area",
-                    "GOGET - gas": "gas-extraction-area",
+                    "GOGET - oil": "oil & gas extraction area",
+                    # "GOGET - gas": "gas-extraction-area",
                     "GOIT": "oil-pipeline",
                     "GGIT": "gas-pipeline",
                     "GGIT - import": "LNG-import-terminal",

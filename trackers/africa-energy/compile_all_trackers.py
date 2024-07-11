@@ -49,7 +49,7 @@ def gspread_access_file_read_only(key, tab_list):
 
     for tab in tab_list:
     
-        print(tab)
+        # print(tab)
         wait_time = 5
         time.sleep(wait_time)
         gsheets = gspread_creds.open_by_key(key)
@@ -109,21 +109,21 @@ def clean_dfs(df):
         cleaned_df['Longitude'].str.contains('-')].index.tolist()
             
     non_numeric_rows = non_numeric_rows + non_numeric_rows2 # + cleaned_df_missing
-    print(f'length of :{len(non_numeric_rows)}')
+    # print(f'length of :{len(non_numeric_rows)}')
     cleaned_df = cleaned_df.drop(non_numeric_rows)
-    print("Rows to drop:", non_numeric_rows)
-    print("\nCleaned DataFrame:")
-    print(cleaned_df)
+    # print("Rows to drop:", non_numeric_rows)
+    # print("\nCleaned DataFrame:")
+    # print(cleaned_df)
     
     # Create new DataFrames from the lists
     non_numeric_df = pd.DataFrame(non_numeric_rows)
 
-    print("\nNon-Numeric DataFrame:")
-    print(non_numeric_df)
+    # print("\nNon-Numeric DataFrame:")
+    # print(non_numeric_df)
     non_numeric_df.to_csv(f'{path_for_test_results}non_numeric_df_coords_{today_date}.csv')
 
                 
-    print(f'length of df at end of cleand_dfs removed lat and long empty which is good because all point data:{len(cleaned_df)}')
+    # print(f'length of df at end of cleand_dfs removed lat and long empty which is good because all point data:{len(cleaned_df)}')
     return cleaned_df
 
 # def lat_lng_to_Point(df):
@@ -202,7 +202,7 @@ prep_df = create_prep_file(prep_file_key, prep_file_tab)
 
 def create_conversion_df(key, tab):
     df = gspread_access_file_read_only(key, tab)
-    print(f'this is conversion df: {df}')
+    # print(f'this is conversion df: {df}')
     
     df = df[['tracker', 'type', 'original units', 'conversion factor (capacity/production to common energy equivalents, TJ/y)']]
     df = df.rename(columns={'conversion factor (capacity/production to common energy equivalents, TJ/y)': 'conversion_factor', 'original units': 'original_units'})
@@ -240,8 +240,8 @@ def find_missing_coords(df):
     
     df['float_col_clean_lng'] = df['Longitude'].apply(lambda x: check_and_convert_float(x))
 
-    print("Check which rows will be dropped because nan coords:")
-    print(df[df.isna().any(axis=1)])
+    # print("Check which rows will be dropped because nan coords:")
+    # print(df[df.isna().any(axis=1)])
     nan_df = df[df.isna().any(axis=1)]
     # nan_df.to_csv(f'{path_for_test_results}{df["tracker"].loc[0]}_nan_coords_{today_date}.csv')
 
@@ -257,8 +257,8 @@ def find_missing_cap(df):
     else:
         df['float_col_clean_cap'] = df['capacity'].apply(lambda x: check_and_convert_float(x))
         
-        print("Check which rows will be dropped because nan capacity:")
-        print(df[df.isna().any(axis=1)])
+        # print("Check which rows will be dropped because nan capacity:")
+        # print(df[df.isna().any(axis=1)])
         nan_df = df[df.isna().any(axis=1)]
         # nan_df.to_csv(f'{path_for_test_results}{df["tracker"].loc[0]}_nan_capacity_{today_date}.csv')
         df = df.dropna(subset = ['float_col_clean_cap'])
@@ -295,16 +295,16 @@ def find_about_page(key):
             
         # List all sheet names
         sheet_names = [sheet.title for sheet in gsheets.worksheets()]
-        print("Sheet names:", sheet_names)
+        # print("Sheet names:", sheet_names)
         
         
         # Access a specific sheet by name
         tab = sheet_names[0]
         sheet = gsheets.worksheet(tab)  # Access the first sheet, for example
 
-        print("First sheet name:", sheet.title)
+        # print("First sheet name:", sheet.title)
         if 'About' not in sheet.title:
-            print('UHOH try the lat sheet then')
+            # print('UHOH try the lat sheet then')
             # handle for goget and ggit, goit who put it in the last tab
             tab = sheet_names[-1]
             sheet = gsheets.worksheet(tab)  # Access the first sheet, for example
@@ -325,7 +325,7 @@ def write_to_about_page_file(about_page_df_dict):
         try:
             with pd.ExcelWriter(about_output, engine='openpyxl', mode='a', if_sheet_exists='new') as writer:
                 for sheet_name, df in about_page_df_dict.items():
-                    print(sheet_name)
+                    # print(sheet_name)
                     try:
                         df.to_excel(writer, sheet_name=sheet_name, index=False)
                     except AttributeError as e:
@@ -333,7 +333,7 @@ def write_to_about_page_file(about_page_df_dict):
         except FileNotFoundError:
             with pd.ExcelWriter(about_output, engine='openpyxl') as writer:
                 for sheet_name, df in about_page_df_dict.items():
-                    print(sheet_name)
+                    # print(sheet_name)
                     try:
                         df.to_excel(writer, sheet_name=sheet_name, index=False)
                     except AttributeError as e:
@@ -360,19 +360,19 @@ def find_region_colname(df):
 
 def create_all_dfs(df):
     all_dict = df.to_dict(orient='index')
-    print(all_dict)
+    # print(all_dict)
     list_of_gdfs = [] # map 
     list_of_dfs = [] # data download 
     about_page_df_dict = {} # tracker: sheetname: tracker_df_tabs (pull out )
     
     
     for key, value in all_dict.items():
-        print(f'we are on tracker: {key}')
+        # print(f'we are on tracker: {key}')
         if all_dict[key]['gspread_tabs'] == 'n/a':
             pass
 
         else:
-            print(all_dict[key]['gspread_tabs'])
+            # print(all_dict[key]['gspread_tabs'])
             # dfs_about_dict = pd.read_excel(all_dict[key]['gspread_key'], sheet_name=None)
             about_page_df = find_about_page(all_dict[key]['gspread_key'])
             about_page_df_dict[f'About {key}'] = about_page_df
@@ -398,7 +398,7 @@ def create_all_dfs(df):
             
             # list_of_dfs.append(df)
             list_of_gdfs.append(gdf)
-            print(f'added {key}')
+            # print(f'added {key}')
             
     about_output = write_to_about_page_file(about_page_df_dict)
         
@@ -415,7 +415,7 @@ def incorporate_geojson_trackers(GOIT, GGIT, GGIT_lng, list_of_gdfs):
     ggit_gdf = gpd.read_file(GGIT)
     ggit_gdf['tracker'] = 'GGIT'
     ggit_lng_gdf = gpd.read_file(GGIT_lng)
-    ggit_lng_gdf['tracker'] = 'GGIT - lng'
+    ggit_lng_gdf['tracker'] = 'GGIT-lng'
 
     list_of_gdfs.append(pipes_gdf)
     list_of_gdfs.append(ggit_gdf)
@@ -498,12 +498,11 @@ def split_goget_ggit(list_of_gdfs):
             # oil
             gdf = gdf.copy()
             # df_goget_missing_units.to_csv('compilation_output/missing_gas_oil_unit_goget.csv')
-            gdf['tracker_custom'] = gdf.apply(lambda row: 'GOGET - gas' if row['Production - Gas (Million m³/y)'] != '' else 'GOGET - oil', axis=1)
+            # gdf['tracker_custom'] = gdf.apply(lambda row: 'GOGET - gas' if row['Production - Gas (Million m³/y)'] != '' else 'GOGET - oil', axis=1)
+            gdf['tracker_custom'] = 'GOGET - oil'
             custom_list_of_gdfs.append(gdf)
-
-            # gas 
             
-        elif gdf['tracker'].iloc[0] == 'GGIT - lng':
+        elif gdf['tracker'].iloc[0] == 'GGIT-lng':
             gdf_ggit_missing_units = gdf[gdf['FacilityType']=='']
             # df_ggit_missing_units.to_csv('compilation_output/missing_ggit_facility.csv')
             gdf = gdf[gdf['FacilityType']!='']
@@ -544,14 +543,14 @@ def assign_conversion_factors(list_of_gdfs, conversion_df):
                 if gdf.loc[row, 'tracker_custom'] == 'GOGET - oil':
                     gdf.loc[row, 'original_units'] = conversion_df[conversion_df['tracker']=='GOGET - oil']['original_units'].values[0]
                     gdf.loc[row, 'conversion_factor'] = conversion_df[conversion_df['tracker']=='GOGET - oil']['conversion_factor'].values[0]
-                elif gdf.loc[row, 'tracker_custom'] == 'GOGET - gas':  
-                    gdf.loc[row, 'original_units'] = conversion_df[conversion_df['tracker']=='GOGET - gas']['original_units'].values[0]
-                    gdf.loc[row, 'conversion_factor'] = conversion_df[conversion_df['tracker']=='GOGET - gas']['conversion_factor'].values[0]
+                # elif gdf.loc[row, 'tracker_custom'] == 'GOGET - gas':  
+                #     gdf.loc[row, 'original_units'] = conversion_df[conversion_df['tracker']=='GOGET - gas']['original_units'].values[0]
+                #     gdf.loc[row, 'conversion_factor'] = conversion_df[conversion_df['tracker']=='GOGET - gas']['conversion_factor'].values[0]
 
             gdf['tracker'] = 'GOGET'
      
             augmented_list_of_gdfs.append(gdf)
-        elif gdf['tracker'].iloc[0] == 'GGIT - lng':
+        elif gdf['tracker'].iloc[0] == 'GGIT-lng':
             # print(f'We are on tracker: {gdf["tracker"].iloc[0]} length: {len(gdf)}')
             for row in gdf.index:
                 if gdf.loc[row, 'tracker_custom'] == 'GGIT - export':
@@ -592,7 +591,7 @@ def rename_dfs(list_of_dfs_with_conversion):
         # print(item.columns)
         # print(item['tracker'])
         # print(item['tracker_custom'])
-        tracker_sel = df['tracker'].iloc[0] # GOGPT, GGIT, GGIT - lng, GOGET
+        tracker_sel = df['tracker'].iloc[0] # GOGPT, GGIT, GGIT-lng, GOGET
         # print(tracker_sel)
         
         # tracker_sel = tracker_sel.split('-')[0]
@@ -802,16 +801,15 @@ def conversion_multiply(row):
 
 def workaround_no_sum_cap_project(gdf):
     gdf = gdf.copy()
-    # cap = float(row['cleaned_cap'])
     
     # result = int()
     
     # group by id
     # summed cleaned cap
     # that's the project cap
-    project_cap_df = gdf.groupby('name', as_index=False)['cleaned_cap'].sum()
+    project_cap_df = gdf.groupby('name', as_index=False)['capacity'].sum()
     print(f'this is cols of project_cap_df: {project_cap_df.columns}')
-    project_cap_df = project_cap_df.rename(columns={'cleaned_cap': 'cap_total'})
+    project_cap_df = project_cap_df.rename(columns={'capacity': 'capacity-details'})
     
     # merge on name to gdf
     
@@ -820,17 +818,23 @@ def workaround_no_sum_cap_project(gdf):
     return gdf
 
 def workaround_display_cap(row):
-    cap = str(row['capacity'])
+    cap = row['capacity'] 
     units_of_m = str(row['original_units'])
-    
-    result = f'{cap} ({units_of_m})'
+    if isinstance(cap, (int, float)):
+        cap = str((round(cap, 3))) # handle rounding and converting from string to float to round later 
+        result = f'{cap} {units_of_m}'
+    else:
+        result = ''
     return result
 
 def workaround_display_cap_total(row):
-    cap = str(row['cap_total'])
+    cap = row['capacity-details']
     units_of_m = str(row['original_units'])
-    
-    result = f'{cap} ({units_of_m})'
+    if isinstance(cap, (int, float)):
+        cap = str(float(round(cap, 3)))
+        result = f'{cap} ({units_of_m})'
+    else:
+        result = ''
     return result
     
 def capacity_conversions(gdf): 
@@ -845,23 +849,23 @@ def capacity_conversions(gdf):
     gdf_converted = gdf.copy()
     
     # first let's get GHPT cap added 
-    print(len(gdf_converted))
+    # print(len(gdf_converted))
     ghpt_only = gdf_converted[gdf_converted['tracker']=='GHPT'] # for GGPT we need to re run it to get it 
     gdf_converted = gdf_converted[gdf_converted['tracker']!='GHPT']
     ghpt_only['capacity'] = ghpt_only.apply(lambda row: row['capacity1'] + row['capacity2'], axis=1)
     gdf_converted = pd.concat([gdf_converted, ghpt_only],sort=False).reset_index(drop=True)
-    print(len(gdf_converted))
+    # print(len(gdf_converted))
     
-    # second let's handle GOGET -- need to differentiate use cap-gas if custom_tracker gas etc
-    goget_oil_only = gdf_converted[gdf_converted['tracker_custom']=='GOGET - oil'] # for GGPT we need to re run it to get it 
-    goget_gas_only = gdf_converted[gdf_converted['tracker_custom']=='GOGET - gas'] # for GGPT we need to re run it to get it 
+    # # second let's handle GOGET -- need to differentiate use cap-gas if custom_tracker gas etc
+    # goget_oil_only = gdf_converted[gdf_converted['tracker_custom']=='GOGET - oil'] # for GGPT we need to re run it to get it 
+    # goget_gas_only = gdf_converted[gdf_converted['tracker_custom']=='GOGET - gas'] # for GGPT we need to re run it to get it 
 
-    goget_oil_only['capacity'] = goget_oil_only['capacity_oil']
-    goget_gas_only['capacity'] = goget_gas_only['capacity_gas']
+    # goget_oil_only['capacity'] = goget_oil_only['capacity_oil']
+    # goget_gas_only['capacity'] = goget_gas_only['capacity_gas']
 
-    gdf_converted = gdf_converted[gdf_converted['tracker']!='GOGET']
-    gdf_converted = pd.concat([gdf_converted, goget_oil_only],sort=False).reset_index(drop=True)
-    gdf_converted = pd.concat([gdf_converted, goget_gas_only],sort=False).reset_index(drop=True)
+    # gdf_converted = gdf_converted[gdf_converted['tracker']!='GOGET']
+    # gdf_converted = pd.concat([gdf_converted, goget_oil_only],sort=False).reset_index(drop=True)
+    # gdf_converted = pd.concat([gdf_converted, goget_gas_only],sort=False).reset_index(drop=True)
 
     
 
@@ -910,11 +914,11 @@ def capacity_conversions(gdf):
     # print(f"{gdf_converted['scaling_capacity'].min().round(2)}")
     # print(f"{gdf_converted['scaling_capacity'].max().round(2)}")
     # print(f"scaling_cap stats: {gdf_converted['scaling_capacity'].describe()}")
-    gdf_converted['capacity-display'] = gdf_converted.apply(lambda row: workaround_display_cap(row), axis=1)
+    gdf_converted['capacity-table'] = gdf_converted.apply(lambda row: workaround_display_cap(row), axis=1)
 
-    gdf_converted = workaround_no_sum_cap_project(gdf_converted)
+    gdf_converted = workaround_no_sum_cap_project(gdf_converted) # adds capacity-details 
     
-    gdf_converted['cap_total'] = gdf_converted.apply(lambda row: workaround_display_cap_total(row), axis=1)
+    gdf_converted['capacity-details'] = gdf_converted.apply(lambda row: workaround_display_cap_total(row), axis=1)
     # gdf_converted['capacity-plant-total'] = gdf_converted.apply(lambda row: workaround_no_sum_cap_project(row), axis=1)
 
     return gdf_converted
@@ -991,34 +995,38 @@ def map_ready_countries(gdf):
     # GOIT has comma separated in countries
     # hydropower has two columns country1 and country2
     # GGIT has comma separated in countries
-    grouped_tracker_before = gdf.groupby('tracker', as_index=False)['id'].count()
-    print(f'In map ready before adjustment: {grouped_tracker_before}')
-    # no return
+    # grouped_tracker_before = gdf.groupby('tracker', as_index=False)['id'].count()
+    # print(f'In map ready before adjustment: {grouped_tracker_before}')
+    # # no return
 
-    # count groupby
-    gdf_map_ready['area2'] = gdf_map_ready['area2'].fillna('')
+    # gdf_map_ready['area2'] = gdf_map_ready['area2'].fillna('')
     for row in gdf_map_ready.index:
 
         if gdf_map_ready.loc[row, 'area2'] != '':
-            gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'area1'].strip()};{gdf_map_ready.loc[row, 'area2'].strip()};"
+            gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'area'].strip()};{gdf_map_ready.loc[row, 'area2'].strip()};"
             print(f"Found a area2! Hydro? {gdf_map_ready.loc[row, 'areas']} {gdf_map_ready.loc[row, 'tracker']} {gdf_map_ready.loc[row, 'name']}")
 
         else:
             # make it so all areas even just one end with a comma 
             gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'areas'].strip()};"
     
-    grouped_tracker_after = gdf.groupby('tracker', as_index=False)['id'].count()
+    # grouped_tracker_after = gdf.groupby('tracker', as_index=False)['id'].count()
 
-    print(f'In map ready after adjustment: {grouped_tracker_after}')
+    # print(f'In map ready after adjustment: {grouped_tracker_after}')
     
 
     return gdf_map_ready
 
 africa_df_country_update = map_ready_countries(africa_df_status_update)
 
+# Define a function to check for valid values
+def is_valid_goget(x):
+    return isinstance(x, (int, float)) and not pd.isna(x) and x != '' and x != 0 and x != 0.0
+
+
 def workarounds_eg_interim(gdf):
     # copy tracker column to be full display name not custom 
-    
+    gdf = gdf.copy()
     # create column that has capacity with appended units 
     
     # for items with no capacity remove capacity
@@ -1026,7 +1034,31 @@ def workarounds_eg_interim(gdf):
     
     # make capacity == ''
     # production_mask = gdf[gdf['tracker']=='GOGET' or 'GCMT'] 
-    
+    for row in gdf.index:
+        prod_oil = gdf.loc[row, 'prod_oil']
+        prod_gas = gdf.loc[row, 'prod_gas']
+        cap = gdf.loc[row, 'capacity']
+        tracker = (gdf.loc[row, 'tracker'])
+        #if goget then make capacity table and capacity details empty
+        
+        if tracker == 'GOGET':
+            gdf.loc[row, 'capacity-table'] = ''
+            gdf.loc[row, 'capacity-details'] = ''
+            
+            if is_valid_goget(prod_oil):
+                # round it then if either is '' we can remove it later we filter on it before adding to table or details
+                prod_oil = str(float(round(prod_oil, 3)))
+
+                gdf.loc[row, 'prod-oil-table'] = f'{prod_oil} million bbl/y'
+                gdf.loc[row, 'prod-oil-details'] = f'{prod_oil} (million bbl/y)'
+                
+            if is_valid_goget(prod_gas):
+                prod_gas = str(float(round(prod_gas, 3)))
+
+                gdf.loc[row, 'prod-gas-table'] = f'{prod_gas} million m³/y'
+                gdf.loc[row, 'prod-gas-details'] = f'{prod_gas} (million m³/y)'
+
+                
     # in that column above make it so all units within a project are summed and it's called total capacity
         
     # pull in new GOGET info
@@ -1055,10 +1087,11 @@ def last_min_fixes(gdf):
     gdf['name'] = gdf['name'].fillna('')
     gdf['url'] = gdf['url'].fillna('')
     print(gdf.columns)
-    gdf = gdf.drop(['original_units','conversion_factor', 'area1', 'area2', 'region2', 'subnat1', 'subnat2', 'capacity1', 'capacity2', 'Latitude', 'Longitude'], axis=1) # 'cleaned_cap'
+    # TODO for now remove drop to understand why all GOGET empty is now not being filled and also prod doesn't come through
+    # gdf = gdf.drop(['original_units','conversion_factor', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2', 'Latitude', 'Longitude'], axis=1) # 'cleaned_cap'
     # handle countries/areas ? 
     # gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Guinea,Bissau','Guinea-Bissau')) # reverse this one special case back 
-    print(gdf[gdf['areas']=='']) # check if missing!!   
+    print(f'Missing areas: {gdf[gdf["areas"]==""]}') # check if missing!!   
     # handle situation where Guinea-Bissau IS official and ok not to be split into separate countries 
     gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Guinea,Bissau','Guinea-Bissau')) 
     
@@ -1073,7 +1106,7 @@ def last_min_fixes(gdf):
 
     gdf_empty_url = gdf[gdf['url'] == '']
     
-    print(gdf_empty_url[['tracker', 'wiki-from-name', 'url']])
+    # print(gdf_empty_url[['tracker', 'wiki-from-name', 'url']])
     
     # assign Africa to all regions
     gdf['region'] = 'Africa'
@@ -1094,6 +1127,9 @@ def last_min_fixes(gdf):
     gdf['capacity'] = gdf['capacity'].apply(lambda x: str(x).replace('--', ''))
     # gdf['capacity'] = gdf['capacity'].apply(lambda x: x.replace('', pd.NA))
     # gdf['capacity'] = gdf['capacity'].astype(float) # Stuck with concatting like strings for now? ValueError: could not convert string to float: ''
+    
+    # REMOVE TODO not found!! 
+    
      
     return gdf
 

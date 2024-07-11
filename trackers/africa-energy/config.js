@@ -137,12 +137,12 @@ var config = {
 
     tableHeaders: {
         values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-oil-table', 'prod-year-oil', 'prod-gas-table', 'prod-year-gas'],
-        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Status','Countries','Start year', 'Production - oil','Production year - oil', 'Production - gas', 'Production year - gas'],
+        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Status','Countries','Start year', 'Production (oil)','Production year (oil)', 'Production (gas)', 'Production year (gas)'],
         
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
         clickColumns: ['project'],
-        rightAlign: ['unit','capacity','prod-oil-table', 'prod-gas-table','start-year'], 
+        rightAlign: ['unit','capacity','prod-oil-table', 'prod-gas-table','start-year', 'prod-year-oil', 'prod-year-gas'], 
         removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
         // appendValue: {'capacity': "capItemLabel"},
@@ -154,17 +154,19 @@ var config = {
     searchFields: { 'Project': ['name'], 
         'Companies': ['owner', 'parent'],
         'Start Year': ['start-year'],
-        'Infrastructure Type': ['tracker-display']
+        'Infrastructure Type': ['tracker-display'],
+        'Status': ['status'],
+        'Province/State': ['subnat']
     },
     detailView: {
         'name': {'display': 'heading'},
         // 'status': {'lable': 'Status'},
         // 'prod-gcmt': {'label': 'Production (MTPA)'}, // if its GCMT or GOGET should be 
         'capacity-details': {'label': 'Project Level Capacity'}, // interim until summary capacity can be customized by tracker
-        'prod-oil-details': {'label': 'Production - Oil'},
-        'prod-gas-details': {'label': 'Production - Gas'},
-        'prod-year-oil': {'label': 'Production Year - Oil'},
-        'prod-year-gas': {'label': 'Production Year - Gas'},
+        'prod-oil-details': {'label': 'Production (Oil)'},
+        'prod-gas-details': {'label': 'Production (Gas)'},
+        'prod-year-oil': {'label': 'Production Year (Oil)'},
+        'prod-year-gas': {'label': 'Production Year (Gas)'},
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
