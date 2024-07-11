@@ -137,7 +137,7 @@ var config = {
 
     tableHeaders: {
         values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-oil-table', 'prod-year-oil', 'prod-gas-table', 'prod-year-gas'],
-        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Status','Countries','Start year', 'Production (oil)','Production year (oil)', 'Production (gas)', 'Production year (gas)'],
+        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (oil)','Production year (oil)', 'Production (gas)', 'Production year (gas)'],
         
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
