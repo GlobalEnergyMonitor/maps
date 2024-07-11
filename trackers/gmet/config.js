@@ -59,6 +59,7 @@ var config = {
     //         field: 'coalfield',
     //         'label': 'Coal Fields',
     //         'tileset': '[mapbox tile url]',
+
     //         paint: {}
     //     }
     // ],
