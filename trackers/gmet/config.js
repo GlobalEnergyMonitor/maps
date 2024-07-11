@@ -88,10 +88,10 @@ var config = {
         each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: { 'Country/Area(s)': ['country'],
         'Project': ['name'], 
-        // 'Companies': ['owners'],
-        // 'Type of Infrastructure': ['infra_type'],
-        // 'Government Well ID': ['well_id'],
-        // // 'California VISTA and other Government ID Assets': ['gov_assets']
+        'Companies': ['owners'],
+        'Type of Infrastructure': ['infra_type'],
+        'Government Well ID': ['well_id'],
+        'California VISTA and other Government ID Assets': ['gov_assets']
     },
 
     /* define fields and how they are displayed. 
@@ -111,7 +111,7 @@ var config = {
         'infra_type': {'label': 'Type of Infrastructure'},
         'infra_name': { 'label': 'Nearby Infrastructure Project Name'},
         'related_cm_field': {'label': 'ClimateTrace Field'},
-        'mtyr-gcmt_emissions': {'label': 'GEM Coal Mine Methane Emissions Estimate (Mt/yr)'},
+        'mtyr-gcmt_emissions': {'label': 'GEM Coal Mine Methane Emissions Estimate (mt/yr)'},
         'capacity_output': {'label': 'Coal Output (Annual, Mst)'},
         'capacity_prod': {'label': 'Production (Mtpa)'},
         'tonnesyr-pipes_emissions': {'label': 'Emissions if Operational (tonnes/yr)'},

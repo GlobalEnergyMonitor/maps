@@ -836,7 +836,9 @@ def workaround_display_cap_total(row):
     else:
         result = ''
     return result
-    
+
+
+
 def capacity_conversions(gdf): 
 
 # you could multiply all the capacity/production values in each tracker by the values in column C, 
@@ -1059,11 +1061,25 @@ def workarounds_eg_interim(gdf):
                 gdf.loc[row, 'prod-gas-details'] = f'{prod_gas} (million m³/y)'
 
                 
-    # in that column above make it so all units within a project are summed and it's called total capacity
-        
-    # pull in new GOGET info
+    # in that column above make it so all units within a project are summed and it's called total capacityDONE
     
-    # find out why terminals and hydro and import not in there? 
+    # handle more than one country for sat image say intranational project
+    # if there is more than one ; you know it's a multiple country situation
+    # so we want to say in areas-display "multi country"
+    # we would also want to overwrite the subnat and say nothing ""
+    gdf['count_of_semi'] = gdf.apply(lambda row: row['areas'].split(';')) # if len of list is more than 2, then split more than once
+    gdf['multi-country'] = gdf.apply(lambda row: 't' if len(row['count_of_semi']) > 2 else 'f')
+    print(gdf['multi-country'])
+    # if t then make areas-display 
+    gdf['areas-subnat-sat-display'] = gdf.apply(lambda row: f"{row['subnat'],row['areas']}" if row['multi-country'] == 'f' else 'Multiple Countries/Areas')
+
+
+    # here we want to get the total number of units at the project level and put it at each row
+    # so however it gets pulled into details it is shown
+    units_per_project = gdf.groupby(['name', 'status'], as_index=False)['geometry'].count()
+    print(len(f'length of units_per_project series from groupby: {units_per_project}'))
+    print(units_per_project.columns)
+    # gdf = pd.merge(left=gdf, right=units_per_project, on='name', how='outer')
     
     #### figure out 
     
