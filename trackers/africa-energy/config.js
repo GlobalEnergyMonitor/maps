@@ -173,7 +173,7 @@ var config = {
         'river': {'label': 'River'},
         'tracker-display': {'label': 'Type'},
         'areas': {'label': 'Country/Area(s)'},
-        'subnat-display': {'display': 'location'}, // TODO pull out first one only if ; in it 
+        'subnat': {'display': 'location'}, // TODO pull out first one only if ; in it 
         // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
     }
 
