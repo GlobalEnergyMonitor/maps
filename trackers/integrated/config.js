@@ -53,14 +53,16 @@ var config = {
     countryField: 'Country',
     searchFields: { 'Project': ['Plant/project name'], 
         'Companies': ['Owner', 'Parent'],
-        'Start Year': ['Start year']
+        'Start Year': ['Start year'],
+        'Country/Area': ['Country'],
+        'Status': ['Status']
     },
     assetFullLabel: "units / phases / areas",
     assetLabel: "Units / Phases / Areas",
     img_detail_zoom: 15,
     tableHeaders: {
         values: ['Plant/project name','Unit/phase name', 'Owner', 'Parent', 'Capacity (MW)', 'Status', 'Subnational unit(s)', 'Country', 'Start year'],
-        labels: ['Plant/project name','Unit/phase name','Owner','Parent','Capacity (MW)','Status','Subnational unit (province/state)','Country','Start year'],
+        labels: ['Plant/project name','Unit/phase name','Owner','Parent','Capacity (MW)','Status','Subnational unit (province/state)','Country/Area','Start year'],
         clickColumns: 'Plant/project name'
     },
     detailView: {

@@ -45,7 +45,7 @@ var config = {
         and designated which column has the link */
     tableHeaders: {
         values: ['plant','unit','chinese_name','owner', 'parent', 'capacity', 'status', 'region', 'country', 'subnational', 'start_year'],
-        labels: ['Plant','Unit','Chinese Name','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
+        labels: ['Plant','Unit','Chinese Name','Owner','Parent','Capacity (MW)','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year'],
         clickColumns: ['plant'],
         rightAlign: ['unit','capacity','start_year']
     },

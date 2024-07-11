@@ -58,7 +58,7 @@ var config = {
     
     tableHeaders: {
         values: ['unit_name', 'operator', 'status', 'country', 'province', 'production_oil', 'production_gas', 'production_oil_year', 'production_gas_year', 'production_start_year',],
-        labels: ['Extraction Area', 'Operator', 'Status','Country','Subnational unit (province/state)', 'Production - Oil (Million bbl/y)', 'Production - Gas (Million m³/y)', 'Production Year - Oil', 'Production Year - Gas', 'Production start year',],
+        labels: ['Extraction Area', 'Operator', 'Status','Country/Area(s)','Subnational unit (province/state)', 'Production - Oil (Million bbl/y)', 'Production - Gas (Million m³/y)', 'Production Year - Oil', 'Production Year - Gas', 'Production start year',],
         clickColumns: ['unit_name'],
         rightAlign: ['unit_name','discovery_year', 'fid_year', 'production_start_year', 'production_gas_year', 'production_gas', 'production_oil_year', 'production_oil', ]
     },

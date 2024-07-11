@@ -71,7 +71,7 @@ var config = {
         and designated which column has the link */
     tableHeaders: {
         values: ['Project Name', 'Project Name in Local Language / Script', 'Phase Name', 'Capacity (MW)', 'Installation-Type', 'Status', 'Start year', 'Owner', 'Operator',  'State/Province', 'Country'],
-        labels: ['Project', 'Project Name in Local Language / Script', 'Phase','Capacity (MW)','Installation Type','Status','Start year', 'Owner', 'Operator', 'State/Province', 'Country'],
+        labels: ['Project', 'Project Name in Local Language / Script', 'Phase','Capacity (MW)','Installation Type','Status','Start year', 'Owner', 'Operator', 'State/Province', 'Country/Area'],
         clickColumns: ['Project Name'],
         rightAlign: ['Capacity (MW)','Start year']
     },

@@ -59,7 +59,7 @@ var config = {
         and designated which column has the link */
     tableHeaders: {
         values: ['project_name', 'capacity_(mw)', 'technology', 'status', 'start_year', 'owner', 'operator',  'country'],
-        labels: ['Project name','Capacity (MW)','Technology','Status','Start year', 'Owner', 'Operator', 'Country'],
+        labels: ['Project name','Capacity (MW)','Technology','Status','Start year', 'Owner', 'Operator', 'Country/Area(s)'],
         clickColumns: ['project_name'],
         rightAlign: ['capacity_(mw)','start_year']
     },

@@ -26,7 +26,7 @@ var config = {
     nameField: 'project',
     tableHeaders: {
         values: ['project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
-        labels: ['Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country','Subnational unit (province/state)','Start year'],
+        labels: ['Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year'],
         clickColumns: ['project'],
         rightAlign: ['unit','capacity','start_year']
     },

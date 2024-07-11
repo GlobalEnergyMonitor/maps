@@ -78,7 +78,7 @@ var config = {
         and designated which column has the link */
     tableHeaders: {
         values: ['name', 'status','plume_emissions', 'emission_uncertainty','infra_type', 'date','subnational', 'country','infra_name','well_id', 'gov_assets', 'infra_url'],
-        labels: ['Project', 'Status','Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)','Type of Infrastructure','Observation Date', 'Subnational', 'Country/Area','Nearby Infrastructure Project Name', 'Government Well ID', 'California VISTA and other Government ID Assets','Infrastructure Wiki'],
+        labels: ['Project', 'Status','Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)','Type of Infrastructure','Observation Date', 'Subnational', 'Country/Area(s)','Nearby Infrastructure Project Name', 'Government Well ID', 'California VISTA and other Government ID Assets','Infrastructure Wiki'],
         clickColumns: ['name'],
         rightAlign: ['Government Well ID','plume_emissions','date'],
         removeLastComma: ['country']
@@ -86,7 +86,7 @@ var config = {
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Country': ['country'],
+    searchFields: { 'Country/Area(s)': ['country'],
         'Project': ['name'], 
         // 'Companies': ['owners'],
         // 'Type of Infrastructure': ['infra_type'],
