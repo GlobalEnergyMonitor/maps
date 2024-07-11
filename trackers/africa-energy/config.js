@@ -103,7 +103,7 @@ var config = {
     //productionLabel NEED a productionLabel
     showMaxCapacity: false,
 
-    assetFullLabel: "Units / Phases / Areas",
+    assetFullLabel: "Units / Phases / Areas / Pipelines",
     //can be string for single value, or hash
     assetLabel: {
         field: 'tracker-custom',
