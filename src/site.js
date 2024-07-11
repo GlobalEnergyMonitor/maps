@@ -534,11 +534,16 @@ function addEvents() {
             }
         } else {
             // console.log(displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]))
-            var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6><ul>";
+            var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6>";
+
+            let ul = $('<ul>');
             selectedFeatures.forEach((feature) => {
-                modalText += "<li class='asset-select-option' onClick='displayDetails(\"" + JSON.stringify(config.linked[feature.properties[config.linkField]]).replace(/"/g, '\\"').replace(/'/g, "\\'") + "\")'>" + feature.properties[config.nameField] + "</li>";
+                var link = $('<li class="asset-select-option">' + feature.properties[config.nameField] + "</li>");
+                link.attr('data-feature', JSON.stringify(config.linked[feature.properties[config.linkField]]));
+                link.attr('onClick', "displayDetails(this.dataset.feature)");
+                ul.append(link);
             });
-            modalText += "</ul>";
+            modalText += ul[0].outerHTML;
             config.selectModal = modalText;
             $('.modal-body').html(modalText);
         }
