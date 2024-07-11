@@ -37,9 +37,9 @@ var config = {
         {
             field: 'status-legend',
             label: 'Infrastructure Status',
-            values: ['proposed-plus','construction-plus','mothballed-plus', 'retired-plus', 'unknown-plus'], // pre-construction-plus
+            values: ['operating','proposed-plus','construction-plus','mothballed-plus', 'retired-plus', 'unknown-plus'], // pre-construction-plus
             /* value_labels must match order/number in values */
-            values_labels: ['Proposed / Announced / Discovered' ,'Construction / In development','Mothballed / Idle / Shut in','Retired / Closed / Decommissioned','Not applicable / Unknown'] // 'Pre-construction / Pre-permit / Permitted'
+            values_labels: ['Operating','Proposed / Announced / Discovered' ,'Construction / In development','Mothballed / Idle / Shut in','Retired / Closed / Decommissioned','Not applicable / Unknown'] // 'Pre-construction / Pre-permit / Permitted'
         }
     ],
 
