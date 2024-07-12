@@ -119,7 +119,6 @@ table.dataTable td {
     left: 0px;
     z-index: 1;
     overflow-y:scroll; 
-    overflow-x:scroll; 
     max-height: 80%;
     white-space: nowrap;
 }
@@ -140,22 +139,12 @@ table.dataTable td {
     font-size: 9px;
 }
 
-.mapboxgl-ctrl-bottom-right,
-.mapboxgl-ctrl-bottom-left,
-.mapboxgl-ctrl-top-right,
-.mapboxgl-ctrl-top-left {
-    display: block;
-    visibility: visible;
-}
-
 .mapboxgl-ctrl-bottom-right {
     bottom: 90px;
 }
-
 .mapboxgl-ctrl-bottom-left {
     bottom: 88px;
 }
-
 @media screen and (max-width: 900px) {
     .sidebar {
         bottom: 25px;
@@ -175,64 +164,6 @@ table.dataTable td {
 
     .mapboxgl-ctrl-bottom-right {
         bottom: 0px;
-    }
-
-}
-@media screen and (max-width: 768px) {
-    .sidebar {
-        bottom: 25px;
-    }
-    #expand-sidebar {
-        display: block;
-    }
-    #collapse-sidebar, #filter-form, #all-select {
-        display: none;
-    }
-    .navbar {
-        /* visibility: hidden; */
-        visibility: visible;
-        max-height: 100vh;
-        overflow-y: auto;
-    }
-    .mapboxgl-ctrl-bottom-left{
-        bottom: 0px;
-    }
-
-    .mapboxgl-ctrl-bottom-right {
-        bottom: 0px;
-    }
-
-
-    /* Hide the elements by default */
-    #filter-form,
-    #all-select,
-    .mapboxgl-ctrl-bottom-right,
-    .mapboxgl-ctrl-bottom-left {
-        display: none;
-    }
-    /* Hide the elements by default */
-    #filter-form,
-    #all-select,
-    .mapboxgl-ctrl-bottom-right,
-    .mapboxgl-ctrl-bottom-left {
-        display: none;
-    }
-
-    /*Hover area to show the hidden elements */
-    .hover-area {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        height: 50px;
-        z-index: 9999;
-        /* background-color: rgba(255, 255, 255, 0.5); to indicate hover area at bottom of mobile screen */
-
-    }
-    .hover-area:hover + #filter-form,
-    .hover-area:hover + #all-select,
-    .hover-area:hover + .mapboxgl-ctrl-bottom-right,
-    .hover-area:hover + .mapboxgl-ctrl-bottom-left {
-        display: block;
     }
 }
 
@@ -287,19 +218,16 @@ table.dataTable td {
   }
 }	
 /* ============ small devices .end// ============ */
-ß
+
 .dropdown-menu.submenu {
      max-height: 400px;
      overflow-y: auto;
-     overflow-x: auto;
 }
 
 .navbar {
     opacity: 0.90; 
     filter:(opacity=90);
     padding: 2px;
-    overflow-y: auto;
-    overflow-x: auto;
 }
 
 #country {

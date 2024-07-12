@@ -106,26 +106,27 @@ var config = {
     assetFullLabel: "Units / Phases / Areas / Pipelines", //TODO This should be projects when in the list down of linked in same area
     //can be string for single value, or hash
     // not using assetLabel for now TODO
+    assetLabel: '',
     // assetLabel: {
-    //     field: 'tracker-custom',
-    //     values: {
-    //         'GCPT': 'units',
-    //         'GOGPT': 'units',
-    //         'GBPT': 'units',
-    //         'GNPT': 'units',
-    //         'GSPT': 'phases',
-    //         'GWPT':	'phases',
-    //         'GHPT':	'units',
-    //         'GGPT':	'units',
-    //         'GOGET - oil': 'areas',
-    //         'GOGET - gas': 'areas',
-    //         'GOIT': 'projects',
-    //         'GGIT': 'projects',
-    //         'GGIT - import': 'projects',
-    //         'GGIT - export': 'projects',
-    //         'GCMT': 'projects',
-    //         'GCTT': 'projects'
-    //     }
+    //     // field: 'tracker-custom',
+    //     // values: {
+    //     //     'GCPT': 'units',
+    //     //     'GOGPT': 'units',
+    //     //     'GBPT': 'units',
+    //     //     'GNPT': 'units',
+    //     //     'GSPT': 'phases',
+    //     //     'GWPT':	'phases',
+    //     //     'GHPT':	'units',
+    //     //     'GGPT':	'units',
+    //     //     'GOGET - oil': 'areas',
+    //     //     'GOGET - gas': 'areas',
+    //     //     'GOIT': 'projects',
+    //     //     'GGIT': 'projects',
+    //     //     'GGIT - import': 'projects',
+    //     //     'GGIT - export': 'projects',
+    //     //     'GCMT': 'projects',
+    //     //     'GCTT': 'projects'
+    //     // }
     // },
     nameField: 'name',
 //    linkField: 'id',  
