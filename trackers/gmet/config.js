@@ -34,22 +34,17 @@ var config = {
             values_labels: ['Plumes (has attribution information) ', 'Plumes (no attribution information)','Oil and Gas Extraction Areas', 'Coal Mines'],
             primary: true
         },
-        // {
-        //     field: 'infra-filter',
-        //     label: 'Attributed Plume',
-        //     values: ['Y', 'N'],
-        //     values_labels: ['Yes', 'No'],
-        //     // primary: true
-        // },
         {
             field: 'status-legend',
             label: 'Infrastructure Status',
-            values: ['proposed-plus','construction-plus','mothballed-plus', 'retired-plus', 'unknown-plus'], // pre-construction-plus
+            values: ['operating','proposed-plus','construction-plus','mothballed-plus', 'retired-plus', 'unknown-plus'], // pre-construction-plus
             /* value_labels must match order/number in values */
-            values_labels: ['Proposed / Announced / Discovered' ,'Construction / In development','Mothballed / Idle / Shut in','Retired / Closed / Decommissioned','Not applicable / Unknown'] // 'Pre-construction / Pre-permit / Permitted'
+            values_labels: ['Operating','Proposed / Announced / Discovered' ,'Construction / In development','Mothballed / Idle / Shut in','Retired / Closed / Decommissioned','Not applicable / Unknown'] // 'Pre-construction / Pre-permit / Permitted'
         }
     ],
 
+    statusDisplayField: 'status',
+    statusField: 'status-legend',
     // # O&G extraction areas and coal mines by status 
     // plumes by "has attribution information"
     // infrastructure emissions estimates
@@ -77,13 +72,13 @@ var config = {
     nameField: 'name',
 
 
-    urlField: 'url', // wikiField
+    // urlField: 'url', // wikiField
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['name','plume_emissions', 'emission_uncertainty','infra_type', 'date','subnational', 'country','infra_name','well_id', 'gov_assets', 'infra_url'],
-        labels: ['Project', 'Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)','Type of Infrastructure','Observation Date', 'Subnational', 'Country/Area','Infrastructure Name', 'Government Well ID', 'California VISTA and other Government ID Assets','Infrastructure Wiki'],
+        values: ['name', 'status','plume_emissions', 'emission_uncertainty','infra_type', 'date','subnational', 'country','infra_name','well_id', 'gov_assets', 'infra_url'],
+        labels: ['Project', 'Status','Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)','Type of Infrastructure','Observation Date', 'Subnational', 'Country/Area(s)','Nearby Infrastructure Project Name', 'Government Well ID', 'California VISTA and other Government ID Assets','Infrastructure Wiki'],
         clickColumns: ['name'],
         rightAlign: ['Government Well ID','plume_emissions','date'],
         removeLastComma: ['country']
@@ -91,12 +86,12 @@ var config = {
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Country': ['country'],
+    searchFields: { 'Country/Area(s)': ['country'],
         'Project': ['name'], 
-        // 'Companies': ['owners'],
-        // 'Type of Infrastructure': ['infra_type'],
-        // 'Government Well ID': ['well_id'],
-        // // 'California VISTA and other Government ID Assets': ['gov_assets']
+        'Companies': ['owners'],
+        'Type of Infrastructure': ['infra_type'],
+        'Government Well ID': ['well_id'],
+        'California VISTA and other Government ID Assets': ['gov_assets']
     },
 
     /* define fields and how they are displayed. 
@@ -114,9 +109,9 @@ var config = {
         'plume_emissions': {'label': 'Emissions (kg/hr)'},
         'emission_uncertainty': {'label': 'Emissions Uncertainity (kg/hr)'},
         'infra_type': {'label': 'Type of Infrastructure'},
-        'infra_name': { 'label': 'Attributed Infrastructure Project Name'},
+        'infra_name': { 'label': 'Nearby Infrastructure Project Name'},
         'related_cm_field': {'label': 'ClimateTrace Field'},
-        'mtyr-gcmt_emissions': {'label': 'GEM Coal Mine Methane Emissions Estimate (Mt/yr)'},
+        'mtyr-gcmt_emissions': {'label': 'GEM Coal Mine Methane Emissions Estimate (mt/yr)'},
         'capacity_output': {'label': 'Coal Output (Annual, Mst)'},
         'capacity_prod': {'label': 'Production (Mtpa)'},
         'tonnesyr-pipes_emissions': {'label': 'Emissions if Operational (tonnes/yr)'},
@@ -137,4 +132,6 @@ var config = {
     showCapacityTable: false,
 
     multiCountry: true,
+
+    showMaxCapacity: false
 }

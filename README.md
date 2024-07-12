@@ -46,3 +46,23 @@ If hosting on another webserver, the entire repo should be available from a dire
 * jQuery for document manipulation / querying
 * bootstrap for styling
 * DataTables for table view
+
+
+## Next trackers to move into EG
+
+* Nuclear (changing soon)
+* Asia Gas Tracker (able to change soon, and will be prioritized this summer if possible)
+* Europe Gas Tracker (able to change soon, and will be prioritized this summer if possible)
+* LATAM Energy Tracker (able to change soon, and will be prioritized this summer if possible)
+* GMET (add in pipelines soon)
+
+* GOIT (able to change soon)
+* GGIT (able to change soon) 
+
+* Steel & Iron (able to change soon, planned for early 2025) 
+* GBPT (planned to change early Sept 2024) 
+
+* GCTT Coal Terminals Tracker (no plans, but easily could)
+* Coal Project Finance Tracker (no plans)
+* Global Energy Ownership (no plans, no map) 
+* Private Equity tracker (no plans, no map)

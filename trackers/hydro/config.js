@@ -58,7 +58,7 @@ var config = {
         and designated which column has the link */
     tableHeaders: {
         values: ['project_name', 'capacity_(mw)', 'technology_type', 'status', 'start_year', 'owner', 'operator',  'country', 'country_2'],
-        labels: ['Project name','Capacity (MW)','Technology type','Status','Start year', 'Owner', 'Operator', 'Country 1','Country 2'],
+        labels: ['Project name','Capacity (MW)','Technology type','Status','Start year', 'Owner', 'Operator', 'Country/Area 1','Country/Area 2'],
         clickColumns: ['project_name'],
         rightAlign: ['capacity_(mw)','start_year']
     },
@@ -84,9 +84,9 @@ var config = {
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'start_year': {'label': 'Start Year'},
-        'country' : {'label': 'Country 1'},
+        'country' : {'label': 'Country/Area 1'},
         'binational': {'label': 'Binational'},
-        'country_2' : {'label': 'Country 2'},
+        'country_2' : {'label': 'Country/Area 2'},
         'location_accuracy': {'label': 'Location Accuracy'},
         'state/province_1': {'display': 'location'},
         'country': {'display': 'location'},

@@ -53,7 +53,7 @@ status_legend = {
                 'decommissioned': 'retired-plus',
                 # unknown
                 'n/a': 'unknown-plus',
-                '': 'unknown-plus'
+                'unknown': 'unknown-plus'
                 }
 
 country_harm_dict = {

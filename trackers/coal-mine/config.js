@@ -50,7 +50,7 @@ var config = {
         }
     ],
     capacityField: 'circle_value',
-    capacityDisplayField: 'circle_value',
+    // capacityDisplayField: 'circle_value',
     // capacityLabel: '(Mt)', # to accomodate new feature Mikel put in, 
     capacityLabel: '',
     // context_layers: [
@@ -75,7 +75,7 @@ var config = {
         and designated which column has the link */
     tableHeaders: {
         values: ['project','owner', 'parent', 'capacity', 'production', 'status', 'workforce', 'coalfield', 'country', 'region', 'opening_year', 'closing_year'],
-        labels: ['Project','Owner','Parent','Capacity (Mt)', 'Production (Mt)', 'Status', 'Workforce', 'Coal Field', 'Country', 'Region','Opening year', 'Closing year'],
+        labels: ['Project','Owner','Parent','Capacity (Mt)', 'Production (Mt)', 'Status', 'Workforce', 'Coal Field', 'Country/Area', 'Region','Opening year', 'Closing year'],
         clickColumns: ['project'],
         rightAlign: ['production','capacity','opening_year, closing_year']
     },
@@ -105,5 +105,7 @@ var config = {
         'coalfield': {'display': 'location'},
         'country': {'display': 'location'}
     }, 
-    showCapacityTable: false
+    showCapacityTable: false,
+    showMaxCapacity: false,
+    
 }

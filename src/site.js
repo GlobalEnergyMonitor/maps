@@ -445,7 +445,7 @@ function addPointLayer() {
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
             'minzoom': 8,
             'layout': {
-                'text-field': '{' + config.nameField + '}',
+                'text-field': '{' + config.nameField + '}', 
                 'text-font': ["DIN Pro Italic"],
                 'text-variable-anchor': ['top'],
                 'text-offset': [0, 1],
@@ -533,11 +533,16 @@ function addEvents() {
                 displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
             }
         } else {
+            // console.log(displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]))
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6><ul>";
+            let ul = $('<ul>');
             selectedFeatures.forEach((feature) => {
-                modalText += "<li class='asset-select-option' onClick='displayDetails(\"" + JSON.stringify(config.linked[feature.properties[config.linkField]]).replace(/"/g, '\\"') + "\")'>" + feature.properties[config.nameField] + "</li>";
+                var link = $('<li class="asset-select-option">' + feature.properties[config.nameField] + "</li>");
+                link.attr('data-feature', JSON.stringify(config.linked[feature.properties[config.linkField]]));
+                link.attr('onClick', "displayDetails(this.dataset.feature)");
+                ul.append(link);
             });
-            modalText += "</ul>";
+            modalText += ul[0].outerHTML;
             config.selectModal = modalText;
             $('.modal-body').html(modalText);
         }
@@ -589,6 +594,7 @@ function addEvents() {
 function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
+        
         if (config.color.field != filter.field) {
             $('#filter-form').append('<hr /><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
         }
@@ -927,6 +933,9 @@ function displayDetails(features) {
     var detail_text = '';
     var location_text = '';
     Object.keys(config.detailView).forEach((detail) => {
+        // replace apostrophe in displayDetails to resolve invalid or unexpected token
+        // features[0].properties[detail] = features[0].properties[detail].replace("'", "\'")
+
         if (Object.keys(config.detailView[detail]).includes('display')) {
 
             if (config.detailView[detail]['display'] == 'heading') {
@@ -983,17 +992,17 @@ function displayDetails(features) {
                 }
             }
         } else {
-            if (features[0].properties[detail] == 'undefined') {
-                console.log(features[0].properties[detail])
-                detail_text += '';
-                
-            } else if (features[0].properties[detail] == ' '){
-                console.log(features[0].properties[detail])
-                detail_text += '';
-            }
-            
-            else if (features[0].properties[detail] != '') {
-                    if (Object.keys(config.detailView[detail]).includes('label')) {
+
+            if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null &&  features[0].properties[detail] != 'not found' && features[0].properties[detail] != 'Unknown [unknown %]'){
+                    if (features[0].properties[detail].includes(';') && config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
+                        // console.log(config.detailView[detail]['label'])
+                        // remove semi colon in areas country for multi country
+                        // features[0].properties[detail] = removeLastComma(features[0].properties[detail])
+                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
+
+
+                    }
+                    else if (Object.keys(config.detailView[detail]).includes('label')) {
                         // console.log(features[0].properties[detail])
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
                     } else {
@@ -1014,6 +1023,7 @@ function displayDetails(features) {
         ? config.capacityLabel 
         : config.capacityLabel.values[features[0].properties[config.capacityLabel.field]];
 
+    // Need this to be customizable for trackers that do not need summary because no units 
     // Build capacity summary
     if (capacityLabel == ''){
         detail_text += '';

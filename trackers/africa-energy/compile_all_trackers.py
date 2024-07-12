@@ -20,14 +20,18 @@ import openpyxl
 import xlsxwriter
 from config import *
 import re
+from openpyxl import Workbook
+from openpyxl import load_workbook
+from openpyxl.styles import Font
+from openpyxl.styles import Alignment
 
 
 # # output in geojson
 
 # # so all geometries in the right format
 
-
 # #### useful general functions ####
+
 
 def gspread_access_file_read_only(key, tab_list):
     """
@@ -45,8 +49,8 @@ def gspread_access_file_read_only(key, tab_list):
 
     for tab in tab_list:
     
-        print(tab)
-        wait_time = 1
+        # print(tab)
+        wait_time = 5
         time.sleep(wait_time)
         gsheets = gspread_creds.open_by_key(key)
         # Access a specific tab
@@ -105,21 +109,21 @@ def clean_dfs(df):
         cleaned_df['Longitude'].str.contains('-')].index.tolist()
             
     non_numeric_rows = non_numeric_rows + non_numeric_rows2 # + cleaned_df_missing
-    print(f'length of :{len(non_numeric_rows)}')
+    # print(f'length of :{len(non_numeric_rows)}')
     cleaned_df = cleaned_df.drop(non_numeric_rows)
-    print("Rows to drop:", non_numeric_rows)
-    print("\nCleaned DataFrame:")
-    print(cleaned_df)
+    # print("Rows to drop:", non_numeric_rows)
+    # print("\nCleaned DataFrame:")
+    # print(cleaned_df)
     
     # Create new DataFrames from the lists
     non_numeric_df = pd.DataFrame(non_numeric_rows)
 
-    print("\nNon-Numeric DataFrame:")
-    print(non_numeric_df)
+    # print("\nNon-Numeric DataFrame:")
+    # print(non_numeric_df)
     non_numeric_df.to_csv(f'{path_for_test_results}non_numeric_df_coords_{today_date}.csv')
 
                 
-    print(f'length of df at end of cleand_dfs removed lat and long empty which is good because all point data:{len(cleaned_df)}')
+    # print(f'length of df at end of cleand_dfs removed lat and long empty which is good because all point data:{len(cleaned_df)}')
     return cleaned_df
 
 # def lat_lng_to_Point(df):
@@ -198,7 +202,7 @@ prep_df = create_prep_file(prep_file_key, prep_file_tab)
 
 def create_conversion_df(key, tab):
     df = gspread_access_file_read_only(key, tab)
-    print(f'this is conversion df: {df}')
+    # print(f'this is conversion df: {df}')
     
     df = df[['tracker', 'type', 'original units', 'conversion factor (capacity/production to common energy equivalents, TJ/y)']]
     df = df.rename(columns={'conversion factor (capacity/production to common energy equivalents, TJ/y)': 'conversion_factor', 'original units': 'original_units'})
@@ -231,21 +235,18 @@ def check_and_convert_float(x):
         return np.nan
     
 def find_missing_coords(df):
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        print(df.dtypes) # more options can be specified also
-    
+
     df['float_col_clean_lat'] = df['Latitude'].apply(lambda x: check_and_convert_float(x))
     
     df['float_col_clean_lng'] = df['Longitude'].apply(lambda x: check_and_convert_float(x))
 
-    print("Check which rows will be dropped because nan coords:")
-    print(df[df.isna().any(axis=1)])
+    # print("Check which rows will be dropped because nan coords:")
+    # print(df[df.isna().any(axis=1)])
     nan_df = df[df.isna().any(axis=1)]
     # nan_df.to_csv(f'{path_for_test_results}{df["tracker"].loc[0]}_nan_coords_{today_date}.csv')
 
     df = df.dropna(subset = ['float_col_clean_lat', 'float_col_clean_lng'])
 
-    
     return df
     
 def find_missing_cap(df):
@@ -256,8 +257,8 @@ def find_missing_cap(df):
     else:
         df['float_col_clean_cap'] = df['capacity'].apply(lambda x: check_and_convert_float(x))
         
-        print("Check which rows will be dropped because nan capacity:")
-        print(df[df.isna().any(axis=1)])
+        # print("Check which rows will be dropped because nan capacity:")
+        # print(df[df.isna().any(axis=1)])
         nan_df = df[df.isna().any(axis=1)]
         # nan_df.to_csv(f'{path_for_test_results}{df["tracker"].loc[0]}_nan_capacity_{today_date}.csv')
         df = df.dropna(subset = ['float_col_clean_cap'])
@@ -273,22 +274,122 @@ def convert_coords_to_point(df):
     
     return gdf
 
+
+def find_about_page(key):
+        # Print the keys (sheet names) and the first few rows of each DataFrame
+        # for sheet_name, df in dict_df.items():
+        #     print(f"Sheet name: {sheet_name}")
+        #     print(df.head())
+        #     if 'About' | 'about' in sheet_name:
+        #         about_df = df.copy()
+        #     else:
+        #         'Not About page skip'
+        gspread_creds = gspread.oauth(
+            scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
+            credentials_filename=client_secret_full_path,
+            # authorized_user_filename=json_token_name,
+        )
+        wait_time = 5
+        time.sleep(wait_time)
+        gsheets = gspread_creds.open_by_key(key)
+            
+        # List all sheet names
+        sheet_names = [sheet.title for sheet in gsheets.worksheets()]
+        # print("Sheet names:", sheet_names)
+        
+        
+        # Access a specific sheet by name
+        tab = sheet_names[0]
+        sheet = gsheets.worksheet(tab)  # Access the first sheet, for example
+
+        # print("First sheet name:", sheet.title)
+        if 'About' not in sheet.title:
+            # print('UHOH try the lat sheet then')
+            # handle for goget and ggit, goit who put it in the last tab
+            tab = sheet_names[-1]
+            sheet = gsheets.worksheet(tab)  # Access the first sheet, for example
+            if 'About' not in sheet.title:
+                if 'Copyright' not in sheet.title:
+                    print('UHOH for real')
+
+        
+        # TODO why does GCPT and GCTT not pull in all data? formatting? GCMT was fine and merged.
+        data = pd.DataFrame(sheet.get_all_records(expected_headers=[]))
+        about_df = data.copy()
+    
+        return about_df
+    
+def write_to_about_page_file(about_page_df_dict):
+        about_output = f'{path_for_data_dwnld}{today_date}about_pages.xlsx'
+        # Write each DataFrame to a separate sheet
+        try:
+            with pd.ExcelWriter(about_output, engine='openpyxl', mode='a', if_sheet_exists='new') as writer:
+                for sheet_name, df in about_page_df_dict.items():
+                    # print(sheet_name)
+                    try:
+                        df.to_excel(writer, sheet_name=sheet_name, index=False)
+                    except AttributeError as e:
+                        print(f'problem on {sheet_name}: {e}')
+        except FileNotFoundError:
+            with pd.ExcelWriter(about_output, engine='openpyxl') as writer:
+                for sheet_name, df in about_page_df_dict.items():
+                    # print(sheet_name)
+                    try:
+                        df.to_excel(writer, sheet_name=sheet_name, index=False)
+                    except AttributeError as e:
+                        print(f'problem on {sheet_name}: {e}')
+        finally:
+            print(f'this always runs.')
+            
+        return about_output
+
+def find_region_colname(df):
+    continent_list = ['Africa', 'Americas', 'Oceania', 'Asia', 'Europe']
+    cols = df.columns
+    col_reg_name = '' # initialize 
+    for col in cols:
+        # random row
+        random = int(len(df) / 2)
+        # print(random)
+        
+        if df[col].loc[random] in continent_list:
+            col_reg_name = col 
+            print(f'this is region col: {col_reg_name} to filter on!')
+             
+    return col_reg_name       
+
 def create_all_dfs(df):
     all_dict = df.to_dict(orient='index')
-    print(all_dict)
-    list_of_gdfs = []
+    # print(all_dict)
+    list_of_gdfs = [] # map 
+    list_of_dfs = [] # data download 
+    about_page_df_dict = {} # tracker: sheetname: tracker_df_tabs (pull out )
+    
     
     for key, value in all_dict.items():
-        print(f'we are on tracker: {key}')
+        # print(f'we are on tracker: {key}')
         if all_dict[key]['gspread_tabs'] == 'n/a':
             pass
 
         else:
-            print(all_dict[key]['gspread_tabs'])
+            # print(all_dict[key]['gspread_tabs'])
+            # dfs_about_dict = pd.read_excel(all_dict[key]['gspread_key'], sheet_name=None)
+            about_page_df = find_about_page(all_dict[key]['gspread_key'])
+            about_page_df_dict[f'About {key}'] = about_page_df
+            
+        
             df = gspread_access_file_read_only(all_dict[key]['gspread_key'], all_dict[key]['gspread_tabs'])
             df['tracker'] = key
+            
+            # filter by Africa, but GOGET names it GEM region .. key error?
+            col_reg_name = find_region_colname(df)
+            df = df[df[col_reg_name] == 'Africa'] 
+            
             df = df.fillna('')
             df.dropna()
+            list_of_dfs.append(df)
+
+            # append df to list of dfs for data download
             # clean up missing coords, # do latercapacity, status, country
             df = find_missing_coords(df)
             # handle lat lng into geometry so when concat all gdfs already
@@ -297,11 +398,13 @@ def create_all_dfs(df):
             
             # list_of_dfs.append(df)
             list_of_gdfs.append(gdf)
-            print(f'added {key}')
+            # print(f'added {key}')
+            
+    about_output = write_to_about_page_file(about_page_df_dict)
+        
+    return list_of_gdfs, list_of_dfs, about_output
 
-    return list_of_gdfs
-
-list_of_gdfs = create_all_dfs(prep_df)
+list_of_gdfs, list_of_dfs, about_output = create_all_dfs(prep_df)
 
 # add into list of dfs, GGIT and GOIT 
 
@@ -312,21 +415,78 @@ def incorporate_geojson_trackers(GOIT, GGIT, GGIT_lng, list_of_gdfs):
     ggit_gdf = gpd.read_file(GGIT)
     ggit_gdf['tracker'] = 'GGIT'
     ggit_lng_gdf = gpd.read_file(GGIT_lng)
-    ggit_lng_gdf['tracker'] = 'GGIT - lng'
+    ggit_lng_gdf['tracker'] = 'GGIT-lng'
 
     list_of_gdfs.append(pipes_gdf)
     list_of_gdfs.append(ggit_gdf)
     list_of_gdfs.append(ggit_lng_gdf)
 
-        
     return list_of_gdfs
 
 
 list_of_gdfs = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, list_of_gdfs)
 
+                
+
+def create_data_download(list_of_gdfs, list_of_dfs, about_output):
+    list_of_gdfs = list_of_gdfs
+    list_of_dfs = list_of_dfs
+
+    # create file name xlsx writer
+    xlsfile = f'{path_for_data_dwnld}{today_date}africa-energy-tracker-data.xlsx'
+    # # wb = load_workbook(xlsfile)
+    # wb = xlsxwriter.Workbook(xlsfile)
+
+    # # Add a new sheet
+    # # wb = wb.add_worksheet(title=f"{tracker}")
+
+    # new_sheet = wb.create_sheet(title=f"{tracker}")
+    # wb.save(xlsfile)
+    # wb.close()
+    with pd.ExcelWriter(xlsfile, engine='openpyxl') as writer:
+        # for df in list choose a tab name from tracker 
+        # print entire df into tab
+        # for pipelines us gdf
+        for df in list_of_dfs:
+            try:
+                tracker = df['tracker'].loc[0]
+                print(len(df))
+            except KeyError as e:
+                print(f"Error: Not a tracker sheet. {e}")
+            else:
+                print(f"Result works for {tracker}")
+                print(f'Adding this tracker to dt dwnld: {tracker}')
+                # filter by Africa, but GOGET names it GEM region .. key error?
+                # do this above when making list of dfs and gdfs
+                # col_reg_name = find_region_colname(df)
+                # df_africa = df[df[col_reg_name] == 'Africa'] 
+                # df_africa.to_excel(writer, sheet_name=f'{tracker}', index=False)
+                columns_to_drop = ['tracker', 'float_col_clean_lat', 'float_col_clean_lng']
+
+                # Check which columns to drop actually exist in the DataFrame
+                existing_columns_to_drop = [col for col in columns_to_drop if col in df.columns]
+
+                # Drop the existing columns
+                if existing_columns_to_drop:
+                    df = df.drop(columns=existing_columns_to_drop)
+                df.to_excel(writer, sheet_name=f'{tracker}', index=False)
+                print(f"DataFrame {tracker} written to {xlsfile}")
+            finally:
+                print("This will always run.")
+                
+    print(f"DataFrames written to {xlsfile}")
+    
+    # TODO 
+    # merge this file with the one with about page stuff
+    about_output # file name to merge with
+  
+create_data_download(list_of_gdfs, list_of_dfs, about_output) 
+
+
+
 def split_goget_ggit(list_of_gdfs):
     custom_list_of_gdfs = []
-    print(f'this is length before: {len(list_of_gdfs)}')
+    # print(f'this is length before: {len(list_of_gdfs)}')
     # Read the Excel file
 
     
@@ -334,21 +494,20 @@ def split_goget_ggit(list_of_gdfs):
         # print(df['tracker'])
         # df = df.fillna('') # df = df.copy().fillna("")
         if gdf['tracker'].iloc[0] == 'GOGET':
-            print(gdf.columns)
+            # print(gdf.columns)
             # oil
             gdf = gdf.copy()
             # df_goget_missing_units.to_csv('compilation_output/missing_gas_oil_unit_goget.csv')
-            gdf['tracker_custom'] = gdf.apply(lambda row: 'GOGET - gas' if row['Production - Gas (Million m³/y)'] != '' else 'GOGET - oil', axis=1)
+            # gdf['tracker_custom'] = gdf.apply(lambda row: 'GOGET - gas' if row['Production - Gas (Million m³/y)'] != '' else 'GOGET - oil', axis=1)
+            gdf['tracker_custom'] = 'GOGET - oil'
             custom_list_of_gdfs.append(gdf)
-
-            # gas 
             
-        elif gdf['tracker'].iloc[0] == 'GGIT - lng':
+        elif gdf['tracker'].iloc[0] == 'GGIT-lng':
             gdf_ggit_missing_units = gdf[gdf['FacilityType']=='']
             # df_ggit_missing_units.to_csv('compilation_output/missing_ggit_facility.csv')
             gdf = gdf[gdf['FacilityType']!='']
             gdf['tracker_custom'] = gdf.apply(lambda row: 'GGIT - import' if row['FacilityType'] == 'Import' else 'GGIT - export', axis=1)
-            print(gdf[['tracker_custom', 'tracker', 'FacilityType']])
+            # print(gdf[['tracker_custom', 'tracker', 'FacilityType']])
         
             custom_list_of_gdfs.append(gdf)
 
@@ -357,7 +516,7 @@ def split_goget_ggit(list_of_gdfs):
         
             custom_list_of_gdfs.append(gdf)
                 
-    print(f'this is length after: {len(custom_list_of_gdfs)}')
+    # print(f'this is length after: {len(custom_list_of_gdfs)}')
     # for df in custom_list_of_dfs:
     #     if df['tracker'].iloc[0] == 'GOGET':
     #         print(df['tracker_custom'])
@@ -378,21 +537,21 @@ def assign_conversion_factors(list_of_gdfs, conversion_df):
         # print(df.columns.to_list()) # it's saying tracker is equalt to custom_tracker for ggit-lng shouldn't be the case 
 
         if gdf['tracker'].iloc[0] == 'GOGET': 
-            print(f'We are on tracker: {gdf["tracker"].iloc[0]} length: {len(gdf)}')
+            # print(f'We are on tracker: {gdf["tracker"].iloc[0]} length: {len(gdf)}')
 
             for row in gdf.index:
                 if gdf.loc[row, 'tracker_custom'] == 'GOGET - oil':
                     gdf.loc[row, 'original_units'] = conversion_df[conversion_df['tracker']=='GOGET - oil']['original_units'].values[0]
                     gdf.loc[row, 'conversion_factor'] = conversion_df[conversion_df['tracker']=='GOGET - oil']['conversion_factor'].values[0]
-                elif gdf.loc[row, 'tracker_custom'] == 'GOGET - gas':  
-                    gdf.loc[row, 'original_units'] = conversion_df[conversion_df['tracker']=='GOGET - gas']['original_units'].values[0]
-                    gdf.loc[row, 'conversion_factor'] = conversion_df[conversion_df['tracker']=='GOGET - gas']['conversion_factor'].values[0]
+                # elif gdf.loc[row, 'tracker_custom'] == 'GOGET - gas':  
+                #     gdf.loc[row, 'original_units'] = conversion_df[conversion_df['tracker']=='GOGET - gas']['original_units'].values[0]
+                #     gdf.loc[row, 'conversion_factor'] = conversion_df[conversion_df['tracker']=='GOGET - gas']['conversion_factor'].values[0]
 
             gdf['tracker'] = 'GOGET'
      
             augmented_list_of_gdfs.append(gdf)
-        elif gdf['tracker'].iloc[0] == 'GGIT - lng':
-            print(f'We are on tracker: {gdf["tracker"].iloc[0]} length: {len(gdf)}')
+        elif gdf['tracker'].iloc[0] == 'GGIT-lng':
+            # print(f'We are on tracker: {gdf["tracker"].iloc[0]} length: {len(gdf)}')
             for row in gdf.index:
                 if gdf.loc[row, 'tracker_custom'] == 'GGIT - export':
                     gdf.loc[row, 'original_units'] = conversion_df[conversion_df['tracker']=='GGIT - export']['original_units'].values[0]
@@ -407,7 +566,7 @@ def assign_conversion_factors(list_of_gdfs, conversion_df):
             augmented_list_of_gdfs.append(gdf)
 
         else:
-            print(f'We are on tracker: {gdf["tracker"].iloc[0]} length: {len(gdf)}')
+            # print(f'We are on tracker: {gdf["tracker"].iloc[0]} length: {len(gdf)}')
             # This should apply to all rows not just one.
             gdf['tracker_custom'] = gdf["tracker"].iloc[0]
             gdf['original_units'] = conversion_df[conversion_df['tracker']==gdf['tracker'].iloc[0]]['original_units'].values[0]
@@ -426,28 +585,28 @@ def rename_dfs(list_of_dfs_with_conversion):
     renamed_dfs = []
     all_trackers = []
     len_africa = 0 # initialize
-    print(f'Length of original gdfs: {len(list_of_dfs_with_conversion)}')
+    # print(f'Length of original gdfs: {len(list_of_dfs_with_conversion)}')
     # print(list_of_gdfs)
     for df in list_of_dfs_with_conversion:
         # print(item.columns)
         # print(item['tracker'])
         # print(item['tracker_custom'])
-        tracker_sel = df['tracker'].iloc[0] # GOGPT, GGIT, GGIT - lng, GOGET
-        print(tracker_sel)
+        tracker_sel = df['tracker'].iloc[0] # GOGPT, GGIT, GGIT-lng, GOGET
+        # print(tracker_sel)
         
         # tracker_sel = tracker_sel.split('-')[0]
         all_trackers.append(tracker_sel)
         renaming_dict_sel = renaming_cols_dict[tracker_sel]
         df = df.rename(columns=renaming_dict_sel) 
         # print(f"Len of df name col: {len(df['name'])}")
-        print(f"Len of df region africa:{len(df[df['region']=='Africa'])}")
+        # print(f"Len of df region africa:{len(df[df['region']=='Africa'])}")
         len_africa += (len(df[df['region']=='Africa']))
 
         # df = find_missing_cap(df) # no need them will fill in average ... still remember for GOGET to differentiate use cap-gas if custom_tracker gas etc
 
         renamed_dfs.append(df)
-    print(f'all tracker names: {all_trackers}')
-    print(f'Length of renamed gdfs: {len(renamed_dfs)}')
+    # print(f'all tracker names: {all_trackers}')
+    # print(f'Length of renamed gdfs: {len(renamed_dfs)}')
     
     # drop un needed cols with final_cols  
 
@@ -459,9 +618,9 @@ def rename_dfs(list_of_dfs_with_conversion):
     
     
     
-    print(f'This is oned_df columns lets see if there are two names: {one_df.columns}')
+    # print(f'This is oned_df columns lets see if there are two names: {one_df.columns}')
     df = one_df[final_cols]
-    print(df.columns)
+    # print(df.columns)
     df.to_csv(f'{path_for_test_results}concatted_df{today_date}.csv')
     
     return df
@@ -469,132 +628,129 @@ def rename_dfs(list_of_dfs_with_conversion):
 concatted_gdf = rename_dfs(list_of_gdfs_with_conversion)
 
 
-def harmonize_countries(gdf):
-    gdf = gdf.copy()
+# def harmonize_countries(gdf):
+#     gdf = gdf.copy()
 
 
-    """
-    Standardize country names, based on file "GEM Country Naming Conventions"
-    """
+#     """
+#     Standardize country names, based on file "GEM Country Naming Conventions"
+#     """
 
-    country_col = 'areas'
+#     country_col = 'areas'
         
-    # strip white space
-    gdf[country_col] = gdf[country_col].str.strip()
+#     # strip white space
+#     gdf[country_col] = gdf[country_col].str.strip()
         
-    # harmonize countries:
-    country_harm_dict = {
-        'Czechia': 'Czech Republic',
-        'Ivory Coast': "Côte d'Ivoire",
-        "Cote d'Ivoire": "Côte d'Ivoire", # adds accent
-        "Republic of Congo": "Republic of the Congo", # adds "the"
-        "Rep Congo": "Republic of the Congo",
-        "Democratic Republic of Congo": "DR Congo",
-        "Democratic Republic of the Congo": "DR Congo", # in case step above adds "the"
-        "Republic of Guinea": "Guinea",
-        "Republic of Sudan": "Sudan",
-        "FYROM": "North Macedonia",
-        "Chinese Taipei": "Taiwan",
-        "East Timor": "Timor-Leste",
-        "USA": "United States",
-        'Turkey': 'Türkiye',
-        'Canary Islands': 'Spain', 
-    }
-    for key in country_harm_dict.keys():
-        sel = gdf[gdf[country_col]==key]
-        if len(sel) > 0:
-            print(f"Found non-standardized country name before trying to standardize: {key} ({len(sel)} rows)")
-        gdf[country_col] = gdf[country_col].str.replace(key, country_harm_dict[key])
+#     # harmonize countries:
+#     country_harm_dict = {
+#         'Czechia': 'Czech Republic',
+#         'Ivory Coast': "Côte d'Ivoire",
+#         "Cote d'Ivoire": "Côte d'Ivoire", # adds accent
+#         "Republic of Congo": "Republic of the Congo", # adds "the"
+#         "Rep Congo": "Republic of the Congo",
+#         "Democratic Republic of Congo": "DR Congo",
+#         "Democratic Republic of the Congo": "DR Congo", # in case step above adds "the"
+#         "Republic of Guinea": "Guinea",
+#         "Republic of Sudan": "Sudan",
+#         "FYROM": "North Macedonia",
+#         "Chinese Taipei": "Taiwan",
+#         "East Timor": "Timor-Leste",
+#         "USA": "United States",
+#         'Turkey': 'Türkiye',
+#         'Canary Islands': 'Spain', 
+#     }
+#     for key in country_harm_dict.keys():
+#         sel = gdf[gdf[country_col]==key]
+#         if len(sel) > 0:
+#             print(f"Found non-standardized country name before trying to standardize: {key} ({len(sel)} rows)")
+#         gdf[country_col] = gdf[country_col].str.replace(key, country_harm_dict[key])
         
-    # clean up, checking if countries are in standard GEM list
-    hyphenated_countries = ['Timor-Leste', 'Guinea-Bissau']
-    for row in gdf.index:
-        if pd.isna(gdf.at[row, country_col])==False:    
-            try:
-                countries_list = gdf.at[row, country_col].split(', ')
-                countries_list = [x.split('-') for x in countries_list if x not in hyphenated_countries]
-            except:
-                print("Error!" + f" Exception for row {row}, country_col: {gdf.at[row, country_col]}")
-                countries_list = []
+#     # clean up, checking if countries are in standard GEM list
+#     hyphenated_countries = ['Timor-Leste', 'Guinea-Bissau']
+#     for row in gdf.index:
+#         if pd.isna(gdf.at[row, country_col])==False:    
+#             try:
+#                 countries_list = gdf.at[row, country_col].split(', ')
+#                 countries_list = [x.split('-') for x in countries_list if x not in hyphenated_countries]
+#             except:
+#                 print("Error!" + f" Exception for row {row}, country_col: {gdf.at[row, country_col]}")
+#                 countries_list = []
                 
-            # flatten list
-            countries_list = [
-                country
-                for group in countries_list
-                for country in group
-            ]
-            # clean up
-            countries_list = [x.strip() for x in countries_list]
+#             # flatten list
+#             countries_list = [
+#                 country
+#                 for group in countries_list
+#                 for country in group
+#             ]
+#             # clean up
+#             countries_list = [x.strip() for x in countries_list]
         
-            # check that countries are standardized
-            for country in countries_list:
-                if country not in gem_standard_country_names:
-                    print(f"For row {row}, non-standard country name after trying to standardize: {country}")
-        else:
-            continue
-            # print(f"No countries listed for row {row}")
+#             # check that countries are standardized
+#             for country in countries_list:
+#                 if country not in gem_standard_country_names:
+#                     print(f"For row {row}, non-standard country name after trying to standardize: {country}")
+#         else:
+#             continue
+#             # print(f"No countries listed for row {row}")
 
 
-    return gdf
+#     return gdf
 
-harmonized_gdf = harmonize_countries(concatted_gdf)
+# harmonized_gdf = harmonize_countries(concatted_gdf)
 
-def handle_multiple_countries(gdf):
-    # replace separate , with ;
-    # parse out so that area1 has an appropriate africa_countries
-    gdf = gdf.copy()
+# def handle_multiple_countries(gdf):
+#     # replace separate , with ;
+#     # parse out so that area1 has an appropriate africa_countries
+#     gdf = gdf.copy()
     
-    country_exceptions = ['Saint Helena, Ascension and Tristan da Cunha (UK)', 'Guinea-Bissau']
+#     country_exceptions = ['Saint Helena, Ascension and Tristan da Cunha (UK)', 'Guinea-Bissau']
     
-    print(f"List of areas before handle mult countries: {set(gdf['areas'].to_list())}")
-    # goget
-    gdf['areas'] = gdf['areas'].fillna('')
-    # assign first one to area like all other countries 
-    gdf['area'] = gdf.apply(lambda row: row['areas'] if row['areas'] in country_exceptions or '-' not in row['areas'] else row['areas'].split('-')[0], axis=1)
-    # assign second one to new column so can merge together later if needed for goget list
-    gdf['area_extra'] = gdf.apply(lambda row: row['areas'].split('-')[1] if '-' in row['areas'] and row['areas'] not in country_exceptions else '', axis=1)
+#     # print(f"List of areas before handle mult countries: {set(gdf['areas'].to_list())}")
+#     # # goget
+#     # gdf['areas'] = gdf['areas'].fillna('')
+#     # # assign first one to area like all other countries 
+#     # gdf['area'] = gdf.apply(lambda row: row['areas'] if row['areas'] in country_exceptions or '-' not in row['areas'] else row['areas'].split('-')[0], axis=1)
+#     # # assign second one to new column so can merge together later if needed for goget list
+#     # gdf['area_extra'] = gdf.apply(lambda row: row['areas'].split('-')[1] if '-' in row['areas'] and row['areas'] not in country_exceptions else '', axis=1)
     
-    # pipelines 
-    # assign first one to area like all other countries 
-    # assign actual coutnry if its in exceptions otherwise split on -
-    gdf['area'] = gdf.apply(lambda row: row['areas'] if row['areas'] in country_exceptions else row['areas'].split('-')[0], axis=1)
-    # assign actual coutnry declared in previous line if its in exceptions, otherwise split on ,
+#     # # pipelines 
+#     # # assign first one to area like all other countries 
+#     # # assign actual coutnry if its in exceptions otherwise split on -
+#     # gdf['area'] = gdf.apply(lambda row: row['areas'] if row['areas'] in country_exceptions else row['areas'].split('-')[0], axis=1)
+#     # # assign actual coutnry declared in previous line if its in exceptions, otherwise split on ,
 
-    gdf['area'] = gdf.apply(lambda row: row['area'] if row['area'] in country_exceptions else row['areas'].split(',')[0], axis=1)
+#     # gdf['area'] = gdf.apply(lambda row: row['area'] if row['area'] in country_exceptions else row['areas'].split(',')[0], axis=1)
 
-    # now make it so that areas will be a good list of them all separated by ;
-    gdf['areas'] = gdf['areas'].apply(lambda x: x if x in country_exceptions else x.strip().replace('-',';'))
-    gdf['areas'] = gdf['areas'].apply(lambda x: x if x in country_exceptions else x.strip().replace(',',';'))
-    gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('; ', ';'))
-    print(f"List of areas after handle mult countries: {set(gdf['areas'].to_list())}")
+#     # now make it so that areas will be a good list of them all separated by ;
+#     gdf['areas'] = gdf['areas'].apply(lambda x: x if x in country_exceptions else x.strip().replace('-',';'))
+#     gdf['areas'] = gdf['areas'].apply(lambda x: x if x in country_exceptions else x.strip().replace(',',';'))
+#     gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('; ', ';'))
+#     # print(f"List of areas after handle mult countries: {set(gdf['areas'].to_list())}")
+#     return gdf
 
-    print(f"List of area after handle mult countries: {set(gdf['area'].to_list())}")
-
-    
-    return gdf
-
-concatted_gdf = handle_multiple_countries(harmonized_gdf)
+# concatted_gdf = handle_multiple_countries(harmonized_gdf)
 
 def filter_by_country_all_gdfs(gdf):
     # df = pd.read_csv(file_path) # file_path in config file
-    print(f'length of df at start of filter by country: {len(gdf)}')
+    print(f'length of df at start of filter by regino: {len(gdf)}')
     
     # df['areas'] = df['areas'].apply(lambda x: x.replace('Guinea,Bissau','Guinea-Bissau'))
 
     # df['areas'] = df['areas'].apply(lambda x: x.split(','))
     # df['areas'] = df[df['tracker']=='GOGET']['areas'].apply(lambda x: x.split('-'))
     
-    africa_df1 = gdf[gdf['area'].isin(africa_countries)] 
+    # africa_df1 = gdf[gdf['area'].isin(africa_countries)] 
     # don't need this anymore because should have all fixed so no need to use region 
     # africa_df2 = gdf[gdf['area1'].isin(africa_countries)]
-    # africa_df3 = gdf[gdf['region']=='Africa']
+    africa_df = gdf[gdf['region']=='Africa']
     # africa_df = pd.concat([africa_df1, africa_df2])
     # africa_df = pd.concat([africa_df, africa_df3])
-    print(f'filter by country before drop dup on id: {len(africa_df1)}')
+    # print(f'filter by country before drop dup on id: {len(africa_df1)}')
 
-    africa_df = africa_df1.drop_duplicates(subset='id')
+    # africa_df = africa_df1.drop_duplicates(subset=['id', 'name']) # TODO check
     # africa_df = df['areas'].apply_row(lambda x: row.drop() if x not in africa_countries else row) 
-    print(f'Africa filter by country: {len(africa_df)}')
+    # print(f'Africa filter by country: {len(africa_df)}')
+    print(f'length of df after of filter by region: {len(gdf)}')
 
     return africa_df
 
@@ -605,14 +761,14 @@ africa_gdf = filter_by_country_all_gdfs(concatted_gdf)
 def remove_null_geo(concatted_gdf):
 
     # print(set(concatted_gdf['geometry'].to_list()))
-    print(f'length of df at start of remove_null_geo: {len(concatted_gdf)}')
+    # print(f'length of df at start of remove_null_geo: {len(concatted_gdf)}')
     # concatted_gdf = concatted_gdf[concatted_gdf['geometry']!='null']
     good_keywords = ['point', 'line']
     filtered_geo = concatted_gdf[concatted_gdf['geometry'].apply(lambda x: any(keyword in str(x).lower() for keyword in good_keywords))]
-    print(f'length of df at after filter for point and line geo: {len(filtered_geo)}')
+    # print(f'length of df at after filter for point and line geo: {len(filtered_geo)}')
     dropped_geo = pd.concat([concatted_gdf, filtered_geo], ignore_index=True).drop_duplicates(keep=False)
-    print(dropped_geo)
-    print(dropped_geo[['tracker', 'name', 'geometry']])
+    # print(dropped_geo)
+    # print(dropped_geo[['tracker', 'name', 'geometry']])
     
     return filtered_geo
 
@@ -643,6 +799,45 @@ def conversion_multiply(row):
     # print(f'this is result! {result}')
     return result
 
+def workaround_no_sum_cap_project(gdf):
+    gdf = gdf.copy()
+    
+    # result = int()
+    
+    # group by id
+    # summed cleaned cap
+    # that's the project cap
+    project_cap_df = gdf.groupby('name', as_index=False)['capacity'].sum()
+    print(f'this is cols of project_cap_df: {project_cap_df.columns}')
+    project_cap_df = project_cap_df.rename(columns={'capacity': 'capacity-details'})
+    
+    # merge on name to gdf
+    
+    gdf = pd.merge(left=gdf, right=project_cap_df, on='name', how='outer')
+    
+    return gdf
+
+def workaround_display_cap(row):
+    cap = row['capacity'] 
+    units_of_m = str(row['original_units'])
+    if isinstance(cap, (int, float)):
+        cap = str((round(cap, 3))) # handle rounding and converting from string to float to round later 
+        result = f'{cap} {units_of_m}'
+    else:
+        result = ''
+    return result
+
+def workaround_display_cap_total(row):
+    cap = row['capacity-details']
+    units_of_m = str(row['original_units'])
+    if isinstance(cap, (int, float)):
+        cap = str(float(round(cap, 3)))
+        result = f'{cap} ({units_of_m})'
+    else:
+        result = ''
+    return result
+
+
 
 def capacity_conversions(gdf): 
 
@@ -656,23 +851,23 @@ def capacity_conversions(gdf):
     gdf_converted = gdf.copy()
     
     # first let's get GHPT cap added 
-    print(len(gdf_converted))
+    # print(len(gdf_converted))
     ghpt_only = gdf_converted[gdf_converted['tracker']=='GHPT'] # for GGPT we need to re run it to get it 
     gdf_converted = gdf_converted[gdf_converted['tracker']!='GHPT']
     ghpt_only['capacity'] = ghpt_only.apply(lambda row: row['capacity1'] + row['capacity2'], axis=1)
     gdf_converted = pd.concat([gdf_converted, ghpt_only],sort=False).reset_index(drop=True)
-    print(len(gdf_converted))
+    # print(len(gdf_converted))
     
-    # second let's handle GOGET -- need to differentiate use cap-gas if custom_tracker gas etc
-    goget_oil_only = gdf_converted[gdf_converted['tracker_custom']=='GOGET - oil'] # for GGPT we need to re run it to get it 
-    goget_gas_only = gdf_converted[gdf_converted['tracker_custom']=='GOGET - gas'] # for GGPT we need to re run it to get it 
+    # # second let's handle GOGET -- need to differentiate use cap-gas if custom_tracker gas etc
+    # goget_oil_only = gdf_converted[gdf_converted['tracker_custom']=='GOGET - oil'] # for GGPT we need to re run it to get it 
+    # goget_gas_only = gdf_converted[gdf_converted['tracker_custom']=='GOGET - gas'] # for GGPT we need to re run it to get it 
 
-    goget_oil_only['capacity'] = goget_oil_only['capacity_oil']
-    goget_gas_only['capacity'] = goget_gas_only['capacity_gas']
+    # goget_oil_only['capacity'] = goget_oil_only['capacity_oil']
+    # goget_gas_only['capacity'] = goget_gas_only['capacity_gas']
 
-    gdf_converted = gdf_converted[gdf_converted['tracker']!='GOGET']
-    gdf_converted = pd.concat([gdf_converted, goget_oil_only],sort=False).reset_index(drop=True)
-    gdf_converted = pd.concat([gdf_converted, goget_gas_only],sort=False).reset_index(drop=True)
+    # gdf_converted = gdf_converted[gdf_converted['tracker']!='GOGET']
+    # gdf_converted = pd.concat([gdf_converted, goget_oil_only],sort=False).reset_index(drop=True)
+    # gdf_converted = pd.concat([gdf_converted, goget_gas_only],sort=False).reset_index(drop=True)
 
     
 
@@ -721,7 +916,12 @@ def capacity_conversions(gdf):
     # print(f"{gdf_converted['scaling_capacity'].min().round(2)}")
     # print(f"{gdf_converted['scaling_capacity'].max().round(2)}")
     # print(f"scaling_cap stats: {gdf_converted['scaling_capacity'].describe()}")
+    gdf_converted['capacity-table'] = gdf_converted.apply(lambda row: workaround_display_cap(row), axis=1)
 
+    gdf_converted = workaround_no_sum_cap_project(gdf_converted) # adds capacity-details 
+    
+    gdf_converted['capacity-details'] = gdf_converted.apply(lambda row: workaround_display_cap_total(row), axis=1)
+    # gdf_converted['capacity-plant-total'] = gdf_converted.apply(lambda row: workaround_no_sum_cap_project(row), axis=1)
 
     return gdf_converted
 
@@ -729,7 +929,7 @@ africa_df_converted = capacity_conversions(africa_gdf_cleaned)
 
 def fix_status_inferred(df):
     df = df.fillna('')
-    print(f"Statuses before: {set(df['status'].to_list())}")
+    # print(f"Statuses before: {set(df['status'].to_list())}")
     inferred_statuses_cancelled = df['status'].str.contains('cancelled - inferred')
     inferred_statuses_shelved = df['status'].str.contains('shelved - inferred')
     
@@ -741,7 +941,7 @@ def fix_status_inferred(df):
     #     if 'shelved - inferred' in df.loc[row, 'status']:
     #         df.loc[row, 'status'] = 'shelved'
     
-    print(f"Statuses after: {set(df['status'].to_list())}")
+    # print(f"Statuses after: {set(df['status'].to_list())}")
 
     return df
 
@@ -797,32 +997,117 @@ def map_ready_countries(gdf):
     # GOIT has comma separated in countries
     # hydropower has two columns country1 and country2
     # GGIT has comma separated in countries
+    # grouped_tracker_before = gdf.groupby('tracker', as_index=False)['id'].count()
+    # print(f'In map ready before adjustment: {grouped_tracker_before}')
+    # # no return
 
-    gdf_map_ready['area2'] = gdf_map_ready['area2'].fillna('')
+    # gdf_map_ready['area2'] = gdf_map_ready['area2'].fillna('')
     for row in gdf_map_ready.index:
 
         if gdf_map_ready.loc[row, 'area2'] != '':
-            gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'area1'].strip()};{gdf_map_ready.loc[row, 'area2'].strip()};"
+            gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'area'].strip()};{gdf_map_ready.loc[row, 'area2'].strip()};"
             print(f"Found a area2! Hydro? {gdf_map_ready.loc[row, 'areas']} {gdf_map_ready.loc[row, 'tracker']} {gdf_map_ready.loc[row, 'name']}")
 
         else:
             # make it so all areas even just one end with a comma 
             gdf_map_ready.loc[row, 'areas'] = f"{gdf_map_ready.loc[row, 'areas'].strip()};"
+    
+    # grouped_tracker_after = gdf.groupby('tracker', as_index=False)['id'].count()
 
-            pass
+    # print(f'In map ready after adjustment: {grouped_tracker_after}')
+    
 
     return gdf_map_ready
 
+africa_df_country_update = map_ready_countries(africa_df_status_update)
 
-def last_min_fixes(africa_gdf_country_update):
-    gdf = africa_gdf_country_update.copy()
+# Define a function to check for valid values
+def is_valid_goget(x):
+    return isinstance(x, (int, float)) and not pd.isna(x) and x != '' and x != 0 and x != 0.0
+
+
+def workarounds_eg_interim(gdf):
+    # copy tracker column to be full display name not custom 
+    gdf = gdf.copy()
+    # create column that has capacity with appended units 
+    
+    # for items with no capacity remove capacity
+    # goget, and GCMT need to not have anything in capacity
+    
+    # make capacity == ''
+    # production_mask = gdf[gdf['tracker']=='GOGET' or 'GCMT'] 
+    for row in gdf.index:
+        prod_oil = gdf.loc[row, 'prod_oil']
+        prod_gas = gdf.loc[row, 'prod_gas']
+        cap = gdf.loc[row, 'capacity']
+        tracker = (gdf.loc[row, 'tracker'])
+        #if goget then make capacity table and capacity details empty
+        
+        if tracker == 'GOGET':
+            gdf.loc[row, 'capacity-table'] = ''
+            gdf.loc[row, 'capacity-details'] = ''
+            
+            if is_valid_goget(prod_oil):
+                # round it then if either is '' we can remove it later we filter on it before adding to table or details
+                prod_oil = str(float(round(prod_oil, 3)))
+
+                gdf.loc[row, 'prod-oil-table'] = f'{prod_oil} million bbl/y'
+                gdf.loc[row, 'prod-oil-details'] = f'{prod_oil} (million bbl/y)'
+                
+            if is_valid_goget(prod_gas):
+                prod_gas = str(float(round(prod_gas, 3)))
+
+                gdf.loc[row, 'prod-gas-table'] = f'{prod_gas} million m³/y'
+                gdf.loc[row, 'prod-gas-details'] = f'{prod_gas} (million m³/y)'
+
+                
+    # in that column above make it so all units within a project are summed and it's called total capacityDONE
+    
+    # handle more than one country for sat image say intranational project
+    # if there is more than one ; you know it's a multiple country situation
+    # so we want to say in areas-display "multi country"
+    # we would also want to overwrite the subnat and say nothing ""
+    gdf['count_of_semi'] = gdf.apply(lambda row: row['areas'].split(';')) # if len of list is more than 2, then split more than once
+    gdf['multi-country'] = gdf.apply(lambda row: 't' if len(row['count_of_semi']) > 2 else 'f')
+    print(gdf['multi-country'])
+    # if t then make areas-display 
+    gdf['areas-subnat-sat-display'] = gdf.apply(lambda row: f"{row['subnat'],row['areas']}" if row['multi-country'] == 'f' else 'Multiple Countries/Areas')
+
+
+    # here we want to get the total number of units at the project level and put it at each row
+    # so however it gets pulled into details it is shown
+    units_per_project = gdf.groupby(['name', 'status'], as_index=False)['geometry'].count()
+    print(len(f'length of units_per_project series from groupby: {units_per_project}'))
+    print(units_per_project.columns)
+    # gdf = pd.merge(left=gdf, right=units_per_project, on='name', how='outer')
+    
+    #### figure out 
+    
+    # tracker type not clickable! 
+    
+    #### nice to have
+    
+    # also create a country multiple or not column for displaying on map's sat picture  
+    # escape apostrophe and / 
+    
+    return gdf
+    
+workarounds_eg_interim_gdf = workarounds_eg_interim(africa_df_country_update)
+
+def last_min_fixes(gdf):
+    gdf = gdf.copy()
+    print(len(gdf))
+    gdf.drop_duplicates(inplace=True)
+    print(len(gdf))
+
     gdf['name'] = gdf['name'].fillna('')
     gdf['url'] = gdf['url'].fillna('')
-
-    gdf = gdf.drop(['original_units','conversion_factor', 'area1', 'area2', 'region2', 'subnat1', 'subnat2', 'capacity1', 'capacity2', 'Latitude', 'Longitude', 'cleaned_cap'], axis=1)
+    print(gdf.columns)
+    # TODO for now remove drop to understand why all GOGET empty is now not being filled and also prod doesn't come through
+    # gdf = gdf.drop(['original_units','conversion_factor', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2', 'Latitude', 'Longitude'], axis=1) # 'cleaned_cap'
     # handle countries/areas ? 
     # gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Guinea,Bissau','Guinea-Bissau')) # reverse this one special case back 
-    print(gdf[gdf['areas']=='']) # check if missing!!   
+    print(f'Missing areas: {gdf[gdf["areas"]==""]}') # check if missing!!   
     # handle situation where Guinea-Bissau IS official and ok not to be split into separate countries 
     gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Guinea,Bissau','Guinea-Bissau')) 
     
@@ -837,7 +1122,7 @@ def last_min_fixes(africa_gdf_country_update):
 
     gdf_empty_url = gdf[gdf['url'] == '']
     
-    print(gdf_empty_url[['tracker', 'wiki-from-name', 'url']])
+    # print(gdf_empty_url[['tracker', 'wiki-from-name', 'url']])
     
     # assign Africa to all regions
     gdf['region'] = 'Africa'
@@ -852,24 +1137,29 @@ def last_min_fixes(africa_gdf_country_update):
     # translate acronyms to full names 
     
     gdf['tracker-display'] = gdf['tracker-custom'].map(tracker_to_fullname)
-    print(set(gdf['tracker-display'].to_list()))
-    print(f'Figure out capacity dtype: {gdf.dtypes}')
+    gdf['tracker-legend'] = gdf['tracker-custom'].map(tracker_to_legendname)
+    # print(set(gdf['tracker-display'].to_list()))
+    # print(f'Figure out capacity dtype: {gdf.dtypes}')
     gdf['capacity'] = gdf['capacity'].apply(lambda x: str(x).replace('--', ''))
     # gdf['capacity'] = gdf['capacity'].apply(lambda x: x.replace('', pd.NA))
     # gdf['capacity'] = gdf['capacity'].astype(float) # Stuck with concatting like strings for now? ValueError: could not convert string to float: ''
-     
-     
-    # goget, and GCMT need to not have anything in capacity
     
-    # make capacity == ''
-    production_mask = gdf[gdf['tracker']=='GOGET' or 'GCMT'] 
+    # REMOVE TODO not found!! 
     
+     
     return gdf
 
 
+africa_gdf_country_update = last_min_fixes(workarounds_eg_interim_gdf)
 
-africa_gdf_country_update = map_ready_countries(africa_df_status_update)
-africa_gdf_country_update = last_min_fixes(africa_gdf_country_update)
+
+def final_count(gdf):
+    grouped_tracker = gdf.groupby('tracker', as_index=False)['id'].count()
+    print(print(grouped_tracker))
+    # no return
+
+final_count(africa_gdf_country_update)
+
 # RE RUN with fixed new GOGET OR 
 
 # call all

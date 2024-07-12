@@ -251,7 +251,7 @@ gmet_df = rename_dfs(list_of_dfs)
 def consolidate_statuses(df):
     df = df.copy()
     # find nan status
-    df['status'] = df['status'].fillna('')
+    df['status'] = df['status'].fillna('unknown') # help with filtering 
     print(set(df['status'].to_list()))
     
     df['status_legend'] = df.copy()['status'].str.lower().replace(status_legend)
@@ -314,15 +314,20 @@ def create_scaling_col(df):
     plume_emissions_avg_check = ((plume_df['plume_emissions'].sum()) / (len(plume_df)))
     print(f"Check that plume avg is right: {plume_emissions_avg_check} vs. {plume_emissions_avg}")
     
+    # make it round to 2
+    plume_df['plume_emissions'] = plume_df['plume_emissions'].astype(float).round(2)
+    # make it round to 2
+    plume_df['emission_uncertainty'] = plume_df['emission_uncertainty'].astype(float).round(2)
+    
     # concat them back 
-    
-    
+
     df = pd.concat([non_plume_df, plume_df], sort=False).reset_index(drop=True)
     df['scaling_col'] = df['scaling_col'].fillna('')
     
     for row in df.index:
         if df.loc[row, 'scaling_col'] == '':
             df.loc[row, 'scaling_col'] = plume_emissions_avg
+
 
     return df
 
@@ -729,6 +734,14 @@ def fix_countries(df):
 
 df = fix_countries(df)
 
+
+# TODO fix start year if not stated replace with ''
+def round_cap_emissions(df):
+    print(df.columns)
+    print('TODO round the emissions and cap columns')
+    return df
+
+df = round_cap_emissions(df)
 
 def create_geo(df):
 # def convert_coords_to_point(df): from compile all trackers for AET
