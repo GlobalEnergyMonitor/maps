@@ -736,9 +736,12 @@ df = fix_countries(df)
 
 
 # TODO fix start year if not stated replace with ''
+# TODO replace null subnational
+# TODO if search field is empty undefined fix search
+# TODO find out why some goget still not coming through, likely status
 def round_cap_emissions(df):
     print(df.columns)
-    print('TODO round the emissions and cap columns')
+    print('TODO round the emissions and cap columns!')
     return df
 
 df = round_cap_emissions(df)
