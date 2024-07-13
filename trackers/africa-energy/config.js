@@ -1,8 +1,9 @@
 var config = {
     json: './data/africa_energy_tracker_2024-07-10.geojson',
     geometries: ['Point','LineString'],
-    center: [30, 0],
-    zoomFactor: 1.5,
+    center: [10, 0],
+    zoomFactor: 1.9,
+    img_detail_zoom: 10,
     statusField: 'status-legend',
     statusDisplayField: 'status',
     color: {

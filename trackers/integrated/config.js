@@ -59,7 +59,7 @@ var config = {
     },
     assetFullLabel: "units / phases / areas",
     assetLabel: "Units / Phases / Areas",
-    img_detail_zoom: 15,
+    img_detail_zoom: 10,
     tableHeaders: {
         values: ['Plant/project name','Unit/phase name', 'Owner', 'Parent', 'Capacity (MW)', 'Status', 'Subnational unit(s)', 'Country', 'Start year'],
         labels: ['Plant/project name','Unit/phase name','Owner','Parent','Capacity (MW)','Status','Subnational unit (province/state)','Country/Area','Start year'],
@@ -76,5 +76,6 @@ var config = {
         'Subnational unit (province/state)': {'display': 'location'},
         'Country': {'display': 'location'}
     },
-    zoomFactor: 1
+    zoomFactor: 1,
+    // center: [60, 20], // 1.7 zoomFacter once we get the data loading separate from tiles
 };
