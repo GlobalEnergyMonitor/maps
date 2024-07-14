@@ -9,6 +9,7 @@ var config = {
 
         ],
     tileSourceLayer: 'integrated',
+
     // projection: 'globe',
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 

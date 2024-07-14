@@ -1297,3 +1297,19 @@ function removeLastComma(str) {
     }
     return str;
 }
+
+
+// function control_spinner_buffering(){
+//     document.addEventListener('DOMContentLoaded', function () {
+//         // Show the spinner on page load
+//         var spinnerContainer = document.getElementById('spinner-container');
+//         spinnerContainer.style.display = 'flex';
+
+//         // TODO get the ajax request so hides spinner on content load
+//          //Simulate loading content (e.g., fetching data, etc.)
+//         setTimeout(function () {
+//             // Hide the spinner once the content is loaded
+//             spinnerContainer.style.display = 'none';
+//         }, 5000); // Simulate a 3-second loading time
+//     });
+// }
