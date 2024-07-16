@@ -794,23 +794,30 @@ def round_cap_emissions(df):
 df = round_cap_emissions(df)
 
 
-def make_table_wiki_url(df):
-    df = df.copy()
-    df['table_infra_url'] = df.apply(lambda row: f"<a href={infra_url} target='_blank'></a>" if row['infra_url'] != "" else row['infra_url'], axis=1)
-    return df
-df = make_table_wiki_url(df)
+# def make_table_wiki_url(df):
+#     df = df.copy()
+#     df['table_infra_url'] = df.apply(lambda row: f"<a href={infra_url} target='_blank'></a>" if row['infra_url'] != "" else row['infra_url'], axis=1)
+#     return df
+# df = make_table_wiki_url(df)
 
 def investigate_goget_missing(df):
     
     df = df.copy()
-    df_test = df[df['tracker']=='oil-and-gas-extraction-area']
     
-    df_test = df_test[['country', 'areas', 'goget_id', 'status', 'status-legend', 'scaling_col', 'map_id', 'infra-filter', 'name', 'lat', 'lng']]
+    df_mask = df[(df['status-legend']==pd.NA) & (df['tracker']=="oil-and-gas-extraction-areas")]
+    df_mask.to_csv('goget_investigate.csv')
+    df['status-legend'] = df['status-legend'].mask(df['status-legend']=='', other='unknown')
+    df['status-legend'] = df['status-legend'].mask(df['status']==pd.NA, other='unknown')
+    # print(set(df['tracker'].to_list()))
+    # df_test = df[df['tracker']=='oil-and-gas-extraction-areas']
+    df_mask = df[(df['status-legend']=='') & (df['tracker']=="oil-and-gas-extraction-areas")]
+    df_mask.to_csv('goget_investigate.csv')
+    # # df_test = df_test['country', 'areas', 'goget_id', 'status', 'status-legend', 'scaling_col', 'map_id', 'infra-filter', 'name', 'lat', 'lng']
     
-    df_test.to_csv('goget_investigate.csv')
+    # df_test.to_csv('goget_investigate.csv')
     # return nothing 
-    # return df
-investigate_goget_missing(df)
+    return df
+df = investigate_goget_missing(df)
 
 def create_geo(df):
 # def convert_coords_to_point(df): from compile all trackers for AET
