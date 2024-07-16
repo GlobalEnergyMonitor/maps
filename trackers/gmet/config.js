@@ -43,8 +43,8 @@ var config = {
         }
     ],
 
-    statusDisplayField: 'status',
-    statusField: 'status-legend',
+    // statusDisplayField: 'status',
+    // statusField: 'status-legend',
     // # O&G extraction areas and coal mines by status 
     // plumes by "has attribution information"
     // infrastructure emissions estimates

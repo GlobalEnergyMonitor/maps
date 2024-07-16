@@ -806,8 +806,12 @@ def investigate_goget_missing(df):
     
     df_mask = df[(df['status-legend']==pd.NA) & (df['tracker']=="oil-and-gas-extraction-areas")]
     df_mask.to_csv('goget_investigate.csv')
-    df['status-legend'] = df['status-legend'].mask(df['status-legend']=='', other='unknown')
-    df['status-legend'] = df['status-legend'].mask(df['status']==pd.NA, other='unknown')
+    df['status-legend'] = df['status-legend'].mask(df['status-legend']=='', other='unknown_plus')
+    df['status-legend'] = df['status-legend'].mask(df['status-legend']==pd.NA, other='unknown_plus')
+    df['status'] = df['status'].mask(df['status']=='', other='not found')
+    df['status'] = df['status'].mask(df['status']==pd.NA, other='not found')
+    
+    
     # print(set(df['tracker'].to_list()))
     # df_test = df[df['tracker']=='oil-and-gas-extraction-areas']
     df_mask = df[(df['status-legend']=='') & (df['tracker']=="oil-and-gas-extraction-areas")]
