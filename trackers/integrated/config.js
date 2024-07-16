@@ -5,8 +5,8 @@ var config = {
         // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-03-14/{z}/{x}/{y}.pbf'
         // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-05-24/{z}/{x}/{y}.pbf',
         // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-05-30/{z}/{x}/{y}.pbf',
-        // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-06-10/{z}/{x}/{y}.pbf'
-        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-test-speed/{z}/{x}/{y}.pbf'
+        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-06-10/{z}/{x}/{y}.pbf'
+        // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-test-speed/{z}/{x}/{y}.pbf'
          ],
     tileSourceLayer: 'integrated',
 
