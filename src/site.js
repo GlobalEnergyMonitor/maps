@@ -110,9 +110,9 @@ function addGeoJSON(jsonData) {
         'type': 'geojson',
         'data': config.processedGeoJSON
     });
-
     addLayers();
     map.on('idle', enableUX);
+
 }
 function addTiles() {
     map.addSource('assets-source', {
@@ -122,21 +122,20 @@ function addTiles() {
         'maxzoom': 10 // ?
     });
 
-        /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
-        config.geometries.forEach(geometry => {
-            map.addLayer({
-                'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
-                'type': geometry == "LineString" ? 'line' : 'circle',
-                'source': 'assets-source',
-                'source-layer': config.tileSourceLayer,
-                'layout': {},
-                'filter': ["==",["geometry-type"],geometry],
-                'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
-            });
+    /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
+    config.geometries.forEach(geometry => {
+        map.addLayer({
+            'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
+            'type': geometry == "LineString" ? 'line' : 'circle',
+            'source': 'assets-source',
+            'source-layer': config.tileSourceLayer,
+            'layout': {},
+            'filter': ["==",["geometry-type"],geometry],
+            'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
         });
+    });
 
-        map.on('idle', geoJSONFromTiles);
-
+    map.on('idle', geoJSONFromTiles);
 }
 function geoJSONFromTiles() {
     map.off('idle', geoJSONFromTiles);
@@ -533,7 +532,8 @@ function addEvents() {
             }
         } else {
             // console.log(displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]))
-            var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6><ul>";
+            var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6>";
+
             let ul = $('<ul>');
             selectedFeatures.forEach((feature) => {
                 var link = $('<li class="asset-select-option">' + feature.properties[config.nameField] + "</li>");
