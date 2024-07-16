@@ -1,7 +1,7 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
-    csv: 'data/data-2024-07-16.csv',
+    csv: 'data/data_2024-07-16.csv',
 
     colors: {
         'red greeninfo': '#c00',
