@@ -96,6 +96,7 @@ def harmonize_countries(df, countries_dict):
         results_len = df_mask[df_mask['country-harmonize-pass'] == 'false']
         results.append((region, len(results_len)))
         print(f'\nWe want this to be 0: {results}\n')
+            
     
     return df
 
@@ -117,7 +118,7 @@ df = rename_cols(df)
 df = harmonize_countries(df, countries)
 print(df.info())
 
-input_to_output(df, f'{output_folder}data_{iso_today_date}.csv')
+input_to_output(df, f'{output_folder}data-{iso_today_date}.csv')
 
 def test_stats(df):
     df = df.copy()

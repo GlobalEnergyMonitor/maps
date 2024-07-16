@@ -1,7 +1,7 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
-    csv: '../data/data_2024-07-16.csv',
+    csv: 'data/data-2024-07-16.csv',
 
     colors: {
         'red greeninfo': '#c00',
@@ -31,7 +31,7 @@ var config = {
 
     /* define the column and values used for the filter UI. There can be multiple filters listed. 
       Additionally a custom `label` can be defined (default is the field), 
-      and `values_label` (an array matching elements in `values`)
+      and `values-label` (an array matching elements in `values`)
       */
     filters: [
         {
@@ -42,30 +42,30 @@ var config = {
 
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
-    capacityField: 'capacity_(mw)',
-    capacityDisplayField: 'capacity_(mw)',
+    capacityField: 'capacity-(mw)',
+    capacityDisplayField: 'capacity-(mw)',
     capacityLabel: 'Capacity (MW)',
 
     /* Labels for describing the assets */
     assetFullLabel: "Nuclear Power Plant Units",
-    assetLabel: 'unit',
+    assetLabel: 'units',
 
     /* the column that contains the asset name. this varies between trackers */
-    nameField: 'project_name',
+    nameField: 'project-name',
 
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['project_name', 'capacity_(mw)', 'reactor', 'status', 'owner', 'operator',  'country'],
+        values: ['project-name', 'capacity-(mw)', 'reactor-type', 'status', 'owner', 'operator',  'country'],
         labels: ['Project name','Capacity (MW)','Reactor','Status','Owner', 'Operator', 'Country/Area(s)'],
-        clickColumns: ['project_name'],
-        rightAlign: ['capacity_(mw)']
+        clickColumns: ['project-name'],
+        rightAlign: ['capacity-(mw)']
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Project': ['project_name'], 
+    searchFields: { 'Project': ['project-name'], 
         'Companies': ['owner', 'operator'],
 
     },
@@ -78,13 +78,13 @@ var config = {
       `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'project_name': {'display': 'heading'},
+        'project-name': {'display': 'heading'},
         'status': {'label': 'Status'},
-        'capacity_(mw)': {'label': 'Capacity (MW)'},
+        'capacity-(mw)': {'label': 'Capacity (MW)'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'country' : {'label': 'Country/Area(s)'},
-        'location_accuracy': {'label': 'Location Accuracy'},
+        'location-accuracy': {'label': 'Location Accuracy'},
         'state/province': {'display': 'location'},
         'country': {'display': 'location'},
 

@@ -984,16 +984,20 @@ function displayDetails(features) {
             } else if (config.detailView[detail]['display'] == 'location') {
 
                 if (Object.keys(features[0].properties).includes(detail)) {
+                    console.log(location_text)
                     if (location_text.length > 0) {
                         location_text += ', ';
                     }
+                    //TODO figure out why subnational and country are reversed in nuclear
+                    console.log(location_text)
+
                     location_text += features[0].properties[detail];
                 }
             }
         } else {
 
             if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null &&  features[0].properties[detail] != 'not found' && features[0].properties[detail] != 'Unknown [unknown %]'){
-                    if (features[0].properties[detail].includes(';') && config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
+                    if (config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
                         // console.log(config.detailView[detail]['label'])
                         // remove semi colon in areas country for multi country
                         // features[0].properties[detail] = removeLastComma(features[0].properties[detail])
