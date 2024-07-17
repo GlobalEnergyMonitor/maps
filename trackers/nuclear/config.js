@@ -5,8 +5,8 @@ var config = {
     /* zoom level to set map when viewing all phases */
     phasesZoom: 10,
     /* initial load zoom multiplier */
-    zoomFactor: 2,
-    center: [50, 30],
+    // zoomFactor: 2,
+    center: [0, 0],
 
     colors: {
         'red greeninfo': '#c00',
