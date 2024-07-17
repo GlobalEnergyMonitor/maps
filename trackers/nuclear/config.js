@@ -1,7 +1,7 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
-    csv: 'data/data-2024-07-16.csv',
+    csv: 'data/data-2024-07-17.csv',
 
     colors: {
         'red greeninfo': '#c00',
@@ -85,8 +85,9 @@ var config = {
         'operator': {'label': 'Operator'},
         'country' : {'label': 'Country/Area(s)'},
         'location-accuracy': {'label': 'Location Accuracy'},
-        'state/province': {'display': 'location'},
-        'country': {'display': 'location'},
+        // 'state/province': {'display': 'location'},
+        // 'country': {'display': 'location'},
+        'areas-subnat-sat-display': {'display': 'location'}
 
     },
     showCapacityTable: true, 

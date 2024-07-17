@@ -46,7 +46,7 @@ def set_up_df(input):
         
     col_info_df = pd.DataFrame(col_info)
     # print(col_info_df)
-    col_info_df.to_csv('col_df.csv')
+    col_info_df.to_csv(f'{test_results_folder}col_df.csv')
     return df
 
 def filter_cols(df):
@@ -96,8 +96,8 @@ def harmonize_countries(df, countries_dict):
         results_len = df_mask[df_mask['country-harmonize-pass'] == 'false']
         results.append((region, len(results_len)))
         print(f'\nWe want this to be 0: {results}\n')
-            
-    
+        
+    df['areas-subnat-sat-display'] = df.apply(lambda row: f"{row['country']}" if row['state/province'] == '' else f"{row['state/province']}, {row['country']}", axis=1)   
     return df
 
 def input_to_output(df, output_file):
