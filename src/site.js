@@ -44,6 +44,7 @@ function determineZoom() {
   load data in various formats, and prepare for use in application
 */
 function loadData() {
+    // Here we could load in data from csv always minus what's needed for map dots?
     if ("tiles" in config) {
         addTiles();
     } else if ("geojson" in config) {
@@ -72,6 +73,7 @@ function loadData() {
     }
 }
 function addGeoJSON(jsonData) {
+    // converts all to geojson 
     if ('type' in jsonData && jsonData['type'] == 'FeatureCollection') {
         config.geojson = jsonData;
     } else {
@@ -90,6 +92,7 @@ function addGeoJSON(jsonData) {
                 "properties": {}
             }
             for (let key in asset) {
+           
                 if (key == config.capacityField) {
                     feature.properties[key] = Number(asset[key]);
                 } else if (key != config.locationColumns['lng'] && key != config.locationColumns['lat']) {
@@ -104,6 +107,7 @@ function addGeoJSON(jsonData) {
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
+    // this we can preprocess
     findLinkedAssets();
 
     map.addSource('assets-source', {
@@ -111,7 +115,10 @@ function addGeoJSON(jsonData) {
         'data': config.processedGeoJSON
     });
     addLayers();
-    map.on('idle', enableUX);
+    map.on('idle', enableUX); // enableUX starts to render data
+    // this is when the data has loaded 
+    console.log('loaded')
+
 
 }
 function addTiles() {
@@ -136,6 +143,7 @@ function addTiles() {
     });
 
     map.on('idle', geoJSONFromTiles);
+
 }
 function geoJSONFromTiles() {
     map.off('idle', geoJSONFromTiles);
@@ -154,11 +162,12 @@ function geoJSONFromTiles() {
     });
     findLinkedAssets();
     addLayers();
-    map.on('idle', enableUX);
+    map.on('idle', enableUX); // enableUX starts to renders data 
 }
 // Builds lookup of linked assets by the link column
 //  and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
 function findLinkedAssets() {
+    
     map.off('idle', findLinkedAssets);
 
     config.preLinkedGeoJSON = JSON.parse(JSON.stringify(config.processedGeoJSON));
@@ -183,6 +192,7 @@ function findLinkedAssets() {
                 if (! (key in grouped)) {
                     grouped[key] = [];
                 }
+                // adds feature to dictonary grouped if shares a linkField id and coords, not done for lines
                 grouped[key].push(feature);
             }
         }
@@ -198,6 +208,7 @@ function findLinkedAssets() {
         let features = JSON.parse(JSON.stringify(grouped[key])); //deep copy
 
         // Sum capacity across all linked assets
+        // we can preprocess this
         let capacity = features.reduce((previous, current) => {
             return previous + Number(current.properties[config.capacityField]);
         }, 0);
@@ -222,6 +233,7 @@ function findLinkedAssets() {
                 if (! config.icons.includes(string_icon)) {
                     generateIcon(icon);
                     config.icons.push(string_icon);
+
                 }
             }
         }
@@ -238,6 +250,7 @@ function findLinkedAssets() {
         config.totalCount += features.length;
 
         config.processedGeoJSON.features.push(features[0]);
+
     });
 }
 function generateIcon(icon) {
@@ -310,14 +323,14 @@ function setMinMax() {
 */
 function enableUX() {
     map.off('idle', enableUX);
-
     buildFilters();
     updateSummary();
-    
     buildTable(); 
-
     enableModal();
     enableNavFilters();
+    console.log('stop spinner after legend is rendered on initial load')
+    $('#spinner-container').addClass('d-none')
+    $('#spinner-container').removeClass('d-flex')
 }
 
 function addLayers() {
@@ -610,6 +623,9 @@ function buildFilters() {
     });
     $('.filter-row').each(function() {
         this.addEventListener("click", function() {
+            console.log('CLICKED! so start the spinner') // add in spinner start here for filtering wait 
+            $('#spinner-container').removeClass('d-none')
+            $('#spinner-container').addClass('d-flex')
             $('#' + this.dataset.checkid).click();
             toggleFilter(this.dataset.checkid);
             filterData();
@@ -626,6 +642,9 @@ function selectAllFilter() {
             toggleFilter(this.dataset.checkid);
         }
     });
+    console.log('start spinner for select all click') // spinner starts again only for when select select all
+    $('#spinner-container').removeClass('d-none')
+    $('#spinner-container').addClass('d-flex')
     filterData();
 }
 function clearAllFilter() {
@@ -808,6 +827,9 @@ function updateSummary() {
         $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString())
         $('#capacity_summary').html("Maximum " + config.capacityLabel);
     }
+    console.log('stop spinner after updateSummary in filterGeoJSON for any type of filter') // stop spinner filter now?
+    $('#spinner-container').addClass('d-none')
+    $('#spinner-container').removeClass('d-flex')
 }
 
 /*
@@ -1113,6 +1135,8 @@ function enableNavFilters() {
     enableSearchSelect();
     enableCountrySelect();
 
+    // this is the event that starts loading but not complete
+
     document.addEventListener("DOMContentLoaded", function() {
 
         // make it as accordion for smaller screens
@@ -1149,6 +1173,7 @@ function enableNavFilters() {
     }); 
 }
 function enableCountrySelect() {
+
     $.ajax({
         type: "GET",
         url: config.countryFile,
@@ -1301,19 +1326,3 @@ function removeLastComma(str) {
     }
     return str;
 }
-
-
-// function control_spinner_buffering(){
-//     document.addEventListener('DOMContentLoaded', function () {
-//         // Show the spinner on page load
-//         var spinnerContainer = document.getElementById('spinner-container');
-//         spinnerContainer.style.display = 'flex';
-
-//         // TODO get the ajax request so hides spinner on content load
-//          //Simulate loading content (e.g., fetching data, etc.)
-//         setTimeout(function () {
-//             // Hide the spinner once the content is loaded
-//             spinnerContainer.style.display = 'none';
-//         }, 5000); // Simulate a 3-second loading time
-//     });
-// }

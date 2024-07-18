@@ -364,14 +364,20 @@ table.dataTable td {
     position: relative;
     top: 3px;
 }
-/* TODO 
-    #spinner-container {
+
+#spinner-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.8); /* Optional: Add a background to make the spinner more visible */
-    /* z-index: 9999; Ensure the spinner is on top */
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    visibility: visible; 
+}
 
-/* } */ 
+.spinner-grow {
+
+    --bs-spinner-animation-speed: 1.5s !important ;
+
+}
