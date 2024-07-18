@@ -1202,6 +1202,9 @@ function buildCountrySelect() {
 
     $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
+            console.log('country dropdown clicked')
+            $('#spinner-container').removeClass('d-none')
+            $('#spinner-container').addClass('d-flex')
             config.selectedCountryText = this.dataset.countrytext;
             config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []);
             $('#selectedCountryLabel').text(config.selectedCountryText || "all");
