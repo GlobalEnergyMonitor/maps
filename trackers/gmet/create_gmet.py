@@ -219,7 +219,7 @@ def rename_dfs(list_of_dfs):
             renamed_list_of_dfs.append(df)
 
         if df.loc[0,'tracker'] == 'Pipelines':
-            df = df.rename(columns = {'Emissions if Operational (tonnes/yr)':'tonnesyr-pipes_emissions','Pipeline Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Length Merged Km': 'length', 
+            df = df.rename(columns = {'Emissions if Operational (tonnes/yr)':'tonnesyr-pipes_emissions','Pipeline Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Length Merged Km': 'pipe_length', 
                                     'Capacity (cubic meters/day)': 'capacity', 'Countries/Areas': 'areas', 'WKTFormat': 'geometry'})
             print("renamed Pipelines!")
             renamed_list_of_dfs.append(df)
@@ -556,9 +556,9 @@ def last_min_fixes(df):
     # status legend needs to have no underscores
     
     print(f"Set of Status Legend before: {set(df['status_legend'].to_list())}")
-    df['status_legend'] = df['status_legend'].fillna('unknown_plus') # why is this empty? 
+    df['status_legend'] = df['status_legend'].fillna('unknown-plus') # why is this empty? 
     df['status_legend'] = df['status_legend'].apply(lambda x: x.replace('_', '-'))
-    print(f"Set of Status Legend after: {set(df['status_legend'].to_list())}")
+    print(f"Set of Status Legend after CHECK config.js: {set(df['status_legend'].to_list())}")
         # remove any NAN areas
     print(len(df))
     df['areas'] = df['areas'].fillna('')
@@ -806,8 +806,8 @@ def investigate_goget_missing(df):
     
     df_mask = df[(df['status-legend']==pd.NA) & (df['tracker']=="oil-and-gas-extraction-areas")]
     df_mask.to_csv('goget_investigate.csv')
-    df['status-legend'] = df['status-legend'].mask(df['status-legend']=='', other='unknown_plus')
-    df['status-legend'] = df['status-legend'].mask(df['status-legend']==pd.NA, other='unknown_plus')
+    df['status-legend'] = df['status-legend'].mask(df['status-legend']=='', other='unknown-plus')
+    df['status-legend'] = df['status-legend'].mask(df['status-legend']==pd.NA, other='unknown-plus')
     df['status'] = df['status'].mask(df['status']=='', other='not found')
     df['status'] = df['status'].mask(df['status']==pd.NA, other='not found')
     
