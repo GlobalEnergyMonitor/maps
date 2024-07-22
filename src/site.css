@@ -413,3 +413,6 @@ table.dataTable td {
     visibility: hidden;
 }
 
+.spinner-container-filter{
+    visibility: hidden;
+}
