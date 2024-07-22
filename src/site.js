@@ -21,16 +21,35 @@ const map = new mapboxgl.Map({
     center: config.center,
     projection: config.projection
 });
+
+if (config.projection == 'globe'){
+    const mapNaturalEarth = new mapboxgl.Map({
+        container: 'map-second',
+        style: config.mapStyle,
+        zoom: determineZoom(),
+        center: config.center,
+        projection: 'naturalEarth'
+    });
+}
+
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false
 });
-map.dragRotate.disable();
-map.touchZoomRotate.disableRotation();
+// map.dragRotate.disable();
+// map.touchZoomRotate.disableRotation();
+// map.dragRotate
+// map.touchZoomRotate
+// map.rotateTo((timestamp / 100) % 360, { duration: 0 })
+
 
 map.on('load', function () {
     loadData();
+    if (config.projection == 'globe'){
+        map.setFog({}); // Set the default atmosphere style
+
+    }
 });
 function determineZoom() {
     let modifier = 650;
@@ -39,6 +58,7 @@ function determineZoom() {
     let zoom = config.zoomFactor * (window.innerWidth - modifier) / modifier;
     return zoom;
 }
+
 
 /*
   load data in various formats, and prepare for use in application
@@ -100,6 +120,8 @@ function addGeoJSON(jsonData) {
                 }
             }
             config.geojson.features.push(feature);
+            // console.log('length of config.geojson in addGeoJson')
+            // console.log(lenth(config.geojson.features))
         });
 
     }
@@ -107,7 +129,6 @@ function addGeoJSON(jsonData) {
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
-    // this we can preprocess
     findLinkedAssets();
 
     map.addSource('assets-source', {
@@ -117,7 +138,7 @@ function addGeoJSON(jsonData) {
     addLayers();
     map.on('idle', enableUX); // enableUX starts to render data
     // this is when the data has loaded 
-    console.log('loaded')
+    // console.log('loaded')
 
 
 }
@@ -141,6 +162,8 @@ function addTiles() {
             'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
         });
     });
+    // console.log('length of all config.tiles in addTiles')
+    // console.log(config.tiles)
 
     map.on('idle', geoJSONFromTiles);
 
@@ -154,18 +177,28 @@ function geoJSONFromTiles() {
         "type": "FeatureCollection", 
         "features": map.queryRenderedFeatures({layers: layers})  
     }
+
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
 
     layers.forEach(layer => {
         map.removeLayer(layer);
     });
-    findLinkedAssets();
+    findInitialAssets();
+    // console.log('length of config.geojson in geoJSONFromTiles')
+    // console.log(config.geojson.features.length)
     addLayers();
     map.on('idle', enableUX); // enableUX starts to renders data 
+    
+
 }
+
 // Builds lookup of linked assets by the link column
 //  and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
+// what if we change this so instead of rebuilding on initial load we load the geojson directly?! to solve globe issue 
+// until David implements his fix
+
+
 function findLinkedAssets() {
     
     map.off('idle', findLinkedAssets);
@@ -328,9 +361,11 @@ function enableUX() {
     buildTable(); 
     enableModal();
     enableNavFilters();
-    console.log('stop spinner after legend is rendered on initial load')
+    // console.log('stop spinner after legend is rendered on initial load')
     $('#spinner-container').addClass('d-none')
     $('#spinner-container').removeClass('d-flex')
+    // TODO 
+    // spinGlobe();
 }
 
 function addLayers() {
@@ -362,8 +397,6 @@ function addLayers() {
             }
         }
     , config.layers[0]);
-
-
 
     addEvents();
 }
@@ -407,6 +440,7 @@ function addPointLayer() {
         'paint': paint
     });
     config.layers.push('assets-points');
+
 
     // Add layer with proportional icons
     map.addLayer({
@@ -586,6 +620,25 @@ function addEvents() {
            map.setLayoutProperty('satellite', 'visibility', 'none');
         }
     });
+
+    // //TODO - adjust to work more like table view toggle
+    // $('#projection-toggle').on("click", function() {
+    //     if (config.projection == "globe") {
+    //        // $('#basemap-toggle').text("Streets");
+    //        userInteracting = true;
+    //        // hide btn for rotation
+    //        config.projection = "naturalEarth";
+    //        map.setProjection('naturalEarth');
+
+
+    //     } else {
+    //        // $('#basemap-toggle').text("Satellite");
+    //     //    config.projection = "globe";
+    //        map.setLayoutProperty('globe');
+    //     }
+    // });
+
+
     $('#collapse-sidebar').on("click", function() {
         $('#filter-form').hide();
         $('#all-select').hide();
@@ -623,9 +676,16 @@ function buildFilters() {
     });
     $('.filter-row').each(function() {
         this.addEventListener("click", function() {
-            console.log('CLICKED! so start the spinner') // add in spinner start here for filtering wait 
-            $('#spinner-container').removeClass('d-none')
-            $('#spinner-container').addClass('d-flex')
+            // console.log('CLICKED! so start the spinner') // add in spinner start here for filtering wait 
+            // todo add in customization for gipt
+            // if (config.tileSourceLayer == 'integrated'){
+            $('#spinner-container-filter').removeClass('d-none')
+            $('#spinner-container-filter').addClass('d-flex')
+            // }
+            // else{
+            //     $('#spinner-container').removeClass('d-none')
+            //     $('#spinner-container').addClass('d-flex')
+            // }
             $('#' + this.dataset.checkid).click();
             toggleFilter(this.dataset.checkid);
             filterData();
@@ -642,9 +702,16 @@ function selectAllFilter() {
             toggleFilter(this.dataset.checkid);
         }
     });
-    console.log('start spinner for select all click') // spinner starts again only for when select select all
-    $('#spinner-container').removeClass('d-none')
-    $('#spinner-container').addClass('d-flex')
+    // console.log('start spinner for select all click') // spinner starts again only for when select select all
+    // if (config.tileSourceLayer == 'integrated'){
+    $('#spinner-container-filter').removeClass('d-none')
+    $('#spinner-container-filter').addClass('d-flex')
+    
+    // }
+    // else{
+    //     $('#spinner-container').removeClass('d-none')
+    //     $('#spinner-container').addClass('d-flex')
+    // }
     filterData();
 }
 function clearAllFilter() {
@@ -827,10 +894,17 @@ function updateSummary() {
         $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString())
         $('#capacity_summary').html("Maximum " + config.capacityLabel);
     }
-    console.log('stop spinner after updateSummary in filterGeoJSON for any type of filter') // stop spinner filter now?
-    $('#spinner-container').addClass('d-none')
-    $('#spinner-container').removeClass('d-flex')
+    // console.log('stop spinner after updateSummary in filterGeoJSON for any type of filter') // stop spinner filter now?
+    // if (config.tileSourceLayer == 'integrated'){
+    $('#spinner-container-filter').addClass('d-none')
+    $('#spinner-container-filter').removeClass('d-flex')
 }
+//     }
+//     else {    
+//         $('#spinner-container').addClass('d-none')
+//         $('#spinner-container').removeClass('d-flex')
+//     }
+// }
 
 /*
   table view
@@ -960,7 +1034,7 @@ function displayDetails(features) {
         if (Object.keys(config.detailView[detail]).includes('display')) {
 
             if (config.detailView[detail]['display'] == 'heading') {
-
+                // console.log(features[0])
                 detail_text += '<h4>' + features[0].properties[detail] + '</h4>';
 
             } else if (config.detailView[detail]['display'] == 'join') {
@@ -1006,12 +1080,12 @@ function displayDetails(features) {
             } else if (config.detailView[detail]['display'] == 'location') {
 
                 if (Object.keys(features[0].properties).includes(detail)) {
-                    console.log(location_text)
+                    // console.log(location_text)
                     if (location_text.length > 0) {
                         location_text += ', ';
                     }
                     //TODO figure out why subnational and country are reversed in nuclear
-                    console.log(location_text)
+                    // console.log(location_text)
 
                     location_text += features[0].properties[detail];
                 }
@@ -1202,9 +1276,16 @@ function buildCountrySelect() {
 
     $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
-            console.log('country dropdown clicked')
-            $('#spinner-container').removeClass('d-none')
-            $('#spinner-container').addClass('d-flex')
+            // console.log('country dropdown clicked')
+            // if (config.tileSourceLayer == 'integrated'){
+            $('#spinner-container-filter').removeClass('d-none')
+            $('#spinner-container-filter').addClass('d-flex')
+            
+            // else{
+            //     $('#spinner-container').removeClass('d-none')
+            //     $('#spinner-container').addClass('d-flex')
+            // }
+
             config.selectedCountryText = this.dataset.countrytext;
             config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []);
             $('#selectedCountryLabel').text(config.selectedCountryText || "all");
@@ -1329,3 +1410,80 @@ function removeLastComma(str) {
     }
     return str;
 }
+
+// TODO
+    // // The following values can be changed to control rotation speed:
+
+    // // At low zooms, complete a revolution every two minutes.
+    // const secondsPerRevolution = 120;
+    // // Above zoom level 5, do not rotate.
+    // const maxSpinZoom = 5;
+    // // Rotate at intermediate speeds between zoom levels 3 and 5.
+    // const slowSpinZoom = 3;
+
+    // let userInteracting = false;
+    // let spinEnabled = true;
+
+    // function spinGlobe() {
+    //     const zoom = map.getZoom();
+    //     if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
+    //         let distancePerSecond = 360 / secondsPerRevolution;
+    //         if (zoom > slowSpinZoom) {
+    //             // Slow spinning at higher zooms
+    //             const zoomDif =
+    //                 (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
+    //             distancePerSecond *= zoomDif;
+    //         }
+    //         const center = map.getCenter();
+    //         center.lng -= distancePerSecond;
+    //         // Smoothly animate the map over one second.
+    //         // When this animation is complete, it calls a 'moveend' event.
+    //         map.easeTo({ center, duration: 1000, easing: (n) => n });
+    //     }
+    // }
+
+    // // Pause spinning on interaction
+    // map.on('mousedown', () => {
+    //     userInteracting = true;
+    // });
+
+    // // Restart spinning the globe when interaction is complete
+    // map.on('mouseup', () => {
+    //     userInteracting = false;
+    //     spinGlobe();
+    // });
+
+    // // These events account for cases where the mouse has moved
+    // // off the map, so 'mouseup' will not be fired.
+    // map.on('dragend', () => {
+    //     userInteracting = false;
+    //     spinGlobe();
+    // });
+    // map.on('pitchend', () => {
+    //     userInteracting = false;
+    //     spinGlobe();
+    // });
+    // map.on('rotateend', () => {
+    //     userInteracting = false;
+    //     spinGlobe();
+    // });
+
+    // // When animation is complete, start spinning if there is no ongoing interaction
+    // map.on('moveend', () => {
+    //     spinGlobe();
+    // });
+
+    // TODO
+
+    // document.getElementById('btn-spin').addEventListener('click', (e) => {
+    //     spinEnabled = !spinEnabled;
+    //     if (spinEnabled) {
+    //         spinGlobe();
+    //         e.target.innerHTML = 'Pause rotation';
+    //     } else {
+    //         map.stop(); // Immediately end ongoing animation
+    //         e.target.innerHTML = 'Start rotation';
+    //     }
+    // });
+
+    // spinGlobe();
