@@ -219,13 +219,13 @@ def rename_dfs(list_of_dfs):
             renamed_list_of_dfs.append(df)
 
         if df.loc[0,'tracker'] == 'Pipelines':
-            df = df.rename(columns = {'Emissions if Operational (tonnes/yr)':'tonnesyr-pipes_emissions','Pipeline Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Length Merged Km': 'length', 
+            df = df.rename(columns = {'Emissions if Operational (tonnes/yr)':'tonnesyr-pipes_emissions','Pipeline Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Length Merged Km': 'pipe_length', 
                                     'Capacity (cubic meters/day)': 'capacity', 'Countries/Areas': 'areas', 'WKTFormat': 'geometry'})
             print("renamed Pipelines!")
             renamed_list_of_dfs.append(df)
 
         if df.loc[0,'tracker'] == 'Oil and Gas Extraction Areas':
-            df = df.rename(columns = {'Climate TRACE Field Emissions (tonnes)':'tonnes-goget_emissions','GEM GOGET ID': 'goget_id','Unit name':'name', 'GEM Wiki': 'url', 'Status': 'status', 'Status Year': 'status_year', 'Operator': 'operator',
+            df = df.rename(columns = {'Climate TRACE Field Emissions (tonnes)':'tonnes-goget_emissions','GEM GOGET ID': 'goget_id','Unit name':'name', 'GEM Wiki': 'url', 'Status': 'status', 'Status year': 'status_year', 'Operator': 'operator',
                                     'ClimateTrace Field (encompasses GEM field)': 'related_cm_field', 'Country/Area': 'areas', 'Latitude':'lat', 'Longitude': 'lng'})
             print("renamed Oil and Gas Extraction Areas!")
             renamed_list_of_dfs.append(df)
@@ -297,6 +297,7 @@ def create_scaling_col(df):
     plume_df = df[df['tracker'] == 'Plumes']
     plume_df.fillna('', inplace=True)
     plume_df = plume_df[plume_df['plume_emissions']!= '']
+    plume_df['plume_emissions'] = plume_df['plume_emissions'].apply(lambda x: round(x, 2))
     
     plume_tot_emissions = plume_df['plume_emissions'].astype(float).sum()  
     plume_projects = len(plume_df)
@@ -317,7 +318,7 @@ def create_scaling_col(df):
     # make it round to 2
     plume_df['plume_emissions'] = plume_df['plume_emissions'].astype(float).round(2)
     # make it round to 2
-    plume_df['emission_uncertainty'] = plume_df['emission_uncertainty'].astype(float).round(2)
+    plume_df['Emissions Uncertainty (kg/hr)'] = plume_df['Emissions Uncertainty (kg/hr)'].astype(float).round(2)
     
     # concat them back 
 
@@ -555,14 +556,16 @@ def last_min_fixes(df):
     # status legend needs to have no underscores
     
     print(f"Set of Status Legend before: {set(df['status_legend'].to_list())}")
-    df['status_legend'] = df['status_legend'].fillna('unknown_plus') # why is this empty? 
+    df['status_legend'] = df['status_legend'].fillna('unknown-plus') # why is this empty? 
     df['status_legend'] = df['status_legend'].apply(lambda x: x.replace('_', '-'))
-    print(f"Set of Status Legend after: {set(df['status_legend'].to_list())}")
+    print(f"Set of Status Legend after CHECK config.js: {set(df['status_legend'].to_list())}")
         # remove any NAN areas
     print(len(df))
     df['areas'] = df['areas'].fillna('')
     df_final = df[df['areas']!='']
     print(len(df_final))
+    print(df_final.columns)
+
     
     # clean out cols
     # lat lng 
@@ -653,6 +656,7 @@ def split_plumes_out_attrib(df):
     # df['tracker'] = df.apply(lambda row: row['tracker']=='plumes' and row['infra-filter']== 'N' then plumes-unattrib)
     df['tracker'] = df.apply(lambda row: 'plumes-attrib' if row['tracker'] == 'plumes' and row['infra-filter'] == 'Y' else ('plumes-unattrib' if row['tracker'] == 'plumes' and row['infra-filter'] == 'N' else row['tracker']), axis=1)    
     print(df[['tracker','infra-filter']])
+    df['infra-filter'] = df['infra-filter'].fillna('')
     return df
 
 df = split_plumes_out_attrib(df)
@@ -663,8 +667,7 @@ def get_standard_country_names():
         '1mtlwSJfWy1gbIwXVgpP3d6CcUEWo2OM0IvPD6yztGXI', 
         ['Countries'],
     )
-    print(f'this is coutnry df: {df}')
-    print(df.columns)
+
     gem_standard_country_names = df['GEM Standard Country Name'].tolist()
     
     return gem_standard_country_names
@@ -678,34 +681,34 @@ def fix_countries(df):
     country_col = 'areas'
     hyphenated_countries = ['Timor-Leste', 'Guinea-Bissau']
     comma_countries = ['Bonaire, Sint Eustatius, and Saba']
-    for row in df.index:
-            if df.at[row, country_col] in comma_countries:
-                continue
-            elif pd.isna(df.at[row, country_col])==False:    
-                try:
+    # for row in df.index:
+    #         if df.at[row, country_col] in comma_countries:
+    #             continue
+    #         elif pd.isna(df.at[row, country_col])==False:    
+    #             try:
         
-                    countries_list = gdf.at[row, country_col].split(', ') 
-                    countries_list = [x.split('-') for x in countries_list if x not in hyphenated_countries]
+    #                 countries_list = gdf.at[row, country_col].split(', ') 
+    #                 countries_list = [x.split('-') for x in countries_list if x not in hyphenated_countries]
                     
-                except:
-                    # print("Error!" + f" Exception for row {row}, country_col: {df.at[row, country_col]}")
-                    countries_list = df.at[row, country_col]
+    #             except:
+    #                 # print("Error!" + f" Exception for row {row}, country_col: {df.at[row, country_col]}")
+    #                 countries_list = df.at[row, country_col]
                     
-                # flatten list
-                countries_list = [
-                    country
-                    for group in countries_list
-                    for country in group
-                ]
-                # clean up
-                countries_list = [x.strip() for x in countries_list]
+    #             # flatten list
+    #             countries_list = [
+    #                 country
+    #                 for group in countries_list
+    #                 for country in group
+    #             ]
+    #             # clean up
+    #             countries_list = [x.strip() for x in countries_list]
             
-                # check that countries are standardized
-                for country in countries_list:
-                    if country not in gem_standard_country_names:
-                        print(f"For row {row}, non-standard country name after trying to standardize: {country}")
-            else:
-                continue
+    #             # check that countries are standardized
+    #             for country in countries_list:
+    #                 if country not in gem_standard_country_names:
+    #                     print(f"For row {row}, non-standard country name after trying to standardize: {country}")
+    #         else:
+    #             continue
     # fix mult countries
     # kuwait-iran to kuwait, iran and main being kuwait
     df['country'] = df['areas']
@@ -716,32 +719,109 @@ def fix_countries(df):
             df.at[row,'country'] = df.at[row,'country'].replace('-',';')
             df.at[row,'country'] = df.at[row,'country'].replace(',',';')
     
+    # country is the column holding the fixed areas data with ; and handling multiple countries
     df['country'] = df['country'].apply(lambda x: f"{x};")
 
-    # let's make areas have the list of areas, when we pull in pipelines we'll have to adjust this
-    print(set(df['country'].to_list()))
+    # df['country'].to_csv('countries_check.csv')
 
-    # print(set(df['areas'].to_list()))
-    # lenfirst = len(set(df['areas'].to_list()))
-
-    # # df['areas'] = df['areas'].apply(lambda x: x.split['-'])
-    # print(set(df['areas'].to_list()))
-    
-    # lensec = len(set(df['areas'].to_list()))
-    # print(f'{lenfirst} to {lensec}')
-    
     return df
 
 df = fix_countries(df)
 
 
-# TODO fix start year if not stated replace with ''
+# TODO fix status year if not stated replace with '' DONE
+# TODO replace null subnational FIX MULT COUNTRY DONE
+# TODO if search field is empty undefined fix search DONE
+# TODO find out why some goget still not coming through, likely status 
+
+def is_valid(x):
+    return isinstance(x, (int, float)) and not pd.isna(x) and x != '' and x != 0 and x != 0.0
+def is_valid_str(x):
+    return isinstance(x, (str)) and not pd.isna(x)
+
+
+def last_min_data_fixes(df):
+    for col in ['infra_type', 'gov_assets', 'operator']: # ['infra_type']
+        df[col] = df[col].apply(lambda x: x.strip().lower() if is_valid_str(x) else '')
+
+    print(set(df['status'].to_list()))
+    print(set(df['tracker'].to_list()))
+
+    # make all search values have something
+    print(set(df['infra_type'].to_list()))
+    df['infra_type'].fillna('', inplace = True)
+    print(set(df['infra_type'].to_list()))
+    
+    # well_id
+    df['well_id'].fillna('', inplace = True)
+
+    # gov_assets
+    df['gov_assets'].fillna('', inplace = True)
+
+    # status_year
+    df['status_year'].fillna('', inplace = True)
+    
+
+    # fix null subnat
+    # print(df.columns)
+    # print(df.head())
+
+    df['count_of_semi'] = df.apply(lambda row: len(row['country'].split(';')) - 1, axis=1) # if len of list is more than 2, then split more than once
+    df['multi-country'] = df.apply(lambda row: 't' if row['count_of_semi'] > 1 else 'f', axis=1)
+    # if t then make areas-display 
+    df['areas-subnat-sat-display'] = df.apply(lambda row: f"{row['country']}" if row['multi-country'] == 'f' else 'Multiple Countries/Areas', axis=1)
+
+    # infra_url make it a hyperlink html!!
+    
+    
+
+    return df
+
+df = last_min_data_fixes(df)
+# Define a function to check for valid values
+
+    
 def round_cap_emissions(df):
     print(df.columns)
-    print('TODO round the emissions and cap columns')
+    print('TODO round the emissions and cap columns!')
+    # emission_uncertainty, plume_emissions, mtyr-gcmt_emissions, capacity_output, capacity_prod, tonnesyr-pipes_emissions, capacity, tonnes-goget_emissions, tonnes-goget-reserves_emissions
+    for col in ['emission_uncertainty', 'plume_emissions', 'mtyr-gcmt_emissions', 'capacity_output', 'capacity_prod', 'tonnes-goget_emissions', 'tonnes-goget-reserves_emissions']:
+        
+        
+        df[col] = df[col].apply(lambda x: round(x, 2) if is_valid(x) else '')
     return df
 
 df = round_cap_emissions(df)
+
+
+# def make_table_wiki_url(df):
+#     df = df.copy()
+#     df['table_infra_url'] = df.apply(lambda row: f"<a href={infra_url} target='_blank'></a>" if row['infra_url'] != "" else row['infra_url'], axis=1)
+#     return df
+# df = make_table_wiki_url(df)
+
+def investigate_goget_missing(df):
+    
+    df = df.copy()
+    
+    df_mask = df[(df['status-legend']==pd.NA) & (df['tracker']=="oil-and-gas-extraction-areas")]
+    df_mask.to_csv('goget_investigate.csv')
+    df['status-legend'] = df['status-legend'].mask(df['status-legend']=='', other='unknown-plus')
+    df['status-legend'] = df['status-legend'].mask(df['status-legend']==pd.NA, other='unknown-plus')
+    df['status'] = df['status'].mask(df['status']=='', other='not found')
+    df['status'] = df['status'].mask(df['status']==pd.NA, other='not found')
+    
+    
+    # print(set(df['tracker'].to_list()))
+    # df_test = df[df['tracker']=='oil-and-gas-extraction-areas']
+    df_mask = df[(df['status-legend']=='') & (df['tracker']=="oil-and-gas-extraction-areas")]
+    df_mask.to_csv('goget_investigate.csv')
+    # # df_test = df_test['country', 'areas', 'goget_id', 'status', 'status-legend', 'scaling_col', 'map_id', 'infra-filter', 'name', 'lat', 'lng']
+    
+    # df_test.to_csv('goget_investigate.csv')
+    # return nothing 
+    return df
+df = investigate_goget_missing(df)
 
 def create_geo(df):
 # def convert_coords_to_point(df): from compile all trackers for AET
@@ -754,6 +834,8 @@ def create_geo(df):
     return gdf
 
 gdf = create_geo(df)
+
+
 
 def check_length_and_other_end(df):
     

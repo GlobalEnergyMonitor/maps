@@ -1,8 +1,9 @@
 var config = {
     json: './data/africa_energy_tracker_2024-07-10.geojson',
     geometries: ['Point','LineString'],
-    center: [30, 0],
-    zoomFactor: 1.5,
+    center: [10, 0],
+    zoomFactor: 1.9,
+    img_detail_zoom: 10,
     statusField: 'status-legend',
     statusDisplayField: 'status',
     color: {
@@ -71,61 +72,63 @@ var config = {
     // },
     // skipCapacitySum: '',
 
-    capItemLabel:  {
-            field: 'tracker-custom',
-            values: {
-                'GCPT': 'MW',
-                'GOGPT': 'MW',
-                'GBPT':	'MW',
-                'GNPT':	'MW',
-                'GSPT':	'MW',
-                'GWPT':	'MW',
-                'GHPT':	'MW',
-                'GGPT':	'MW',
-                // 'GOGET - oil':	'million boe/y',
-                // 'GOGET - gas':	'million m³/y',
-                'GOIT': 'boe/d',
-                'GGIT':	'Bcm/y of natural gas',
-                'GGIT - import': 'MTPA of natural gas',
-                'GGIT - export': 'MTPA of natural gas',
-                // 'GCMT':	'million tonnes coal/y',
-                'GCTT':	'million tonnes coal/y'
-            }
-        },
-    prodItemLabel: {
-        field: 'tracker-custom',
-            values: {
-                'GOGET - oil':	'million boe/y',
-                'GOGET - gas':	'million m³/y',
-                'GCMT':	'million tonnes coal/y'
-            }
-    },
+    // capItemLabel:  {
+    //         field: 'tracker-custom',
+    //         values: {
+    //             'GCPT': 'MW',
+    //             'GOGPT': 'MW',
+    //             'GBPT':	'MW',
+    //             'GNPT':	'MW',
+    //             'GSPT':	'MW',
+    //             'GWPT':	'MW',
+    //             'GHPT':	'MW',
+    //             'GGPT':	'MW',
+    //             // 'GOGET - oil':	'million boe/y',
+    //             // 'GOGET - gas':	'million m³/y',
+    //             'GOIT': 'boe/d',
+    //             'GGIT':	'Bcm/y of natural gas',
+    //             'GGIT - import': 'MTPA of natural gas',
+    //             'GGIT - export': 'MTPA of natural gas',
+    //             // 'GCMT':	'million tonnes coal/y',
+    //             'GCTT':	'million tonnes coal/y'
+    //         }
+    //     },
+    // prodItemLabel: {
+    //     field: 'tracker-custom',
+    //         values: {
+    //             'GOGET - oil':	'million boe/y',
+    //             'GOGET - gas':	'million m³/y',
+    //             'GCMT':	'million tonnes coal/y'
+    //         }
+    // },
     //productionLabel NEED a productionLabel
     showMaxCapacity: false,
 
-    assetFullLabel: "Units / Phases / Areas",
+    assetFullLabel: "Units / Phases / Areas / Pipelines", //TODO This should be projects when in the list down of linked in same area
     //can be string for single value, or hash
-    assetLabel: {
-        field: 'tracker-custom',
-        values: {
-            'GCPT': 'units',
-            'GOGPT': 'units',
-            'GBPT': 'units',
-            'GNPT': 'units',
-            'GSPT': 'phases',
-            'GWPT':	'phases',
-            'GHPT':	'units',
-            'GGPT':	'units',
-            'GOGET - oil': 'areas',
-            'GOGET - gas': 'areas',
-            'GOIT': 'projects',
-            'GGIT': 'projects',
-            'GGIT - import': 'projects',
-            'GGIT - export': 'projects',
-            'GCMT': 'projects',
-            'GCTT': 'projects'
-        }
-    },
+    // not using assetLabel for now TODO
+    assetLabel: '',
+    // assetLabel: {
+    //     // field: 'tracker-custom',
+    //     // values: {
+    //     //     'GCPT': 'units',
+    //     //     'GOGPT': 'units',
+    //     //     'GBPT': 'units',
+    //     //     'GNPT': 'units',
+    //     //     'GSPT': 'phases',
+    //     //     'GWPT':	'phases',
+    //     //     'GHPT':	'units',
+    //     //     'GGPT':	'units',
+    //     //     'GOGET - oil': 'areas',
+    //     //     'GOGET - gas': 'areas',
+    //     //     'GOIT': 'projects',
+    //     //     'GGIT': 'projects',
+    //     //     'GGIT - import': 'projects',
+    //     //     'GGIT - export': 'projects',
+    //     //     'GCMT': 'projects',
+    //     //     'GCTT': 'projects'
+    //     // }
+    // },
     nameField: 'name',
 //    linkField: 'id',  
 

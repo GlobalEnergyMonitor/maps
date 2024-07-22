@@ -6,9 +6,10 @@ var config = {
         // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-05-24/{z}/{x}/{y}.pbf',
         // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-05-30/{z}/{x}/{y}.pbf',
         'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-06-10/{z}/{x}/{y}.pbf'
-
-        ],
+        // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-test-speed/{z}/{x}/{y}.pbf'
+         ],
     tileSourceLayer: 'integrated',
+
     // projection: 'globe',
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
@@ -59,7 +60,7 @@ var config = {
     },
     assetFullLabel: "units / phases / areas",
     assetLabel: "Units / Phases / Areas",
-    img_detail_zoom: 15,
+    img_detail_zoom: 10,
     tableHeaders: {
         values: ['Plant/project name','Unit/phase name', 'Owner', 'Parent', 'Capacity (MW)', 'Status', 'Subnational unit(s)', 'Country', 'Start year'],
         labels: ['Plant/project name','Unit/phase name','Owner','Parent','Capacity (MW)','Status','Subnational unit (province/state)','Country/Area','Start year'],
@@ -76,5 +77,6 @@ var config = {
         'Subnational unit (province/state)': {'display': 'location'},
         'Country': {'display': 'location'}
     },
-    zoomFactor: 1
+    zoomFactor: 1,
+    // center: [60, 20], // 1.7 zoomFacter once we get the data loading separate from tiles
 };

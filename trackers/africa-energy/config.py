@@ -163,6 +163,5 @@ tracker_to_legendname = {
 
 filler_Angola = [17.47057255231345, -12.24586903613316]
 
-
 # TODO get list of all google sheet keys and tabs including GGIT, GOIT and GGIT lng
 list_of_keys_tabs = []

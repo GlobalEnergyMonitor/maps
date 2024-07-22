@@ -29,7 +29,7 @@ const popup = new mapboxgl.Popup({
 map.dragRotate.disable();
 map.touchZoomRotate.disableRotation();
 
-map.on('style.load', function () {
+map.on('load', function () {
     loadData();
 });
 function determineZoom() {
@@ -44,6 +44,7 @@ function determineZoom() {
   load data in various formats, and prepare for use in application
 */
 function loadData() {
+    // Here we could load in data from csv always minus what's needed for map dots?
     if ("tiles" in config) {
         addTiles();
     } else if ("geojson" in config) {
@@ -72,6 +73,7 @@ function loadData() {
     }
 }
 function addGeoJSON(jsonData) {
+    // converts all to geojson 
     if ('type' in jsonData && jsonData['type'] == 'FeatureCollection') {
         config.geojson = jsonData;
     } else {
@@ -90,6 +92,7 @@ function addGeoJSON(jsonData) {
                 "properties": {}
             }
             for (let key in asset) {
+           
                 if (key == config.capacityField) {
                     feature.properties[key] = Number(asset[key]);
                 } else if (key != config.locationColumns['lng'] && key != config.locationColumns['lat']) {
@@ -104,40 +107,43 @@ function addGeoJSON(jsonData) {
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
+    // this we can preprocess
     findLinkedAssets();
-    map.on('load', function () {
-        map.addSource('assets-source', {
-            'type': 'geojson',
-            'data': config.processedGeoJSON
-        });
-        addLayers();
-        map.on('idle', enableUX);
+
+    map.addSource('assets-source', {
+        'type': 'geojson',
+        'data': config.processedGeoJSON
     });
+    addLayers();
+    map.on('idle', enableUX); // enableUX starts to render data
+    // this is when the data has loaded 
+    console.log('loaded')
+
+
 }
 function addTiles() {
-    map.on('load', function () {
-        map.addSource('assets-source', {
-            'type': 'vector',
-            'tiles': config.tiles,
-            'minzoom': 0,
-            'maxzoom': 10 // ?
-        });
-
-        /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
-        config.geometries.forEach(geometry => {
-            map.addLayer({
-                'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
-                'type': geometry == "LineString" ? 'line' : 'circle',
-                'source': 'assets-source',
-                'source-layer': config.tileSourceLayer,
-                'layout': {},
-                'filter': ["==",["geometry-type"],geometry],
-                'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
-            });
-        });
-
-        map.on('idle', geoJSONFromTiles);
+    map.addSource('assets-source', {
+        'type': 'vector',
+        'tiles': config.tiles,
+        'minzoom': 0,
+        'maxzoom': 10 // ?
     });
+
+    /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
+    config.geometries.forEach(geometry => {
+        map.addLayer({
+            'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
+            'type': geometry == "LineString" ? 'line' : 'circle',
+            'source': 'assets-source',
+            'source-layer': config.tileSourceLayer,
+            'layout': {},
+            'filter': ["==",["geometry-type"],geometry],
+            'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
+        });
+    });
+
+    map.on('idle', geoJSONFromTiles);
+
 }
 function geoJSONFromTiles() {
     map.off('idle', geoJSONFromTiles);
@@ -156,11 +162,12 @@ function geoJSONFromTiles() {
     });
     findLinkedAssets();
     addLayers();
-    map.on('idle', enableUX);
+    map.on('idle', enableUX); // enableUX starts to renders data 
 }
 // Builds lookup of linked assets by the link column
 //  and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
 function findLinkedAssets() {
+    
     map.off('idle', findLinkedAssets);
 
     config.preLinkedGeoJSON = JSON.parse(JSON.stringify(config.processedGeoJSON));
@@ -185,6 +192,7 @@ function findLinkedAssets() {
                 if (! (key in grouped)) {
                     grouped[key] = [];
                 }
+                // adds feature to dictonary grouped if shares a linkField id and coords, not done for lines
                 grouped[key].push(feature);
             }
         }
@@ -200,6 +208,7 @@ function findLinkedAssets() {
         let features = JSON.parse(JSON.stringify(grouped[key])); //deep copy
 
         // Sum capacity across all linked assets
+        // we can preprocess this
         let capacity = features.reduce((previous, current) => {
             return previous + Number(current.properties[config.capacityField]);
         }, 0);
@@ -224,6 +233,7 @@ function findLinkedAssets() {
                 if (! config.icons.includes(string_icon)) {
                     generateIcon(icon);
                     config.icons.push(string_icon);
+
                 }
             }
         }
@@ -240,6 +250,7 @@ function findLinkedAssets() {
         config.totalCount += features.length;
 
         config.processedGeoJSON.features.push(features[0]);
+
     });
 }
 function generateIcon(icon) {
@@ -312,14 +323,14 @@ function setMinMax() {
 */
 function enableUX() {
     map.off('idle', enableUX);
-
     buildFilters();
     updateSummary();
-    
     buildTable(); 
-
     enableModal();
     enableNavFilters();
+    console.log('stop spinner after legend is rendered on initial load')
+    $('#spinner-container').addClass('d-none')
+    $('#spinner-container').removeClass('d-flex')
 }
 
 function addLayers() {
@@ -612,6 +623,9 @@ function buildFilters() {
     });
     $('.filter-row').each(function() {
         this.addEventListener("click", function() {
+            console.log('CLICKED! so start the spinner') // add in spinner start here for filtering wait 
+            $('#spinner-container').removeClass('d-none')
+            $('#spinner-container').addClass('d-flex')
             $('#' + this.dataset.checkid).click();
             toggleFilter(this.dataset.checkid);
             filterData();
@@ -628,6 +642,9 @@ function selectAllFilter() {
             toggleFilter(this.dataset.checkid);
         }
     });
+    console.log('start spinner for select all click') // spinner starts again only for when select select all
+    $('#spinner-container').removeClass('d-none')
+    $('#spinner-container').addClass('d-flex')
     filterData();
 }
 function clearAllFilter() {
@@ -810,6 +827,9 @@ function updateSummary() {
         $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString())
         $('#capacity_summary').html("Maximum " + config.capacityLabel);
     }
+    console.log('stop spinner after updateSummary in filterGeoJSON for any type of filter') // stop spinner filter now?
+    $('#spinner-container').addClass('d-none')
+    $('#spinner-container').removeClass('d-flex')
 }
 
 /*
@@ -986,16 +1006,20 @@ function displayDetails(features) {
             } else if (config.detailView[detail]['display'] == 'location') {
 
                 if (Object.keys(features[0].properties).includes(detail)) {
+                    console.log(location_text)
                     if (location_text.length > 0) {
                         location_text += ', ';
                     }
+                    //TODO figure out why subnational and country are reversed in nuclear
+                    console.log(location_text)
+
                     location_text += features[0].properties[detail];
                 }
             }
         } else {
 
             if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null &&  features[0].properties[detail] != 'not found' && features[0].properties[detail] != 'Unknown [unknown %]'){
-                    if (features[0].properties[detail].includes(';') && config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
+                    if (config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
                         // console.log(config.detailView[detail]['label'])
                         // remove semi colon in areas country for multi country
                         // features[0].properties[detail] = removeLastComma(features[0].properties[detail])
@@ -1111,6 +1135,8 @@ function enableNavFilters() {
     enableSearchSelect();
     enableCountrySelect();
 
+    // this is the event that starts loading but not complete
+
     document.addEventListener("DOMContentLoaded", function() {
 
         // make it as accordion for smaller screens
@@ -1147,6 +1173,7 @@ function enableNavFilters() {
     }); 
 }
 function enableCountrySelect() {
+
     $.ajax({
         type: "GET",
         url: config.countryFile,
@@ -1175,6 +1202,9 @@ function buildCountrySelect() {
 
     $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
+            console.log('country dropdown clicked')
+            $('#spinner-container').removeClass('d-none')
+            $('#spinner-container').addClass('d-flex')
             config.selectedCountryText = this.dataset.countrytext;
             config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []);
             $('#selectedCountryLabel').text(config.selectedCountryText || "all");
