@@ -47,6 +47,13 @@ function loadData() {
     // Here we could load in data from csv always minus what's needed for map dots?
     if ("tiles" in config) {
         addTiles();
+        Papa.parse(config.csv, {
+            download: true,
+            header: true,
+            complete: function(results) {
+                addGeoJSON(results.data);
+            }
+        });
     } else if ("geojson" in config) {
         $.ajax({
             type: "GET",
@@ -62,14 +69,21 @@ function loadData() {
             success: function(jsonData) {addGeoJSON(jsonData);}
         });
     } else {
-        $.ajax({
-            type: "GET",
-            url: config.csv,
-            dataType: "text",
-            success: function(csvData) {
-                addGeoJSON($.csv.toObjects(csvData));
+        // $.ajax({
+        //     type: "GET",
+        //     url: config.csv,
+        //     dataType: "text",
+        //     success: function(csvData) {
+        //         addGeoJSON($.csv.toObjects(csvData));
+        //     }
+        // });        
+        Papa.parse(config.csv, {
+            download: true,
+            header: true,
+            complete: function(results) {
+                addGeoJSON(results.data);
             }
-        });        
+        });
     }
 }
 function addGeoJSON(jsonData) {
@@ -99,21 +113,29 @@ function addGeoJSON(jsonData) {
                     feature.properties[key] = asset[key];
                 }
             }
-            config.geojson.features.push(feature);
+            if (feature.properties[config['countryField']]) {
+                config.geojson.features.push(feature);
+            } else {
+                console.log(feature)
+            }
         });
 
     }
 
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
-    config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
+    config.processedGeoJSON = config.geojson; // copy
     setMinMax();
     // this we can preprocess
     findLinkedAssets();
 
-    map.addSource('assets-source', {
-        'type': 'geojson',
-        'data': config.processedGeoJSON
-    });
+    if (!config.tiles) {
+        map.addSource('assets-source', {
+            'type': 'geojson',
+            'data': config.processedGeoJSON,
+            'buffer': 0,
+            'tolerance': 100
+        });
+    }
     addLayers();
     map.on('idle', enableUX); // enableUX starts to render data
     // this is when the data has loaded 
@@ -130,20 +152,19 @@ function addTiles() {
     });
 
     /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
-    config.geometries.forEach(geometry => {
-        map.addLayer({
-            'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
-            'type': geometry == "LineString" ? 'line' : 'circle',
-            'source': 'assets-source',
-            'source-layer': config.tileSourceLayer,
-            'layout': {},
-            'filter': ["==",["geometry-type"],geometry],
-            'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
-        });
-    });
+    // config.geometries.forEach(geometry => {
+    //     map.addLayer({
+    //         'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
+    //         'type': geometry == "LineString" ? 'line' : 'circle',
+    //         'source': 'assets-source',
+    //         'source-layer': config.tileSourceLayer,
+    //         'layout': {},
+    //         'filter': ["==",["geometry-type"],geometry],
+    //         'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
+    //     });
+    // });
 
-    map.on('idle', geoJSONFromTiles);
-
+    // map.on('idle', geoJSONFromTiles);
 }
 function geoJSONFromTiles() {
     map.off('idle', geoJSONFromTiles);
@@ -170,7 +191,7 @@ function findLinkedAssets() {
     
     map.off('idle', findLinkedAssets);
 
-    config.preLinkedGeoJSON = JSON.parse(JSON.stringify(config.processedGeoJSON));
+    config.preLinkedGeoJSON = config.processedGeoJSON;
     config.totalCount = 0;
 
     // First, create a lookup table for linked assets based on linkField
@@ -538,11 +559,12 @@ function addEvents() {
 
         if (selectedFeatures.length == 1) {
             config.selectModal = '';
-            if (config.tiles) {
-                displayDetails([selectedFeatures[0]]); //use clicked point
-            } else {
-                displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
-            }
+            displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
+            // if (config.tiles) {
+            //     displayDetails([selectedFeatures[0]]); //use clicked point
+            // } else {
+            //     displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
+            // }
         } else {
             // console.log(displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]))
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6>";
@@ -802,7 +824,7 @@ function filterGeoJSON() {
             filteredGeoJSON.features.push(feature);
         }
     });
-    config.processedGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
+    config.processedGeoJSON = filteredGeoJSON;
     findLinkedAssets();
     config.tableDirty = true;
     updateTable();
