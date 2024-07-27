@@ -382,8 +382,11 @@ table.dataTable td {
 
 }
 
+.spinner-container-filter{
+    visibility: hidden;
+}
 
-/* rotation */
+/* rotation
 
 #btn-spin {
     font:
@@ -407,12 +410,6 @@ table.dataTable td {
 }
 #btn-spin:hover {
     background-color: #4ea0da;
-}
+} */
 
-#map-second {
-    visibility: hidden;
-}
 
-.spinner-container-filter{
-    visibility: hidden;
-}
