@@ -258,7 +258,7 @@ table.dataTable td {
     position: relative;
     top: 0px;
 }
-.checkmark {
+.uncheckmark {
     background: url(./img/uncheck.svg);
     background-repeat: no-repeat;
     background-position: right;
