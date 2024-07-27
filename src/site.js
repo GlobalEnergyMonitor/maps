@@ -21,6 +21,18 @@ const map = new mapboxgl.Map({
     center: config.center,
     projection: config.projection
 });
+
+// if (config.projection == 'globe'){
+//     const mapNaturalEarth = new mapboxgl.Map({
+//         container: 'map-second',
+//         style: config.mapStyle,
+//         zoom: determineZoom(),
+//         center: config.center,
+//         projection: 'naturalEarth'
+//     });
+// }
+
+
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
     closeButton: false,
@@ -30,7 +42,7 @@ map.dragRotate.disable();
 map.touchZoomRotate.disableRotation();
 
 map.on('load', function () {
-    loadData();
+    loadData()
 });
 function determineZoom() {
     let modifier = 650;
@@ -347,6 +359,7 @@ function enableUX() {
     buildFilters();
     updateSummary();
     buildTable(); 
+    createTable(); // added this here so it's quicker to go to table
     enableModal();
     enableNavFilters();
     console.log('stop spinner after legend is rendered on initial load')
@@ -621,6 +634,19 @@ function addEvents() {
         $('#expand-sidebar').hide();
     });
 }
+    $('#projection-toggle').on("click", function() {
+        if (config.projection == 'globe') {
+            config.projection = "naturalEarth";
+            map.setProjection('naturalEarth');
+            // console.log(config.projection)
+        } else {
+            config.projection = "globe";
+            map.setProjection("globe");
+            // console.log(config.projection)
+        }
+    });
+    
+
 
 /*
   legend filters
@@ -865,6 +891,7 @@ function buildTable() {
             $('#sidebar').hide();
             $('#table-container').show();
             $('#basemap-toggle').hide();
+            $('#projection-toggle').hide();
             updateTable(true);
         } else {
             $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
@@ -872,10 +899,12 @@ function buildTable() {
             $('#sidebar').show();
             $('#table-container').hide();
             $('#basemap-toggle').show();
+            $('#projection-toggle').show();
         }
     });
 }
 function createTable() {
+    console.log('first time takes a while to load')
     if ('rightAlign' in config.tableHeaders) {
         config.tableHeaders.rightAlign.forEach((col) => {
             $("#site-style").get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { text-align:right }', 0);
@@ -893,12 +922,15 @@ function createTable() {
         fixedHeader: true,
         columns: config.tableHeaders.labels.map((header) => { return {'title': header}})
     });
+
 }
 function updateTable(force) {
     // table create/update with large number of rows is slow, only do it if visible
+    
     if ($('#table-container').is(':visible') || force) {
         if (config.table == null) {
             createTable();
+
         } else if (config.tableDirty) {
             config.table.clear();
             config.table.rows.add(geoJSON2Table()).draw();
