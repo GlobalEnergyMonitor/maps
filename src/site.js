@@ -184,7 +184,7 @@ function geoJSONFromTiles() {
     layers.forEach(layer => {
         map.removeLayer(layer);
     });
-    findInitialAssets();
+    findLinkedAssets();
     // console.log('length of config.geojson in geoJSONFromTiles')
     // console.log(config.geojson.features.length)
     addLayers();
