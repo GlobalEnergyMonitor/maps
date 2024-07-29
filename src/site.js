@@ -22,16 +22,15 @@ const map = new mapboxgl.Map({
     projection: config.projection
 });
 
-// if (config.projection == 'globe'){
-//     const mapNaturalEarth = new mapboxgl.Map({
-//         container: 'map-second',
-//         style: config.mapStyle,
-//         zoom: determineZoom(),
-//         center: config.center,
-//         projection: 'naturalEarth'
-//     });
-// }
-
+if (config.projection == 'globe'){
+    const mapNaturalEarth = new mapboxgl.Map({
+        container: 'map-second',
+        style: config.mapStyle,
+        zoom: determineZoom(),
+        center: config.center,
+        projection: 'naturalEarth'
+    });
+}
 
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
@@ -46,7 +45,11 @@ const popup = new mapboxgl.Popup({
 
 
 map.on('load', function () {
-    loadData()
+    loadData();
+    if (config.projection == 'globe'){
+        map.setFog({}); // Set the default atmosphere style
+
+    }
 });
 function determineZoom() {
     let modifier = 650;
@@ -64,13 +67,6 @@ function loadData() {
     // Here we could load in data from csv always minus what's needed for map dots?
     if ("tiles" in config) {
         addTiles();
-        Papa.parse(config.csv, {
-            download: true,
-            header: true,
-            complete: function(results) {
-                addGeoJSON(results.data);
-            }
-        });
     } else if ("geojson" in config) {
         $.ajax({
             type: "GET",
@@ -86,21 +82,14 @@ function loadData() {
             success: function(jsonData) {addGeoJSON(jsonData);}
         });
     } else {
-        // $.ajax({
-        //     type: "GET",
-        //     url: config.csv,
-        //     dataType: "text",
-        //     success: function(csvData) {
-        //         addGeoJSON($.csv.toObjects(csvData));
-        //     }
-        // });        
-        Papa.parse(config.csv, {
-            download: true,
-            header: true,
-            complete: function(results) {
-                addGeoJSON(results.data);
+        $.ajax({
+            type: "GET",
+            url: config.csv,
+            dataType: "text",
+            success: function(csvData) {
+                addGeoJSON($.csv.toObjects(csvData));
             }
-        });
+        });        
     }
 }
 function addGeoJSON(jsonData) {
@@ -130,17 +119,15 @@ function addGeoJSON(jsonData) {
                     feature.properties[key] = asset[key];
                 }
             }
-            if (feature.properties[config['countryField']]) {
-                config.geojson.features.push(feature);
-            } else {
-                console.log(feature)
-            }
+            config.geojson.features.push(feature);
+            // console.log('length of config.geojson in addGeoJson')
+            // console.log(lenth(config.geojson.features))
         });
 
     }
 
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
-    config.processedGeoJSON = config.geojson; // copy
+    config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
     findLinkedAssets();
 
@@ -168,19 +155,22 @@ function addTiles() {
     });
 
     /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
-    // config.geometries.forEach(geometry => {
-    //     map.addLayer({
-    //         'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
-    //         'type': geometry == "LineString" ? 'line' : 'circle',
-    //         'source': 'assets-source',
-    //         'source-layer': config.tileSourceLayer,
-    //         'layout': {},
-    //         'filter': ["==",["geometry-type"],geometry],
-    //         'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
-    //     });
-    // });
+    config.geometries.forEach(geometry => {
+        map.addLayer({
+            'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
+            'type': geometry == "LineString" ? 'line' : 'circle',
+            'source': 'assets-source',
+            'source-layer': config.tileSourceLayer,
+            'layout': {},
+            'filter': ["==",["geometry-type"],geometry],
+            'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
+        });
+    });
+    // console.log('length of all config.tiles in addTiles')
+    // console.log(config.tiles)
 
-    // map.on('idle', geoJSONFromTiles);
+    map.on('idle', geoJSONFromTiles);
+
 }
 function geoJSONFromTiles() {
     map.off('idle', geoJSONFromTiles);
@@ -198,7 +188,7 @@ function geoJSONFromTiles() {
     layers.forEach(layer => {
         map.removeLayer(layer);
     });
-    findLinkedAssets();
+    findInitialAssets();
     // console.log('length of config.geojson in geoJSONFromTiles')
     // console.log(config.geojson.features.length)
     addLayers();
@@ -217,7 +207,7 @@ function findLinkedAssets() {
     
     map.off('idle', findLinkedAssets);
 
-    config.preLinkedGeoJSON = config.processedGeoJSON;
+    config.preLinkedGeoJSON = JSON.parse(JSON.stringify(config.processedGeoJSON));
     config.totalCount = 0;
 
     // First, create a lookup table for linked assets based on linkField
@@ -373,7 +363,6 @@ function enableUX() {
     buildFilters();
     updateSummary();
     buildTable(); 
-    createTable(); // added this here so it's quicker to go to table
     enableModal();
     enableNavFilters();
     // console.log('stop spinner after legend is rendered on initial load')
@@ -587,12 +576,11 @@ function addEvents() {
 
         if (selectedFeatures.length == 1) {
             config.selectModal = '';
-            displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
-            // if (config.tiles) {
-            //     displayDetails([selectedFeatures[0]]); //use clicked point
-            // } else {
-            //     displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
-            // }
+            if (config.tiles) {
+                displayDetails([selectedFeatures[0]]); //use clicked point
+            } else {
+                displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
+            }
         } else {
             // console.log(displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]))
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6>";
@@ -668,19 +656,6 @@ function addEvents() {
         $('#expand-sidebar').hide();
     });
 }
-    $('#projection-toggle').on("click", function() {
-        if (config.projection == 'globe') {
-            config.projection = "naturalEarth";
-            map.setProjection('naturalEarth');
-            // console.log(config.projection)
-        } else {
-            config.projection = "globe";
-            map.setProjection("globe");
-            // console.log(config.projection)
-        }
-    });
-    
-
 
 /*
   legend filters
@@ -898,7 +873,7 @@ function filterGeoJSON() {
             filteredGeoJSON.features.push(feature);
         }
     });
-    config.processedGeoJSON = filteredGeoJSON;
+    config.processedGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
     findLinkedAssets();
     config.tableDirty = true;
     updateTable();
@@ -946,7 +921,6 @@ function buildTable() {
             $('#sidebar').hide();
             $('#table-container').show();
             $('#basemap-toggle').hide();
-            $('#projection-toggle').hide();
             updateTable(true);
         } else {
             $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
@@ -954,12 +928,10 @@ function buildTable() {
             $('#sidebar').show();
             $('#table-container').hide();
             $('#basemap-toggle').show();
-            $('#projection-toggle').show();
         }
     });
 }
 function createTable() {
-    console.log('first time takes a while to load')
     if ('rightAlign' in config.tableHeaders) {
         config.tableHeaders.rightAlign.forEach((col) => {
             $("#site-style").get(0).sheet.insertRule('td:nth-child(' + (config.tableHeaders.values.indexOf(col)+1) + ') { text-align:right }', 0);
@@ -977,15 +949,12 @@ function createTable() {
         fixedHeader: true,
         columns: config.tableHeaders.labels.map((header) => { return {'title': header}})
     });
-
 }
 function updateTable(force) {
     // table create/update with large number of rows is slow, only do it if visible
-    
     if ($('#table-container').is(':visible') || force) {
         if (config.table == null) {
             createTable();
-
         } else if (config.tableDirty) {
             config.table.clear();
             config.table.rows.add(geoJSON2Table()).draw();
