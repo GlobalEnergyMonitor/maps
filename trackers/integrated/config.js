@@ -1,5 +1,4 @@
 var config = {
-    csv: 'data.csv',
     tiles: [
         // 'https://gem.dev.c10e.org/2024-03-12/{z}/{x}/{y}.pbf'
         // 'https://bucketeer-cf25e1cc-bfe0-4e0f-957c-65e8e9492475.s3.amazonaws.com/maps/integrated-2024-03-14/{z}/{x}/{y}.pbf'
@@ -11,8 +10,7 @@ var config = {
          ],
     tileSourceLayer: 'integrated',
 
-    projection: 'globe',
-
+    // projection: 'globe',
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
@@ -27,11 +25,6 @@ var config = {
             'solar': 'green',
             'wind': 'green'
         }
-    },
-
-    locationColumns:{
-        lat: 'Latitude',
-        lng: 'Longitude'
     },
     minRadius: 1,
     maxRadius: 10,
@@ -60,8 +53,8 @@ var config = {
     urlField: 'Wiki URL',
     countryField: 'Country',
     searchFields: { 'Project': ['Plant/project name'], 
-        //'Companies': ['Owner', 'Parent'],
-        //'Start Year': ['Start year'],
+        'Companies': ['Owner', 'Parent'],
+        'Start Year': ['Start year'],
         'Country/Area': ['Country'],
         'Status': ['Status']
     },
