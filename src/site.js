@@ -148,8 +148,8 @@ function addGeoJSON(jsonData) {
         map.addSource('assets-source', {
             'type': 'geojson',
             'data': config.processedGeoJSON,
-            'buffer': 0,
-            'tolerance': 100
+            // 'buffer': 0,
+            // 'tolerance': 100
         });
     }
     addLayers();
@@ -1127,7 +1127,7 @@ function displayDetails(features) {
             }
         } else {
 
-            if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null &&  features[0].properties[detail] != 'not found' && features[0].properties[detail] != 'Unknown [unknown %]'){
+            if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null &&  features[0].properties[detail] != 'not found' && features[0].properties[detail] != 'Unknown' && features[0].properties[detail] != ' ' && features[0].properties[detail] != 'Unknown [unknown %]'){
                     if (config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
                         // console.log(config.detailView[detail]['label'])
                         // remove semi colon in areas country for multi country
