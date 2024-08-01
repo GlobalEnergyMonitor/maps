@@ -31,8 +31,8 @@ var config = {
     },
 
     locationColumns:{
-        lat: 'Latitude',
-        lng: 'Longitude'
+        lat: 'lat',
+        lng: 'lng'
     },
 
     minRadius: 1,
