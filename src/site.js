@@ -36,10 +36,7 @@ const popup = new mapboxgl.Popup({
 
 map.on('load', function () {
     loadData();
-    // if (config.projection == 'globe'){
-    //     map.setFog({}); // Set the default atmosphere style
 
-    // }
 });
 function determineZoom() {
     let modifier = 650;
@@ -57,13 +54,6 @@ function loadData() {
     // Here we could load in data from csv always minus what's needed for map dots?
     if ("tiles" in config) {
         addTiles();
-        Papa.parse(config.csv, {
-            download: true,
-            header: true,
-            complete: function(results) {
-                addGeoJSON(results.data);
-            }
-        });
     } else if ("geojson" in config) {
         $.ajax({
             type: "GET",
@@ -94,6 +84,7 @@ function loadData() {
                 addGeoJSON(results.data);
             } 
         });
+
     }
 }
 function addGeoJSON(jsonData) {
@@ -128,13 +119,13 @@ function addGeoJSON(jsonData) {
             } else {
                 console.log(feature)
             }            // console.log('length of config.geojson in addGeoJson')
-            // console.log(lenth(config.geojson.features))
+
         });
 
     }
 
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
-    config.processedGeoJSON = config.geojson; // copy
+    config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     setMinMax();
     findLinkedAssets();
 
@@ -146,6 +137,7 @@ function addGeoJSON(jsonData) {
             // 'tolerance': 100
         });
     }
+
     addLayers();
     map.on('idle', enableUX); // enableUX starts to render data
     // this is when the data has loaded 
@@ -177,6 +169,7 @@ function addTiles() {
     // // console.log(config.tiles)
 
     // map.on('idle', geoJSONFromTiles);
+
 
 }
 function geoJSONFromTiles() {
@@ -214,6 +207,7 @@ function findLinkedAssets() {
     
     map.off('idle', findLinkedAssets);
     config.preLinkedGeoJSON = config.processedGeoJSON;
+
     config.totalCount = 0;
 
     // First, create a lookup table for linked assets based on linkField
@@ -590,6 +584,7 @@ function addEvents() {
             // } else {
             //     displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
             // }
+
         } else {
             // console.log(displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]))
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6>";
@@ -665,7 +660,6 @@ function addEvents() {
         $('#expand-sidebar').hide();
     });
 }
-
     $('#projection-toggle').on("click", function() {
         if (config.projection == 'globe') {
             config.projection = "naturalEarth";
@@ -677,6 +671,7 @@ function addEvents() {
             // console.log(config.projection)
         }
     });
+
 
 /*
   legend filters
@@ -895,6 +890,7 @@ function filterGeoJSON() {
         }
     });
     config.processedGeoJSON = filteredGeoJSON;    
+
     findLinkedAssets();
     config.tableDirty = true;
     updateTable();
@@ -942,7 +938,6 @@ function buildTable() {
             $('#sidebar').hide();
             $('#table-container').show();
             $('#basemap-toggle').hide();
-            $('#projection-toggle').hide();
             updateTable(true);
         } else {
             $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
@@ -950,7 +945,6 @@ function buildTable() {
             $('#sidebar').show();
             $('#table-container').hide();
             $('#basemap-toggle').show();
-            $('#projection-toggle').show();
         }
     });
 }
