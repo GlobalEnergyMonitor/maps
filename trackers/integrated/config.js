@@ -31,8 +31,8 @@ var config = {
     },
 
     locationColumns:{
-        lat: 'lat',
-        lng: 'lng'
+        lat: 'Latitude',
+        lng: 'Longitude'
     },
 
     minRadius: 1,
@@ -58,7 +58,7 @@ var config = {
     capacityField: 'capacity-(mw)',
     capacityDisplayField: 'capacity-(mw)',
     capacityLabel: 'Capacity (MW)',
-    linkField: 'gem-location-id',
+    linkField: 'gemwiki-url',
     urlField: 'gemwiki-url',
     countryField: 'country/area',
     searchFields: { 'Project': ['plant-/-project-name'], 
