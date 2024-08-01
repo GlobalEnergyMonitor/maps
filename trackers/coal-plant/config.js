@@ -41,7 +41,7 @@ var config = {
 
     /* the column that contains the asset name. this varies between trackers */
     nameField: 'plant-name',
-
+    countryField: 'country/area',
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
