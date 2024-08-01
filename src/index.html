@@ -6,7 +6,7 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>  
     <script src="../../packages/jquery-csv.js"></script>  
-    
+    <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
     <link href="../../packages/bootstrap-lux/bootstrap.min.css" rel="stylesheet" />
 
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet" />
@@ -22,19 +22,13 @@
 <body>
     <div id="spinner-container" class="d-flex justify-content-center align-items-center" style="height: 100vh; display: none;">
         <span class="sr-only">Loading data...   </span> 
-        <!-- <span class="sr-only-gipt">Compiling 100,000+ hand-researched energy projects from all over the world. This might take a moment.   </span>  -->
-        <!-- <span class="sr-only-test2">'Did you know that: asante rafiki yangu means Thank you my friend in Swahili? ' </span>-->
         <div class="spinner-grow text-info" role="status"></div>
     </div>
     <div id="spinner-container-filter" class="d-none justify-content-md-start">
         <span class="sr-only">Some data still loading...   </span> 
         <div class="sd-none spinner-border text-info" role="status"></div>
     </div>
-    <!-- customized message TODO  -->
-    <!-- <div id="spinner-container-gipt" class="d-none justify-content-center align-items-center" style="height: 100vh; display: none;">
-        <span class="sr-only-gipt">One moment, calculating attributes for 100,000+ hand-researched energy projects from all over the world.   </span> 
-        <div class="spinner-grow text-info" role="status"></div>
-    </div> -->
+
 
     <div class="sidebar card secondary m-3 shadow rounded-top-left-1 rounded-bottom-right-1" id="sidebar">
         <div id="card-body" class="card-body pb-0">
@@ -85,10 +79,7 @@
                 </form>
                 <!-- layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) -->
                 <div id="basemap-toggle" class="btn btn-secondary mx-1 shadow-sm">Adjust Basemap <img src="../../src/img/layer.svg" width="25" /></div>
-                <!-- Arrow Right by Andrejs Kirma from <a href="https://thenounproject.com/browse/icons/term/arrow-right/" target="_blank" title="Arrow Right Icons">Noun Project</a> (CC BY 3.0) -->
-                <!-- TODO hide on table view -->
-
-                <!-- <div id="projection-toggle" class="btn btn-secondary mx-1 shadow-sm">Adjust Projection <img src="../../src/img/projection.svg" width="25" /></div> -->
+                <div id="projection-toggle" class="btn btn-secondary mx-1 shadow-sm"><span id="projection-toggle-label"></span>Adjust Map Projection <img src="../../src/img/projection.svg" width="25" /></div>
                 <!-- Globe by ennbe from <a href="https://thenounproject.com/browse/icons/term/globe/" target="_blank" title="Globe Icons">Noun Project</a> (CC BY 3.0)  -->
                 <div id="table-toggle" class="btn btn-secondary mx-1 shadow-sm shadow-intensity-lg"><span id="table-toggle-label">Table view <img src="../../src/img/arrow-right.svg" width="15"></span></div>
                 <!-- layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) -->
@@ -97,7 +88,6 @@
     </div>
 
     <div id="map"></div>
-    <div id="map-second"></div>
     <!-- TODO -->
     <!-- <button id="btn-spin">Pause rotation</button> -->
     <div id="table-container"><table id="table" class="display primary" width="100%" height="100%"></table></div>

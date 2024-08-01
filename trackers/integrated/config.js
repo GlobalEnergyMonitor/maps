@@ -11,7 +11,7 @@ var config = {
          ],
     tileSourceLayer: 'integrated',
 
-    // projection: 'globe',
+    projection: 'globe',
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
@@ -27,6 +27,12 @@ var config = {
             'wind': 'green'
         }
     },
+
+    locationColumns:{
+        lat: 'Latitude',
+        lng: 'Longitude'
+    },
+    
     minRadius: 1,
     maxRadius: 10,
     highZoomMinRadius: 4,
