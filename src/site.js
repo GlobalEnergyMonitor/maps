@@ -553,6 +553,8 @@ function addEvents() {
         const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea]];
         const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
         
+        if (selectedFeatures.length == 0) return;
+
         const links = selectedFeatures.map(
             (feature) => feature.properties[config.linkField]
         );
