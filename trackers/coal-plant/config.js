@@ -26,7 +26,7 @@ var config = {
     filters: [
         {
             field: 'status',
-            values: ['operating','construction','announced','permitted','pre-permit','retired','cancelled','mothballed','shelved'],
+            values: ['operating','construction','permitted','pre-permit', 'announced','retired','cancelled', 'shelved','mothballed'],
         }
     ],
 

@@ -120,8 +120,7 @@ function addGeoJSON(jsonData) {
                 }
             }
             config.geojson.features.push(feature);
-            // console.log('length of config.geojson in addGeoJson')
-            // console.log(lenth(config.geojson.features))
+
         });
 
     }
@@ -137,9 +136,6 @@ function addGeoJSON(jsonData) {
     });
     addLayers();
     map.on('idle', enableUX); // enableUX starts to render data
-    // this is when the data has loaded 
-    // console.log('loaded')
-
 
 }
 function addTiles() {
@@ -162,8 +158,6 @@ function addTiles() {
             'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
         });
     });
-    // console.log('length of all config.tiles in addTiles')
-    // console.log(config.tiles)
 
     map.on('idle', geoJSONFromTiles);
 
@@ -185,8 +179,6 @@ function geoJSONFromTiles() {
         map.removeLayer(layer);
     });
     findLinkedAssets();
-    // console.log('length of config.geojson in geoJSONFromTiles')
-    // console.log(config.geojson.features.length)
     addLayers();
     map.on('idle', enableUX); // enableUX starts to renders data 
     
@@ -361,7 +353,6 @@ function enableUX() {
     buildTable(); 
     enableModal();
     enableNavFilters();
-    // console.log('stop spinner after legend is rendered on initial load')
     $('#spinner-container').addClass('d-none')
     $('#spinner-container').removeClass('d-flex')
     // TODO 
@@ -561,8 +552,6 @@ function addEvents() {
     map.on('click', (e) => {
         const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea]];
         const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
-
-        if (selectedFeatures.length == 0) return;
         
         const links = selectedFeatures.map(
             (feature) => feature.properties[config.linkField]
@@ -572,13 +561,17 @@ function addEvents() {
 
         if (selectedFeatures.length == 1) {
             config.selectModal = '';
-            if (config.tiles) {
-                displayDetails([selectedFeatures[0]]); //use clicked point
-            } else {
-                displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
-            }
+            // commenting this out because it creates a bug in summary capacity section 
+            // if (config.tiles) {
+            //     displayDetails([selectedFeatures[0]]); //use clicked point
+
+
+            // } else {
+            displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
+
+
+            // }
         } else {
-            // console.log(displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]))
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6>";
 
             let ul = $('<ul>');
@@ -657,11 +650,9 @@ $('#projection-toggle').on("click", function() {
     if (config.projection == 'globe') {
         config.projection = "naturalEarth";
         map.setProjection('naturalEarth');
-        // console.log(config.projection)
     } else {
         config.projection = "globe";
         map.setProjection("globe");
-        // console.log(config.projection)
     }
 });
 
@@ -689,16 +680,10 @@ function buildFilters() {
     });
     $('.filter-row').each(function() {
         this.addEventListener("click", function() {
-            // console.log('CLICKED! so start the spinner') // add in spinner start here for filtering wait 
-            // todo add in customization for gipt
-            // if (config.tileSourceLayer == 'integrated'){
+
             $('#spinner-container-filter').removeClass('d-none')
             $('#spinner-container-filter').addClass('d-flex')
-            // }
-            // else{
-            //     $('#spinner-container').removeClass('d-none')
-            //     $('#spinner-container').addClass('d-flex')
-            // }
+
             $('#' + this.dataset.checkid).click();
             toggleFilter(this.dataset.checkid);
             filterData();
@@ -715,16 +700,10 @@ function selectAllFilter() {
             toggleFilter(this.dataset.checkid);
         }
     });
-    // console.log('start spinner for select all click') // spinner starts again only for when select select all
-    // if (config.tileSourceLayer == 'integrated'){
+
     $('#spinner-container-filter').removeClass('d-none')
     $('#spinner-container-filter').addClass('d-flex')
-    
-    // }
-    // else{
-    //     $('#spinner-container').removeClass('d-none')
-    //     $('#spinner-container').addClass('d-flex')
-    // }
+
     filterData();
 }
 function clearAllFilter() {
@@ -907,17 +886,11 @@ function updateSummary() {
         $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString())
         $('#capacity_summary').html("Maximum " + config.capacityLabel);
     }
-    // console.log('stop spinner after updateSummary in filterGeoJSON for any type of filter') // stop spinner filter now?
-    // if (config.tileSourceLayer == 'integrated'){
+
     $('#spinner-container-filter').addClass('d-none')
     $('#spinner-container-filter').removeClass('d-flex')
 }
-//     }
-//     else {    
-//         $('#spinner-container').addClass('d-none')
-//         $('#spinner-container').removeClass('d-flex')
-//     }
-// }
+
 
 /*
   table view
@@ -1050,7 +1023,6 @@ function displayDetails(features) {
         if (Object.keys(config.detailView[detail]).includes('display')) {
 
             if (config.detailView[detail]['display'] == 'heading') {
-                // console.log(features[0])
                 detail_text += '<h4>' + features[0].properties[detail] + '</h4>';
 
             } else if (config.detailView[detail]['display'] == 'join') {
@@ -1096,7 +1068,6 @@ function displayDetails(features) {
             } else if (config.detailView[detail]['display'] == 'location') {
 
                 if (Object.keys(features[0].properties).includes(detail)) {
-                    // console.log(location_text)
                     if (location_text.length > 0) {
                         location_text += ', ';
                     }
@@ -1110,15 +1081,12 @@ function displayDetails(features) {
 
             if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null &&  features[0].properties[detail] != 'not found' && features[0].properties[detail] != 'Unknown [unknown %]'){
                     if (config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
-                        // console.log(config.detailView[detail]['label'])
-                        // remove semi colon in areas country for multi country
-                        // features[0].properties[detail] = removeLastComma(features[0].properties[detail])
+    
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
 
 
                     }
                     else if (Object.keys(config.detailView[detail]).includes('label')) {
-                        // console.log(features[0].properties[detail])
                         detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
                     } else {
                         console.log(features[0].properties[detail])
@@ -1140,43 +1108,58 @@ function displayDetails(features) {
 
     // Need this to be customizable for trackers that do not need summary because no units 
     // Build capacity summary
-    if (capacityLabel == ''){
-        detail_text += '';
-    }
-    else if (features.length > 1) {   
-       let filterIndex = 0;
-        for (const[index, filter] of config.filters.entries()) {
-            if (filter.field == config.statusField) {
-                filterIndex = index;
+    if (capacityLabel != ''){
+        if (features.length > 1) { 
+
+        let filterIndex = 0;
+            for (const[index, filter] of config.filters.entries()) {
+                if (filter.field == config.statusField) {
+                    filterIndex = index;
+                }
             }
-        }
-        let capacity = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
-        let count = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
+
+        // Initialize capacity and count objects using reduce to resolve summary build bug
+        let capacity = config.filters[filterIndex].values.reduce((acc, f) => {
+            acc[f] = 0;
+            return acc;
+        }, {});
+
+        let count = config.filters[filterIndex].values.reduce((acc, f) => {
+            acc[f] = 0;
+            return acc;
+        }, {});
 
         features.forEach((feature) => {
-            capacity[feature.properties[config.statusField]] += feature.properties[config.capacityDisplayField];
+            let capacityInt = parseInt(feature.properties[config.capacityDisplayField], 10);
+
+            capacity[feature.properties[config.statusField]] += capacityInt;
             count[feature.properties[config.statusField]]++;
+
         });
 
-        let detail_capacity = '';
-        Object.keys(count).forEach((k) => {
-            if (count[k] != 0) {
-                detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
-            }
-        });
-        detail_text += '<div>' + 
-            '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
-            '<div class="row" style="height: 2px"><hr/></div>' +
-            '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
-            detail_capacity +
-            '</div>';
+            let detail_capacity = '';
+            Object.keys(count).forEach((k) => {
+                if (count[k] != 0) {
+                    detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                }
+
+            });
+            detail_text += '<div>' + 
+                '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
+                '<div class="row" style="height: 2px"><hr/></div>' +
+                '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
+                detail_capacity +
+                '</div>';
+        }
+        else {
+            detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
+                '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
+            detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + features[0].properties[config.capacityDisplayField] + ' ' + capacityLabel;
+        }
     }
     else {
-        detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-            '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-        detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + features[0].properties[config.capacityDisplayField] + ' ' + capacityLabel;
+        detail_text += '';
     }
-
     //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
     //Arrow Back by Nursila from <a href="https://thenounproject.com/browse/icons/term/arrow-back/" target="_blank" title="Arrow Back Icons">Noun Project</a> (CC BY 3.0)
     $('.modal-body').html('<div class="row m-0">' +
@@ -1292,15 +1275,9 @@ function buildCountrySelect() {
 
     $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
-            // console.log('country dropdown clicked')
-            // if (config.tileSourceLayer == 'integrated'){
+
             $('#spinner-container-filter').removeClass('d-none')
             $('#spinner-container-filter').addClass('d-flex')
-            
-            // else{
-            //     $('#spinner-container').removeClass('d-none')
-            //     $('#spinner-container').addClass('d-flex')
-            // }
 
             config.selectedCountryText = this.dataset.countrytext;
             config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []);
