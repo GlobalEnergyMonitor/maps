@@ -1141,10 +1141,17 @@ function displayDetails(features) {
 
             let detail_capacity = '';
             Object.keys(count).forEach((k) => {
-                if (count[k] != 0) {
-                    detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                if (config.color.field == config.statusField){ 
+                
+                    if (count[k] != 0) {
+                        detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                    }
                 }
-
+                else {
+                    if (count[k] != 0) {
+                        detail_capacity += '<div class="row"><div class="col-5">' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                    }
+                }
             });
             detail_text += '<div>' + 
                 '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
