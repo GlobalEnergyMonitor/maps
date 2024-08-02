@@ -26,6 +26,24 @@ var config = {
             'solar': 'green',
             'wind': 'green'
         }
+
+    //     explore doing this on status instead:
+    //     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
+    //         what's right property name?? is color also listing values used in the summary? 
+    //         should this just be made part of the filter? that might allow to address multiple properties */
+    //     field: 'status',
+    //     values: {
+    //         'operating': 'red',
+    //         'construction': 'blue',
+    //         'pre-construction': 'green',
+    //         'announced': 'green',
+    //         'retired': 'grey',
+    //         'cancelled': 'grey',
+    //         'shelved': 'grey',
+    //         'mothballed': 'grey'
+    //     }
+    // },
+
     },
     minRadius: 1,
     maxRadius: 10,
@@ -66,7 +84,8 @@ var config = {
     tableHeaders: {
         values: ['plant-/-project-name','unit-/-phase-name', 'owner', 'parent', 'capacity-(mw)', 'status', 'subnational-unit-(state,-province)', 'country/area', 'start-year', 'retired-year', 'type'],
         labels: ['Plant/project name','Unit/phase name','Owner','Parent','Capacity (MW)','Status','Subnational unit (province/state)','Country/Area','Start year','Retired year','Type'],
-        clickColumns: 'plant-/-project-name'
+        clickColumns: 'plant-/-project-name',
+        removeLastComma: ['country/area']
     },
     detailView: {
         'plant-/-project-name': {'display': 'heading'},
