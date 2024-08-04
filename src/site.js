@@ -616,6 +616,10 @@ function addEvents() {
         }
     });
 
+    $('#reset-all-button').on("click", function() {
+        enableResetAll();
+    });
+
     // //TODO - adjust to work more like table view toggle
     // $('#projection-toggle').on("click", function() {
     //     if (config.projection == "globe") {
@@ -682,12 +686,12 @@ function buildFilters() {
     });
     $('.filter-row').each(function() {
         this.addEventListener("click", function() {
+            $('#' + this.dataset.checkid).click();
+            toggleFilter(this.dataset.checkid);
 
             $('#spinner-container-filter').removeClass('d-none')
             $('#spinner-container-filter').addClass('d-flex')
 
-            $('#' + this.dataset.checkid).click();
-            toggleFilter(this.dataset.checkid);
             filterData();
         });
     });
@@ -1284,13 +1288,13 @@ function buildCountrySelect() {
 
     $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
+            config.selectedCountryText = this.dataset.countrytext;
+            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []); // I think this needs to be exchanged with ; for multiple countries 
+            $('#selectedCountryLabel').text(config.selectedCountryText || "all");
 
             $('#spinner-container-filter').removeClass('d-none')
             $('#spinner-container-filter').addClass('d-flex')
 
-            config.selectedCountryText = this.dataset.countrytext;
-            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []);
-            $('#selectedCountryLabel').text(config.selectedCountryText || "all");
             filterData();
         });
     });
@@ -1301,6 +1305,7 @@ function buildCountrySelect() {
 function enableSearch() {
     $('#search-text').on('keyup paste', debounce(function() {
         config.searchText = $('#search-text').val().toLowerCase();
+
         filterData();
     }, 500));
     config.searchText = '';
@@ -1320,12 +1325,53 @@ function enableSearchSelect() {
         this.addEventListener("click", function() {
             config.selectedSearchFields = this.dataset.searchfields;
             $('#selectedSearchLabel').text(this.dataset.searchfieldtext);
+
+            $('#spinner-container-filter').removeClass('d-none')
+            $('#spinner-container-filter').addClass('d-flex')
             filterData();
         });
     });
 
     config.selectedSearchFields = allSearchFields.join(',');
 }
+
+function enableResetAll() {
+    // need to also handle for table view - it works the same no special handling needed.
+
+    // clear country filter by returning selectedCountryLabel to 'All' DONE!
+    $('#selectedCountryLabel').text("all");
+    config.selectedCountryText = '';
+    config.selectedCountries = [];
+    
+    // // clear search text by making search text ''
+    config.searchText = ''; 
+    $('#search-text').val('');
+
+    // put search field category back to all
+    let allSearchFields = [];
+    Object.keys(config.searchFields).forEach((field_label) => {
+        allSearchFields = allSearchFields.concat(config.searchFields[field_label]);
+    });
+    config.selectedSearchFields = allSearchFields.join(',');
+    $('#selectedSearchLabel').text("all");
+
+    // clear legend by checking checked boxes DONE! 
+    $('.filter-row').each(function() {
+        if (! $('#' + this.dataset.checkid)[0].checked) {
+            $('#' + this.dataset.checkid)[0].checked = true;
+            toggleFilter(this.dataset.checkid);
+        }
+    }); 
+
+    // start the spinner
+    $('#spinner-container-filter').removeClass('d-none')
+    $('#spinner-container-filter').addClass('d-flex')
+
+    // then filter data
+    filterData();
+}  
+
+
 
 /* 
   Util functions
