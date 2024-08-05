@@ -73,13 +73,14 @@
                   </li>
                 </ul>
                 <form class="d-flex me-auto" id="search-form" onSubmit="return false">
-                  <input class="form-control p-4 bg-white shadow-sm" placeholder="SEARCH" aria-label="Search" id="search-text"></input>
+                  <input class="form-control p-4 bg-white shadow-sm" placeholder="SEARCH" aria-label="Search" id="search-text"> 
+                  <button id="reset-all-button" type="button" class=" btn-close" aria-label="Close"></button>
+                </input>
                 </form>
-                <!-- put reset button here -->
-                <div id="reset-all-button" class="d-flex me-auto text-center medium"><a href="" onclick="enableResetAll(); return false;">reset</a></div>
+                <!-- <div id="reset-all-button" class="d-flex me-auto text-center medium"><a href="" onclick="enableResetAll(); return false;">reset</a></div> -->
                 <!-- layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) -->
                 <div id="basemap-toggle" class="btn btn-secondary mx-1 shadow-sm">Adjust Basemap <img src="../../src/img/layer.svg" width="25" /></div>
-                <div id="projection-toggle" class="btn btn-secondary mx-1 shadow-sm"><span id="projection-toggle-label"></span>Adjust Map Projection <img src="../../src/img/projection.svg" width="25" /></div>
+                <div id="projection-toggle" class="btn btn-secondary mx-1 shadow-sm"><span id="projection-toggle-label"></span>Adjust Map Projection <img src="../../src/img/globe.svg" width="20" height="50"/></div>
                 <!-- Arrow Right by Andrejs Kirma from <a href="https://thenounproject.com/browse/icons/term/arrow-right/" target="_blank" title="Arrow Right Icons">Noun Project</a> (CC BY 3.0) -->
                 <!-- Globe by ennbe from <a href="https://thenounproject.com/browse/icons/term/globe/" target="_blank" title="Globe Icons">Noun Project</a> (CC BY 3.0)  -->
                 <div id="table-toggle" class="btn btn-secondary mx-1 shadow-sm shadow-intensity-lg"><span id="table-toggle-label">Table view <img src="../../src/img/arrow-right.svg" width="15"></span></div>

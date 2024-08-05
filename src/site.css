@@ -410,3 +410,11 @@ table.dataTable td {
     background-color: #4ea0da;
 }
 
+#reset-all-button {
+    width: 2em;
+    height: 5em;
+    padding-left: 1em;
+    padding-right: .25em;
+    color: #000;
+    opacity: .5;
+}
