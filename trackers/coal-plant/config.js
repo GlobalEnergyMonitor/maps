@@ -3,7 +3,6 @@ var config = {
     csv: 'compilation_output/data-2024-07-30.csv',
     /* define the column and associated values for color application */
     linkField: 'gem-location-id',
-
     color: {
         field: 'status',
         values: {
