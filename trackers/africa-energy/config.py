@@ -19,10 +19,6 @@ path_for_data_dwnld = gem_path + tracker_folder + '/dt_dwnld/'
 geojson_file_of_all_africa = f'africa_energy_tracker_{iso_today_date}.geojson'
 path_for_download_and_map_files = gem_path + tracker_folder + '/compilation_output/' + iso_today_date_folder
 
-goit_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GOIT-Oil-NGL-Pipelines-2024-05-13.geojson'
-ggit_lng_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GGIT-LNG-Terminals-2024-01.geojson'
-ggit_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GGIT-Gas-Pipelines-2023-12.geojson'
-
 os.makedirs(path_for_download_and_map_files, exist_ok=True)
 os.makedirs(path_for_data_dwnld, exist_ok=True)
 
@@ -46,8 +42,6 @@ africa_countries = [
 filler_url_tracker = {}
 
 bbox_africa = '-24.433851,-45.706179,69.257813,39.232253' #lng lat epsg 4326
-prep_file_key = '12ltof1T1pxwc_iDTN4PpkcfygLXhAHJ7Or0caJvbmNk'
-prep_file_tab = ['prep']
 
 conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']
@@ -141,27 +135,38 @@ tracker_to_legendname = {
                     "GCMT": "coal-mine",
                     "GCTT": "coal-terminal"
 }
+# not needed anymore, update below
+# prep_file_key = '12ltof1T1pxwc_iDTN4PpkcfygLXhAHJ7Or0caJvbmNk'
+# prep_file_tab = ['prep']
 
-# tracker_to_dwnld_name = {
-#                     "GCPT": "coal plants",
-#                     "GOGPT": "oil & gas power station",
-#                     "GBPT": "bioenergy power station",
-#                     "GNPT": "nuclear power plant",
-#                     "GSPT": "solar power plant",  # GSPT is used for both "solar thermal" and "solar PV"
-#                     "GWPT": "wind power plant",
-#                     "GHPT": "hydropower plant",
-#                     "GGPT": "geothermal power plant",
-#                     "GOGET":,
-#                     "GOIT": "oil pipeline",
-#                     "GGIT": "Gas Pipelines",
-#                     "GGIT": "",
-#                     "GCMT": "coal mine",
-#                     "GCTT": "coal terminal"
-# }
+# last updated Jul 30th for nuclear and coal 
+gsheets_acro_dict = {
+    # all trackers minus goit, ggit and ggit-lng
+    "GOGPT": ["1dosICr3DU05hIRawCLB0EK4rv3cn44fwBAKjTTqmLDo", "Gas & Oil Units"],
+    "GCPT": ["1zrVobNcD0HiBfko4Z8N9BUaMXxEvNNrXFxzk42q2ZBI", "Units"],
+    "GSPT": ["1FTGYWZsBG20e4hyTkdgpondcqdD2kTam6d9YcvqREYo", "20 MW+; 1-20 MW"],
+    "GWPT": ["13Td6X2iQSZljmiu5q_Tvd1LYWf1hEMf6UwJGKjGPGGU", "Data"],
+    "GNPT": ["1zCcO9LwVmiQZBOGqlwKGYgZ5lAnBKJ91hjwWcbUw5nQ", "Data"],
+    "GHPT": ["1cqLe0xOx7FLpfaGZhtVnV-bhuKgaczHPtXzCRIgy_RQ", "Data"],
+    "GBPT": ["10Clsb8auutXy4iBm6c7HywZjSbNKUiho9NHzZmC2-Bs", "Data"],
+    "GGPT": ["1j0Q0s6koeUYlCvp-beBnJX-tW1RHh8830eNwW4LW-Sw", "Data"],
+    "GCTT": ["1gY2X3cDWmBDHVFZcDesqlfY9i7aEtqSfM-fuBeUiV7o", "Coal Terminals"],
+    "GOGET": ["1ZeHDitJDnktiy2TrrV20SdZOmiJS1btycqlyDQBtUeU", "Data"],
+    "GCMT": ["1OJIEYKHR6L9-w1jbSPQr01X3w4Ot0qOWoKaVuZCrEc4", "Global Coal Mine Tracker (Non-C"]
+}
 
-# concatted_file_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/concatted_df2024-06-24.csv'
+about_page_ggit_goit = {
+    "GGIT-lng": ["1VwxZgLNSXiuGnwzgC1CPcnLrI-PGdseP_RDQJnzLuAY"],
+    "GGIT": ["1rcFIqHjVpZ7UFNdP1TE7BeDKmraOjXof8gLtZ49G77U"],
+    "GOIT": ["12bhnTJ5kaia187ZvX9qWshfs4btmZuTpzPj2Jz7ct6Y"], 
+}
 
-filler_Angola = [17.47057255231345, -12.24586903613316]
+goit_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GOIT-Oil-NGL-Pipelines-2024-05-13.geojson'
+ggit_lng_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GGIT-LNG-Terminals-2024-01.geojson'
+ggit_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GGIT-Gas-Pipelines-2023-12.geojson'
 
-# TODO get list of all google sheet keys and tabs including GGIT, GOIT and GGIT lng
-list_of_keys_tabs = []
+region_cols = 'Region'
+trackers_to_update = [('GCPT', 'July 2024'), ('GNPT', 'July 2024')]
+previous_release = 'data/Africa-Energy-Tracker-data-July-2024.xlsx' # key 1B8fwCQZ3ZMCf7ZjQPqETKNeyFN0uNFZMFWw532jv480
+previous_map = 'data/africa_energy_tracker_2024-07-10.geojson' 
+
