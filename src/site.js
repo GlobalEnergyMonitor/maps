@@ -45,11 +45,12 @@ const popup = new mapboxgl.Popup({
 
 
 map.on('load', function () {
-    loadData();
-    if (config.projection == 'globe'){
-        map.setFog({}); // Set the default atmosphere style
+    if (config.projection != 'globe'){
+        // map.setFog({}); // Set the default atmosphere style
+        $('#btn-spin').hide();
 
     }
+    loadData();
 });
 function determineZoom() {
     let modifier = 650;
@@ -385,8 +386,7 @@ function enableUX() {
     enableNavFilters();
     $('#spinner-container').addClass('d-none')
     $('#spinner-container').removeClass('d-flex')
-    // TODO 
-    // spinGlobe();
+
 }
 
 function addLayers() {
@@ -641,33 +641,26 @@ function addEvents() {
            // $('#basemap-toggle').text("Streets");
            config.baseMap = "Satellite";
            map.setLayoutProperty('satellite', 'visibility', 'visible');
+           map.setFog({
+            "range": [0.8, 8],
+            "color": "#dc9f9f",
+            "horizon-blend": 0.5,
+            "high-color": "#245bde",
+            "space-color": "#000000",
+            "star-intensity": 0.3
+            });
         } else {
            // $('#basemap-toggle').text("Satellite");
            config.baseMap = "Streets";
            map.setLayoutProperty('satellite', 'visibility', 'none');
+
+           map.setFog(null);
         }
     });
 
     $('#reset-all-button').on("click", function() {
         enableResetAll();
     });
-
-    // //TODO - adjust to work more like table view toggle
-    // $('#projection-toggle').on("click", function() {
-    //     if (config.projection == "globe") {
-    //        // $('#basemap-toggle').text("Streets");
-    //        userInteracting = true;
-    //        // hide btn for rotation
-    //        config.projection = "naturalEarth";
-    //        map.setProjection('naturalEarth');
-
-
-    //     } else {
-    //        // $('#basemap-toggle').text("Satellite");
-    //     //    config.projection = "globe";
-    //        map.setLayoutProperty('globe');
-    //     }
-    // });
 
 
     $('#collapse-sidebar').on("click", function() {
@@ -688,9 +681,18 @@ $('#projection-toggle').on("click", function() {
     if (config.projection == 'globe') {
         config.projection = "naturalEarth";
         map.setProjection('naturalEarth');
+        $('#btn-spin').hide();
+        map.setCenter(config.center);
+        map.setZoom(determineZoom());
+
     } else {
         config.projection = "globe";
         map.setProjection("globe");
+        map.setCenter(config.center);
+        $('#btn-spin').show();
+        spinGlobe();
+        map.setZoom(determineZoom());
+
     }
 });
 
@@ -1493,78 +1495,77 @@ function removeLastComma(str) {
 }
 
 // TODO
-    // // The following values can be changed to control rotation speed:
+// // The following values can be changed to control rotation speed:
 
-    // // At low zooms, complete a revolution every two minutes.
-    // const secondsPerRevolution = 120;
-    // // Above zoom level 5, do not rotate.
-    // const maxSpinZoom = 5;
-    // // Rotate at intermediate speeds between zoom levels 3 and 5.
-    // const slowSpinZoom = 3;
+// At low zooms, complete a revolution every two minutes.
+const secondsPerRevolution = 120;
+// Above zoom level 5, do not rotate.
+const maxSpinZoom = 5;
+// Rotate at intermediate speeds between zoom levels 3 and 5.
+const slowSpinZoom = 3;
 
-    // let userInteracting = false;
-    // let spinEnabled = true;
+let userInteracting = false;
+let spinEnabled = true;
 
-    // function spinGlobe() {
-    //     const zoom = map.getZoom();
-    //     if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
-    //         let distancePerSecond = 360 / secondsPerRevolution;
-    //         if (zoom > slowSpinZoom) {
-    //             // Slow spinning at higher zooms
-    //             const zoomDif =
-    //                 (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
-    //             distancePerSecond *= zoomDif;
-    //         }
-    //         const center = map.getCenter();
-    //         center.lng -= distancePerSecond;
-    //         // Smoothly animate the map over one second.
-    //         // When this animation is complete, it calls a 'moveend' event.
-    //         map.easeTo({ center, duration: 1000, easing: (n) => n });
-    //     }
-    // }
+function spinGlobe() {
+    const zoom = map.getZoom();
+    if (config.projection == 'globe'){
 
-    // // Pause spinning on interaction
-    // map.on('mousedown', () => {
-    //     userInteracting = true;
-    // });
+        if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
+            let distancePerSecond = 360 / secondsPerRevolution;
+            if (zoom > slowSpinZoom) {
+                // Slow spinning at higher zooms
+                const zoomDif =
+                    (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
+                distancePerSecond *= zoomDif;
+            }
+            const center = map.getCenter();
+            center.lng -= distancePerSecond;
+            // Smoothly animate the map over one second.
+            // When this animation is complete, it calls a 'moveend' event.
+            map.easeTo({ center, duration: 1000, easing: (n) => n });
+        }
+    }
+}
 
-    // // Restart spinning the globe when interaction is complete
-    // map.on('mouseup', () => {
-    //     userInteracting = false;
-    //     spinGlobe();
-    // });
+// Pause spinning on interaction
+map.on('mousedown', () => {
+    userInteracting = true;
+});
 
-    // // These events account for cases where the mouse has moved
-    // // off the map, so 'mouseup' will not be fired.
-    // map.on('dragend', () => {
-    //     userInteracting = false;
-    //     spinGlobe();
-    // });
-    // map.on('pitchend', () => {
-    //     userInteracting = false;
-    //     spinGlobe();
-    // });
-    // map.on('rotateend', () => {
-    //     userInteracting = false;
-    //     spinGlobe();
-    // });
+// Restart spinning the globe when interaction is complete
+map.on('mouseup', () => {
+    userInteracting = false;
+    spinGlobe();
+});
 
-    // // When animation is complete, start spinning if there is no ongoing interaction
-    // map.on('moveend', () => {
-    //     spinGlobe();
-    // });
+// // These events account for cases where the mouse has moved
+// // off the map, so 'mouseup' will not be fired.
+map.on('dragend', () => {
+    userInteracting = false;
+    spinGlobe();
+});
+map.on('pitchend', () => {
+    userInteracting = false;
+    spinGlobe();
+});
+map.on('rotateend', () => {
+    userInteracting = false;
+    spinGlobe();
+});
 
-    // TODO
+// // When animation is complete, start spinning if there is no ongoing interaction
+map.on('moveend', () => {
+    spinGlobe();
+});
 
-    // document.getElementById('btn-spin').addEventListener('click', (e) => {
-    //     spinEnabled = !spinEnabled;
-    //     if (spinEnabled) {
-    //         spinGlobe();
-    //         e.target.innerHTML = 'Pause rotation';
-    //     } else {
-    //         map.stop(); // Immediately end ongoing animation
-    //         e.target.innerHTML = 'Start rotation';
-    //     }
-    // });
-
-    // spinGlobe();
+document.getElementById('btn-spin').addEventListener('click', (e) => {
+    spinEnabled = !spinEnabled;
+    if (spinEnabled) {
+        spinGlobe();
+        e.target.innerHTML = 'Pause rotation';
+    } else {
+        map.stop(); // Immediately end ongoing animation
+        e.target.innerHTML = 'Start rotation';
+    }
+});
