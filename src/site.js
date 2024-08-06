@@ -22,27 +22,11 @@ const map = new mapboxgl.Map({
     projection: config.projection
 });
 
-if (config.projection == 'globe'){
-    const mapNaturalEarth = new mapboxgl.Map({
-        container: 'map-second',
-        style: config.mapStyle,
-        zoom: determineZoom(),
-        center: config.center,
-        projection: 'naturalEarth'
-    });
-}
-
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false
 });
-// map.dragRotate.disable();
-// map.touchZoomRotate.disableRotation();
-// map.dragRotate
-// map.touchZoomRotate
-// map.rotateTo((timestamp / 100) % 360, { duration: 0 })
-
 
 map.on('load', function () {
     if (config.projection != 'globe'){
@@ -386,7 +370,9 @@ function enableUX() {
     enableNavFilters();
     $('#spinner-container').addClass('d-none')
     $('#spinner-container').removeClass('d-flex')
-
+    if (config.projection == 'globe') {
+        spinGlobe();
+    }
 }
 
 function addLayers() {
