@@ -395,6 +395,7 @@ table.dataTable td {
     background-color: #3386c0;
     color: #fff;
     position: absolute;
+    /* visibility: hidden; */
     top: 20px;
     left: 50%;
     z-index: 1;
