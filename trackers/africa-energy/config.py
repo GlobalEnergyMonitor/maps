@@ -3,12 +3,13 @@ import os
 import gspread
 
 #determine if pull from local copy
+refine = True
 augmented = False
 summary_create = False
-about_create = False
-map_create = True
+about_create = True
+map_create = False
 dwlnd_create = False
-local_copy = False
+local_copy = True
 slowmo = False
 # Get today's date
 today_date = date.today()
@@ -74,8 +75,8 @@ bbox_africa = '-24.433851,-45.706179,69.257813,39.232253' #lng lat epsg 4326
 conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']
 
-final_cols = ['url', 'areas','name', 'unit_name', 'capacity', 'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
-       'original_units', 'conversion_factor', 'geometry', 'river', 'area', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
+final_cols = ['official_name','url', 'areas','name', 'unit_name', 'capacity', 'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
+       'original_units', 'conversion_factor', 'geometry', 'river', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
        'production', 'Latitude', 'Longitude', 'id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas']
 
 
