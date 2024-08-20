@@ -1,5 +1,5 @@
 var config = {
-    json: './data/africa_energy_tracker_2024-07-10.geojson',
+    json: './data/africa_energy_tracker_2024-08-19.geojson',
     geometries: ['Point','LineString'],
     center: [10, 0],
     zoomFactor: 1.9,
