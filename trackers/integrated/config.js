@@ -79,8 +79,8 @@ var config = {
         'Type': ['type'],
         'Status': ['status']
     },
-    assetFullLabel: "units / phases / areas",
-    assetLabel: "Units / Phases / Areas",
+    assetFullLabel: "units / phases",
+    assetLabel: "Units / Phases",
     img_detail_zoom: 10,
     tableHeaders: {
         values: ['plant-/-project-name','unit-/-phase-name', 'owner', 'parent', 'capacity-(mw)', 'status', 'subnational-unit-(state,-province)', 'country/area', 'start-year', 'retired-year', 'type'],
