@@ -1,5 +1,5 @@
 var config = {
-    csv: 'data.csv',
+    csv: 'data/data-2024-08-29.csv',
     color: {
         field: 'status',
         values: {
