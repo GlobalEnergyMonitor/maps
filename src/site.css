@@ -358,10 +358,31 @@ table.dataTable td {
 #table_length {
     display: none;
 }
-#table-toggle {
-    min-height: 55px;
+
+#search-form {
+    position: relative;
+    top: 3px;
+}
+#search-type {
+    position: relative;
+    top: 3px;
+}
+#country {
+    position: relative;
+    top: 3px;
 }
 #table-toggle-label {
+    position: relative;
+    top: 3px;
+}
+
+
+#basemap-toggle-label {
+    position: relative;
+    top: 3px;
+}
+
+#projection-toggle-label {
     position: relative;
     top: 3px;
 }
@@ -382,7 +403,6 @@ table.dataTable td {
     --bs-spinner-animation-speed: 1.5s !important ;
 
 }
-
 
 /* rotation */
 
