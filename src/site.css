@@ -111,15 +111,21 @@ table.dataTable td {
     content: '✔';
     margin-right: 5px;
 }
+.map-border {
+    /* overflow:auto; */
+    overflow-y: scroll;
+}
 
 .sidebar {
     /* padding: 10px; */
     position: fixed;
     bottom: 100px; /* trying 75*/
     left: 0px;
-    z-index: 1;
+    z-index: 2;
     overflow-y:scroll; 
-    max-height: 80%;
+    overflow-x:scroll;
+    max-height: 100%;
+    max-width: 28%;
     white-space: nowrap;
 }
 #collapse-sidebar, #expand-sidebar {
@@ -139,12 +145,27 @@ table.dataTable td {
     font-size: 9px;
 }
 
-.mapboxgl-ctrl-bottom-right {
+/* .mapboxgl-ctrl-bottom-right {
     bottom: 90px;
-}
-.mapboxgl-ctrl-bottom-left {
+} */
+/* .mapboxgl-ctrl-bottom-left {
     bottom: 88px;
+} */
+
+@media screen and (max-width: 1170) {
+    .navbar{
+        #basemap-toggle-label {
+            display: none;
+        }
+        #projection-toggle-label {
+            display: none;
+        }
+        #table-toggle-label {
+            z-index: 2;    }
+    }
 }
+
+
 @media screen and (max-width: 900px) {
     .sidebar {
         bottom: 25px;
@@ -165,6 +186,7 @@ table.dataTable td {
 
     .mapboxgl-ctrl-bottom-right {
         bottom: 0px;
+
     }
 }
 
@@ -217,18 +239,22 @@ table.dataTable td {
   .dropdown-menu .dropdown-menu{
       margin-left:0.7rem; margin-right:0.7rem; margin-bottom: .5rem;
   }
+
 }	
 /* ============ small devices .end// ============ */
 
 .dropdown-menu.submenu {
      max-height: 400px;
      overflow-y: auto;
+     overflow-x: auto;
 }
 
 .navbar {
     opacity: 0.90; 
     filter:(opacity=90);
     padding: 2px;
+    overflow: visible;
+    z-index: 2;
 }
 
 #country {
@@ -358,33 +384,52 @@ table.dataTable td {
 #table_length {
     display: none;
 }
-
-#search-form {
+/* #searchbarDropdown {
     position: relative;
     top: 3px;
 }
-#search-type {
+#search_type_select {
+    position: relative;
+    top: 3px;
+} */
+/* #search-form {
     position: relative;
     top: 3px;
 }
 #country {
     position: relative;
     top: 3px;
+} */
+
+#search-form {
+    position: relative;
+    top: 3px;
+    bottom: 3px;
+    max-height: 72px;
+
+
 }
 #table-toggle-label {
     position: relative;
     top: 3px;
+    bottom: 3px;
+    flex-grow: 1;
+    right:0%;
+    z-index: 2;
 }
-
 
 #basemap-toggle-label {
     position: relative;
     top: 3px;
+    bottom: 3px;
+    flex-grow: 1;
 }
 
 #projection-toggle-label {
     position: relative;
     top: 3px;
+    bottom: 3px;
+    flex-grow: 1;
 }
 
 #spinner-container {
@@ -414,22 +459,48 @@ table.dataTable td {
         sans-serif;
     background-color: #3386c0;
     color: #fff;
-    position: absolute;
-    /* visibility: hidden; */
-    top: 700px;
+    position: relative;
+    /* visibility: visible; */
+    /* top: 50%; */
     left: 80%;
-    z-index: 1;
+    z-index: 1; 
+    right: 0px;
     border: none;
     width: 200px;
-    margin-left: -100px;
+    margin-top: 10%;
+    margin-right: 30%;
+    /* margin-left: auto; */
     display: block;
     cursor: pointer;
     padding: 10px 20px;
     border-radius: 3px;
 }
-#btn-spin:hover {
+
+#btn-spin-toggle {
+    position: relative;  /* keep this */ 
+    top: 10px; /* keep this */ 
+    left: 10px;
+    font:
+        bold 12px/20px 'Helvetica Neue',
+        Arial,
+        Helvetica,
+        sans-serif;
+    background-color: #3386c0;
+    color: #fff;
+    /* right: 30%; */
+    display: block; 
+    cursor: pointer; 
+    border: none;  /* keep this */ 
+    width: 200px;
+    padding: 10px 20px;  /* keep this */ 
+    border-radius: 3px;  /* keep this */ 
+}
+
+
+#btn-spin-toggle:hover {
     background-color: #4ea0da;
 }
+
 
 #reset-all-button {
     width: 2em;
