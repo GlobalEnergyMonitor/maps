@@ -100,6 +100,6 @@ var config = {
         'country/area': {'display': 'location'}
     },
     zoomFactor: 1,
-    // multiCountry: true,
+    multiCountry: true,
     // center: [60, 20], // 1.7 zoomFacter once we get the data loading separate from tiles
 };

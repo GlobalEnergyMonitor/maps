@@ -114,6 +114,7 @@ table.dataTable td {
 .map-border {
     /* overflow:auto; */
     overflow-y: scroll;
+    overflow-x: scroll;
 }
 
 .sidebar {
@@ -123,9 +124,9 @@ table.dataTable td {
     left: 0px;
     z-index: 2;
     overflow-y:scroll; 
-    overflow-x:scroll;
-    max-height: 100%;
-    max-width: 28%;
+    overflow-x:scroll !important;
+    max-height: 80%;
+    max-width: 35%;
     white-space: nowrap;
 }
 #collapse-sidebar, #expand-sidebar {
@@ -147,12 +148,12 @@ table.dataTable td {
 
 .mapboxgl-ctrl-bottom-right {
     bottom: 90px;
-    opacity: 0.01 !important;
+    opacity: 0.00 !important;
 }
 
 .mapboxgl-ctrl-bottom-left {
-    bottom: 85px;
-    opacity: 0.50 !important;
+    bottom: 0px;
+    opacity: 0.00 !important;
 
 }
 
@@ -413,14 +414,17 @@ table.dataTable td {
 }
 
 /* #table-toggle-label {
-    position: relative; 
+    position: absolue;
+    top: 3px;
 }
 
 #basemap-toggle-label {
-    position: relative;
-}
+    position: absolute;
+    top: 3px;
 
-#projection-toggle-label {
+} */
+
+/* #projection-toggle-label {
     position: relative;
 } */
 

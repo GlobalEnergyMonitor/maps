@@ -691,7 +691,7 @@ function buildFilters() {
     config.filters.forEach(filter => {
         
         if (config.color.field != filter.field) {
-            $('#filter-form').append('<hr /><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
+            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h7>');
         }
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
@@ -700,7 +700,7 @@ function buildFilters() {
             check += `<div class="col-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
             check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "");
             check +=  `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
-            check += '<div class="col-3 text-end" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+            check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
         }
     });
@@ -713,7 +713,6 @@ function buildFilters() {
             $('#spinner-container-filter').addClass('d-flex')
 
             filterData();
-            console.log('filterData done')
 
         });
     });
@@ -733,7 +732,6 @@ function selectAllFilter() {
     $('#spinner-container-filter').addClass('d-flex')
 
     filterData();
-    console.log('filterData done')
 
 }
 function clearAllFilter() {
@@ -744,7 +742,6 @@ function clearAllFilter() {
         }
     });
     filterData();
-    console.log('filterData done')
 
 }
 function countFilteredFeatures() {
@@ -788,11 +785,13 @@ function countFilteredFeatures() {
     });
 }
 function filterData() {
-    console.log('filterData')
     if (config.tiles) {
+
         filterTiles();
     } else {
+
         filterGeoJSON();
+
     }
 }
 
@@ -823,13 +822,14 @@ function filterTiles() {
         let countryExpression = ['any'];
         config.selectedCountries.forEach(country => {
             if (config.multiCountry) {
-                country = country + ',';
-                countryExpression.push(['in', ['string', country], ['string',['get', config.countryField]]]);
+                country = country + ';'; //this is needed to filter integrated file by country select but doesn't affect filtering by region
+                countryExpression.push(['in', ['string', country], ['string',['get', removeLastComma(config.countryField)]]]);
             } else {
-                countryExpression.push(['==', ['string', country], ['string',['get', config.countryField]]]);
+                countryExpression.push(['==', ['string', country], ['string',['get', removeLastComma(config.countryField)]]]);
             }
         })
         config.filterExpression.push(countryExpression);
+
     }
     for (let field in filterStatus) {
         config.filterExpression.push(['in', ['get', field], ['literal', filterStatus[field]]]);
@@ -1321,15 +1321,12 @@ function buildCountrySelect() {
     $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
             config.selectedCountryText = this.dataset.countrytext;
-            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []); // I think this needs to be exchanged with ; for multiple countries 
+            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(";") : []); // I think this needs to be exchanged with ; for multiple countries 
             $('#selectedCountryLabel').text(config.selectedCountryText || "all");
 
             $('#spinner-container-filter').removeClass('d-none')
             $('#spinner-container-filter').addClass('d-flex')
-
             filterData();
-            console.log('filterData done')
-
         });
     });
 
@@ -1365,8 +1362,6 @@ function enableSearchSelect() {
             $('#spinner-container-filter').removeClass('d-none')
             $('#spinner-container-filter').addClass('d-flex')
             filterData();
-            console.log('filterData done')
-
         });
     });
 
@@ -1407,7 +1402,6 @@ function enableResetAll() {
 
     // then filter data
     filterData();
-    console.log('filterData done')
 
 }  
 
