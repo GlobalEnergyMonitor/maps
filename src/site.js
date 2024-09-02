@@ -1338,7 +1338,6 @@ function enableSearch() {
         config.searchText = $('#search-text').val().toLowerCase();
 
         filterData();
-        console.log('filterData done')
 
     }, 500));
     config.searchText = '';
@@ -1587,29 +1586,3 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
-
-
-//functionality for pausing the spin
-
-// function toggleSpinning() {
-//     if (spinEnabled) {
-//         btnSpinToggle.innerHTML = 'Pause rotation';
-//         spinGlobe();
-//     } else {
-//         btnSpinToggle.innerHTML = 'Start rotation';
-//         spinGlobe();
-
-//     }
-//     spinEnabled = !spinEnabled;
-// }
-
-// // Event listener for the button click
-// btnSpinToggle.addEventListener('click', toggleSpinning);
-
-// // Event listener for the space bar
-// document.addEventListener('keydown', (event)=> {
-//     if (event.code === 'Space') {
-//         event.preventDefault(); 
-//         toggleSpinning();
-//     }
-// });
