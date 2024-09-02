@@ -934,7 +934,7 @@ function updateSummary() {
 function buildTable() {
     $('#table-toggle').on("click", function() {
         if (! $('#table-container').is(':visible')) {
-            $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15'>");
+            $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15' height='50' style='text-align: center;'>");
             $('#map').hide();
             $('#sidebar').hide();
             $('#table-container').show();
@@ -943,7 +943,7 @@ function buildTable() {
             $('#projection-toggle').hide();
             updateTable(true);
         } else {
-            $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
+            $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15' height='50' style='text-align: center;'>");
             $('#map').show();
             $('#sidebar').show();
             $('#table-container').hide();

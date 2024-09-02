@@ -145,23 +145,25 @@ table.dataTable td {
     font-size: 9px;
 }
 
-/* .mapboxgl-ctrl-bottom-right {
+.mapboxgl-ctrl-bottom-right {
     bottom: 90px;
-} */
-/* .mapboxgl-ctrl-bottom-left {
-    bottom: 88px;
-} */
+    opacity: 0.01 !important;
+}
+
+.mapboxgl-ctrl-bottom-left {
+    bottom: 85px;
+    opacity: 0.50 !important;
+
+}
 
 @media screen and (max-width: 1170) {
     .navbar{
-        #basemap-toggle-label {
+        #basemap-toggle {
             display: none;
         }
-        #projection-toggle-label {
+        #projection-toggle {
             display: none;
         }
-        #table-toggle-label {
-            z-index: 2;    }
     }
 }
 
@@ -202,14 +204,13 @@ table.dataTable td {
 /* HACK */
 #search-form {
     position: relative;
-    top: -3px;
-    min-height: 74px;
+    top: 3px;
+    max-height: 74px;
 }
 #search-type {
     position: relative;
-    top: 1px;
+    top: 3px;
     font-family: 'Familjen Grotesk';
-    min-height: 74px;
 }
 
 
@@ -384,53 +385,44 @@ table.dataTable td {
 #table_length {
     display: none;
 }
-/* #searchbarDropdown {
-    position: relative;
-    top: 3px;
-}
-#search_type_select {
-    position: relative;
-    top: 3px;
-} */
-/* #search-form {
-    position: relative;
-    top: 3px;
-}
+
+
 #country {
     position: relative;
     top: 3px;
-} */
-
-#search-form {
-    position: relative;
-    top: 3px;
     bottom: 3px;
-    max-height: 72px;
-
-
+    
 }
-#table-toggle-label {
+
+#table-toggle {
+    position: relative; 
+    top: 0.5px;
+    height: 74px;
+}
+
+#basemap-toggle {
     position: relative;
-    top: 3px;
-    bottom: 3px;
-    flex-grow: 1;
-    right:0%;
-    z-index: 2;
+    top: 0.5px;
+    height: 74px;
+}
+
+#projection-toggle {
+    position: relative;
+    top: 0.5px;
+    height: 74px;
+}
+
+/* #table-toggle-label {
+    position: relative; 
 }
 
 #basemap-toggle-label {
     position: relative;
-    top: 3px;
-    bottom: 3px;
-    flex-grow: 1;
 }
 
 #projection-toggle-label {
     position: relative;
-    top: 3px;
-    bottom: 3px;
-    flex-grow: 1;
-}
+} */
 
 #spinner-container {
     position: fixed;
