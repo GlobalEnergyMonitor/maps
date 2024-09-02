@@ -1321,7 +1321,7 @@ function buildCountrySelect() {
     $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
             config.selectedCountryText = this.dataset.countrytext;
-            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(";") : []); // I think this needs to be exchanged with ; for multiple countries 
+            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []); // I think this needs to be exchanged with ; for multiple countries 
             $('#selectedCountryLabel').text(config.selectedCountryText || "all");
 
             $('#spinner-container-filter').removeClass('d-none')
