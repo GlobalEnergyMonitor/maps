@@ -111,11 +111,10 @@ table.dataTable td {
     content: '✔';
     margin-right: 5px;
 }
-.map-border {
-    /* overflow:auto; */
+/* .map-border {
     overflow-y: scroll;
     overflow-x: scroll;
-}
+} */
 
 .sidebar {
     /* padding: 10px; */
