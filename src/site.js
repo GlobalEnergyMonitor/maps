@@ -927,6 +927,7 @@ function buildTable() {
         if (! $('#table-container').is(':visible')) {
             $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15'>");
             $('#map').hide();
+            $('#btn-spin').hide();
             $('#sidebar').hide();
             $('#table-container').show();
             $('#basemap-toggle').hide();
@@ -935,6 +936,7 @@ function buildTable() {
         } else {
             $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
             $('#map').show();
+            $('#btn-spin').show();
             $('#sidebar').show();
             $('#table-container').hide();
             $('#basemap-toggle').show();
