@@ -108,6 +108,7 @@ def folder_setup(needed_tracker_geo_by_map):
     return None
 
 
+
 ###########################
 ###########################
 # PULL IN ALL AET DATA #
@@ -185,7 +186,9 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                 
                 else:
                     df = gspread_access_file_read_only(prep_dict[tracker]['gspread_key'], prep_dict[tracker]['gspread_tabs'])
-                    print(f'Shape of df: {df.shape}')
+                    print(f'Shape of {tracker} df: {df.shape}')
+                    input('Stop and check this  makes sense prior to filtering geo')
+                    df = df.reset_index()
                     df['tracker acro'] = prep_dict[tracker]['tracker acro']
                     df['official_name'] = tracker
                     
@@ -193,11 +196,13 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                     # then can compare filter on country vs region
 
                     col_reg_name, col_country_name = find_region_country_colname(df)
+                    input('Stop to confirm country column is not bizarre')
                     # TODO add in a check to compare filtering by country versus filtering by region column where applicable
                     filtered_geo_df = create_filtered_df_list_by_map(df,col_country_name, col_reg_name, mapname, needed_geo)
                     # filter by needed_geo 
+                    input('Stop and confirm filter makes sense for region, using that one')
                     filtered_geo_df = filtered_geo_df.fillna('')
-                    filtered_geo_df.dropna()
+                    # filtered_geo_df.dropna()
                     df_info(filtered_geo_df, mapname)
                     filtered_geo_df = find_missing_coords(filtered_geo_df)
                     # append df to list of dfs for data download
@@ -211,6 +216,8 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                     print(f'Added gdf {tracker} for map {mapname} to list of gdfs for map and saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson.')
         dict_list_dfs_by_map[mapname] = list_dfs_by_map
         dict_list_gdfs_by_map[mapname] = list_gdfs_by_map
+        # check GCMT count
+        track_missing_data(dict_list_dfs_by_map, 'GCMT', 'africa')
             
     return dict_list_dfs_by_map,dict_list_gdfs_by_map
 
@@ -289,6 +296,8 @@ def incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, d
             list_of_dfs.append(ggit_df)
             list_of_dfs.append(ggit_lng_df)
             incorporated_dict_list_dfs_by_map[mapname] = list_of_dfs    
+    
+    track_missing_data(incorporated_dict_list_dfs_by_map, 'GCMT', 'africa')
 
     return incorporated_dict_list_gdfs_by_map, incorporated_dict_list_dfs_by_map
     
@@ -772,15 +781,43 @@ def last_min_fixes(one_gdf_by_maptype, needed_geo_for_region_assignment):
         one_gdf_by_maptype_fixed[mapname] = gdf
     return one_gdf_by_maptype_fixed
 
-def create_map_file(one_gdf_by_maptype_fixed):
+def filter_oil_out_for_gas_only(one_gdf_by_maptype_fixed):
+    final_dict_gdfs_gas_too = {}
+    for mapname, gdf in one_gdf_by_maptype_fixed.items():
+        if mapname in gas_only_maps:
+            # filter out oil rows for goget and gogpt
+            if gdf['tracker acro'].loc[0] == 'GOGPT':
+                for row in gdf.index:
+                    fuel = gdf.loc[row, 'fuel']
+                    if list_of_oil_fuels in fuel:
+                        # drop the row
+                        gdf = gdf.drop(row)
+                        
+                final_dict_gdfs_gas_too[mapname] = gdf
+         
+            elif gdf['tracker acro'].loc[0] == 'GOGET':
+                print(set(gdf['prod-year-gas'].to_list()))
+                input("Make sure '' in there for no gas year! Otherwise below won't work.")
+                gdf = gdf[gdf['prod-year-gas'] != '']
+                final_dict_gdfs_gas_too[mapname] = gdf
+    
+        else:
+            # else do nothing
+            final_dict_gdfs_gas_too[mapname] = gdf
+    
+    return final_dict_gdfs_gas_too
+    
+
+
+def create_map_file(final_dict_gdfs_gas_too):
     final_dict_gdfs = {}
-    print(one_gdf_by_maptype_fixed.keys())
+    print(final_dict_gdfs_gas_too.keys())
     input('STOP HERE - why only one map being printed??')
 
-    for mapname, gdf in one_gdf_by_maptype_fixed.items():
+    for mapname, gdf in final_dict_gdfs_gas_too.items():
         path_for_download_and_map_files = gem_path + mapname + '/compilation_output/'
 
-        print(f'We are on map: {mapname} there are {len(one_gdf_by_maptype_fixed)} total maps')
+        print(f'We are on map: {mapname} there are {len(final_dict_gdfs_gas_too)} total maps')
         print(f"This is cols for gdf: {gdf.columns}")
         input('STOP HERE')
         # drop columns we don't need
@@ -1177,12 +1214,13 @@ def reorder_dwld_file_tabs(about_page_dict, incorporated_dict_list_dfs_by_map):
     # todo pull over what you have in the other script for release notes to help highlight code changes
     # needed based on column name changes 
 
-def df_info(df, key):
+def df_info(df, mapname):
     # find all col name changes 
     if slowmo:
         print(df.info())
         input('Check df info')
-
+    print(df.info())
+    input('Check df info')
     # numerical_cols = ['Capacity (MW)', 'Start year', 'Retired year', 'Planned retire', 'Latitude', 'Longitude']
     numerical_cols = ''
     col_info = {}
@@ -1214,9 +1252,10 @@ def df_info(df, key):
 
         print(col_info_df)
 
-        input(f'Check col info for {key}')
-    col_info_df.to_csv(f'test_results/{key}_column_info_{iso_today_date}.csv',  encoding="utf-8")
-    print(f'saved col info for {key} here: "test_results/{key}_column_info_{iso_today_date}.csv"')
+        input(f'Check col info for {mapname}')
+    path_test_results = gem_path + mapname + '/test_results/'
+    col_info_df.to_csv(f'{path_test_results}/{mapname}_column_info_{iso_today_date}.csv',  encoding="utf-8")
+    print(f'saved col info for {mapname} here: "{path_test_results}/{mapname}_column_info_{iso_today_date}.csv"')
 
 def final_count(final_dict_gdfs):
     for mapname, gdf in final_dict_gdfs.items():
@@ -1292,8 +1331,11 @@ if map_create:
     
     cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
     one_gdf_by_maptype = workarounds_eg_interim(cleaned_dict_by_map_one_gdf_with_better_countries)
-    one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype, needed_tracker_geo_by_map) 
-    final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
+    one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype, needed_tracker_geo_by_map)
+    
+    final_dict_gdfs_gas_too =filter_oil_out_for_gas_only(one_gdf_by_maptype_fixed)
+
+    final_dict_gdfs = create_map_file(final_dict_gdfs_gas_too)
     final_count(final_dict_gdfs)
 
 if refine:
