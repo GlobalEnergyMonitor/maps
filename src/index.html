@@ -32,16 +32,15 @@
     <div class="sidebar card secondary m-3 shadow rounded-top-left-1 rounded-bottom-right-1" id="sidebar">
         <div id="card-body" class="card-body pb-0">
             <!-- Arrow by Calvin Goodman from <a href="https://thenounproject.com/browse/icons/term/arrow/" target="_blank" title="Arrow Icons">Noun Project</a> (CC BY 3.0)-->
-            <!-- Arrow by Calvin Goodman from <a href="https://thenounproject.com/browse/icons/term/arrow/" target="_blank" title="Arrow Icons">Noun Project</a> (CC BY 3.0)-->
             <img id="collapse-sidebar" src="../../src/img/collapse.svg" />
             <img id="expand-sidebar" src="../../src/img/expand.svg" />
             <div class="row">
-                <div class="col-9 h6 font-weight-bold" id="summary"></div><div class="col-3 h5 font-weight-bold text-end" id="total_in_view"></div>
+            <div class="col-9 h6 font-weight-bold" id="summary"></div><div class="col-3 h6 font-weight-bold text-end" id="total_in_view"></div>
             </div>
             <form id="filter-form" class="pb-3">
             </form>
             <div class="row">
-                <div class="col-9 h6 font-weight-bold" id="capacity_summary"></div><div class="col-3 h5 font-weight-bold text-end" id="max_capacity"></div>
+                <div class="col-9 h6 font-weight-bold" id="capacity_summary"></div><div class="col-3 h6 font-weight-bold text-end" id="max_capacity"></div>
             </div>
         </div>
         <div class="col-12 text-center small" id="all-select">
@@ -52,57 +51,54 @@
     <div class="navbar fixed-bottom navbar-expand-sm navbar-light bg-light">
         <div class="container-fluid">
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-
-                <ul class="navbar-nav mb-2 mx-2 border-dark shadow-sm" id="country">
-                  <li class="nav-item dropup">
+                <ul class="navbar-nav mb-2 mx-2 shadow-sm" id="country">
+                <li class="nav-item dropup">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                       <span class="small">Select region/country/area</span><br/><span class="h3" id="selectedCountryLabel">All</span>
+
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="country_select">
                     </ul>
-                  </li>
+                </li>
                 </ul>
 
-                <ul class="navbar-nav mb-2 border-dark shadow-sm" id="search-type">
-                 <li class="nav-item dropup">
+                <ul class="navbar-nav mb-2 mx-2 shadow-sm" id="search-type">
+                <li class="nav-item dropup">
                     <a class="nav-link dropdown-toggle" href="#" id="searchbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <span class="small">Search by</span><br/><span class="h3" id="selectedSearchLabel">All</span>
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="searchbarDropdown" id="search_type_select">
                     </ul>
-                  </li>
+                </li>
                 </ul>
-                <form class="d-flex me-auto" id="search-form" onSubmit="return false">
-                  <input class="form-control p-4 bg-white shadow-sm" placeholder="SEARCH" aria-label="Search" id="search-text"> 
-                  <button id="reset-all-button" type="button" class="btn-close" aria-label="Close"></button>
+                <form class="d-flex mb-2 mx-2 shadow-sm" id="search-form" onSubmit="return false">
+                <input class="form-control bg-white" placeholder="SEARCH" aria-label="Search" id="search-text"> 
+                <button id="reset-all-button" type="button" class="btn-close" aria-label="Close"></button>
                 </input>
                 </form>
-                <!-- <div id="reset-all-button" class="d-flex me-auto text-center medium"><a href="" onclick="enableResetAll(); return false;">reset</a></div> -->
-                <!-- layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) -->
-                <div id="basemap-toggle" class="btn btn-secondary mx-1 shadow-sm">Adjust Basemap <img src="../../src/img/layer.svg" width="25" /></div>
-                <div id="projection-toggle" class="btn btn-secondary mx-1 shadow-sm"><span id="projection-toggle-label"></span>Adjust Map Projection <img src="../../src/img/globe.svg" width="20" height="50"/></div>
-                <!-- Arrow Right by Andrejs Kirma from <a href="https://thenounproject.com/browse/icons/term/arrow-right/" target="_blank" title="Arrow Right Icons">Noun Project</a> (CC BY 3.0) -->
-                <!-- Globe by ennbe from <a href="https://thenounproject.com/browse/icons/term/globe/" target="_blank" title="Globe Icons">Noun Project</a> (CC BY 3.0)  -->
-                <div id="table-toggle" class="btn btn-secondary mx-1 shadow-sm shadow-intensity-lg"><span id="table-toggle-label">Table view <img src="../../src/img/arrow-right.svg" width="15"></span></div>
-                <!-- layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) -->
-        </div>
-        </div>
-    </div>
+                <!-- layer by Fahrur Razi Siddiq from <a href="https://thenounproject.com/browse/icons/term/layer/" target="_blank" title="layer Icons">Noun Project</a> (CC BY 3.0) --> 
+                <div id="table-toggle" class="btn btn-secondary mx-2 shadow-sm shadow-intensity-lg"><span id="table-toggle-label">Table View <img src="../../src/img/arrow-right.svg" height="50" width="15" style="text-align: center;"></span></div>
 
-    <div id="map">
-    <button id="btn-spin" >Pause rotation</button>
-    </div>
-    
-    <div id="table-container"><table id="table" class="display primary" width="100%" height="100%"></table></div>
-    <div id="modal" class="modal">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-bottom-right-1 rounded-top-left-1">
-                  <div class="modal-body" id="modal-body">
-                  </div>
+                <div id="basemap-toggle" class="btn btn-secondary mx-2 shadow-sm"><span id="basemap-toggle-label">Basemap <img src="../../src/img/layer.svg" height="50" width="15" style="text-align: center;"></span></div>
+                <div id="projection-toggle" class="btn btn-secondary mx-2 shadow-sm"><span id="projection-toggle-label">Projection <img src="../../src/img/globe.svg" height="50"  width="15" style="text-align: center;"></span></div>
+                <!-- Globe by ennbe from <a href="https://thenounproject.com/browse/icons/term/globe/" target="_blank" title="Globe Icons">Noun Project</a> (CC BY 3.0)  -->
+                <!-- table data by Jamil Akhtar from <a href="https://thenounproject.com/browse/icons/term/table-data/" target="_blank" title="table data Icons">Noun Project</a> (CC BY 3.0) -->
             </div>
         </div>
     </div>
 
+    <div id="map"></div>
+    <button id="btn-spin-toggle">Pause rotation</button>
+
+    <div id="table-container"><table id="table" class="display primary" width="100%" height="100%"></table></div>
+    <div id="modal" class="modal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-bottom-right-1 rounded-top-left-1">
+                <div class="modal-body" id="modal-body">
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="../../site-config.js"></script>
     <script src="./config.js"></script>
     <script src="../../src/site.js"></script>

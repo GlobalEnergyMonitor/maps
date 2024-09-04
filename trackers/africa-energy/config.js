@@ -30,14 +30,14 @@ var config = {
         {
             field: 'tracker',
             values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
-            values_labels: ['coal power station units', 'oil/gas power station units', 'bioenergy power station phases', 'nuclear plant units', 'solar plant phases', 'wind plant phases', 'hydro plant units', 'geothermal plant units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil & gas extraction areas','coal mines'],
+            values_labels: ['coal power station units', 'oil&gas power station units', 'bioenergy power station phases', 'nuclear plant units', 'solar plant phases', 'wind plant phases', 'hydro plant units', 'geothermal plant units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
             primary: true
         },
         {
             field: 'status-legend',
             label: 'Status',
             values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
-            values_labels: ['Operating','Proposed / Announced / Discovered','Pre-construction / Pre-permit / Permitted', 'Construction / In development','Retired / Closed / Decommissioned','Cancelled','Mothballed / Idle / Shut in','Shelved']
+            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved']
 
         },
 
@@ -104,7 +104,7 @@ var config = {
     //productionLabel NEED a productionLabel
     showMaxCapacity: false,
 
-    assetFullLabel: "Units / Phases / Areas / Pipelines", //TODO This should be projects when in the list down of linked in same area
+    assetFullLabel: "Units / Phases / Pipelines", 
     //can be string for single value, or hash
     // not using assetLabel for now TODO
     assetLabel: '',
@@ -133,7 +133,7 @@ var config = {
 //    linkField: 'id',  
 
     countryFile: 'countries.js',
-    allCountrySelect: true, //why was this false? 
+    allCountrySelect: true, // TODO bug when clicking Africa nothing gets selected but clicking all it does 
     countryField: 'areas',
     //if multicountry, always end values with a comma
     multiCountry: true,

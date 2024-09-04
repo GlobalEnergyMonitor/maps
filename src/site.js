@@ -31,7 +31,7 @@ const popup = new mapboxgl.Popup({
 map.on('load', function () {
     if (config.projection != 'globe'){
         // map.setFog({}); // Set the default atmosphere style
-        $('#btn-spin').hide();
+        $('#btn-spin-toggle').hide();
 
     }
     loadData();
@@ -667,7 +667,7 @@ $('#projection-toggle').on("click", function() {
     if (config.projection == 'globe') {
         config.projection = "naturalEarth";
         map.setProjection('naturalEarth');
-        $('#btn-spin').hide();
+        $('#btn-spin-toggle').hide();
         map.setCenter(config.center);
         map.setZoom(determineZoom());
 
@@ -675,7 +675,7 @@ $('#projection-toggle').on("click", function() {
         config.projection = "globe";
         map.setProjection("globe");
         map.setCenter(config.center);
-        $('#btn-spin').show();
+        $('#btn-spin-toggle').show();
         spinGlobe();
         map.setZoom(determineZoom());
 
@@ -691,7 +691,7 @@ function buildFilters() {
     config.filters.forEach(filter => {
         
         if (config.color.field != filter.field) {
-            $('#filter-form').append('<hr /><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
+            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h7>');
         }
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
@@ -700,7 +700,7 @@ function buildFilters() {
             check += `<div class="col-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
             check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "");
             check +=  `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
-            check += '<div class="col-3 text-end" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+            check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
             $('#filter-form').append(check);
         }
     });
@@ -713,6 +713,7 @@ function buildFilters() {
             $('#spinner-container-filter').addClass('d-flex')
 
             filterData();
+
         });
     });
 }
@@ -731,6 +732,7 @@ function selectAllFilter() {
     $('#spinner-container-filter').addClass('d-flex')
 
     filterData();
+
 }
 function clearAllFilter() {
     $('.filter-row').each(function() {
@@ -740,6 +742,7 @@ function clearAllFilter() {
         }
     });
     filterData();
+
 }
 function countFilteredFeatures() {
     config.filterCount = {};
@@ -783,9 +786,12 @@ function countFilteredFeatures() {
 }
 function filterData() {
     if (config.tiles) {
+
         filterTiles();
     } else {
+
         filterGeoJSON();
+
     }
 }
 
@@ -816,13 +822,14 @@ function filterTiles() {
         let countryExpression = ['any'];
         config.selectedCountries.forEach(country => {
             if (config.multiCountry) {
-                country = country + ',';
-                countryExpression.push(['in', ['string', country], ['string',['get', config.countryField]]]);
+                country = country + ';'; //this is needed to filter integrated file by country select but doesn't affect filtering by region
+                countryExpression.push(['in', ['string', country], ['string',['get', removeLastComma(config.countryField)]]]);
             } else {
-                countryExpression.push(['==', ['string', country], ['string',['get', config.countryField]]]);
+                countryExpression.push(['==', ['string', country], ['string',['get', removeLastComma(config.countryField)]]]);
             }
         })
         config.filterExpression.push(countryExpression);
+
     }
     for (let field in filterStatus) {
         config.filterExpression.push(['in', ['get', field], ['literal', filterStatus[field]]]);
@@ -845,6 +852,8 @@ function filterTiles() {
 
     if ($('#table-container').is(':visible')) {
         filterGeoJSON();
+        $('btn-spin-toggle').hide();
+
     } else {
         map.on('idle', filterGeoJSON);
     }
@@ -925,21 +934,23 @@ function updateSummary() {
 function buildTable() {
     $('#table-toggle').on("click", function() {
         if (! $('#table-container').is(':visible')) {
-            $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15'>");
+            $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15' height='50' style='text-align: center;'>");
             $('#map').hide();
             $('#btn-spin').hide();
             $('#sidebar').hide();
             $('#table-container').show();
             $('#basemap-toggle').hide();
+            $('btn-spin-toggle').hide();
             $('#projection-toggle').hide();
             updateTable(true);
         } else {
-            $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
+            $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15' height='50' style='text-align: center;'>");
             $('#map').show();
             $('#btn-spin').show();
             $('#sidebar').show();
             $('#table-container').hide();
             $('#basemap-toggle').show();
+            $('btn-spin-toggle').show();
             $('#projection-toggle').show();
 
         }
@@ -1317,7 +1328,6 @@ function buildCountrySelect() {
 
             $('#spinner-container-filter').removeClass('d-none')
             $('#spinner-container-filter').addClass('d-flex')
-
             filterData();
         });
     });
@@ -1330,6 +1340,7 @@ function enableSearch() {
         config.searchText = $('#search-text').val().toLowerCase();
 
         filterData();
+
     }, 500));
     config.searchText = '';
 }
@@ -1392,6 +1403,7 @@ function enableResetAll() {
 
     // then filter data
     filterData();
+
 }  
 
 
@@ -1491,11 +1503,14 @@ const secondsPerRevolution = 120;
 const maxSpinZoom = 5;
 // Rotate at intermediate speeds between zoom levels 3 and 5.
 const slowSpinZoom = 3;
+const btnSpinToggle = document.querySelector('#btn-spin-toggle');
+
 
 let userInteracting = false;
 let spinEnabled = true;
 
 function spinGlobe() {
+
     const zoom = map.getZoom();
     if (config.projection == 'globe'){
 
@@ -1547,7 +1562,7 @@ map.on('moveend', () => {
     spinGlobe();
 });
 
-document.getElementById('btn-spin').addEventListener('click', (e) => {
+document.getElementById('btn-spin-toggle').addEventListener('click', (e) => {
     spinEnabled = !spinEnabled;
     if (spinEnabled) {
         spinGlobe();
@@ -1555,5 +1570,21 @@ document.getElementById('btn-spin').addEventListener('click', (e) => {
     } else {
         map.stop(); // Immediately end ongoing animation
         e.target.innerHTML = 'Start rotation';
+    }
+});
+
+
+// # adding option to pause spin with space important for smaller screens
+document.addEventListener('keydown', (e) => {
+    spinEnabled = !spinEnabled;
+    if (e.code === "Space") {
+        if (spinEnabled) {
+            spinGlobe();
+            btnSpinToggle.innerHTML = 'Pause rotation'; // not working not sure why
+        } else {
+            map.stop(); // Immediately end ongoing animation
+            spinGlobe();
+            btnSpinToggle.innerHTML = 'Start rotation';
+        }
     }
 });
