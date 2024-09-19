@@ -3,14 +3,15 @@ import os
 import gspread
 
 test = False
-refine = False
+refine = False # TEST THIS SOON!
 augmented = True
 summary_create = False
 about_create = False
 map_create = True
 dwlnd_create = False
-local_copy = False
+local_copy = False # problem here 
 slowmo = False
+data_filtering = True
 # Get today's date
 today_date = datetime.today()
 yesterday = today_date - timedelta(days=1)
@@ -33,7 +34,7 @@ gas_only_maps = ['AGT', 'EGT', 'asia', 'europe']
 non_gsheet_data = ['Gas Pipelines', 'LNG Terminals', 'Oil Pipelines']
 conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']
-
+gcmt_closed_tab = 'Global Coal Mine Tracker (Close'
 # TODO make it so that each map has it's only set of final cols, so smallest csv possible, helpful for regional gas mostly ...
 final_cols = ['mapname','tracker acro','official_name','url', 'areas','name', 'unit_name', 'capacity', 'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
        'original_units', 'conversion_factor', 'geometry', 'river', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
@@ -42,7 +43,7 @@ final_cols = ['mapname','tracker acro','official_name','url', 'areas','name', 'u
 renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country/Area': 'areas', 'Plant name': 'name', 'Unit name': 'unit_name', 
                                 'Capacity (MW)': 'capacity', 'Status': 'status',
                                 'Start year': 'start_year', 'Subnational unit (province, state)': 'subnat', 'Region': 'region', 'Owner':'owner', 'Parent': 'parent'},
-                      'GCPT': {'GEM unit/phase ID': 'id','Country/Area': 'areas', 'Wiki URL':' url',
+                      'GCPT': {'GEM unit/phase ID': 'id','Country/Area': 'areas', 'Wiki URL':'url',
                                    'Plant name': 'name', 'Unit name':'unit_name',
                                    'Owner': 'owner', 'Parent': 'parent', 'Capacity (MW)': 'capacity', 'Status': 'status', 
                                    'Start year': 'start_year', 'Subnational unit (province, state)': 'subnat', 'Region': 'region'},
@@ -68,21 +69,29 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country/A
                       'GCTT': {'Terminal ID':'id','Coal Terminal Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Owner': 'owner', 'Capacity (Mt)':'capacity',
                                'Opening Year': 'start_year', 'Region': 'region', 'State/Province':'subnat', 'Country': 'areas'},
                       'GOGET': {'Unit ID':'id', 'Wiki name': 'name', 'Country': 'areas', 'Subnational unit (province, state)': 'subnat', 'Status': 'status', 'Discovery year': 'start_year', 'Production start year': 'prod_start_year',
-                                'GEM region': 'region','Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'prod_oil', 'Production - Gas (Million m³/y)': 'prod_gas','Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)': 'capacity','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'},
+                                'GEM region': 'region','Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'prod_oil', 'Production - Gas (Million m³/y)': 'prod_gas',
+                                'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)': 'capacity','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'
+                                , 'Country List':'mult_countries'},
                       'GCMT': {'GEM Mine ID':'id','Country': 'areas', 'Mine Name': 'name', 'Status': 'status', 'Owners': 'owner', 'Parent Company': 'parent', 'Capacity (Mtpa)': 'capacity', 
                                'Production (Mtpa)':'production', 'Opening Year': 'start_year', 'State, Province': 'subnat', 'Region': 'region', },
                       'GOIT': {'ProjectID':'id','Countries': 'areas', 'Wiki': 'url', 'PipelineName': 'name', 'SegmentName': 'unit_name', 'Status': 'status', 'Owner': 'owner',
                                'Parent': 'parent', 'CapacityBOEd': 'capacity', 'StartYear1': 'start_year', 'StartState/Province':'subnat', 'StartRegion': 'region',
-                               'EndState/Province': 'subnat2', 'EndRegion': 'region2',},
+                               'EndState/Province': 'subnat2', 'EndRegion': 'region2'},
                       'GGIT': {'ProjectID':'id','Countries': 'areas','Wiki': 'url',
                                    'PipelineName':'name', 'SegmentName':'unit_name', 'Status':'status', 'Owner':'owner', 'Parent': 'parent',
                                    'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat',
-                                   'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2',
+                                   'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2'
                                    }, 
                       'GGIT-lng': {'ComboID':'id','Wiki': 'url', 'TerminalName': 'name',
                                    'UnitName': 'unit_name', 'Status': 'status', 'Country': 'areas', 'Owner': 'owner', 
                                    'Parent': 'parent', 'CapacityInMtpa': 'capacity', 'StartYearEarliest': 'start_year', 'Region': 'region', 
                                    'State/Province': 'subnat'}}
+
+final_order_datadownload = ['Oil & Gas Plants', 'Coal Plants', 'Solar', 'Wind', 'Nuclear', 'Hydropower', 'Bioenergy', 'Geothermal', 'Coal Terminals', 'Oil & Gas Extraction', 'Coal Mines', 'Oil Pipelines', 'Gas Pipelines', 'LNG Terminals']
+tracker_mult_countries = ['GGIT', 'GOIT'] # mult_countries Country List, Countries need this so don't filter on region and miss ones where region start or end is asia not africa bi continental GGIT 8 missing africa GOGET is different because only one region and its created by Scott for the map file so go by region
+
+dtype_spec = {} #{'Latitude': float, 'Longitude': float}
+numeric_cols = [] #TODO 
 
 tracker_to_fullname = {
                     "GCPT": "coal power station",
@@ -126,7 +135,7 @@ tracker_to_legendname = {
 # TODO ideally get this from map log gsheet
 # DO THIS NOW TODO so that aet and gipt look done and latam still needs to do
 trackers_to_update = ['Coal Plants', 'Nuclear', 'Oil & Gas Plants'] # ['Coal Plants', 'Nuclear', 'Oil & Gas Plants']
-new_release_date = 'August 2024' # get from spreadsheet I manage 15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8
+new_release_date = 'September 2024' # get from spreadsheet I manage 15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8
 previous_release_date = 'July 2024'
 # previous_release = 'data/Africa-Energy-Tracker-data-July-2024.xlsx' # key 1B8fwCQZ3ZMCf7ZjQPqETKNeyFN0uNFZMFWw532jv480
 # previous_map = 'data/africa_energy_tracker_2024-07-10.geojson' 
@@ -134,11 +143,11 @@ prev_key_dict = {'africa': '1B8fwCQZ3ZMCf7ZjQPqETKNeyFN0uNFZMFWw532jv480', 'lata
 # also TODO ideally save new release data file of map to gsheets and put htat link in the results tab
 # prev_key = '1B8fwCQZ3ZMCf7ZjQPqETKNeyFN0uNFZMFWw532jv480'
 
-print('Handle multi tracker map creation for more than just AET')
+# print('Handle multi tracker map creation for more than just AET')
 
 multi_tracker_log_sheet_key = '15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8'
 multi_tracker_log_sheet_tab = ['multi_map']
-
+prep_file_tab = ['prep_file']
 multi_tracker_countries_sheet = '1UUTNERZYT1kHNMo_bKpwSGrUax9WZ8eyGPOyaokgggk'
 
 # will be commenting all this out soon! get to map file
@@ -152,38 +161,22 @@ path_for_download_and_map_files = gem_path + tracker_folder + '/compilation_outp
 os.makedirs(path_for_download_and_map_files, exist_ok=True)
 os.makedirs(path_for_data_dwnld, exist_ok=True)
 
-# not needed anymore, update below
+testing_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/testing/'
+
 # TODO Maisie likes the spreadsheet so we can all see what's going on
 # TODO create a better spreadsheet
-prep_file_key = '12ltof1T1pxwc_iDTN4PpkcfygLXhAHJ7Or0caJvbmNk'
-prep_file_tab = ['prep']
 
-# last updated Jul 30th for nuclear and coal 
-gsheets_acro_dict = {
-    # all trackers minus goit, ggit and ggit-lng
-    "GOGPT": ["1dosICr3DU05hIRawCLB0EK4rv3cn44fwBAKjTTqmLDo", ["Gas & Oil Units"]],
-    "GCPT": ["1zrVobNcD0HiBfko4Z8N9BUaMXxEvNNrXFxzk42q2ZBI", ["Units"]],
-    "GSPT": ["1FTGYWZsBG20e4hyTkdgpondcqdD2kTam6d9YcvqREYo", ["20 MW+; 1-20 MW"]],
-    "GWPT": ["13Td6X2iQSZljmiu5q_Tvd1LYWf1hEMf6UwJGKjGPGGU", ["Data"]],
-    "GNPT": ["1zCcO9LwVmiQZBOGqlwKGYgZ5lAnBKJ91hjwWcbUw5nQ", ["Data"]],
-    "GHPT": ["1cqLe0xOx7FLpfaGZhtVnV-bhuKgaczHPtXzCRIgy_RQ", ["Data"]],
-    "GBPT": ["10Clsb8auutXy4iBm6c7HywZjSbNKUiho9NHzZmC2-Bs", ["Data"]],
-    "GGPT": ["1j0Q0s6koeUYlCvp-beBnJX-tW1RHh8830eNwW4LW-Sw", ["Data"]],
-    "GCTT": ["1gY2X3cDWmBDHVFZcDesqlfY9i7aEtqSfM-fuBeUiV7o", ["Coal Terminals"]],
-    "GOGET": ["1ZeHDitJDnktiy2TrrV20SdZOmiJS1btycqlyDQBtUeU", ["Data"]],
-    "GCMT": ["1OJIEYKHR6L9-w1jbSPQr01X3w4Ot0qOWoKaVuZCrEc4", ["Global Coal Mine Tracker (Non-C"]]
-}
 
 about_page_ggit_goit = {
-    "GGIT-lng": ["1VwxZgLNSXiuGnwzgC1CPcnLrI-PGdseP_RDQJnzLuAY"],
-    "GGIT": ["1rcFIqHjVpZ7UFNdP1TE7BeDKmraOjXof8gLtZ49G77U"],
-    "GOIT": ["12bhnTJ5kaia187ZvX9qWshfs4btmZuTpzPj2Jz7ct6Y"], 
+    "LNG Terminals": "1VwxZgLNSXiuGnwzgC1CPcnLrI-PGdseP_RDQJnzLuAY",
+    "Gas Pipelines": "1rcFIqHjVpZ7UFNdP1TE7BeDKmraOjXof8gLtZ49G77U",
+    "Oil Pipelines": "12bhnTJ5kaia187ZvX9qWshfs4btmZuTpzPj2Jz7ct6Y", 
 }
 
-goit_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GOIT-Oil-NGL-Pipelines-2024-05-13.geojson'
+goit_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GOIT-Oil-NGL-Pipelines-2024-06.geojson'
 ggit_lng_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GGIT-LNG-Terminals-2024-01.geojson'
 ggit_geojson = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_input/GEM-GGIT-Gas-Pipelines-2023-12.geojson'
-
+# TODO convert geojson to csv upload to googlesheets and use like that ... same system as other ones
 
 tracker_summary_pages = {
     "Oil and Gas Plants": [
@@ -285,7 +278,7 @@ tracker_summary_pages = {
 }
 
 
-country_list = [
+full_country_list = [
     "Algeria", "Angola", "Benin", "Botswana", "British Indian Ocean Territory", "Burkina Faso", 
     "Burundi", "Cabo Verde", "Cameroon", "Central African Republic", "Chad", "Comoros", "DR Congo", 
     "Republic of the Congo", "Côte d'Ivoire", "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", 
@@ -328,3 +321,66 @@ country_list = [
     "Northern Mariana Islands", "Palau", "Papua New Guinea", "Pitcairn", "Samoa", "Solomon Islands", 
     "Tokelau", "Tonga", "Tuvalu", "United States Minor Outlying Islands", "Vanuatu", "Wallis and Futuna"
 ]
+
+Africa_countries = [
+    "Algeria",
+    "Angola",
+    "Benin",
+    "Botswana",
+    "British Indian Ocean Territory",
+    "Burkina Faso",
+    "Burundi",
+    "Cabo Verde",
+    "Cameroon",
+    "Central African Republic",
+    "Chad",
+    "Comoros",
+    "DR Congo",
+    "Republic of the Congo",
+    "Côte d'Ivoire",
+    "Djibouti",
+    "Egypt",
+    "Equatorial Guinea",
+    "Eritrea",
+    "Eswatini",
+    "Ethiopia",
+    "French Southern Territories",
+    "Gabon",
+    "The Gambia",
+    "Ghana",
+    "Guinea",
+    "Guinea-Bissau",
+    "Kenya",
+    "Lesotho",
+    "Liberia",
+    "Libya",
+    "Madagascar",
+    "Malawi",
+    "Mali",
+    "Mauritania",
+    "Mauritius",
+    "Mayotte",
+    "Morocco",
+    "Mozambique",
+    "Namibia",
+    "Niger",
+    "Nigeria",
+    "Réunion",
+    "Rwanda",
+    "Saint Helena, Ascension, and Tristan da Cunha",
+    "Sao Tome and Principe",
+    "Senegal",
+    "Seychelles",
+    "Sierra Leone",
+    "Somalia",
+    "South Africa",
+    "South Sudan",
+    "Sudan",
+    "Tanzania",
+    "Togo",
+    "Tunisia",
+    "Uganda",
+    "Western Sahara",
+    "Zambia",
+    "Zimbabwe"
+  ]

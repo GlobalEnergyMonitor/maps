@@ -1,13 +1,14 @@
 var config = {
-    json: './data/africa_energy_tracker_2024-08-19.geojson',
+    json: './data/africa_2024-09-18.geojson',
     geometries: ['Point','LineString'],
     center: [10, 0],
     zoomFactor: 1.9,
     img_detail_zoom: 10,
     statusField: 'status-legend',
     statusDisplayField: 'status',
+    // linkField: 'id',
     color: {
-        field: 'tracker',
+        field: 'tracker acro',
         values: {
             'GOGPT': 'blue',
             'GOGET': 'red',
@@ -28,7 +29,7 @@ var config = {
     //filter values should have no spaces
     filters: [
         {
-            field: 'tracker',
+            field: 'tracker acro',
             values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
             values_labels: ['coal power station units', 'oil&gas power station units', 'bioenergy power station phases', 'nuclear plant units', 'solar plant phases', 'wind plant phases', 'hydro plant units', 'geothermal plant units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
             primary: true
@@ -36,8 +37,8 @@ var config = {
         {
             field: 'status-legend',
             label: 'Status',
-            values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved'],
-            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved']
+            values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved', 'not-found'],
+            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
 
         },
 
@@ -139,13 +140,13 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-oil-table', 'prod-year-oil', 'prod-gas-table', 'prod-year-gas'],
-        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (oil)','Production year (oil)', 'Production (gas)', 'Production year (gas)'],
+        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas'],
+        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity (MW)', 'Status','Country/Area(s)','Start year', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)'],
         
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
         clickColumns: ['project'],
-        rightAlign: ['unit','capacity','prod-oil-table', 'prod-gas-table','start-year', 'prod-year-oil', 'prod-year-gas'], 
+        rightAlign: ['unit','capacity','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
         removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
         // appendValue: {'capacity': "capItemLabel"},
@@ -163,20 +164,20 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        // 'status': {'lable': 'Status'},
+        'status': {'lable': 'Status'},
         // 'prod-gcmt': {'label': 'Production (MTPA)'}, // if its GCMT or GOGET should be 
         'capacity-details': {'label': 'Project Level Capacity'}, // interim until summary capacity can be customized by tracker
-        'prod-oil-details': {'label': 'Production (Oil)'},
-        'prod-gas-details': {'label': 'Production (Gas)'},
-        'prod-year-oil': {'label': 'Production Year (Oil)'},
-        'prod-year-gas': {'label': 'Production Year (Gas)'},
+        'prod-oil': {'label': 'Production (Million bbl/y)'},
+        'prod-gas': {'label': 'Production (Million m³/y)'},
+        'prod-year-oil': {'label': 'Production Year - Oil'},
+        'prod-year-gas': {'label': 'Production Year - Gas'},
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'river': {'label': 'River'},
         'tracker-display': {'label': 'Type'},
         'areas': {'label': 'Country/Area(s)'},
-        'subnat': {'display': 'location'}, // TODO pull out first one only if ; in it 
+        'areas-subnat-sat-display': {'display': 'location'}, 
         // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
     }
 

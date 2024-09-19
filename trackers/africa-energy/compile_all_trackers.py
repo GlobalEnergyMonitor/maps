@@ -61,7 +61,6 @@ def gspread_access_file_read_only(key, tab_list):
         spreadsheet = gsheets.worksheet(tab)
         df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
         df = df.replace('*', pd.NA).replace('Unknown', pd.NA).replace('--', pd.NA) # TODO maybe deal in another way?
-        df = df.dropna()
         df = df.fillna('')
         list_of_dfs.append(df)
 
@@ -241,7 +240,7 @@ def find_missing_coords(df):
     nan_df = df[df.isna().any(axis=1)]
     # nan_df.to_csv(f'{path_for_test_results}{df["tracker"].loc[0]}_nan_coords_{today_date}.csv')
 
-    df = df.dropna(subset = ['float_col_clean_lat', 'float_col_clean_lng'])
+    df = df.dropna(subset = ['float_col_clean_lat', 'float_col_clean_lng'], how = 'any')
 
     return df
     
@@ -451,7 +450,6 @@ def create_all_dfs(df):
             df = df[df[col_reg_name] == 'Africa'] 
             
             df = df.fillna('')
-            df.dropna()
             
             col_info_df = pd.DataFrame(col_info)
             # col_info_df = col_info_df.T # transpose
