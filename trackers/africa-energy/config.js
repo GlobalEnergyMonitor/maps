@@ -8,7 +8,7 @@ var config = {
     statusDisplayField: 'status',
     // linkField: 'id',
     color: {
-        field: 'tracker acro',
+        field: 'tracker-acro',
         values: {
             'GOGPT': 'blue',
             'GOGET': 'red',
@@ -29,7 +29,7 @@ var config = {
     //filter values should have no spaces
     filters: [
         {
-            field: 'tracker acro',
+            field: 'tracker-acro',
             values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
             values_labels: ['coal power station units', 'oil&gas power station units', 'bioenergy power station phases', 'nuclear plant units', 'solar plant phases', 'wind plant phases', 'hydro plant units', 'geothermal plant units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
             primary: true
