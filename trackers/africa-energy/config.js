@@ -1,5 +1,5 @@
 var config = {
-    json: './data/africa_2024-09-18.geojson',
+    json: './data/africa_2024-09-19.geojson',
     geometries: ['Point','LineString'],
     center: [10, 0],
     zoomFactor: 1.9,
@@ -31,7 +31,7 @@ var config = {
         {
             field: 'tracker-acro',
             values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
-            values_labels: ['coal power station units', 'oil&gas power station units', 'bioenergy power station phases', 'nuclear plant units', 'solar plant phases', 'wind plant phases', 'hydro plant units', 'geothermal plant units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
+            values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
             primary: true
         },
         {
@@ -164,7 +164,7 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        'status': {'lable': 'Status'},
+        // 'status': {'lable': 'Status'}, // THIS NEEDS TO BE FIXED it breaks the click option saying not included
         // 'prod-gcmt': {'label': 'Production (MTPA)'}, // if its GCMT or GOGET should be 
         'capacity-details': {'label': 'Project Level Capacity'}, // interim until summary capacity can be customized by tracker
         'prod-oil': {'label': 'Production (Million bbl/y)'},
