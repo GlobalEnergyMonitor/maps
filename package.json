@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "csv2geojson": "^5.1.2"
+  }
+}
