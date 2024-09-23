@@ -1,5 +1,5 @@
 var config = {
-    csv: 'csv-data-2024-07-31.csv',
+    csv: 'data/csv-data-2024-09-20.csv',
     tiles: [
         // 'https://gem.dev.c10e.org/2024-03-12/{z}/{x}/{y}.pbf'
         // 'https://bucketeer-cf25e1cc-bfe0-4e0f-957c-65e8e9492475.s3.amazonaws.com/maps/integrated-2024-03-14/{z}/{x}/{y}.pbf'
@@ -8,7 +8,8 @@ var config = {
         // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-05-30/{z}/{x}/{y}.pbf',
         // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-06-10/{z}/{x}/{y}.pbf',
         // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-test-speed/{z}/{x}/{y}.pbf',
-        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-07-31/{z}/{x}/{y}.pbf'
+        // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-07-31/{z}/{x}/{y}.pbf',
+        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2024-09-20/{z}/{x}/{y}.pbf'
          ],
     tileSourceLayer: 'integrated',
 
@@ -27,23 +28,6 @@ var config = {
             'solar': 'green',
             'wind': 'green'
         }
-
-    //     explore doing this on status instead:
-    //     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
-    //         what's right property name?? is color also listing values used in the summary? 
-    //         should this just be made part of the filter? that might allow to address multiple properties */
-    //     field: 'status',
-    //     values: {
-    //         'operating': 'red',
-    //         'construction': 'blue',
-    //         'pre-construction': 'green',
-    //         'announced': 'green',
-    //         'retired': 'grey',
-    //         'cancelled': 'grey',
-    //         'shelved': 'grey',
-    //         'mothballed': 'grey'
-    //     }
-    // },
 
     },
     minRadius: 1,
@@ -73,8 +57,8 @@ var config = {
     urlField: 'gemwiki-url',
     countryField: 'country/area',
     searchFields: { 'Project': ['plant-/-project-name'], 
-        // 'Companies': ['Owner', 'Parent'],
-        // 'Start Year': ['Start year'],
+        'Companies': ['Owner', 'Parent'],
+        'Start Year': ['Start year'],
         'Country/Area': ['country/area'],
         'Type': ['type'],
         'Status': ['status']
