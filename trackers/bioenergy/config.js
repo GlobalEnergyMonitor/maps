@@ -1,7 +1,9 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
-    csv: 'GBPT-map-file-2024-09-23.csv',
+
+    csv: 'compilation_output/GBPT-map-file-2024-09-23.csv',
+
     /* zoom level to set map when viewing all phases */
     phasesZoom: 10,
     /* initial load zoom multiplier */
