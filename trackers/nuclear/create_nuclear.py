@@ -8,7 +8,6 @@ import math
 import os
 from shapely.geometry import Point, LineString
 from shapely import wkt
-import polyline
 from datetime import date
 import csv
 import gspread
