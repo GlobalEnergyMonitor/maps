@@ -51,11 +51,17 @@ function determineZoom() {
 function loadData() {
     // Here we could load in data from csv always minus what's needed for map dots?
     if ("tiles" in config) {
+        console.log('addTiles');
         addTiles();
         Papa.parse(config.csv, {
             download: true,
             header: true,
+            error: function(error, file) {
+                console.log(error);
+                console.log(file);
+            },
             complete: function(results) {
+                console.log('addGeoJSON');
                 addGeoJSON(results.data);   
             }
         });
@@ -132,7 +138,9 @@ function addGeoJSON(jsonData) {
     // config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
     config.processedGeoJSON = config.geojson; // copy
 
+    console.log('setMinMax');
     setMinMax();
+    console.log('findLinkedAssets');
     findLinkedAssets();
 
     // map.addSource('assets-source', {
@@ -148,7 +156,9 @@ function addGeoJSON(jsonData) {
     }
 
 
+    console.log('addLayers');
     addLayers();
+    console.log('enableUX');
     map.on('idle', enableUX); // enableUX starts to render data
 
 }
@@ -363,14 +373,20 @@ function setMinMax() {
 */
 function enableUX() {
     map.off('idle', enableUX);
+    console.log('buildFilters');
     buildFilters();
+    console.log('updateSummary');
     updateSummary();
+    console.log('buildTable');
     buildTable(); 
+    console.log('enableModal');
     enableModal();
+    console.log('enableNavFilters');
     enableNavFilters();
     $('#spinner-container').addClass('d-none')
     $('#spinner-container').removeClass('d-flex')
     if (config.projection == 'globe') {
+        console.log('spinGlobe');
         spinGlobe();
     }
 }
