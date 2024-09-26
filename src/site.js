@@ -155,13 +155,15 @@ function addGeoJSON(jsonData) {
         });
     }
 
-
     console.log('addLayers');
     addLayers();
+
+    setTimeout(enableUX, 3000);
+
     console.log('enableUX');
     map.on('idle', enableUX); // enableUX starts to render data
-
 }
+
 function addTiles() {
     map.addSource('assets-source', {
         'type': 'vector',
@@ -373,6 +375,12 @@ function setMinMax() {
 */
 function enableUX() {
     map.off('idle', enableUX);
+    if (config.UXEnabled) {
+        console.log('ux already enabled');
+        return
+    };
+    config.UXEnabled = true;
+    
     console.log('buildFilters');
     buildFilters();
     console.log('updateSummary');
