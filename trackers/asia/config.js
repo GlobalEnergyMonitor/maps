@@ -1,6 +1,5 @@
 var config = {
-    // json: 'compilation_output/asia_2024-09-25.geojson', 
-    json: 'compilation_output/asia_2024-09-25-gas-only-w-asia.geojson',
+    json: 'compilation_output/asia_2024-09-26.geojson',
     geometries: ['Point','LineString'],
     center: [60, 20],
     zoomFactor: 1.9,
@@ -20,6 +19,19 @@ var config = {
 
         }
     },
+
+    // /* radius associated with minimum/maximum value on map */
+    // minRadius: 2,
+    // maxRadius: 10,
+    // minLineWidth: 1,
+    // maxLineWidth: 5,
+
+    // /* radius to increase min/max to under high zoom */
+    // highZoomMinRadius: 4,
+    // highZoomMaxRadius: 32,
+    // highZoomMinLineWidth: 4,
+    // highZoomMaxLineWidth: 32,
+    
 
     // /* radius associated with minimum/maximum value on map */
     // minRadius: 2,
@@ -141,14 +153,13 @@ var config = {
 //    linkField: 'id',  
 
     countryFile: 'countries.js',
-    allCountrySelect: false, 
     countryField: 'areas',
     //if multicountry, always end values with a comma
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year',  'prod-gas', 'prod-year-gas'],
-        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity (MW)', 'Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)'],
+        values: ['tracker-display','name','unit-name', 'fuel','owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year',  'prod-gas', 'prod-year-gas'],
+        labels: ['Type', 'Name','Unit', 'Fuel','Owner', 'Parent','Capacity (MW)', 'Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)'],
         
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
