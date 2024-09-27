@@ -153,8 +153,6 @@ var config = {
 //    linkField: 'id',  
 
     countryFile: 'countries.js',
-    allCountrySelect: false, 
-    allCountrySelect: false, 
     countryField: 'areas',
     //if multicountry, always end values with a comma
     multiCountry: true,
