@@ -8,8 +8,6 @@ var config = {
     statusDisplayField: 'status',
     allCountrySelect: false,
 
-    allCountrySelect: false,
-
     // linkField: 'id',
     color: {
         field: 'tracker-acro',
@@ -52,7 +50,6 @@ var config = {
         {
             field: 'tracker-acro',
             values: ["GOGPT",  "GGIT", "GGIT-lng", "GOGET", ], 
-            values_labels: ['gas units', 'gas pipelines', 'LNG terminals', 'gas extraction areas',], // CHECK THAT
             values_labels: ['gas units', 'gas pipelines', 'LNG terminals', 'gas extraction areas',], // CHECK THAT
             primary: true
         },
@@ -169,7 +166,6 @@ var config = {
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
         clickColumns: ['project'],
-        rightAlign: ['unit','capacity', 'prod-gas','start-year','prod-year-gas'], 
         rightAlign: ['unit','capacity', 'prod-gas','start-year','prod-year-gas'], 
         removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
