@@ -9,6 +9,8 @@ var config = {
     statusDisplayField: 'status',
     allCountrySelect: false,
 
+    allCountrySelect: false,
+
     // linkField: 'id',
     color: {
         field: 'tracker-acro',
@@ -33,11 +35,25 @@ var config = {
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
     
+
+    // /* radius associated with minimum/maximum value on map */
+    // minRadius: 2,
+    // maxRadius: 10,
+    // minLineWidth: 1,
+    // maxLineWidth: 5,
+
+    // /* radius to increase min/max to under high zoom */
+    // highZoomMinRadius: 4,
+    // highZoomMaxRadius: 32,
+    // highZoomMinLineWidth: 4,
+    // highZoomMaxLineWidth: 32,
+    
     //filter values should have no spaces
     filters: [
         {
             field: 'tracker-acro',
             values: ["GOGPT",  "GGIT", "GGIT-lng", "GOGET", ], 
+            values_labels: ['gas units', 'gas pipelines', 'LNG terminals', 'gas extraction areas',], // CHECK THAT
             values_labels: ['gas units', 'gas pipelines', 'LNG terminals', 'gas extraction areas',], // CHECK THAT
             primary: true
         },
@@ -142,6 +158,7 @@ var config = {
 
     countryFile: 'countries.js',
     allCountrySelect: false, 
+    allCountrySelect: false, 
     countryField: 'areas',
     //if multicountry, always end values with a comma
     multiCountry: true,
@@ -153,6 +170,7 @@ var config = {
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
         clickColumns: ['project'],
+        rightAlign: ['unit','capacity', 'prod-gas','start-year','prod-year-gas'], 
         rightAlign: ['unit','capacity', 'prod-gas','start-year','prod-year-gas'], 
         removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
