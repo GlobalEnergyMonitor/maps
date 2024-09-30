@@ -1,5 +1,6 @@
 var config = {
-    json: 'compilation_output/asia_2024-09-26.geojson',
+
+    json: 'compilation_output/asia_2024-09-30.geojson',
     geometries: ['Point','LineString'],
     center: [60, 20],
     zoomFactor: 1.9,
