@@ -170,6 +170,36 @@ var config = {
         'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
         // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
-    }
+    },
+/* Mapbox styling applied to all trackers */
+pointPaint: {
+    'circle-opacity':.45
+},
+linePaint: {
+    'line-opacity':.65
+},
+lineLayout: {
+    'line-cap': 'round', 
+    'line-join': 'round'
+},
 
+/* radius associated with minimum/maximum value on map */
+minRadius: 3,
+maxRadius: 40,
+minLineWidth: 1,
+maxLineWidth: 10,
+
+/* radius to increase min/max to under high zoom */
+highZoomMinRadius: 30,
+highZoomMaxRadius: 50,
+highZoomMinLineWidth: 4,
+highZoomMaxLineWidth: 32,
+
+/* zoom level to set map when viewing all phases */
+phasesZoom: 8,
+
+/* initial load zoom multiplier */
+zoomFactor: 1.25,
+
+hitArea: 10, 
 };
