@@ -1,4 +1,5 @@
-{'Europe': [ // TODO look into why this file works test if it's doing anything
+{
+  "Europe": [ 
     "Åland Islands",
     "Albania",
     "Andorra",
@@ -53,5 +54,5 @@
     "United Kingdom",
     "Cyprus",
     "Türkiye"
-  ];
-  }
+  ]
+}

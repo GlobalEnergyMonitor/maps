@@ -1338,10 +1338,13 @@ function buildCountrySelect() {
             }
         });
         dropdown_html += "</ul></li>";
+
         if (continent_idx != Object.keys(config.countries).length - 1) {
             dropdown_html += '<li><hr class="dropdown-divider"></li>';
         }
+
         $('#country_select').append(dropdown_html);
+        console.log('at the country select append to dropdown point')
     });
 
     $('.country-dropdown-item').each(function() {
