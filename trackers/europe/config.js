@@ -1,5 +1,5 @@
 var config = {
-    json: 'compilation_output/europe_2024-09-30.geojson',
+    json: 'compilation_output/europe_2024-10-01.geojson',
     geometries: ['Point','LineString'],
     center: [8, 30],
     zoomFactor: 1.9,
@@ -125,7 +125,7 @@ var config = {
 //    linkField: 'id',  
 
     countryFile: 'countries.js',
-    allCountrySelect: true, // TODO bug when clicking Africa nothing gets selected but clicking all it does 
+    allCountrySelect: false,
     countryField: 'areas',
     //if multicountry, always end values with a comma
     multiCountry: true,
