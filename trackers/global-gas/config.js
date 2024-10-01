@@ -170,6 +170,7 @@ var config = {
         'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
         // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
+
     },
 /* Mapbox styling applied to all trackers */
 pointPaint: {
@@ -202,4 +203,5 @@ phasesZoom: 8,
 zoomFactor: 1.25,
 
 hitArea: 10, 
+
 };
