@@ -40,7 +40,7 @@
     "Poland",
     "Portugal",
     "Romania",
-    "Russia",
+    "Israel",
     "San Marino",
     "Serbia",
     "Slovakia",
@@ -50,6 +50,8 @@
     "Sweden",
     "Switzerland",
     "Ukraine",
-    "United Kingdom"
+    "United Kingdom",
+    "Cyprus",
+    "Türkiye"
   ];
   }
