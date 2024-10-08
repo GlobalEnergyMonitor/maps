@@ -27,7 +27,8 @@ var config = {
         {
             field: 'tracker-custom',
             label: 'Infrastructure Type',
-            values: ['GGIT - import', 'GGIT - export', 'GGIT'],
+            // cannot have any spaces in the values!
+            values: ['GGIT-import', 'GGIT-export', 'GGIT'],
             values_labels: ['LNG Terminals (Import)', 'LNG Terminals (Export)', 'Gas Pipelines']
         }
     ],
@@ -38,12 +39,13 @@ var config = {
     assetLabel: '',
     nameField: 'name', 
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'region', 'areas', 'subnat', 'start-year'],
-        labels: ['Project','Unit','Owner','Parent','Capacity','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'region', 'areas', 'subnat', 'start-year', 'tracker-display'],
+        labels: ['Project','Unit','Owner','Parent','Capacity','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year', 'Type'],
         clickColumns: ['name'],
         rightAlign: ['unit-name','capacity-table','start-year']
     },
-    searchFields: { 'Project': ['name'], 
+    searchFields: { 'Infrastructure Type': ['tracker-custom'],
+        'Project': ['name'], 
         'Companies': ['owner', 'parent'],
         'Start Year': ['start-year']
     },
@@ -54,6 +56,7 @@ var config = {
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'start-year': {'label': 'Start Year'},
+        'tracker-display': {'label': 'Type'},
         'areas-subnat-sat-display': {'display': 'location'}
     },
 
