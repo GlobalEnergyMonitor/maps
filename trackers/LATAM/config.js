@@ -2,7 +2,7 @@
 
 
 var config = {
-    json: 'compilation_output/latam_2024-09-19.geojson',
+    json: 'data/latam_2024-10-11.geojson',
     geometries: ['Point','LineString'],
     center: [-70, -20],
     zoomFactor: 1.8,
@@ -179,7 +179,7 @@ var config = {
         'parent': {'label': 'Parent'},
         'river': {'label': 'River'},
         'tracker-display': {'label': 'Type'},
-        'areas': {'label': 'Country/Area(s)'},
+        // 'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
         // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
     }
