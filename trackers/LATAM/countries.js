@@ -1,7 +1,5 @@
 {
-"Americas": // special for latam
-    [
-    
+"Latam": [
     "Argentina",
     "Bahamas",
     "Barbados",
@@ -32,9 +30,7 @@
     "Trinidad and Tobago",
     "Uruguay",
     "Venezuela"
-  ];
-  
-  
+  ]
 }
 
 

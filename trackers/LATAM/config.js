@@ -179,7 +179,7 @@ var config = {
         'parent': {'label': 'Parent'},
         'river': {'label': 'River'},
         'tracker-display': {'label': 'Type'},
-        // 'areas': {'label': 'Country/Area(s)'},
+        'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
         // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
     }
