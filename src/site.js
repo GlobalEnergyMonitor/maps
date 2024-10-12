@@ -1083,7 +1083,7 @@ function displayDetails(features) {
     Object.keys(config.detailView).forEach((detail) => {
         // replace apostrophe in displayDetails to resolve invalid or unexpected token
         // features[0].properties[detail] = features[0].properties[detail].replace("'", "\'")
-
+        console.log(config.detailView[detail])
         if (Object.keys(config.detailView[detail]).includes('display')) {
 
             if (config.detailView[detail]['display'] == 'heading') {
@@ -1142,20 +1142,24 @@ function displayDetails(features) {
                 }
             }
         } else {
+            console.log('we are in the last else')
+            console.log(features[0].properties[detail])
+            // if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN && features[0].properties[detail] != null && features[0].properties[detail] != 'Unknown [unknown %]'){
+                // if (config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
+            if (features[0].properties[detail] != '' && features[0].properties[detail] != NaN && features[0].properties[detail] != null && features[0].properties[detail] != 'Unknown [unknown %]') {
+                if (config.multiCountry == true && config.detailView[detail] && config.detailView[detail]['label'] && config.detailView[detail]['label'].includes('Country')) {
+                    detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
+                }
+                //     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
 
-            if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null &&  features[0].properties[detail] != 'not found' && features[0].properties[detail] != 'Unknown [unknown %]'){
-                    if (config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
-    
-                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
 
-
-                    }
-                    else if (Object.keys(config.detailView[detail]).includes('label')) {
-                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
-                    } else {
-                        console.log(features[0].properties[detail])
-                        // detail_text += features[0].properties[detail] + '<br/>';
-                    }
+                // }
+                else if (Object.keys(config.detailView[detail]).includes('label')) {
+                    detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
+                } else {
+                    console.log(features[0].properties[detail])
+                    // detail_text += features[0].properties[detail] + '<br/>';
+                }
             }
             
 
