@@ -2,7 +2,7 @@
 
 
 var config = {
-    json: 'data/latam_2024-10-11.geojson',
+    json: 'data/latam_2024-10-12.geojson',
     geometries: ['Point','LineString'],
     center: [-70, -20],
     zoomFactor: 1.8,
@@ -41,8 +41,8 @@ var config = {
             field: 'status-legend',
             label: 'Status',
             values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved', 'not-found'],
-            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
-
+            values_labels: ['Operating','Proposed+','Pre-construction+', 'Construction+','Retired+','Cancelled','Mothballed+','Shelved', 'Not Found']
+// /Announced/Discovered /Pre-permit/Permitted Closed/Decommissioned  /Idle/Shut in /In development
         },
 
     ],
@@ -143,8 +143,8 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas'],
-        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity (MW)', 'Status','Country/Area(s)','Start year', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)'],
+        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-coal','prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas'],
+        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (million tonnes coal/y)', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)'],
         
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
@@ -167,21 +167,20 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        // 'status': {'lable': 'Status'}, // TODO THIS NEEDS TO BE FIXED it breaks the click option saying not included
-        // 'prod-gcmt': {'label': 'Production (MTPA)'}, // if its GCMT or GOGET should be 
-        'capacity-details': {'label': 'Project Level Capacity'}, // TODO this isn't getting populated ...lets fix summary soon!
-        'prod-oil': {'label': 'Production (Million bbl/y)'},
-        'prod-gas': {'label': 'Production (Million m³/y)'},
+        'capacity-table': {'label': 'Capacity'}, // TODO this isn't getting populated ...lets fix summary soon!
+        'status': {'label': 'Status'}, // TODO THIS NEEDS TO BE FIXED it breaks the click option saying not included
+        'prod-oil': {'label': 'Production (million bbl/y)'},
+        'prod-gas': {'label': 'Production (million m³/y)'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
+        'prod-coal': {'label': 'Production (million tonnes coal/y)'}, 
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'river': {'label': 'River'},
         'tracker-display': {'label': 'Type'},
-        // 'areas': {'label': 'Country/Area(s)'},
+        'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
-        // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
-    }
-
+    },
+showCapacityTable: true,
 };
