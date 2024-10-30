@@ -54,7 +54,7 @@ var config = {
        this is defined per tracker since it varies widely */
     capacityField: 'Capacity (MW)',
     capacityDisplayField: 'Capacity (MW)',
-    capacityLabel: 'Capacity (MW)',
+    capacityLabel: '(MW)',
 
     /* Labels for describing the assets */
     assetFullLabel: "Solar photovoltaic farm phases",
@@ -62,10 +62,10 @@ var config = {
 
     /* the column that contains the asset name. this varies between trackers */
     nameField: 'Project Name',
-    nameField: 'Project Name',
     linkField: 'Wiki URL',
     urlField: 'Wiki URL',
     countryField: 'Country',
+    statusField: 'Status',
 
 
     /* configure the table view, selecting which columns to show, how to label them, 
@@ -93,8 +93,8 @@ var config = {
     */
     detailView: {
         'Project Name': {'display': 'heading'},
-        'Status': {'label': 'Status'},
-        'Capacity (MW)': {'label': 'Capacity (MW)'},
+        // 'Status': {'label': 'Status'},
+        // 'Capacity (MW)': {'label': 'Capacity (MW)'},
         'Owner': {'label': 'Owner'},
         'Operator': {'label': 'Operator'},
         'Start year': {'label': 'Start year'},
@@ -104,6 +104,9 @@ var config = {
         'Country': {'display': 'location'},
 
     },
-    showCapacityTable: false, 
+    // showCapacityTable: false, 
+
+    minRadius: 3,
+    maxRadius: 10,
 
 }

@@ -1083,7 +1083,10 @@ function displayDetails(features) {
     Object.keys(config.detailView).forEach((detail) => {
         // replace apostrophe in displayDetails to resolve invalid or unexpected token
         // features[0].properties[detail] = features[0].properties[detail].replace("'", "\'")
-        console.log(config.detailView[detail])
+        // console.log(config.detailView[detail])
+        console.log(config.statusField)
+        console.log(features[0].properties[config.statusField])
+
         if (Object.keys(config.detailView[detail]).includes('display')) {
 
             if (config.detailView[detail]['display'] == 'heading') {
@@ -1206,6 +1209,7 @@ function displayDetails(features) {
         });
 
             let detail_capacity = '';
+
             Object.keys(count).forEach((k) => {
                 if (config.color.field == config.statusField){ 
                 
