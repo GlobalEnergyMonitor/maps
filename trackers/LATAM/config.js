@@ -2,22 +2,23 @@
 
 
 var config = {
-    json: 'data/latam_2024-10-12.geojson',
+    json: 'compilation_output/latam_2024-11-05.geojson',
     geometries: ['Point','LineString'],
     center: [-70, -20],
     zoomFactor: 1.8,
     img_detail_zoom: 10,
     statusField: 'status-legend',
     statusDisplayField: 'status',
-    // linkField: 'id',
+    linkField: 'id',
     color: {
-        field: 'tracker-acro',
+        field: 'tracker-custom',
         values: {
             'GOGPT': 'blue',
-            'GOGET': 'red',
+            'GOGET-oil': 'red',
             'GOIT': 'green',
             'GGIT': 'green',
-            'GGIT-lng':'green',
+            'GGIT-import':'green',
+            'GGIT-export':'green',
             'GCPT': 'blue',
             'GCMT': 'red',
             'GCTT': 'green',
@@ -32,9 +33,9 @@ var config = {
     //filter values should have no spaces
     filters: [
         {
-            field: 'tracker-acro',
-            values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
-            values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
+            field: 'tracker-custom',
+            values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-import", "GGIT-export", "GCTT", "GOGET-oil", "GCMT"], 
+            values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
             primary: true
         },
         {
@@ -168,7 +169,7 @@ var config = {
     detailView: {
         'name': {'display': 'heading'},
         'capacity-table': {'label': 'Capacity'}, // TODO this isn't getting populated ...lets fix summary soon!
-        'status': {'label': 'Status'}, // TODO THIS NEEDS TO BE FIXED it breaks the click option saying not included
+        'status': {'label': 'Status'}, 
         'prod-oil': {'label': 'Production (million bbl/y)'},
         'prod-gas': {'label': 'Production (million m³/y)'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
@@ -182,5 +183,5 @@ var config = {
         'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
     },
-showCapacityTable: true,
+showCapacityTable: false,
 };

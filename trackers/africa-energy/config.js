@@ -1,20 +1,20 @@
 var config = {
-    json: './data/africa_2024-09-19.geojson',
+    json: './data/africa_2024-11-05.geojson',
     geometries: ['Point','LineString'],
-    center: [10, 0],
-    zoomFactor: 1.9,
-    img_detail_zoom: 10,
+    center: [30, 0],
+    zoomFactor: 1.5,
     statusField: 'status-legend',
     statusDisplayField: 'status',
-    // linkField: 'id',
+    linkField: 'id',
     color: {
-        field: 'tracker-acro',
+        field: 'tracker-custom',
         values: {
             'GOGPT': 'blue',
-            'GOGET': 'red',
+            'GOGET-oil': 'red',
             'GOIT': 'green',
             'GGIT': 'green',
-            'GGIT-lng':'green',
+            'GGIT-import':'green',
+            'GGIT-export':'green',
             'GCPT': 'blue',
             'GCMT': 'red',
             'GCTT': 'green',
@@ -29,9 +29,9 @@ var config = {
     //filter values should have no spaces
     filters: [
         {
-            field: 'tracker-acro',
-            values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
-            values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
+            field: 'tracker-custom',
+            values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-import", "GGIT-export","GCTT", "GOGET-oil", "GCMT"], 
+            values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
             primary: true
         },
         {
@@ -107,29 +107,27 @@ var config = {
 
     assetFullLabel: "Units / Phases / Pipelines", 
     //can be string for single value, or hash
-    // not using assetLabel for now TODO
-    assetLabel: '',
-    // assetLabel: {
-    //     // field: 'tracker-custom',
-    //     // values: {
-    //     //     'GCPT': 'units',
-    //     //     'GOGPT': 'units',
-    //     //     'GBPT': 'units',
-    //     //     'GNPT': 'units',
-    //     //     'GSPT': 'phases',
-    //     //     'GWPT':	'phases',
-    //     //     'GHPT':	'units',
-    //     //     'GGPT':	'units',
-    //     //     'GOGET - oil': 'areas',
-    //     //     'GOGET - gas': 'areas',
-    //     //     'GOIT': 'projects',
-    //     //     'GGIT': 'projects',
-    //     //     'GGIT - import': 'projects',
-    //     //     'GGIT - export': 'projects',
-    //     //     'GCMT': 'projects',
-    //     //     'GCTT': 'projects'
-    //     // }
-    // },
+    assetLabel: {
+        field: 'tracker-custom',
+        values: {
+            'GCPT': 'units',
+            'GOGPT': 'units',
+            'GBPT': 'units',
+            'GNPT': 'units',
+            'GSPT': 'phases',
+            'GWPT':	'phases',
+            'GHPT':	'units',
+            'GGPT':	'units',
+            'GOGET - oil': 'areas',
+            'GOGET - gas': 'areas',
+            'GOIT': 'projects',
+            'GGIT': 'projects',
+            'GGIT - import': 'projects',
+            'GGIT - export': 'projects',
+            'GCMT': 'projects',
+            'GCTT': 'projects'
+        }
+    },
     nameField: 'name',
 //    linkField: 'id',  
 
