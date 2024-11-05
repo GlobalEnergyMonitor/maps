@@ -168,6 +168,7 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
+        'unit-name': {'label': 'Unit Name'},
         'capacity-table': {'label': 'Capacity'}, // TODO this isn't getting populated ...lets fix summary soon!
         'status': {'label': 'Status'}, 
         'prod-oil': {'label': 'Production (million bbl/y)'},

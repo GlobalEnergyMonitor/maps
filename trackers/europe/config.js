@@ -98,6 +98,7 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
+        'unit-name': {'label': 'Unit Name'},
         'status': {'label': 'Status'}, 
         'unit-name': {'label': 'Unit Name'},
         'capacity-table': {'label': 'Capacity'}, // interim until summary capacity can be customized by tracker

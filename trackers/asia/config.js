@@ -97,8 +97,8 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        'status': {'label': 'Status'}, 
         'unit-name': {'label': 'Unit Name'},
+        'status': {'label': 'Status'}, 
         'capacity-table': {'label': 'Capacity'}, // interim until summary capacity can be customized by tracker
         'prod-gas': {'label': 'Production (Million m³/y)'},
         'prod-year-gas': {'label': 'Production Year - Gas'},

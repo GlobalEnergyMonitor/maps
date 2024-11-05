@@ -160,10 +160,14 @@ var config = {
         'Status': ['status'],
         'Province/State': ['subnat']
     },
+
+    // combine name and unit-name into one variable so that it can be the heading of the detail view card
+    
+
     detailView: {
         'name': {'display': 'heading'},
-        // 'status': {'lable': 'Status'}, // THIS NEEDS TO BE FIXED it breaks the click option saying not included
-        // 'prod-gcmt': {'label': 'Production (MTPA)'}, // if its GCMT or GOGET should be 
+        'unit-name': {'label': 'Unit Name'},
+        'status': {'label': 'Status'}, 
         'capacity-details': {'label': 'Project Level Capacity'}, // interim until summary capacity can be customized by tracker
         'prod-oil': {'label': 'Production (Million bbl/y)'},
         'prod-gas': {'label': 'Production (Million m³/y)'},
