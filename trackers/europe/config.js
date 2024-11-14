@@ -1,17 +1,17 @@
 var config = {
-    json: 'compilation_output/europe_2024-11-05.geojson',
+    json: 'compilation_output/europe_2024-11-13.geojson',
     geometries: ['Point','LineString'],
     center: [8, 30],
     zoomFactor: 1.9,
     img_detail_zoom: 10,
     statusField: 'status-legend',
     statusDisplayField: 'status',
-    linkField: 'id',
     color: {
         field: 'tracker-custom',
         values: {
             'GOGPT': 'blue',
             'GOGET-oil': 'red',
+            'GGIT-euhy': 'green',
             'GGIT-eu': 'green',
             'GGIT-import':'green',
             'GGIT-export':'green',
@@ -23,8 +23,8 @@ var config = {
     filters: [
         {
             field: 'tracker-custom',
-            values: ["GOGPT",  "GGIT-eu", "GGIT-import", "GGIT-export", "GOGET-oil", ], 
-            values_labels: ['gas power units', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'gas extraction areas',],
+            values: ["GOGPT",  "GGIT-euhy", "GGIT-eu","GGIT-import", "GGIT-export", "GOGET-oil", ], 
+            values_labels: ['gas power units', 'hydrogen gas pipelines', "methane gas pipelines",'LNG import terminals', 'LNG export terminals', 'gas extraction areas',],
             primary: true
         },
         {
@@ -82,9 +82,9 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-gas', 'prod-year-gas', 'tracker-display', 'fuel'],
-        labels: ['Name','Unit','Owner', 'Parent','Capacity (MW)', 'Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)', 'Type', 'Fuel'],
-        clickColumns: ['project'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-gas', 'prod-year-gas', 'fuel', 'tracker-display'],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)', 'Fuel', 'Facility Type'],
+        clickColumns: ['name'],
         rightAlign: ['unit','capacity','prod-gas','start-year','prod-year-gas'], 
         removeLastComma: ['areas'], 
 
@@ -98,10 +98,8 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        'unit-name': {'label': 'Unit Name'},
-        'status': {'label': 'Status'}, 
-        'unit-name': {'label': 'Unit Name'},
-        'capacity-table': {'label': 'Capacity'}, // interim until summary capacity can be customized by tracker
+        'status': {'label': 'Unit Status'}, 
+        'capacity-table': {'label': 'Unit Capacity'},
         'prod-gas': {'label': 'Production (Million m³/y)'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
         'start-year': {'label': 'Start Year'},
@@ -111,7 +109,21 @@ var config = {
         'tracker-display': {'label': 'Type'},
         'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
-        // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
-    }
+    },
+
+        /* radius associated with minimum/maximum value on map */
+    // minRadius: 2,
+    // maxRadius: 10,
+    minLineWidth: 1,
+    maxLineWidth: 3,
+
+    // /* radius to increase min/max to under high zoom */
+    // highZoomMinRadius: 4,
+    // highZoomMaxRadius: 32,
+    // highZoomMinLineWidth: 4,
+    // highZoomMaxLineWidth: 32,
+    
+    showCapacityTable: true,
+    showAllPhases: true
 
 };

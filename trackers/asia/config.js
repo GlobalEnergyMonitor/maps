@@ -1,13 +1,13 @@
 var config = {
 
-    json: 'compilation_output/asia_2024-11-05.geojson',
+    json: 'compilation_output/asia_2024-11-13.geojson',
     geometries: ['Point','LineString'],
     center: [60, 20],
     zoomFactor: 1.9,
     img_detail_zoom: 10,
     statusField: 'status-legend',
     statusDisplayField: 'status',
-    allCountrySelect: false,
+    // allCountrySelect: false,
 
     color: {
         field: 'tracker-custom',
@@ -72,18 +72,16 @@ var config = {
     //     // }
     // },
     nameField: 'name',
-    linkField: 'id',  
-
     countryFile: 'countries.js',
     countryField: 'areas',
     //if multicountry, always end values with a comma
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker-display','name','unit-name', 'fuel','owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year',  'prod-gas', 'prod-year-gas'],
-        labels: ['Type', 'Name','Unit', 'Fuel','Owner', 'Parent','Capacity (MW)', 'Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)'],
+        values: ['name','unit-name','owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year',  'prod-gas', 'prod-year-gas', 'fuel', 'tracker-display',],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)','Fuel', 'Facility Type'],
 
-        clickColumns: ['project'],
+        clickColumns: ['name'],
         rightAlign: ['unit','capacity', 'prod-gas','start-year','prod-year-gas'], 
         removeLastComma: ['areas'], 
   
@@ -97,9 +95,8 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        'unit-name': {'label': 'Unit Name'},
-        'status': {'label': 'Status'}, 
-        'capacity-table': {'label': 'Capacity'}, // interim until summary capacity can be customized by tracker
+        'status': {'label': 'Unit Status'}, 
+        'capacity-table': {'label': 'Unit Capacity'},
         'prod-gas': {'label': 'Production (Million m³/y)'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
         'start-year': {'label': 'Start Year'},
@@ -109,6 +106,21 @@ var config = {
         'tracker-display': {'label': 'Type'},
         'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
-    }
+    },
+
+        /* radius associated with minimum/maximum value on map */
+    // minRadius: 2,
+    // maxRadius: 10,
+    minLineWidth: 1,
+    maxLineWidth: 3,
+
+    // /* radius to increase min/max to under high zoom */
+    // highZoomMinRadius: 4,
+    // highZoomMaxRadius: 32,
+    // highZoomMinLineWidth: 4,
+    // highZoomMaxLineWidth: 32,
+    
+    showCapacityTable: true,
+    showAllPhases: true
 
 };
