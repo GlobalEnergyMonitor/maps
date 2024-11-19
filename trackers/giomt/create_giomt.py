@@ -78,6 +78,11 @@ def fix_coords(df):
 
     return df
 
+def scaling_cap(df):
+    df['scaling_cap'] = df['Design capacity (ttpa)']
+    print(df.columns)
+    return df
+
 def fix_status_inferred(df):
 
     print(f"Statuses before: {set(df['Operating status'].to_list())}")
@@ -198,6 +203,7 @@ df = filter_cols(df)
 df = fix_coords(df)
 df = fix_status_inferred(df)
 df = fill_nans(df)
+df = scaling_cap(df)
 df = rename_cols(df)
 df = fix_regions(df)
 # df = harmonize_countries(df, countries) # find out if they are valid and how to handle regions TODO
