@@ -943,8 +943,13 @@ function updateSummary() {
     });
 
     if (config.showMaxCapacity) {
-        $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString())
-        $('#capacity_summary').html("Maximum " + config.capacityLabel);
+        if (config.maxCapacityLabel) {
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);
+        } else {
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#capacity_summary').html("Maximum " + config.capacityLabel);
+        }
     }
 
     $('#spinner-container-filter').addClass('d-none')

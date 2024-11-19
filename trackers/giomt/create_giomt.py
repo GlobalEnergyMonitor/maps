@@ -35,11 +35,7 @@ def set_up_df(input):
     for col in df.columns:
         
         print(col)
-        # print(col.strip())
-        # # col = col.replace(' ', '.')
-        # print(col)
 
-        
         if 'ref' in col.lower():
             print('ref found pass')
         else:  
@@ -202,8 +198,8 @@ df = set_up_df(input_file_csv)
 df = filter_cols(df)
 df = fix_coords(df)
 df = fix_status_inferred(df)
-df = fill_nans(df)
 df = scaling_cap(df)
+df = fill_nans(df)
 df = rename_cols(df)
 df = fix_regions(df)
 # df = harmonize_countries(df, countries) # find out if they are valid and how to handle regions TODO
