@@ -2,22 +2,22 @@
 
 
 var config = {
-    json: 'data/latam_2024-10-12.geojson',
+    json: 'compilation_output/latam_2024-11-13.geojson',
     geometries: ['Point','LineString'],
     center: [-70, -20],
     zoomFactor: 1.8,
     img_detail_zoom: 10,
     statusField: 'status-legend',
     statusDisplayField: 'status',
-    // linkField: 'id',
     color: {
-        field: 'tracker-acro',
+        field: 'tracker-custom',
         values: {
             'GOGPT': 'blue',
-            'GOGET': 'red',
+            'GOGET-oil': 'red',
             'GOIT': 'green',
             'GGIT': 'green',
-            'GGIT-lng':'green',
+            'GGIT-import':'green',
+            'GGIT-export':'green',
             'GCPT': 'blue',
             'GCMT': 'red',
             'GCTT': 'green',
@@ -32,9 +32,9 @@ var config = {
     //filter values should have no spaces
     filters: [
         {
-            field: 'tracker-acro',
-            values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
-            values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
+            field: 'tracker-custom',
+            values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-import", "GGIT-export", "GCTT", "GOGET-oil", "GCMT"], 
+            values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
             primary: true
         },
         {
@@ -143,12 +143,12 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-coal','prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas'],
-        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (million tonnes coal/y)', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-coal','prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'tracker-display',],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (million tonnes coal/y)', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Facility Type'],
         
         // 'capacity-oil', 'capacity-gas'
         // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
-        clickColumns: ['project'],
+        clickColumns: ['name'],
         rightAlign: ['unit','capacity','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
         removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
@@ -167,8 +167,8 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        'capacity-table': {'label': 'Capacity'}, // TODO this isn't getting populated ...lets fix summary soon!
-        'status': {'label': 'Status'}, // TODO THIS NEEDS TO BE FIXED it breaks the click option saying not included
+        'status': {'label': 'Unit Status'}, 
+        'capacity-table': {'label': 'Unit Capacity'},        
         'prod-oil': {'label': 'Production (million bbl/y)'},
         'prod-gas': {'label': 'Production (million m³/y)'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
@@ -182,5 +182,19 @@ var config = {
         'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
     },
-showCapacityTable: true,
+
+        /* radius associated with minimum/maximum value on map */
+    // minRadius: 2,
+    // maxRadius: 10,
+    minLineWidth: 1,
+    maxLineWidth: 3,
+
+    // /* radius to increase min/max to under high zoom */
+    // highZoomMinRadius: 4,
+    // highZoomMaxRadius: 32,
+    // highZoomMinLineWidth: 4,
+    // highZoomMaxLineWidth: 32,
+    
+    showCapacityTable: true,
+    showAllPhases: true
 };

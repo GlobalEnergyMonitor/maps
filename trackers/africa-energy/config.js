@@ -1,20 +1,20 @@
 var config = {
-    json: './data/africa_2024-09-19.geojson',
+    json: './data/africa_2024-11-13.geojson',
     geometries: ['Point','LineString'],
-    center: [10, 0],
-    zoomFactor: 1.9,
-    img_detail_zoom: 10,
+    center: [30, 0],
+    zoomFactor: 1.5,
     statusField: 'status-legend',
     statusDisplayField: 'status',
     // linkField: 'id',
     color: {
-        field: 'tracker-acro',
+        field: 'tracker-custom',
         values: {
             'GOGPT': 'blue',
-            'GOGET': 'red',
+            'GOGET-oil': 'red',
             'GOIT': 'green',
             'GGIT': 'green',
-            'GGIT-lng':'green',
+            'GGIT-import':'green',
+            'GGIT-export':'green',
             'GCPT': 'blue',
             'GCMT': 'red',
             'GCTT': 'green',
@@ -29,9 +29,9 @@ var config = {
     //filter values should have no spaces
     filters: [
         {
-            field: 'tracker-acro',
-            values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-lng", "GCTT", "GOGET", "GCMT"], 
-            values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
+            field: 'tracker-custom',
+            values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-import", "GGIT-export","GCTT", "GOGET-oil", "GCMT"], 
+            values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
             primary: true
         },
         {
@@ -45,7 +45,7 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     
-    capacityDisplayField: 'capacity-display',
+    capacityDisplayField: 'capacity-table',
     capacityLabel: '',
     //interpolate: ["cubic-bezier", 0, 0, 0, 1],
     //can be string for single value, or hash. always single value is showMaxCapacity is true
@@ -103,36 +103,32 @@ var config = {
     //         }
     // },
     //productionLabel NEED a productionLabel
-    showMaxCapacity: false,
+    // showMaxCapacity: false,
 
     assetFullLabel: "Units / Phases / Pipelines", 
-    //can be string for single value, or hash
-    // not using assetLabel for now TODO
-    assetLabel: '',
-    // assetLabel: {
-    //     // field: 'tracker-custom',
-    //     // values: {
-    //     //     'GCPT': 'units',
-    //     //     'GOGPT': 'units',
-    //     //     'GBPT': 'units',
-    //     //     'GNPT': 'units',
-    //     //     'GSPT': 'phases',
-    //     //     'GWPT':	'phases',
-    //     //     'GHPT':	'units',
-    //     //     'GGPT':	'units',
-    //     //     'GOGET - oil': 'areas',
-    //     //     'GOGET - gas': 'areas',
-    //     //     'GOIT': 'projects',
-    //     //     'GGIT': 'projects',
-    //     //     'GGIT - import': 'projects',
-    //     //     'GGIT - export': 'projects',
-    //     //     'GCMT': 'projects',
-    //     //     'GCTT': 'projects'
-    //     // }
-    // },
+    // can be string for single value, or hash
+    assetLabel: {
+        field: 'tracker-custom',
+        values: {
+            'GCPT': 'units',
+            'GOGPT': 'units',
+            'GBPT': 'units',
+            'GNPT': 'units',
+            'GSPT': 'phases',
+            'GWPT':	'phases',
+            'GHPT':	'units',
+            'GGPT':	'units',
+            'GOGET - oil': 'areas',
+            'GOGET - gas': 'areas',
+            'GOIT': 'projects',
+            'GGIT': 'projects',
+            'GGIT - import': 'projects',
+            'GGIT - export': 'projects',
+            'GCMT': 'projects',
+            'GCTT': 'projects'
+        }
+    },
     nameField: 'name',
-//    linkField: 'id',  
-
     countryFile: 'countries.js',
     allCountrySelect: true, // TODO bug when clicking Africa nothing gets selected but clicking all it does 
     countryField: 'areas',
@@ -140,13 +136,11 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['tracker-display','name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas'],
-        labels: ['Type', 'Name','Unit','Owner', 'Parent','Capacity (MW)', 'Status','Country/Area(s)','Start year', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)'],
-        
-        // 'capacity-oil', 'capacity-gas'
-        // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
-        clickColumns: ['project'],
-        rightAlign: ['unit','capacity','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'tracker-display',],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Facility Type'],
+
+        clickColumns: ['name'],
+        rightAlign: ['unit','capacity-table','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
         removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
         // appendValue: {'capacity': "capItemLabel"},
@@ -162,11 +156,14 @@ var config = {
         'Status': ['status'],
         'Province/State': ['subnat']
     },
+
+    // combine name and unit-name into one variable so that it can be the heading of the detail view card
+    
+
     detailView: {
         'name': {'display': 'heading'},
-        // 'status': {'lable': 'Status'}, // THIS NEEDS TO BE FIXED it breaks the click option saying not included
-        // 'prod-gcmt': {'label': 'Production (MTPA)'}, // if its GCMT or GOGET should be 
-        'capacity-details': {'label': 'Project Level Capacity'}, // interim until summary capacity can be customized by tracker
+        'status': {'label': 'Unit Status'}, 
+        'capacity-table': {'label': 'Unit Capacity'},
         'prod-oil': {'label': 'Production (Million bbl/y)'},
         'prod-gas': {'label': 'Production (Million m³/y)'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
@@ -178,7 +175,21 @@ var config = {
         'tracker-display': {'label': 'Type'},
         'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
-        // 'areas-display': {'display': 'location'} // TODO pull out first one only if ; in it
-    }
+    },
+        /* radius associated with minimum/maximum value on map */
+    // minRadius: 2,
+    // maxRadius: 10,
+    minLineWidth: 1,
+    maxLineWidth: 3,
+
+    // /* radius to increase min/max to under high zoom */
+    // highZoomMinRadius: 4,
+    // highZoomMaxRadius: 32,
+    // highZoomMinLineWidth: 4,
+    // highZoomMaxLineWidth: 32,
+    
+    showCapacityTable: true,
+    showAllPhases: true
+    
 
 };
