@@ -93,6 +93,7 @@ def fix_status_inferred(df):
 
     return df
 
+
 def rename_cols(df):
     df = df.copy()
     df = df.rename(columns=str.lower)
@@ -103,6 +104,38 @@ def rename_cols(df):
     print(df.info())
     
     return df
+def is_number(n):
+    is_number = True
+    try:
+        num = float(n)
+        # check for "nan" floats
+        is_number = num == num   # or use `math.isnan(num)`
+    except ValueError:
+        is_number = False
+    return is_number
+
+def check_and_convert_int(x):
+    if is_number(x):
+        return "{:,}".format(int(x))
+        # formatted = "{:,}".format(number)
+    else:
+        return np.nan
+    
+def fill_nans(df):
+    df = df.copy()
+    floats = ['Design capacity (ttpa)',
+    'Total reserves (proven and probable, thousand metric tonnes)', 
+    'Total resource (inferred, indicated and measured, thousand metric tonnes)']
+    
+    for col in floats:
+        print(set(df[col].to_list()))
+        df[col] = df[col].apply(lambda x: check_and_convert_int(x))
+        df[col] = df[col].replace(np.nan, 'unknown')
+        df[col] = df[col].fillna('unknown')
+        print(set(df[col].to_list()))
+    return df
+
+    
 def fix_regions(df):
     df = df.copy()
     
@@ -164,6 +197,7 @@ df = set_up_df(input_file_csv)
 df = filter_cols(df)
 df = fix_coords(df)
 df = fix_status_inferred(df)
+df = fill_nans(df)
 df = rename_cols(df)
 df = fix_regions(df)
 # df = harmonize_countries(df, countries) # find out if they are valid and how to handle regions TODO
