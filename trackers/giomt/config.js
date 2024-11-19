@@ -116,7 +116,7 @@ var config = {
     maxCapacityLabel: 'Design Capacity (TTPA)',
 
     /* radius associated with minimum/maximum value on map */
-    minRadius: 4,
-    maxRadius: 12,
+    minRadius: 3,
+    maxRadius: 15,
 
 }
