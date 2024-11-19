@@ -112,4 +112,11 @@ var config = {
 
     },
     showCapacityTable: false, 
+    showMaxCapacity: false,
+
+
+    /* radius associated with minimum/maximum value on map */
+    minRadius: 4,
+    maxRadius: 12,
+
 }
