@@ -2,7 +2,7 @@ var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
     geometries: ['Point'],
-    csv: 'output/data-2024-11-18.csv',
+    csv: 'output/data-2024-11-19.csv',
     /* zoom level to set map when viewing all phases */
     phasesZoom: 10,
     /* initial load zoom multiplier */
@@ -112,8 +112,8 @@ var config = {
 
     },
     showCapacityTable: false, 
-    showMaxCapacity: false,
-
+    showMaxCapacity: true,
+    maxCapacityLabel: 'Design Capacity (TTPA)',
 
     /* radius associated with minimum/maximum value on map */
     minRadius: 4,
