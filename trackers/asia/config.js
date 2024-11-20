@@ -1,6 +1,6 @@
 var config = {
 
-    json: 'compilation_output/asia_2024-11-13.geojson',
+    json: 'compilation_output/asia_2024-11-19.geojson',
     geometries: ['Point','LineString'],
     center: [60, 20],
     zoomFactor: 1.9,
@@ -34,8 +34,7 @@ var config = {
             field: 'status-legend',
             label: 'Status',
             values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved', 'not-found'],
-            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
-
+            values_labels: ['Operating','Proposed+','Pre-construction+', 'Construction+','Retired+','Cancelled','Mothballed+','Shelved', 'Not Found']
         },
 
     ],
