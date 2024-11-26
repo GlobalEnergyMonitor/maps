@@ -16,6 +16,7 @@ from datetime import date
 import os
 from config import countries
 
+pd.options.display.float_format = '{:.0f}'.format
 trackers_to_update = 'Iron-Ore'
 # Get today's date
 today_date = date.today()
@@ -117,10 +118,18 @@ def is_number(n):
 
 def check_and_convert_int(x):
     if is_number(x):
-        return "{:,}".format(int(x))
+        return '{:.0f}'.format(int(x)) # no decimal
+        # return "{:,}".format(int(x))
         # formatted = "{:,}".format(number)
     else:
-        return np.nan
+        return np.nan # 
+
+def remove_decimal_int(x):
+    if is_number(x):
+        x = int(str(x).replace('.0',''))
+        print(x)
+        return x
+
     
 def fill_nans(df):
     df = df.copy()
@@ -129,11 +138,16 @@ def fill_nans(df):
     'Total resource (inferred, indicated and measured, thousand metric tonnes)']
     
     for col in floats:
-        print(set(df[col].to_list()))
+        # print(set(df[col].to_list()))
         df[col] = df[col].apply(lambda x: check_and_convert_int(x))
-        df[col] = df[col].replace(np.nan, 'unknown')
-        df[col] = df[col].fillna('unknown')
-        print(set(df[col].to_list()))
+        # df[col] = df[col].apply(lambda x: remove_decimal_int(x))
+        # print(df.sort_values(col)[[col, 'Asset name (English)']])
+        # df[col] = df[col].replace(np.nan, 'unknown')
+        # df[col] = df[col].fillna('unknown')
+        # set_col_data = set(df[col].to_list())
+        # print(set_col_data)
+        # sort max to min each col
+        input('check only the unknown is string rest sort correct')
     return df
 
     
