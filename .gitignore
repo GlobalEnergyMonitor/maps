@@ -7,4 +7,12 @@ npm-debug.log
 *.zip
 
 *.dir
-
+*.pkl
+*.xls
+*.xlsx
+*.txt
+*compilation_output
+*test_results
+*test/
+*local_pkl/
+*issues/
