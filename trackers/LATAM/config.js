@@ -2,10 +2,10 @@
 
 
 var config = {
-    json: 'compilation_output/latam_2024-11-19.geojson',
+    json: 'data/latam_2024-12-16.geojson',
     geometries: ['Point','LineString'],
-    center: [-70, -20],
-    zoomFactor: 1.8,
+    center: [-90, -20],
+    zoomFactor: 2.3,
     img_detail_zoom: 10,
     statusField: 'status-legend',
     statusDisplayField: 'status',
