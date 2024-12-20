@@ -836,7 +836,7 @@ def capacity_conversions(cleaned_dict_map_by_one_gdf):
         gdf_converted['ea_scaling_capacity'] = gdf_converted.apply(lambda row: conversion_equal_area(row), axis=1) # square root(4 * capacity / pi)
 
         gdf_converted['scaling_capacity'] = gdf_converted.apply(lambda row: conversion_multiply(row), axis=1)
-        gdf_converted['capacity-table'] = gdf_converted.apply(lambda row: workaround_display_cap(row, 'capacity'), axis=1)
+        gdf_converted['capacity-table', 'units-of-m'] = gdf_converted.apply(lambda row: workaround_table_float_cap_units(row, 'capacity'), axis=1)
         # below doesn't work cap details was empty all the time
         gdf_converted = workaround_no_sum_cap_project(gdf_converted) # adds capacity-details for singular maps we can just disregard
         # TODO nov 13 test this I think it now adds all cap for a project and applies the original units to it 
@@ -1567,7 +1567,7 @@ def gather_all_about_pages(prev_key_dict, prep_df, new_release_date, previous_re
 
                                 # about_df_dict_by_map[mapname] = (f'About {new_tracker}', about_data)
                                 print(f'Found About page for {tracker}')
-             
+
                                 break
                             
                             except HttpError as e:
@@ -1611,6 +1611,12 @@ def gather_all_about_pages(prev_key_dict, prep_df, new_release_date, previous_re
                             
                 print('test that the indents are the same as before for about_df_dict_by_map[mapname] = list_of_tuples_holding_about_page_name_df')
                 about_df_dict_by_map[mapname] = list_of_tuples_holding_about_page_name_df
+                
+                for tuple in list_of_tuples_holding_about_page_name_df:
+                    if tuple[0] == 'About Hydropower':
+                
+                        input('about page for hydro')
+                
                 #mapname "main about"
                 with open(f'local_pkl/about_df_dict_by_map_{iso_today_date}.pkl', 'wb') as f:
                     pickle.dump(about_df_dict_by_map, f)

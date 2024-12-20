@@ -1,7 +1,7 @@
 var config = {
     geometries: ['Point','LineString'],
 
-    json: 'compilation_output/ggit_2024-10-08.geojson',
+    json: 'data/ggit_2024-12-20.geojson',
     color: {
         field: 'status-legend',
         values: {
