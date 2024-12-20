@@ -4,8 +4,8 @@
 var config = {
     json: 'data/latam_2024-12-16.geojson',
     geometries: ['Point','LineString'],
-    center: [-90, -20],
-    zoomFactor: 2.3,
+    center: [-90, -14],
+    zoomFactor: 1.7,
     img_detail_zoom: 10,
     statusField: 'status-legend',
     statusDisplayField: 'status',
