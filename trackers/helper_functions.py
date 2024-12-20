@@ -1233,6 +1233,18 @@ def workaround_display_cap(row, cap_col):
         result = ''
     return result
     
+def workaround_table_float_cap_units(row, cap_col):
+    cap = row[cap_col] 
+    cap = check_and_convert_float(cap)
+    if pd.isna(cap):
+        cap = '' 
+    units_of_m = str(row['original_units'])
+    if isinstance(cap, (int, float)):
+        cap = float((round(cap, 3))) # handle rounding and converting from string to float to round later 
+    else:
+        result = ''
+    return cap, units_of_m
+    
     
 
 # def workaround_display_cap_total(row):

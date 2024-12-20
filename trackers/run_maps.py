@@ -100,7 +100,7 @@ for tracker in trackers_to_update:
             cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
             
             cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
-            one_gdf_by_maptype = workarounds_eg_interim(cleaned_dict_by_map_one_gdf_with_better_countries)
+            one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
             one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
             final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
             final_count(final_dict_gdfs)
@@ -207,7 +207,7 @@ for tracker in trackers_to_update:
             cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
             
             cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
-            one_gdf_by_maptype = workarounds_eg_interim(cleaned_dict_by_map_one_gdf_with_better_countries)
+            one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
             one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
             final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
             final_count(final_dict_gdfs)
@@ -255,7 +255,7 @@ for tracker in trackers_to_update:
             cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
             
             cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
-            one_gdf_by_maptype = workarounds_eg_interim(cleaned_dict_by_map_one_gdf_with_better_countries)
+            one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
             one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
             final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
             final_count(final_dict_gdfs)
@@ -300,12 +300,12 @@ for tracker in trackers_to_update:
         gdf_by_map = capacity_conversions(gdf_by_map)
         gdf_by_map = map_ready_statuses(gdf_by_map) # handles for map statuses and inferred
         gdf_by_map = map_ready_countries(gdf_by_map) # handles for multiple areas 
-        gdf_by_map = workarounds_eg_interim(gdf_by_map) # mainly handles multiple country sitatuions for details card 
+        gdf_by_map = workarounds_eg_interim_goget_gcmt(gdf_by_map) # mainly handles multiple country sitatuions for details card 
         gdf_by_map = last_min_fixes(gdf_by_map) # likely do not need this
         
         # can print map file here or can try what we have below with the folders set up above
         final_dict_gdfs = create_map_file(gdf_by_map)
-        final_count(final_dict_gdfs)
+        # final_count(final_dict_gdfs)
 
         final_dict_gdfs = input_to_output_all(final_dict_gdfs, f'{output_folder}{tracker}-map-file-{iso_today_date}')
         # test_stats(gdf) 
@@ -353,7 +353,7 @@ for tracker in trackers_to_update:
         renamed_one_gdf = map_ready_statuses(renamed_one_gdf)
         
         renamed_one_gdf = map_ready_countries(renamed_one_gdf)
-        renamed_one_gdf = workarounds_eg_interim(renamed_one_gdf)
+        renamed_one_gdf = workarounds_eg_interim_goget_gcmt(renamed_one_gdf)
         renamed_one_gdf = last_min_fixes(renamed_one_gdf) 
         print(f'This is final gdf keys for {tracker}: {one_gdf_by_maptype}')
         final_dict_gdfs = create_map_file(renamed_one_gdf)

@@ -17,18 +17,18 @@ goget_orig_tab = ['Main data','Production and reserves']
 augmented = True
 data_filtering = True
 
-map_create = False # work on subnat
-dwlnd_create = True
-about_create = True # read api error
-refine = True 
+map_create = True # work on subnat
+dwlnd_create = False
+about_create = False # read api error
+refine = False 
 # summary_create = False
 map_to_test = '' # change if testing a single map not a regional one
-local_copy = True  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
+local_copy = False  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
 
 run_pre_tests = False # TODO need to add so that there is utility here
 run_post_tests = False
 
-final_formatting = True
+final_formatting = False
 
 
 # Get today's date
@@ -206,13 +206,13 @@ testing_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/'
 
 about_page_ggit_goit = {
     "LNG Terminals": "1siAA_1pf9rkK7Ytx3bT-diRkDgJ0TN-bCDSX4NJQXg8",
-    "Gas Pipelines": "1rcFIqHjVpZ7UFNdP1TE7BeDKmraOjXof8gLtZ49G77U",
+    "Gas Pipelines": "1llzDMAXX7xJn3j4d6JQ2UjebgVpRFDBkZ4QTtUPmSHg",
     "Oil Pipelines": "12bhnTJ5kaia187ZvX9qWshfs4btmZuTpzPj2Jz7ct6Y", 
 }
 
 goit_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GOIT-Oil-NGL-Pipelines-2024-10-29.geojson'#'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GOIT-Oil-NGL-Pipelines-2024-06 copy.geojson'
 ggit_lng_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-LNG-Terminals-2024-09 DATA TEAM COPY.geojson'
-ggit_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Hydrogen-Pipelines-2024-11-05.geojson' #'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2023-12 copy.geojson'
+ggit_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2024-12.geojson' #'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2023-12 copy.geojson'
 
 
 # fixed routes and capacity conversions goit (capacity boed) and ggit (route) Oct 23rd 2024
