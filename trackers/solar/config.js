@@ -104,9 +104,9 @@ var config = {
         'Country': {'display': 'location'},
 
     },
-    // showCapacityTable: false, 
-
     minRadius: 3,
     maxRadius: 10,
+    statusField: 'Status', // this strays from default, make it all the same!!
+    statusDisplayField: 'Status', // this strays from default, make it all the same!!
 
 }

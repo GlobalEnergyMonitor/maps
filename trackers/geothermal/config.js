@@ -80,7 +80,8 @@ var config = {
     */
     detailView: {
         'project_name': {'display': 'heading'},
-        'status': {'label': 'Status'},
+        // does not need this workaround for cap status bug
+        // 'status': {'label': 'Status'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'start_year': {'label': 'Start Year'},
