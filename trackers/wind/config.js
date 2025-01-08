@@ -92,8 +92,6 @@ var config = {
     */
     detailView: {
         'Project Name': {'display': 'heading'},
-        'Status': {'label': 'Status'},
-        'Capacity (MW)': {'label': 'Capacity (MW)'},
         'Owner': {'label': 'Owner'},
         'Operator': {'label': 'Operator'},
         'Start Year': {'label': 'Start Year'},
@@ -103,5 +101,8 @@ var config = {
         'Country': {'display': 'location'},
 
     },
-    showCapacityTable: false, 
+
+    statusField: 'Status', // this strays from default, make it all the same!!
+    statusDisplayField: 'Status', // this strays from default, make it all the same!!
+
 }

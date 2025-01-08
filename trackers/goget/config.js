@@ -93,6 +93,5 @@ var config = {
         'province': {'display': 'location'},
         'country': {'display': 'location'}
     },
-    showCapacityTable: false,
     countryFile: './countries.js'
 }

@@ -1087,10 +1087,6 @@ function displayDetails(features) {
     var location_text = '';
     Object.keys(config.detailView).forEach((detail) => {
         // replace apostrophe in displayDetails to resolve invalid or unexpected token
-        // features[0].properties[detail] = features[0].properties[detail].replace("'", "\'")
-        // console.log(config.detailView[detail])
-        console.log(config.statusField)
-        console.log(features[0].properties[config.statusField])
 
         if (Object.keys(config.detailView[detail]).includes('display')) {
 
@@ -1169,6 +1165,10 @@ function displayDetails(features) {
                     // detail_text += features[0].properties[detail] + '<br/>';
                 }
             }
+            else {
+                console.log(features[0].properties[detail])
+                console.log('outer else issue')
+            }
             
 
         }
@@ -1186,7 +1186,6 @@ function displayDetails(features) {
     // Build capacity summary
     if (capacityLabel != ''){
         if (features.length > 1) { 
-
         let filterIndex = 0;
             for (const[index, filter] of config.filters.entries()) {
                 if (filter.field == config.statusField) {
@@ -1217,7 +1216,7 @@ function displayDetails(features) {
 
             Object.keys(count).forEach((k) => {
                 if (config.color.field == config.statusField){ 
-                
+
                     if (count[k] != 0) {
                         detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
                     }
