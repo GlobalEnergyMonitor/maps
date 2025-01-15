@@ -44,6 +44,66 @@ start_time = time.time()  # Record the start time
 # ADAPT AET FUNCTIONS FOR ALL MULTI TRACKER MAPS #
 ################
 
+def what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab):
+    needed_map_and_tracker_dict = {} # map: (trackers, geo, fuel)
+    # TODO un comment after it passes tests
+    # if local_copy:
+    #     with open('local_pkl/map_tab_df.pkl', 'rb') as f:
+    #         map_tab_df = pickle.load(f)
+    #     print("DataFrame have been loaded from map_tab_df.pkl")
+    # else: 
+    map_tab_df = gspread_access_file_read_only(multi_tracker_log_sheet_key, map_tab)
+    # # printf'Trackers with updates to be incorporated: {trackers_to_update}')
+
+    with open('local_pkl/map_tab_df.pkl', 'wb') as f:
+        pickle.dump(map_tab_df, f)
+    print("DataFrame have been saved to map_tab_df.pkl")
+
+    print("Now go through and create the needed tracker dict based on new data in trackers to update.")
+    map_tab_df_copy = map_tab_df.copy()
+    for tracker in trackers_to_update:
+        for row in map_tab_df.index:
+            # use the tracker to filter the map_tab_df df for only rows that contain the tracker in source column
+            print(map_tab_df)
+            print(map_tab_df.info())
+
+            # input('This is map_tab_df df')
+            sources = map_tab_df.loc[row, 'source'].split(',')
+            geo = map_tab_df.loc[row, 'geo'].split(',')
+            fuel = map_tab_df.loc[row, 'fuel'].split(',')
+            mapname = map_tab_df.loc[row, 'mapname']
+            # print(sources)
+            # input('this is sources column split on comma')
+            if tracker in sources:
+                needed_map_and_tracker_dict[mapname] = (sources, geo, fuel)
+
+            else:
+                map_tab_df.drop(row, inplace=True)
+    print(map_tab_df)
+    input('This is map_tab_df_copy after dropping irrelevant rows')
+    print(needed_map_and_tracker_dict)
+    input('this is dict')
+        # for row in map_tab_df.index:
+        #     if tracker in row['source'].to_list():
+            # needed_map_and_tracker_dict[row['mapname']] = (row['source'],row['geo'],row['fuel'])
+                
+                
+        # filter out the map tracker tab df 
+        # so that we only have the row that matches the tracker to be updated
+        # and also find the tracker names for the map to be updated beyond the new tracker data but existing tracker data as well
+        # map_log_df_sel = map_depend_df[map_depend_df['official release tab name'] == tracker]
+        # for col in map_log_df_sel.columns:
+        #     if 'yes' in map_log_df_sel[col].values:
+        #         map_log_df_map_sel = map_log_df[map_log_df[col] == 'yes']
+        #         tracker_col_index = map_log_df.columns.get_loc('official release tab name')
+        #         tracker_name_col_map_sel = map_log_df.columns[tracker_col_index]
+        #         list_of_trackers_relevant_to_map = map_log_df_map_sel[tracker_name_col_map_sel].to_list()
+        #         needed_map_and_tracker_dict[col] = list_of_trackers_relevant_to_map
+        #         print(f'Map {col} needs to be updated with the new data for {tracker}, and existing data for {list_of_trackers_relevant_to_map} minus {tracker}.')
+        #         # ##(input('Check this with ggit-hy')
+            
+    return needed_map_and_tracker_dict
+
 def what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab):
     needed_map_and_tracker_dict = {} # map: [trackers]
     
@@ -158,7 +218,7 @@ def folder_setup(needed_tracker_geo_by_map):
     
     for mapname, list_of_countries in needed_tracker_geo_by_map.items():
         path_test_results = gem_path + mapname + '/test_results/'
-        path_download_and_map_files = gem_path + mapname + '/compilation_output/' + iso_today_date_folder
+        path_download_and_map_files = gem_path + mapname + '/compilation_output/' # + iso_today_date_folder
         os.makedirs(path_download_and_map_files, exist_ok=True)
         os.makedirs(path_test_results, exist_ok=True)
 
@@ -307,14 +367,18 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                             with open(f'local_pkl/{mapname}_{tracker}_gdf_{iso_today_date}.pkl', 'wb') as f:
                                 pickle.dump(gdf, f)
 
+
                             print(f"GeoDataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.pkl")         
+                            if gdf['tracker-acro'].iloc[0] == 'GCTT':
+                                print(gdf)
+                                input('This is gctt gdf ... ')
                         else:
                             print('Latitude not in cols')
                             print(tracker)
                             input('check if eu pipelines eventually come up here - if so check the next inputs that they are not empty until "GeoDataFrames have been saved to"')
      
                             df_map = insert_incomplete_WKTformat_ggit_eu(df_map)
-                            gdf = convert_google_to_gdf(df_map)
+                            gdf = convert_google_to_gdf(df_map) # this drops all empty WKTformat cols
                             
                             print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
 
@@ -327,7 +391,7 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                                 pickle.dump(gdf, f)
 
                             print(f"GeoDataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.pkl")         
-                        
+                                                
                     except HttpError as e:
                         # Handle rate limit error (HTTP status 429)
                         if e.resp.status == 429:
@@ -397,8 +461,8 @@ def incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, d
     incorporated_dict_list_gdfs_by_map = {}
     incorporated_dict_list_dfs_by_map = {}
 
-    print(f'This is dict: {dict_list_gdfs_by_map}')
-    print(dict_list_gdfs_by_map.keys())
+    # print(f'This is dict: {dict_list_gdfs_by_map}')
+    # print(dict_list_gdfs_by_map.keys())
 
     for mapname, list_of_gdfs in dict_list_gdfs_by_map.items():
         list_of_gdfs_geojson = []
@@ -726,7 +790,11 @@ def rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion):
             #     print(gdf['Countries'])
             # declare which tracker we are at in the list so we can rename columns accordingly
             tracker_sel = gdf['tracker-acro'].iloc[0] # GOGPT, GGIT, GGIT-lng, GOGET
-            print(f'renamed on tracker: {tracker_sel}')
+            
+            if tracker_sel == 'GCTT':
+                print(gdf)
+                input('GCTT gdf here')
+            print(f'renaming on tracker: {tracker_sel}')
             # all_trackers.append(tracker_sel)
             # select the correct renaming dict from config.py based on tracker name
             renaming_dict_sel = renaming_cols_dict[tracker_sel]
@@ -836,11 +904,14 @@ def capacity_conversions(cleaned_dict_map_by_one_gdf):
         gdf_converted['ea_scaling_capacity'] = gdf_converted.apply(lambda row: conversion_equal_area(row), axis=1) # square root(4 * capacity / pi)
 
         gdf_converted['scaling_capacity'] = gdf_converted.apply(lambda row: conversion_multiply(row), axis=1)
-        gdf_converted['capacity-table', 'units-of-m'] = gdf_converted.apply(lambda row: workaround_table_float_cap_units(row, 'capacity'), axis=1)
+        # must be float for table to sort
+        gdf_converted['capacity-table'] = gdf_converted.apply(lambda row: pd.Series(workaround_table_float_cap(row, 'capacity')), axis=1)
+        gdf_converted['units-of-m'] = gdf_converted.apply(lambda row: pd.Series(workaround_table_units(row)), axis=1)
+
         # below doesn't work cap details was empty all the time
-        gdf_converted = workaround_no_sum_cap_project(gdf_converted) # adds capacity-details for singular maps we can just disregard
+        # gdf_converted = workaround_no_sum_cap_project(gdf_converted) # adds capacity-details for singular maps we can just disregard
         # TODO nov 13 test this I think it now adds all cap for a project and applies the original units to it 
-        gdf_converted['capacity-details'] = gdf_converted.apply(lambda row: workaround_display_cap(row, 'capacity-details'), axis=1)
+        # gdf_converted['capacity-details-unit'] = gdf_converted.apply(lambda row: workaround_display_cap(row, 'capacity-details'), axis=1)
     
         cleaned_dict_map_by_one_gdf_with_conversions[mapname] = gdf_converted
     
@@ -931,8 +1002,11 @@ def map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses):
         print(f'We are on mapname: {mapname}')
         
         # check that areas isn't empty
-        gdf['areas'] = gdf['areas'].fillna('')
         tracker_sel = gdf['tracker-acro'].iloc[0]
+        if tracker_sel == 'GCTT':
+            print(gdf['areas'])
+        gdf['areas'] = gdf['areas'].fillna('')
+
         empty_areas = gdf[gdf['areas']=='']
         if len(empty_areas) > 0:
             print(f'Check out which rows are empty for countries for map: {mapname}')
@@ -965,7 +1039,6 @@ def map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses):
         # print(len(maskt))
         # #(input('check more than just hydro')
         gdf.loc[maskt, 'areas-subnat-sat-display'] = 'multiple areas/countries'
-        print(gdf.columns)
         # print(gdf[gdf['areas-subnat-sat-display']!=''])
         # print(gdf[gdf['id']=='P0539'])
         # #(input('check subnat mult countries test')
@@ -1001,7 +1074,7 @@ def map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses):
             nan_areas = gdf[gdf['areas']=='']
             print(f'Nan areas: {len(nan_areas)}')
             # print(nan_areas)
-            ##(input('check')
+            input('check nan areas')
             issues = []
             tracker_issues = []
             for row in gdf.index:
@@ -1081,8 +1154,8 @@ def workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_co
                 
 
                 if tracker == 'GOGET':
-                    gdf.loc[row, 'capacity-table'] = ''
-                    # gdf.loc[row, 'capacity-details'] = ''
+                    gdf.loc[row, 'capacity-table'] = np.nan
+                    gdf.loc[row, 'capacity-details'] = ''
                     prod_oil = gdf.loc[row, 'prod_oil']
                     prod_gas = gdf.loc[row, 'prod_gas']
                     prod_oil = check_and_convert_float(prod_oil) # NEW TO TEST FOR ROUNDING ALL GETTING CAUGH TIN INVALID GOGET
@@ -1127,11 +1200,11 @@ def workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_co
                     #     # # print'invalid goget')
                         # TODO handle these cases and then create a test to confirm it's fixed
                 elif tracker == 'GCMT':
-                    gdf.loc[row, 'capacity-table'] = ''
-                    # gdf.loc[row, 'capacity-details'] = ''
-                    prod_coal = gdf.loc[row, 'prod-coal']
-              
-                
+                    gdf.loc[row, 'capacity-table'] = np.nan
+                    gdf.loc[row, 'capacity-details'] = ''
+                    prod_coal = gdf.loc[row, 'prod-coal']                    
+                else:
+                    continue
         one_gdf_by_maptype[mapname] = gdf 
     # # printone_gdf_by_maptype.keys())
     return one_gdf_by_maptype
@@ -1283,9 +1356,11 @@ def last_min_fixes(one_gdf_by_maptype):
         #     gdf['region'] = ''
             # # printf'No region found for gdf: {gdf["tracker"].iloc[0]} for map: {mapname}')
             
-        
+        print(gdf.columns)
+
         gdf.columns = [col.replace('_', '-') for col in gdf.columns] 
-        gdf.columns = [col.replace(' ', '') for col in gdf.columns] 
+        gdf.columns = [col.replace('  ', ' ') for col in gdf.columns] 
+        gdf.columns = [col.replace(' ', '-') for col in gdf.columns] 
 
         print(gdf.columns)
         # ##(input('check cols')
@@ -1319,9 +1394,6 @@ def last_min_fixes(one_gdf_by_maptype):
             gdf = manual_lng_pci_eu_temp_fix(gdf)
             gdf = swap_gas_methane(gdf)
         
-        gdf.fillna('', inplace=True)   
-        
-             
         one_gdf_by_maptype_fixed[mapname] = gdf
     # # printone_gdf_by_maptype_fixed.keys())
     return one_gdf_by_maptype_fixed
@@ -2085,7 +2157,7 @@ def prior_count(d):
 
             total_proj = len(df.groupby('name', as_index=False)) # plant name
             # Ensure column names are stripped of any leading/trailing spaces and are in a consistent case
-            count_unit_per = df.groupby('name', as_index=False)['id'].count()
+            count_unit_per = df.groupby('name', as_index=False)['id'].count() # have to rename first ... 
             print(f"Tracker: {df['tracker-acro'].iloc[0]}")
             print(f"Count per unit: {count_unit_per}")
             print(total_proj)
@@ -2516,7 +2588,9 @@ if run_pre_tests:
     
 if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
     print('Start augmented')
-    needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab)
+    print('TESTING what_maps_are_needed_new')
+    what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab)
+    needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab) # map_tab
     # map_country_region has the list of needed maps to be created and their countries/regions
     print(needed_map_and_tracker_dict)
     # ##(input('inspect')
@@ -2531,10 +2605,10 @@ if data_filtering: # this creates gdfs and dfs for all filtered datasets per map
     end_time = time.time()  # Record the end time
     elapsed_time = end_time - start_time  # Calculate the elapsed time
     print('Start data filtering')
-    prep_df = create_prep_file(multi_tracker_log_sheet_key, prep_file_tab) 
+    prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab) 
     conversion_df = create_conversion_df(conversion_key, conversion_tab)
     
-    priority = ['latam'] # ['africa', 'asia', 'europe', 'latam']
+    priority = [''] # ['africa', 'asia', 'europe', 'latam']
     to_pass = []
     if priority != ['']:
         for key, value in needed_tracker_geo_by_map.items():
@@ -2575,7 +2649,7 @@ if map_create:
     cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
     one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
     one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
-    print(f'This is final gdf keys for: {one_gdf_by_maptype}')
+    # print(f'This is final gdf keys for: {one_gdf_by_maptype}')
     final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
     
     final_count(final_dict_gdfs)
@@ -2659,10 +2733,10 @@ def from_orig_pkl_to_tuple_list():
     # print(list_of_dfs_dd)
     # input('check list of dfs for dd in discrepancies[f'{tracker}{mapname}']')     
     for item in list_of_dfs_map:
-        print(f'this is item in list_of_dfs_map:')
-        print(item)
-        print(f'this is tracker-acro column in item:')
-        print(item['tracker-acro'])
+        # print(f'this is item in list_of_dfs_map:')
+        # print(item)
+        # print(f'this is tracker-acro column in item:')
+        # print(item['tracker-acro'])
         # TODO look into issue
         # I think it has to do with using orig pkl not other pkl
         # input('Check above, got error saying reitred retired plus when should not have been that for tracker')
@@ -2734,7 +2808,7 @@ def robust_tests_dd():
     final_tup_list_map, final_tup_list_dd = from_final_file_to_tuple_list() # final map and dd files from this iteration of the script     
     orig_tup_list_map = from_orig_pkl_to_tuple_list() # source files from this iteration of the script, cols adjusted for map, and not
     # orig_tup_list should be equivalent to list_of_trackers below. with df to left, and tracker acro to right. 
-    discrepancies_file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/issues/output_discrepancies_dd{new_release_date} {iso_today_date}.xlsx'
+    discrepancies_file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/issues/output_discrepancies_dd_{new_release_date} {iso_today_date}.xlsx'
 
     discrepancies = {}            
     for final_tuple_dd_to_test in final_tup_list_dd: # [(dict of sheet dfs, europe), (dict of sheet dfs, africa), (dict of sheet dfs, asia), (dict of sheet dfs, latam)]. 
@@ -3014,8 +3088,10 @@ def robust_tests_dd():
         for item in discrepancies.items():
             df = item[1]
             tracker_acro = item[0]
-            df.to_excel(writer, sheet_name = f'{tracker_acro} ({len(df)})', index=False)  
-            
+            tab_name = tracker_acro.replace('-', '')
+            df.to_excel(writer, sheet_name = f'{tab_name} ({len(df)})', index=False)  
+            # df.to_excel(writer, sheet_name = f'{tracker_acro}', index=False)  
+
             
             
 def robust_tests_map():

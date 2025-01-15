@@ -40,35 +40,44 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     
-    capacityDisplayField: 'capacity-display',
-    capacityLabel: '',
+    // capacityDisplayField: 'capacity-display',
+    capacityLabel: {
+        field: 'tracker-custom',
+        values: {
+            'GOGPT': 'MW',
+            // 'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
+            'GGIT':	'bcm/y of natural gas',
+            'GGIT-import': 'MTPA of natural gas',
+            'GGIT-export': 'MTPA of natural gas',            
 
+        }
+    },
     showMaxCapacity: false,
 
     assetFullLabel: "Units / Pipelines", 
     //can be string for single value, or hash
     // not using assetLabel for now TODO
-    assetLabel: '',
+    assetLabel: 'units',
     // assetLabel: {
-    //     // field: 'tracker-custom',
-    //     // values: {
-    //     //     'GCPT': 'units',
-    //     //     'GOGPT': 'units',
-    //     //     'GBPT': 'units',
-    //     //     'GNPT': 'units',
-    //     //     'GSPT': 'phases',
-    //     //     'GWPT':	'phases',
-    //     //     'GHPT':	'units',
-    //     //     'GGPT':	'units',
-    //     //     'GOGET - oil': 'areas',
-    //     //     'GOGET - gas': 'areas',
-    //     //     'GOIT': 'projects',
-    //     //     'GGIT': 'projects',
-    //     //     'GGIT - import': 'projects',
-    //     //     'GGIT - export': 'projects',
-    //     //     'GCMT': 'projects',
-    //     //     'GCTT': 'projects'
-    //     // }
+        // field: 'tracker-custom',
+        // values: {
+        //     'GCPT': 'units',
+        //     'GOGPT': 'units',
+        //     'GBPT': 'units',
+        //     'GNPT': 'units',
+        //     'GSPT': 'phases',
+        //     'GWPT':	'phases',
+        //     'GHPT':	'units',
+        //     'GGPT':	'units',
+        //     'GOGET - oil': 'areas',
+        //     'GOGET - gas': 'areas',
+        //     'GOIT': 'projects',
+        //     'GGIT': 'projects',
+        //     'GGIT - import': 'projects',
+        //     'GGIT - export': 'projects',
+        //     'GCMT': 'projects',
+        //     'GCTT': 'projects'
+        // }
     // },
     nameField: 'name',
     countryFile: 'countries.js',
@@ -94,8 +103,8 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        'status': {'label': 'Unit Status'}, 
-        'capacity-table': {'label': 'Unit Capacity'},
+        // 'status': {'label': 'Unit Status'}, 
+        // 'capacity-table': {'label': 'Unit Capacity'},
         'prod-gas': {'label': 'Production (Million m³/y)'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
         'start-year': {'label': 'Start Year'},
@@ -119,7 +128,6 @@ var config = {
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
     
-    showCapacityTable: true,
     showAllPhases: true
 
 };

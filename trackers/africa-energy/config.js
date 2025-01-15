@@ -44,32 +44,30 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     
-    capacityDisplayField: 'capacity-table',
-    capacityLabel: '',
-    //interpolate: ["cubic-bezier", 0, 0, 0, 1],
+    // capacityDisplayField: 'capacity-table',
+
     //can be string for single value, or hash. always single value is showMaxCapacity is true
-    // capacityLabel: {
-    //     field: 'tracker-custom',
-    //     values: {
-    //         'GCPT': 'MW',
-    //         'GOGPT': 'MW',
-    //         'GBPT':	'MW',
-    //         'GNPT':	'MW',
-    //         'GSPT':	'MW',
-    //         'GSPT':	'MW',
-    //         'GWPT':	'MW',
-    //         'GHPT':	'MW',
-    //         'GGPT':	'MW',
-    //         'GOGET - oil':	'million boe/y',
-    //         'GOGET - gas':	'million m³/y',
-    //         'GOIT': 'boe/d',
-    //         'GGIT':	'Bcm/y of natural gas',
-    //         'GGIT - import': 'MTPA of natural gas',
-    //         'GGIT - export': 'MTPA of natural gas',
-    //         'GCMT':	'million tonnes coal/y',
-    //         'GCTT':	'million tonnes coal/y'
-    //     }
-    // },
+    capacityLabel: {
+        field: 'tracker-custom',
+        values: {
+            'GCPT': 'MW',
+            'GOGPT': 'MW',
+            'GBPT':	'MW',
+            'GNPT':	'MW',
+            'GSPT':	'MW',
+            'GSPT':	'MW',
+            'GWPT':	'MW',
+            'GHPT':	'MW',
+            'GGPT':	'MW',
+            // 'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
+            'GOIT': 'boe/d',
+            'GGIT':	'bcm/y of natural gas',
+            'GGIT-import': 'MTPA of natural gas',
+            'GGIT-export': 'MTPA of natural gas',            
+            'GCMT':	'million tonnes coal/y', 
+            'GCTT':	'million tonnes coal/y'
+        }
+    },
     // skipCapacitySum: '',
 
     // capItemLabel:  {
@@ -105,28 +103,30 @@ var config = {
     showMaxCapacity: false,
 
     assetFullLabel: "Units / Phases / Pipelines", 
+    assetLabel: 'units',
+
     // can be string for single value, or hash
-    assetLabel: {
-        field: 'tracker-custom',
-        values: {
-            'GCPT': 'units',
-            'GOGPT': 'units',
-            'GBPT': 'units',
-            'GNPT': 'units',
-            'GSPT': 'phases',
-            'GWPT':	'phases',
-            'GHPT':	'units',
-            'GGPT':	'units',
-            'GOGET - oil': 'areas',
-            'GOGET - gas': 'areas',
-            'GOIT': 'projects',
-            'GGIT': 'projects',
-            'GGIT - import': 'projects',
-            'GGIT - export': 'projects',
-            'GCMT': 'projects',
-            'GCTT': 'projects'
-        }
-    },
+    // assetLabel: {
+    //     field: 'tracker-custom',
+    //     values: {
+    //         'GCPT': 'units',
+    //         'GOGPT': 'units',
+    //         'GBPT': 'units',
+    //         'GNPT': 'units',
+    //         'GSPT': 'phases',
+    //         'GWPT':	'phases',
+    //         'GHPT':	'units',
+    //         'GGPT':	'units',
+    //         'GOGET - oil': 'areas',
+    //         'GOGET - gas': 'areas',
+    //         'GOIT': 'projects',
+    //         'GGIT': 'projects',
+    //         'GGIT - import': 'projects',
+    //         'GGIT - export': 'projects',
+    //         'GCMT': 'projects',
+    //         'GCTT': 'projects'
+    //     }
+    // },
     nameField: 'name',
     countryFile: 'countries.js',
     allCountrySelect: true, // TODO bug when clicking Africa nothing gets selected but clicking all it does 
@@ -161,8 +161,6 @@ var config = {
 
     detailView: {
         'name': {'display': 'heading'},
-        'status': {'label': 'Unit Status'}, 
-        'capacity-table': {'label': 'Unit Capacity'},
         'prod-oil': {'label': 'Production (Million bbl/y)'},
         'prod-gas': {'label': 'Production (Million m³/y)'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
@@ -186,8 +184,6 @@ var config = {
     // highZoomMaxRadius: 32,
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
-    
-    showCapacityTable: true,
     showAllPhases: true
     
 
