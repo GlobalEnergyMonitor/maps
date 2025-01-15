@@ -1230,13 +1230,13 @@ function displayDetails(features) {
             detail_text += '<div>' + 
                 '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
                 '<div class="row" style="height: 2px"><hr/></div>' +
-                '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
+                '<div class="row "><div class="col-5 text-capitalize">' + config.statusDisplayField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
                 detail_capacity +
                 '</div>';
         }
         else {
             detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
+                '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
             detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + features[0].properties[config.capacityDisplayField] + ' ' + capacityLabel;
         }
     }

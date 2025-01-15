@@ -9,7 +9,7 @@ from creds import client_secret
 # trackers_to_update = ['Bioenergy Plants']
 # trackers_to_update = ['Oil & Gas Plants'] # egt and agt and latam and then oct aet too 
 # trackers_to_update = ['Oil & Gas Plants']
-trackers_to_update = ['LNG Terminals']
+trackers_to_update = ['Coal Terminals']
 tracker_folder_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
 goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
 goget_orig_tab = ['Main data','Production and reserves']
@@ -25,8 +25,8 @@ refine = False
 map_to_test = '' # change if testing a single map not a regional one
 local_copy = False  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
 
-run_pre_tests = False # TODO need to add so that there is utility here
-run_post_tests = False
+run_pre_tests = True # TODO need to add so that there is utility here
+run_post_tests = True
 
 final_formatting = False
 
@@ -57,7 +57,7 @@ conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']
 gcmt_closed_tab = 'Global Coal Mine Tracker (Close'
 # TODO make it so that each map has it's only set of final cols, so smallest csv possible, helpful for regional gas mostly ...
-final_cols = ['ea_scaling_capacity','mapname','tracker-acro','official_name','url', 'areas','name', 'unit_name', 'capacity', 'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
+final_cols = ['unit_id', 'ea_scaling_capacity', 'units-of-m','mapname','tracker-acro','official_name','url', 'areas','name', 'unit_name', 'capacity', 'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
        'original_units', 'conversion_factor', 'geometry', 'river', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
        'prod-coal', 'Latitude', 'Longitude', 'pid','id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas', 'fuel', 'PCI5', 'PCI6', 'WKTFormat']
 
@@ -89,8 +89,8 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                                'Region': 'region', 'State/Province':'subnat', 'Wiki URL': 'url'},
                       # TODO TO DECIDE need to copy for infra and extraction non power to make a pid copy of the unit id, for ease of use, or just apply unit logic to power
                       
-                      'GCTT': {'Terminal ID':'id','Coal Terminal Name': 'name', 'GEM Wiki': 'url', 'Status': 'status', 'Owner': 'owner', 'Capacity (Mt)':'capacity',
-                               'Opening Year': 'start_year', 'Region': 'region', 'State/Province':'subnat', 'Country': 'areas'},
+                      'GCTT': {'GEM Terminal ID':'id', 'GEM Unit/Phase ID': 'unit_id','Coal Terminal Name': 'name', 'Coal Terminal Name (detail or other)': 'other_name','Parent Port Name': 'port','Wiki URL': 'url', 'Status': 'status', 'Owner': 'owner', 'Capacity (Mt)':'capacity',
+                               'Start Year': 'start_year', 'Region': 'region', 'State/Province':'subnat', 'Country/Area': 'areas'},
                       'GOGET': {'Unit ID':'id', 'Wiki name': 'name', 'Country': 'areas', 'Subnational unit (province, state)': 'subnat', 'Status': 'status', 'Discovery year': 'start_year', 'Production start year': 'prod_start_year',
                                 'GEM region': 'region','Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'prod_oil', 'Production - Gas (Million m³/y)': 'prod_gas',
                                 'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)': 'capacity','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'
@@ -170,8 +170,8 @@ tracker_to_legendname = {
 # TODO ideally get this from map log gsheet
 # DO THIS NOW TODO so that aet and gipt look done and latam still needs to do
 # trackers_to_update = ['Coal Plants', 'Nuclear', 'Oil & Gas Plants'] # ['Coal Plants', 'Nuclear', 'Oil & Gas Plants']
-new_release_date = 'November 2024' # get from spreadsheet I manage 15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8
-previous_release_date = 'August 2024'
+new_release_date = 'January 2024' # get from spreadsheet I manage 15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8
+previous_release_date = 'November 2024'
 # previous_release = 'data/Africa-Energy-Tracker-data-July-2024.xlsx' # key 1B8fwCQZ3ZMCf7ZjQPqETKNeyFN0uNFZMFWw532jv480
 # previous_map = 'data/africa_energy_tracker_2024-07-10.geojson' 
 prev_key_dict = {'africa': '128rAsbENoUzzKJAv1V0Z3AuCc6kNanCclKJVGkSOmhM', 'latam': '128rAsbENoUzzKJAv1V0Z3AuCc6kNanCclKJVGkSOmhM', 'asia': '1q_Zwn_FlLulFvyJPi2pAjJOR7inDvo5nvIlQuZKAwrs', 'europe': '1IYM9SPoq2xSu4dr3H2sXXwuKKvb505FHG6vZKRAV_DE', 'GIPT': '1SZVpnXQ1iE5kJJfmAZQ64q9LaG4wfq4urVX7jdBmIlk'} # ideally pull this from the results tabs in the map log sheet
@@ -181,12 +181,16 @@ prev_key_dict = {'africa': '128rAsbENoUzzKJAv1V0Z3AuCc6kNanCclKJVGkSOmhM', 'lata
 # print('Handle multi tracker map creation for more than just AET')
 
 multi_tracker_log_sheet_key = '15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8'
+source_data_tab = ['source']
+map_tab = ['map']
 multi_tracker_log_sheet_tab = ['regional_multi_map'] # regional 
+
 all_multi_tracker_log_sheet_tab = ['all_multi_map']
 # MOVE TO JUST USE THIS ONE FILE FOR SINGLE, MULTI, REGIONAL MAPS! TODO 
 maps_guide = ['maps_guide']
 
 prep_file_tab = ['prep_file']
+
 multi_tracker_countries_sheet = '1UUTNERZYT1kHNMo_bKpwSGrUax9WZ8eyGPOyaokgggk'
 # will be commenting all this out soon! get to map file
 # tracker_folder = 'africa-energy'

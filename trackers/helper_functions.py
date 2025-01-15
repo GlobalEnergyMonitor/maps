@@ -850,6 +850,19 @@ def assign_eu_hydrogen_legend(gdf):
 
     return gdf
 
+def format_values(df):
+    """this will lowercase status values, 
+    and replace dashes and stars with blanks, 
+    and create display capacity field as string to hide nan"""
+    
+    df['status'] = df['status'].apply(lambda x: x.lower())
+    
+    df[['start-year', 'retired-year', 'owner', 'parent-port-name']] = df[['start-year', 'retired-year',  'owner', 'parent-port-name']].replace('-', '', regex=True)
+        
+    df['capacity_mt_display'] = df['capacity-(mt)'].fillna('').replace('*', '')
+
+    return df
+
 # Function to check if any item in the row's list is in needed_geo
 def check_list(row_list, needed_geo):
     return any(item in needed_geo for item in row_list)
@@ -1140,7 +1153,12 @@ def conversion_equal_area(row):
     cap = float(row['cleaned_cap'])
     factor = float(row['conversion_factor'])
     # print(f'this is factor! {factor}')
-    result = math.sqrt(4 * (float(cap * factor)) / np.pi) # square root(4 * capacity / pi)
+    converted = float(cap * factor)
+    # result = math.sqrt((4 * converted) / np.pi) # CURRENT
+    result = (((4*converted)/np.pi))**(1/2)
+    return result
+    # result = math.sqrt(4 * (float(cap * factor)) / np.pi) # PREVIOUS
+
     
     return result 
 
@@ -1148,6 +1166,7 @@ def conversion_multiply(row):
     cap = float(row['cleaned_cap'])
     factor = float(row['conversion_factor'])
     # print(f'this is factor! {factor}')
+
     result = float(cap * factor)
     # print(f'this is result! {result}')
     return result
@@ -1169,7 +1188,7 @@ def workaround_no_sum_cap_project(gdf):
     # that's the project cap
     # print(gdf['name'].value_counts())
     # gdf['unit-name-status'] = ''
-    gdf['capacity'].fillna('')
+    # gdf['capacity'].fillna('')
     gdf['unit_name'].fillna('--')
     gdf['unit_name'].replace('','--')
     gdf['unit_name'].replace('nan','--')
@@ -1189,7 +1208,7 @@ def workaround_no_sum_cap_project(gdf):
         capacity_details = gdf[gdf['name'] == name].groupby('name', as_index=False)['capacity'].sum()
         
         # If the sum is NaN, replace it with an empty string
-        capacity_details['capacity'] = capacity_details['capacity'].fillna('')
+        # capacity_details['capacity'] = capacity_details['capacity'].fillna('')
         # TODO WORK IN PROGRESS to help fix the summary cap bug affecting solar and all ... 
         all_unit_names_statuses = gdf[gdf['name'] == name].apply(lambda x: f"{x['unit_name']} ({x['status']})", axis=1).to_list()
         all_unit_names_statuses_str = ', '.join(all_unit_names_statuses)
@@ -1233,19 +1252,22 @@ def workaround_display_cap(row, cap_col):
         result = ''
     return result
     
-def workaround_table_float_cap_units(row, cap_col):
+def workaround_table_float_cap(row, cap_col):
     cap = row[cap_col] 
     cap = check_and_convert_float(cap)
-    if pd.isna(cap):
-        cap = '' 
-    units_of_m = str(row['original_units'])
     if isinstance(cap, (int, float)):
         cap = float((round(cap, 3))) # handle rounding and converting from string to float to round later 
     else:
-        result = ''
-    return cap, units_of_m
+        print(f'issue cap should be a float')
+        
+    return cap
     
-    
+def workaround_table_units(row):
+
+    units_of_m = str(row['original_units'])
+
+    return units_of_m
+        
 
 # def workaround_display_cap_total(row):
 #     # adds original units to the summedcapacity-details'from workaround_no_sum_cap_project

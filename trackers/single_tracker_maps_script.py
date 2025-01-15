@@ -51,7 +51,6 @@ def filter_cols(df, final_cols):
 
 def input_to_output(df, output_file):
 
-
     df = df.copy()
     
     if output_file == None:

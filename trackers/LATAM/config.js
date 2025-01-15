@@ -49,70 +49,39 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     
-    capacityDisplayField: 'capacity-display',
-    capacityLabel: '',
+    // capacityDisplayField: 'capacity-display',
+
     //interpolate: ["cubic-bezier", 0, 0, 0, 1],
     //can be string for single value, or hash. always single value is showMaxCapacity is true
-    // capacityLabel: {
-    //     field: 'tracker-custom',
-    //     values: {
-    //         'GCPT': 'MW',
-    //         'GOGPT': 'MW',
-    //         'GBPT':	'MW',
-    //         'GNPT':	'MW',
-    //         'GSPT':	'MW',
-    //         'GSPT':	'MW',
-    //         'GWPT':	'MW',
-    //         'GHPT':	'MW',
-    //         'GGPT':	'MW',
-    //         'GOGET - oil':	'million boe/y',
-    //         'GOGET - gas':	'million m³/y',
-    //         'GOIT': 'boe/d',
-    //         'GGIT':	'Bcm/y of natural gas',
-    //         'GGIT - import': 'MTPA of natural gas',
-    //         'GGIT - export': 'MTPA of natural gas',
-    //         'GCMT':	'million tonnes coal/y',
-    //         'GCTT':	'million tonnes coal/y'
-    //     }
-    // },
+    capacityLabel: {
+        field: 'tracker-custom',
+        values: {
+            'GCPT': 'MW',
+            'GOGPT': 'MW',
+            'GBPT':	'MW',
+            'GNPT':	'MW',
+            'GSPT':	'MW',
+            'GSPT':	'MW',
+            'GWPT':	'MW',
+            'GHPT':	'MW',
+            'GGPT':	'MW',
+            // 'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
+            'GOIT': 'boe/d',
+            'GGIT':	'bcm/y of natural gas',
+            'GGIT-import': 'MTPA of natural gas',
+            'GGIT-export': 'MTPA of natural gas',            
+            'GCMT':	'million tonnes coal/y', 
+            'GCTT':	'million tonnes coal/y'
+        }
+    },
     // skipCapacitySum: '',
 
-    // capItemLabel:  {
-    //         field: 'tracker-custom',
-    //         values: {
-    //             'GCPT': 'MW',
-    //             'GOGPT': 'MW',
-    //             'GBPT':	'MW',
-    //             'GNPT':	'MW',
-    //             'GSPT':	'MW',
-    //             'GWPT':	'MW',
-    //             'GHPT':	'MW',
-    //             'GGPT':	'MW',
-    //             // 'GOGET - oil':	'million boe/y',
-    //             // 'GOGET - gas':	'million m³/y',
-    //             'GOIT': 'boe/d',
-    //             'GGIT':	'Bcm/y of natural gas',
-    //             'GGIT - import': 'MTPA of natural gas',
-    //             'GGIT - export': 'MTPA of natural gas',
-    //             // 'GCMT':	'million tonnes coal/y',
-    //             'GCTT':	'million tonnes coal/y'
-    //         }
-    //     },
-    // prodItemLabel: {
-    //     field: 'tracker-custom',
-    //         values: {
-    //             'GOGET - oil':	'million boe/y',
-    //             'GOGET - gas':	'million m³/y',
-    //             'GCMT':	'million tonnes coal/y'
-    //         }
-    // },
-    //productionLabel NEED a productionLabel
     showMaxCapacity: false,
 
     assetFullLabel: "Units / Phases / Pipelines", 
     //can be string for single value, or hash
     // not using assetLabel for now TODO
-    assetLabel: '',
+    assetLabel: 'units',
     // assetLabel: {
     //     // field: 'tracker-custom',
     //     // values: {
@@ -146,11 +115,8 @@ var config = {
     tableHeaders: {
         values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-coal','prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'tracker-display',],
         labels: ['Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (million tonnes coal/y)', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Facility Type'],
-        
-        // 'capacity-oil', 'capacity-gas'
-        // 'Production oil (Million bbl/y)', 'Production Gas (Milliion m³/y)'
         clickColumns: ['name'],
-        rightAlign: ['unit','capacity','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
+        rightAlign: ['unit','capacity-table','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
         removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
         // appendValue: {'capacity': "capItemLabel"},
@@ -167,9 +133,7 @@ var config = {
         'Province/State': ['subnat']
     },
     detailView: {
-        'name': {'display': 'heading'},
-        'status': {'label': 'Unit Status'}, 
-        'capacity-table': {'label': 'Unit Capacity'},        
+        'name': {'display': 'heading'},     
         'prod-oil': {'label': 'Production (million bbl/y)'},
         'prod-gas': {'label': 'Production (million m³/y)'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
@@ -195,7 +159,8 @@ var config = {
     // highZoomMaxRadius: 32,
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
-    
-    showCapacityTable: true,
+
+
+
     showAllPhases: true
 };

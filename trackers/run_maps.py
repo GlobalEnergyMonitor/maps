@@ -1,7 +1,9 @@
 
 from single_tracker_maps_script import *
-from multi_tracker_maps_script import *
-# from tqdm import tqdm # can adapt more, special tweaking for dataframe, chatgpt!
+# from multi_tracker_maps_script import *
+import subprocess
+# from tqdm import tqdm # can adapt more, special tweaking for dataframe!
+# TODO make sure the dependency map makes sense, so it calls both single and multi script depending on new data, try with tests
 ###
 # CALL ALL FUNCTIONS
 
@@ -398,7 +400,39 @@ for tracker in trackers_to_update:
         #     elapsed_time = end_time - start_time  # Calculate the elapsed time
         #     print('End refining')    
 
-            
+    elif tracker == 'Coal Terminals':
+        # continue for all of them that are in or not in multi tracker maps
+        test_results_folder = f'{tracker_folder_path}coal-terminals/test_results/'
+
+        output_folder = f'{tracker_folder_path}coal-terminals/compilation_output/'
+
+        # input_file_path = f'{tracker_folder_path}coal-terminals/compilation_input/'
+        
+        os.makedirs(test_results_folder, exist_ok=True)
+        os.makedirs(output_folder, exist_ok=True)       
+             
+
+        # creates single map file
+        key, tabs = get_key_tabs_prep_file(tracker)
+        df = create_df(key, tabs)
+        df = rename_cols(df)
+        df = fix_status_inferred(df)
+        df = filter_cols(df,final_cols=['gem-terminal-id', 'gem-unit/phase-id', 'parent-port-name','country/area', 'coal-terminal-name', 'coal-terminal-name-(detail-or-other)',
+                                        'capacity-(mt)', 'status', 'start-year', 'retired-year', 'location-accuracy',
+                                         'owner', 'lat', 'lng', 'state/province',
+                                        'region', 'url'          
+                                        ])
+        
+        df = format_values(df)
+        
+        
+        df = input_to_output(df, f'{output_folder}{tracker}-map-file-{iso_today_date}.csv')
+        # test_stats(df)
+
+        print('DONE MAKING GCTT SINGLE MAP onto MULTI MAPS')
+        # creates multi-tracker maps
+        # if tracker to update is coal terminals then look at sheet and create all regional and of course single
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
           
 # if tracker in tracker to update is part of a multi tracker map then run that script in addition
 # individual script
