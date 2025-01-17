@@ -1,5 +1,5 @@
 var config = {
-    json: 'compilation_output/europe_2024-11-18.geojson',
+    json: 'compilation_output/europe_2025-01-17.geojson',
     geometries: ['Point','LineString'],
     center: [8, 30],
     zoomFactor: 1.9,
@@ -81,8 +81,8 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-gas', 'prod-year-gas', 'fuel', 'tracker-display'],
-        labels: ['Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)', 'Fuel', 'Facility Type'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-gas', 'prod-year-gas', 'fuel', 'tracker-display'],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)', 'Fuel', 'Facility Type'],
         clickColumns: ['name'],
         rightAlign: ['unit','capacity','prod-gas','start-year','prod-year-gas'], 
         removeLastComma: ['areas'], 
@@ -120,6 +120,6 @@ var config = {
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
     
-    showAllPhases: true
+    // showAllPhases: true
 
 };
