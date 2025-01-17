@@ -1,5 +1,9 @@
+
 var config = {
-    csv: 'data/data-2024-08-29.csv',
+
+    csv: 'compilation_output/Oil & Gas Plants-map-file-2025-01-16.csv',
+    linkField: 'gem-location-id',
+    countryField: 'country/area',
     color: {
         field: 'status',
         values: {
@@ -19,30 +23,31 @@ var config = {
             values: ['operating','construction','pre-construction','announced','retired','cancelled','shelved','mothballed'],
         }
     ],
-    capacityField: 'capacity',
-    capacityLabel: 'Capacity (MW)',
+    capacityField: 'capacity-(mw)',
+    capacityDisplayField: 'capacity-(mw)',
+    capacityLabel: '(MW)',
     assetFullLabel: "Gas Units",
     assetLabel: 'units',
-    nameField: 'project',
+    nameField: 'plant-name',
     tableHeaders: {
-        values: ['project','unit', 'owner', 'parent', 'capacity', 'status', 'region', 'country', 'province', 'start_year'],
+        values: ['plant-name','unit-name', 'owner(s)', 'parent(s)', 'capacity-(mw)', 'status', 'region', 'country/area', 'state/province', 'start-year'],
         labels: ['Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year'],
-        clickColumns: ['project'],
-        rightAlign: ['unit','capacity','start_year']
+        clickColumns: ['plant-name'],
+        rightAlign: ['unit-name','capacity-(mw)','start-year']
     },
-    searchFields: { 'Plant': ['project'], 
-        'Companies': ['owner', 'parent'],
-        'Start Year': ['start_year']
+    searchFields: { 'Plant': ['plant-name'], 
+        'Companies': ['owner(s)', 'parent(s)', 'operator(s)'],
+        'Start Year': ['start-year']
     },
     detailView: {
-        'project': {'display': 'heading'},
-        'project_loc': {},
-        'owner': {'label': 'Owner'},
-        'parent': {'label': 'Parent'},
-        'technology': {'display': 'join', 'label': ['Technology', 'Technologies']},
-        'fuel_type': {'display': 'join', 'label': ['Fuel Type', 'Fuel Types']},
-        'start_year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
-        'province': {'display': 'location'},
-        'country': {'display': 'location'}
+        'plant-name': {'display': 'heading'},
+        // 'project': {},
+        'owner(s)': {'label': 'Owner(s)'},
+        'parent(s)': {'label': 'Parent(s)'},
+        'turbine/engine-technology': {'label': 'Turbine/Engine Technology'},
+        'fuel': {'label': 'Fuel'},
+        'start-year': {'label': 'Start year'},
+        'state/province': {'display': 'location'},
+        'country/area': {'display': 'location'}
     }
 };
