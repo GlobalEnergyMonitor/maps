@@ -907,8 +907,11 @@ function filterGeoJSON() {
         }
         if (config.searchText.length >= 3) {
             if (config.selectedSearchFields.split(',').filter((field) => {
-                if (feature.properties[field] !== null)
-                    return feature.properties[field].toLowerCase().includes(config.searchText);
+                let searchTerms = generateDiacriticVariants(config.searchText); // this returns a list
+                // console.log(searchTerms)
+                // console.log(searchTerms.some)
+                // console.log('after diacritic and some')
+                return searchTerms.some(term => feature.properties[field] && feature.properties[field].toLowerCase().includes(term));
             }).length == 0) include = false;
         }
         if (config.selectedCountries.length > 0) {
@@ -1376,11 +1379,38 @@ function buildCountrySelect() {
     config.selectedCountryText = '';
 }
 
+const diacriticMap = {
+    a: ["a", "á", "à", "â", "ã", "ä", "å"],
+    e: ["e", "é", "è", "ê", "ë"],
+    i: ["i", "í", "ì", "î", "ï"],
+    o: ["o", "ó", "ò", "ô", "õ", "ö", "ø"],
+    u: ["u", "ú", "ù", "û", "ü"],
+    c: ["c", "ç"],
+    n: ["n", "ñ"],
+  };
+
+function generateDiacriticVariants(term) {
+    const variants = [""];
+    for (const char of term) {
+      const options = diacriticMap[char] || [char]; // Get diacritic variations or the original character
+      const newVariants = [];
+      for (const variant of variants) {
+        for (const option of options) {
+          newVariants.push(variant + option);
+
+        }
+      }
+      variants.splice(0, variants.length, ...newVariants);
+    }
+    return variants;
+  }
+  
 
 function enableSearch() {
     $('#search-text').on('keyup paste', debounce(function() {
         config.searchText = $('#search-text').val().toLowerCase();
-
+        // console.log(config.searchText) 
+        // console.log('before diacritic function')
         filterData();
 
     }, 500));
