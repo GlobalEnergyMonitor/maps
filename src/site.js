@@ -907,7 +907,8 @@ function filterGeoJSON() {
         }
         if (config.searchText.length >= 3) {
             if (config.selectedSearchFields.split(',').filter((field) => {
-                return feature.properties[field].toLowerCase().includes(config.searchText);
+                if (feature.properties[field] !== null)
+                    return feature.properties[field].toLowerCase().includes(config.searchText);
             }).length == 0) include = false;
         }
         if (config.selectedCountries.length > 0) {
@@ -1374,6 +1375,8 @@ function buildCountrySelect() {
     config.selectedCountries = [];
     config.selectedCountryText = '';
 }
+
+
 function enableSearch() {
     $('#search-text').on('keyup paste', debounce(function() {
         config.searchText = $('#search-text').val().toLowerCase();
