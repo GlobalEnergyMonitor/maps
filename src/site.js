@@ -907,13 +907,17 @@ function filterGeoJSON() {
         }
         if (config.searchText.length >= 3) {
             if (config.selectedSearchFields.split(',').filter((field) => {
-                let searchTerms = generateDiacriticVariants(config.searchText); // this returns a list
-                // console.log(searchTerms)
-                // console.log(searchTerms.some)
-                // console.log('after diacritic and some')
-                return searchTerms.some(term => feature.properties[field] && feature.properties[field].toLowerCase().includes(term));
-            }).length == 0) include = false;
+                // remove diacritics from mapValue
+                if (feature.properties[field] != null){
+                    console.log(feature.properties[field])
+                    console.log('Before remove diacritics function')
+                    let mapValue = removeDiacritics(feature.properties[field]);
+                    console.log(mapValue)
+                    console.log('After remove diacritics function')
+                    return mapValue.toLowerCase().includes(config.searchText);
+                }}).length == 0) include = false;
         }
+        
         if (config.selectedCountries.length > 0) {
             //update to handle multiple countries selected, and handle when countries are substrings of each other
             if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(';').includes(value)).length == 0) include = false;
@@ -1388,23 +1392,19 @@ const diacriticMap = {
     c: ["c", "ç"],
     n: ["n", "ñ"],
   };
-
-function generateDiacriticVariants(term) {
-    const variants = [""];
-    for (const char of term) {
-      const options = diacriticMap[char] || [char]; // Get diacritic variations or the original character
-      const newVariants = [];
-      for (const variant of variants) {
-        for (const option of options) {
-          newVariants.push(variant + option);
-
-        }
-      }
-      variants.splice(0, variants.length, ...newVariants);
-    }
-    return variants;
-  }
   
+function removeDiacritics(value) {
+    let noDiacriticsValue = value;
+    for (const char of value) {
+        for (const [key, values] of Object.entries(diacriticMap)) {
+            if (values.includes(char)) {
+                noDiacriticsValue = noDiacriticsValue.replace(char, key);
+            }
+        }
+    }
+    return noDiacriticsValue;
+}
+
 
 function enableSearch() {
     $('#search-text').on('keyup paste', debounce(function() {
