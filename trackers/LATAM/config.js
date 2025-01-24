@@ -2,7 +2,7 @@
 
 
 var config = {
-    json: 'data/latam_2024-12-16.geojson',
+    json: 'compilation_output/latam_2025-01-17.geojson',
     geometries: ['Point','LineString'],
     center: [-90, -14],
     zoomFactor: 1.7,
@@ -113,8 +113,8 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-coal','prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'tracker-display',],
-        labels: ['Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (million tonnes coal/y)', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Facility Type'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-coal','prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'tracker-display',],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (million tonnes coal/y)', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Facility Type'],
         clickColumns: ['name'],
         rightAlign: ['unit','capacity-table','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
         removeLastComma: ['areas'], 
@@ -162,5 +162,5 @@ var config = {
 
 
 
-    showAllPhases: true
+    // showAllPhases: true
 };

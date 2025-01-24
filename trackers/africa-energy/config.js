@@ -1,5 +1,5 @@
 var config = {
-    json: './data/africa_2024-11-19.geojson',
+    json: 'compilation_output/africa_2025-01-17.geojson',
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
@@ -135,8 +135,8 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year', 'prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'tracker-display',],
-        labels: ['Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Facility Type'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'tracker-display',],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Facility Type'],
 
         clickColumns: ['name'],
         rightAlign: ['unit','capacity-table','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
@@ -184,7 +184,7 @@ var config = {
     // highZoomMaxRadius: 32,
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
-    showAllPhases: true
+    // showAllPhases: true
     
 
 };

@@ -907,9 +907,17 @@ function filterGeoJSON() {
         }
         if (config.searchText.length >= 3) {
             if (config.selectedSearchFields.split(',').filter((field) => {
-                return feature.properties[field].toLowerCase().includes(config.searchText);
-            }).length == 0) include = false;
+                // remove diacritics from mapValue
+                if (feature.properties[field] != null){
+                    console.log(feature.properties[field])
+                    console.log('Before remove diacritics function')
+                    let mapValue = removeDiacritics(feature.properties[field]);
+                    console.log(mapValue)
+                    console.log('After remove diacritics function')
+                    return mapValue.toLowerCase().includes(config.searchText);
+                }}).length == 0) include = false;
         }
+        
         if (config.selectedCountries.length > 0) {
             //update to handle multiple countries selected, and handle when countries are substrings of each other
             if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(';').includes(value)).length == 0) include = false;
@@ -1374,10 +1382,35 @@ function buildCountrySelect() {
     config.selectedCountries = [];
     config.selectedCountryText = '';
 }
+
+const diacriticMap = {
+    a: ["a", "á", "à", "â", "ã", "ä", "å"],
+    e: ["e", "é", "è", "ê", "ë"],
+    i: ["i", "í", "ì", "î", "ï"],
+    o: ["o", "ó", "ò", "ô", "õ", "ö", "ø"],
+    u: ["u", "ú", "ù", "û", "ü"],
+    c: ["c", "ç"],
+    n: ["n", "ñ"],
+  };
+  
+function removeDiacritics(value) {
+    let noDiacriticsValue = value;
+    for (const char of value) {
+        for (const [key, values] of Object.entries(diacriticMap)) {
+            if (values.includes(char)) {
+                noDiacriticsValue = noDiacriticsValue.replace(char, key);
+            }
+        }
+    }
+    return noDiacriticsValue;
+}
+
+
 function enableSearch() {
     $('#search-text').on('keyup paste', debounce(function() {
         config.searchText = $('#search-text').val().toLowerCase();
-
+        // console.log(config.searchText) 
+        // console.log('before diacritic function')
         filterData();
 
     }, 500));

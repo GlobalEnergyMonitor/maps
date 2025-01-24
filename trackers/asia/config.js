@@ -1,6 +1,6 @@
 var config = {
 
-    json: 'compilation_output/asia_2024-11-19.geojson',
+    json: 'compilation_output/asia_2025-01-17.geojson',
     geometries: ['Point','LineString'],
     center: [60, 20],
     zoomFactor: 1.9,
@@ -86,8 +86,8 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['name','unit-name','owner', 'parent', 'capacity-table', 'status', 'areas', 'start-year',  'prod-gas', 'prod-year-gas', 'fuel', 'tracker-display',],
-        labels: ['Name','Unit','Owner', 'Parent','Capacity', 'Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)','Fuel', 'Facility Type'],
+        values: ['name','unit-name','owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year',  'prod-gas', 'prod-year-gas', 'fuel', 'tracker-display',],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)','Fuel', 'Facility Type'],
 
         clickColumns: ['name'],
         rightAlign: ['unit','capacity', 'prod-gas','start-year','prod-year-gas'], 
@@ -103,8 +103,6 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        // 'status': {'label': 'Unit Status'}, 
-        // 'capacity-table': {'label': 'Unit Capacity'},
         'prod-gas': {'label': 'Production (Million m³/y)'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
         'start-year': {'label': 'Start Year'},
@@ -128,6 +126,6 @@ var config = {
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
     
-    showAllPhases: true
+    // showAllPhases: true
 
 };

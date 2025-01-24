@@ -146,14 +146,17 @@ table.dataTable td {
 }
 
 .mapboxgl-ctrl-bottom-right {
-    bottom: 90px;
-    opacity: 0.00 !important;
+    top: 50%;
+    right: 10px;
+    bottom: auto;
+    opacity: 0 !important;
 }
 
 .mapboxgl-ctrl-bottom-left {
-    bottom: 0px;
-    opacity: 0.00 !important;
-
+    top: 50%;
+    right: 10px;
+    bottom: auto;
+    opacity: 0 !important;
 }
 
 @media screen and (max-width: 1170) {
@@ -183,11 +186,13 @@ table.dataTable td {
     }
 
     .mapboxgl-ctrl-bottom-left{
-        bottom: 0px;
+        bottom: auto;
+        opacity: 0 !important;
     }
 
     .mapboxgl-ctrl-bottom-right {
-        bottom: 0px;
+        bottom: auto;
+        opacity: 0 !important;
 
     }
 }
