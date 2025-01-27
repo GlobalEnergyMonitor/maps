@@ -2,7 +2,6 @@ var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
     csv: 'data.csv',
-
     colors: {
         'red greeninfo': '#c00',
         'light blue greeninfo': '#1e90ff',

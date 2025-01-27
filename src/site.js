@@ -139,9 +139,9 @@ function addGeoJSON(jsonData) {
     config.processedGeoJSON = config.geojson; // copy
 
     console.log('setMinMax');
-    setMinMax();
+    setMinMax(); // TODO We need to change this so that the max is max of grouped units, and min is smallest unit, currently its max unit not project
     console.log('findLinkedAssets');
-    findLinkedAssets();
+    findLinkedAssets(); // we should apply area-based scaling at this point, on the grouped capacity, then it'll be used in addPointLayer
 
     // map.addSource('assets-source', {
     //     'type': 'geojson',
@@ -199,8 +199,8 @@ function geoJSONFromTiles() {
     }
 
     config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
-    setMinMax();
-
+    
+    setMinMax(); 
     layers.forEach(layer => {
         map.removeLayer(layer);
     });
@@ -260,10 +260,14 @@ function findLinkedAssets() {
         let features = JSON.parse(JSON.stringify(grouped[key])); //deep copy
 
         // Sum capacity across all linked assets
-        // we can preprocess this
         let capacity = features.reduce((previous, current) => {
             return previous + Number(current.properties[config.capacityField]);
         }, 0);
+        // TODO HERE is where we want to apply the area-based scaling formula, to THIS capacity
+        // sqrt((4 * (float(cap * factor))) / np.pi) 
+        // math.sqrt((4 * converted) / np.pi)
+        // areaBasedScaledCapacity = Math.sqrt((4 * capacity) / Math.PI)
+        // features[0].properties[config.capacityField] = areaBasedScaledCapacity;
         features[0].properties[config.capacityField] = capacity;
 
         // Build summary count of capacity across all linked assets
@@ -347,6 +351,14 @@ function generateIcon(icon) {
     });
 }
 function setMinMax() {
+    // If I can find a way to incorporate the linked asset calculation in this or before
+    // this runs then we would be closer to solving the area-based scaling issue
+
+
+    // Maisie says we should show the full range
+    // which is smallest unit, and largest project level capacity
+    // We could remove these defaults and then returns a error if no value is assigned to the min and max keys
+    // But could be okay to not use project-level since easier in JS and biggest might be a project with one unit
     config.maxPointCapacity = 0;
     config.minPointCapacity = 1000000;
     config.maxLineCapacity = 0;
@@ -361,6 +373,12 @@ function setMinMax() {
             minCapacityKey = 'minPointCapacity';
             maxCapacityKey = 'maxPointCapacity';
         }
+        // this says, if the capacity is more than the max capacity so far then it should be used
+        // vice versa for min capacity
+        // later this is used to size the assets along smoothly by interpolation across the width between min and maxPoint and LineWidth
+        // this min and max Line and Point Capacity is crucial to the scaling, along with the unit's capacity
+        // we need to be using the summed project's capacity not the unit's capacity to inform this, 
+        // either later in addPointLayer where we consider the unit's capacity during interpolation, or here where we find the min and max unit size
         if (parseFloat(feature.properties[config.capacityField]) > config[maxCapacityKey]) {
             config[maxCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
         }
@@ -443,6 +461,8 @@ function addPointLayer() {
             "#000000"
         ];
     }
+// LET"S ADD exponential NOT linear TODO Maisie 
+// ["exponential", base] if base is 1 then it is linear the same, power of 1/2 to do squareroot area based
 
     let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
     paint['circle-radius'] = [
@@ -832,9 +852,12 @@ function filterTiles() {
     });
 
     config.filterExpression = [];
+    // TODO apply diacritic solution here for GIPT as well
     if (config.searchText.length >= 3) {
         let searchExpression = ['any'];
         config.selectedSearchFields.split(',').forEach((field) => {
+            // let mapValue = removeDiacritics(field); // too slow so we'll do it the data input way for removing diacritics in search
+
             searchExpression.push(['in', ['literal', config.searchText], ['downcase', ["get", field]]]);
 
         });
@@ -909,11 +932,11 @@ function filterGeoJSON() {
             if (config.selectedSearchFields.split(',').filter((field) => {
                 // remove diacritics from mapValue
                 if (feature.properties[field] != null){
-                    console.log(feature.properties[field])
-                    console.log('Before remove diacritics function')
+                    // console.log(feature.properties[field])
+                    // console.log('Before remove diacritics function')
                     let mapValue = removeDiacritics(feature.properties[field]);
-                    console.log(mapValue)
-                    console.log('After remove diacritics function')
+                    // console.log(mapValue)
+                    // console.log('After remove diacritics function')
                     return mapValue.toLowerCase().includes(config.searchText);
                 }}).length == 0) include = false;
         }
@@ -1154,8 +1177,8 @@ function displayDetails(features) {
                 }
             }
         } else {
-            console.log('we are in the last else')
-            console.log(features[0].properties[detail])
+            // console.log('we are in the last else')
+            // console.log(features[0].properties[detail])
             // if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN && features[0].properties[detail] != null && features[0].properties[detail] != 'Unknown [unknown %]'){
                 // if (config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
             if (features[0].properties[detail] != '' && features[0].properties[detail] != NaN && features[0].properties[detail] != null && features[0].properties[detail] != 'Unknown [unknown %]') {
@@ -1170,6 +1193,7 @@ function displayDetails(features) {
                     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
                 } else {
                     console.log(features[0].properties[detail])
+                    console.log('inner else issue')
                     // detail_text += features[0].properties[detail] + '<br/>';
                 }
             }
@@ -1364,7 +1388,6 @@ function buildCountrySelect() {
         }
 
         $('#country_select').append(dropdown_html);
-        console.log('at the country select append to dropdown point')
     });
 
     $('.country-dropdown-item').each(function() {
