@@ -2,7 +2,6 @@
 import pandas as pd
 import numpy as np
 from datetime import date
-from datetime import date
 from config import countries
 
 # Get today's date
@@ -15,7 +14,31 @@ test_results_folder = './test_results/'
 testing_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/'
 # /Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final
 output_folder = './compilation_output/'
-input_file_csv = 'compilation_input/Global Integrated Power September 2024 DATA TEAM COPY.xlsx'#'compilation_input/Global Integrated Power August 2024 DATA TEAM COPY.xlsx'
+input_file_csv = 'compilation_input/Global Integrated Power January 2025.xlsx'#'compilation_input/Global Integrated Power August 2024 DATA TEAM COPY.xlsx'
+
+
+
+diacritic_map = {
+    'a': ["a", "á", "à", "â", "ã", "ä", "å"],
+    'e': ["e", "é", "è", "ê", "ë"],
+    'i': ["i", "í", "ì", "î", "ï"],
+    'o': ["o", "ó", "ò", "ô", "õ", "ö", "ø"],
+    'u': ["u", "ú", "ù", "û", "ü"],
+    'c': ["c", "ç"],
+    'n': ["n", "ñ"],
+}
+
+def remove_diacritics(name_value):
+    
+    if pd.isnull(name_value):
+        name_value = ''
+    elif type(name_value) != float:
+        for char in name_value:
+            for k, v in diacritic_map.items():
+                if char in v:
+                    name_value = name_value.replace(char, k)
+
+    return name_value
 
 def is_number(n):
     is_number = True
@@ -127,25 +150,32 @@ def harmonize_countries(df, countries_dict):
     return df
 
 # tiles
+# TO DO ARE WE SPLITTING OUT CSV AND TILE IN MAP OR NAH?
 # for map file we want it to be:  map id link field, geometry, name, scaling col, country, region, statuses, tracker
-# def filter_cols_for_tiles(df): # TODO test if this is ok, you may need it in there so can filter
-#     df = df.copy()
-#     df = df[['GEM location ID', 'Country/area', 'Plant / Project name', 'Capacity (MW)',
-#     'Status', 'Latitude', 'Longitude', 'Region', 'GEM.Wiki URL', 'Type', 'Owner', 'Parent',]] # 'Owner', 'Parent', 
-    
-#     df = df.dropna(subset=['Latitude', 'Longitude', 'Country/area'])
-#     df = df.fillna('')
-#     # print(df.info())
-#     df = rename_cols(df)
-#     df = remove_missing_coord_rows(df)
+def filter_cols_for_tiles(df): # TODO test if this is ok, you may need it in there so can filter
+    df = df.copy()
+    # df = df[['GEM location ID', 'Country/area', 'Plant / Project name', 'Capacity (MW)',
+    # 'Status', 'Latitude', 'Longitude', 'Region', 'GEM.Wiki URL', 'Type', 'Owner', 'Parent',]] # 'Owner', 'Parent', 
+    # df = df[['GEM location ID','Country/area', 'Plant / Project name', 'Plant / Project name_search', 'Unit / Phase name', 'Capacity (MW)',
+    # 'Status', 'Type', 'Owner', 'Owner_search', 'Parent', 'Parent_search','Latitude', 'Longitude', 'Start year', 'Retired year', 'Fuel', 'Technology',
+    # 'Location accuracy', 'Subnational unit (state, province)', 'Region', 'GEM.Wiki URL']]
+    df = df[['GEM location ID','Country/area', 'Plant / Project name', 'Unit / Phase name', 'Capacity (MW)',
+    'Status', 'Type', 'Owner', 'Parent', 'Latitude', 'Longitude', 'Start year', 'Retired year', 'Fuel', 'Technology',
+    'Location accuracy', 'Subnational unit (state, province)', 'Region', 'GEM.Wiki URL']]
+    df = df.dropna(subset=['Latitude', 'Longitude', 'Country/area'])
+    df = df.fillna('')
+    # print(df.info())
+    df = rename_cols(df)
+    df = remove_missing_coord_rows(df)
 
-    
-#     return df
+    df = df.fillna('')
+
+    return df
 
 def filter_cols_for_csv(df):
     df = df.copy()
-    df = df[['GEM location ID','Country/area', 'Plant / Project name', 'Unit / Phase name', 'Capacity (MW)',
-    'Status', 'Type', 'Owner', 'Parent', 'Latitude', 'Longitude', 'Start year', 'Retired year', 'Fuel', 'Technology',
+    df = df[['GEM location ID','Country/area', 'Plant / Project name','Unit / Phase name', 'Capacity (MW)',
+    'Status', 'Type', 'Owner',  'Parent','Latitude', 'Longitude', 'Start year', 'Retired year', 'Fuel', 'Technology',
     'Location accuracy', 'Subnational unit (state, province)', 'Region', 'GEM.Wiki URL']]
     
     df = df.fillna('')
@@ -155,7 +185,8 @@ def filter_cols_for_csv(df):
     df = remove_missing_coord_rows(df)
 
 
-    
+    df = df.fillna('')
+
     return df
 
 def rename_cols(df):
@@ -183,8 +214,35 @@ def remove_missing_coord_rows(df):
 
     return df
 
-def input_to_output(dftiles, dfcsv):
+def create_search_field(df):
+    cols = ['Plant / Project name', 'Owner', 'Parent']
+    for col in cols:
+        
+        new_col_name = f'{col}_search'
+        df[col] = df[col].fillna('')
+        df[new_col_name] = df[col].apply(lambda x: remove_diacritics(x))
+    return df
 
+def remove_100(owner):
+    if ';' in owner:
+        print('owner not relevant')
+        print(owner)
+    else:
+        if '[100%]' in owner:
+            print(owner)
+            owner = owner.replace(' [100.0%]', '')
+            print(owner)
+            input('check owner strip 100')
+    return owner
+
+def remove_100_owner(df):
+    # [100%]
+    col = ['Owner']
+    df[col] = df[col].apply(lambda x: remove_100(x))
+    return df
+
+def input_to_output(dftiles, dfcsv):
+    
     df_for_tiles = dftiles.copy()
     df_for_csv = dfcsv.copy()   
     
@@ -219,16 +277,15 @@ df = set_up_df(input_file_csv, 'Power facilities')
 df = semicolon_for_mult_countries(df)
 df = fix_status_inferred(df)
 df = harmonize_countries(df, countries)
+# df = create_search_field(df) # TODO figure out why it creates a null value not string
+df = remove_100_owner(df)
 
 print(df.info())
-# df_tiles = filter_cols_for_tiles(df)
+df_tiles = filter_cols_for_tiles(df)
 df_csv = filter_cols_for_csv(df)
-# df = rename_cols(df)
-
-# df = remove_missing_coord_rows(df)
-
-
-# input_to_output(df_tiles, df_csv)
+df = rename_cols(df)
+df = remove_missing_coord_rows(df)
+input_to_output(df_tiles, df_csv)
 
 def test_stats(df):
     df = df.copy()
@@ -241,4 +298,4 @@ def test_stats(df):
 
     return df
 
-test_stats(df)
+# test_stats(df)

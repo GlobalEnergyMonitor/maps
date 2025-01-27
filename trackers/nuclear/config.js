@@ -95,5 +95,17 @@ var config = {
         'areas-subnat-sat-display': {'display': 'location'}
 
     },
-    showCapacityTable: true, 
+
+    /* radius associated with minimum/maximum value on map */
+    // minRadius: 2,
+    // maxRadius: 100,
+    // minLineWidth: 1,
+    // maxLineWidth: 10000,
+
+    // /* radius to increase min/max to under high zoom */
+    // highZoomMinRadius: 4,
+    // highZoomMaxRadius: 100,
+    // highZoomMinLineWidth: 4,
+    // highZoomMaxLineWidth: 32,
+    
 }
