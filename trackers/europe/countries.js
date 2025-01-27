@@ -1,5 +1,5 @@
 {
-  "Europe": [ 
+  "Europe": [
     "Åland Islands",
     "Albania",
     "Andorra",
@@ -9,6 +9,7 @@
     "Bosnia and Herzegovina",
     "Bulgaria",
     "Croatia",
+    "Cyprus",
     "Czech Republic",
     "Denmark",
     "Estonia",
@@ -24,6 +25,7 @@
     "Iceland",
     "Ireland",
     "Isle of Man",
+    "Israel",
     "Italy",
     "Jersey",
     "Kosovo",
@@ -31,17 +33,16 @@
     "Liechtenstein",
     "Lithuania",
     "Luxembourg",
-    "North Macedonia",
     "Malta",
     "Moldova",
     "Monaco",
     "Montenegro",
     "Netherlands",
+    "North Macedonia",
     "Norway",
     "Poland",
     "Portugal",
     "Romania",
-    "Israel",
     "San Marino",
     "Serbia",
     "Slovakia",
@@ -50,9 +51,8 @@
     "Svalbard and Jan Mayen",
     "Sweden",
     "Switzerland",
+    "Türkiye",
     "Ukraine",
-    "United Kingdom",
-    "Cyprus",
-    "Türkiye"
+    "United Kingdom"
   ]
 }
