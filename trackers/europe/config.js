@@ -1,5 +1,5 @@
 var config = {
-    json: 'compilation_output/europe_2025-01-17.geojson',
+    csv: 'compilation_output/europe_2025-01-17-test.csv',
     geometries: ['Point','LineString'],
     center: [8, 30],
     zoomFactor: 1.9,
@@ -8,24 +8,35 @@ var config = {
     statusDisplayField: 'status',
     color: {
         field: 'tracker-custom',
-        values: {
+        values: {  
+            'GOGPT-hy': 'blue',
             'GOGPT': 'blue',
             'GOGET-oil': 'red',
-            'GGIT-euhy': 'green',
+            'GGIT-hy-eu': 'green',
             'GGIT-eu': 'green',
+            "GGIT-hy-import": 'green', 
             'GGIT-import':'green',
+            "GGIT-hy-export": 'green',
             'GGIT-export':'green',
-
 
         }
     },
-    //filter values should have no spaces
     filters: [
+
         {
             field: 'tracker-custom',
-            values: ["GOGPT",  "GGIT-euhy", "GGIT-eu","GGIT-import", "GGIT-export", "GOGET-oil", ], 
-            values_labels: ['gas power units', 'hydrogen gas pipelines', "methane gas pipelines",'LNG import terminals', 'LNG export terminals', 'gas extraction areas',],
+            values: ["GOGPT-hy", "GOGPT",  "GGIT-hy-eu", "GGIT-eu","GGIT-hy-import", "GGIT-hy-export", "GGIT-import", "GGIT-export", "GOGET-oil", ], 
+            values_labels: ['hydrogen power units', 'methane gas power units','hydrogen gas pipelines', "methane gas pipelines",'LNG - hydrogen import terminals', 'LNG - hydrogen export terminals','LNG - methane import terminals', 'LNG - methane export terminals', 'gas extraction areas',],
             primary: true
+        
+        },
+        {
+            field: 'fuel-filter',
+            label: 'Fuels',
+            values: ['hy', 'methane'],
+            values_labels: ['Hydrogen', 'Methane'],
+
+
         },
         {
             field: 'status-legend',
@@ -40,6 +51,13 @@ var config = {
             values_labels: ['PCI-5', 'PCI-6', 'PCI-5 & PCI-6', 'Non-PCI'] 
 
         },
+        {
+            field: 'maturity',
+            label: 'Hydrogen Transition Maturity',
+            values: ['y', 'n', 'none'],
+            values_labels: ['yes', 'no', 'inapplicable fuel type'] 
+
+        }
 
     ],
     capacityField: 'scaling-capacity',
@@ -48,12 +66,16 @@ var config = {
     capacityLabel: {
         field: 'tracker-custom',
         values: {
+            'GOGPT-hy': 'MW',
             'GOGPT': 'MW',
             // 'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
             'GGIT-eu':	'bcm/y of gas', 
-            'GGIT-euhy': 'bcm/y of gas',
+            'GGIT-hy-eu': 'bcm/y of gas',
+            'GGIT-hy-import': 'MTPA of natural gas',
+            'GGIT-hy-export': 'MTPA of natural gas',            
             'GGIT-import': 'MTPA of natural gas',
             'GGIT-export': 'MTPA of natural gas',            
+
 
         }
     },

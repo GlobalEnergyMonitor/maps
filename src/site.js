@@ -724,7 +724,28 @@ $('#projection-toggle').on("click", function() {
         map.setZoom(determineZoom());
 
     }
-});
+})
+// ,
+// for egt 
+// $('#hydrogen-fuel-toggle').on("click", function() {
+//     if (config.projection == 'globe') {
+//         config.projection = "naturalEarth";
+//         map.setProjection('naturalEarth');
+//         $('#btn-spin-toggle').hide();
+//         map.setCenter(config.center);
+//         map.setZoom(determineZoom());
+
+//     } else {
+//         config.projection = "globe";
+//         map.setProjection("globe");
+//         map.setCenter(config.center);
+//         $('#btn-spin-toggle').show();
+//         spinGlobe();
+//         map.setZoom(determineZoom());
+
+//     }
+// })
+
 
 
 /*
