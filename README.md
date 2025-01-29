@@ -20,6 +20,20 @@ The [`config.js for coal-plant`](/trackers/coal-plant/config.js) has documentati
 
 Fork the repository. Place new data file in the appropriate tracker directory. Test and do quality checks on that fork. When ready, make a pull request to the main repository. And accept the pull request to make the update.
 
+## Routine tracker releases
+Global Single Tracker Maps: 
+Run run_maps.py after adjusting in the all_config.py file for the tracker name(s) with new data, after you've updated the map tracker log sheet with the new data (tab name prep_file) with the new data's google sheet key from the copy of official data saved here: [Tracker official releases (data team copies)]([url](https://drive.google.com/drive/folders/1Ql9V1GLLNuOGoJOotX-wK6wCtDq1dOxo))
+
+Regional / Multi-tracker Maps and Data Downloads: 
+Run multi_tracker_maps_script.py directly or from run_maps.py with subprocess
+subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+
+
+Testing and data set up for multi tracker map files and data download files: https://docs.google.com/document/d/1LacVuubl4T4CtGzy1KT_GsWrjV-DOI8XQFuLsUliT88/edit?tab=t.0#heading=h.eooqz1k5afdy
+
+
+
+
 ## Building vector tiles
 
 [Detailed GEM Specific Instructions for creating and updating GIPT tiles](https://docs.google.com/document/d/1Lh2GbscAGpM-UKx2UIo2ajHrmII_RWDDiLvGfhMktZg/edit)
@@ -47,22 +61,21 @@ If hosting on another webserver, the entire repo should be available from a dire
 * bootstrap for styling
 * DataTables for table view
 
+## New Features Planned
+* Fly to unit
+* Area based scaling
+* Legend overhaul
+* Search overhaul 
+
 
 ## Next trackers to move into EG
 
-* Nuclear (changing soon)
-* Asia Gas Tracker (able to change soon, and will be prioritized this summer if possible)
-* Europe Gas Tracker (able to change soon, and will be prioritized this summer if possible)
-* LATAM Energy Tracker (able to change soon, and will be prioritized this summer if possible)
 * GMET (add in pipelines soon)
 
 * GOIT (able to change soon)
-* GGIT (able to change soon) 
 
 * Steel & Iron (able to change soon, planned for early 2025) 
-* GBPT (planned to change early Sept 2024) 
 
-* GCTT Coal Terminals Tracker (no plans, but easily could)
 * Coal Project Finance Tracker (no plans)
 * Global Energy Ownership (no plans, no map) 
 * Private Equity tracker (no plans, no map)
