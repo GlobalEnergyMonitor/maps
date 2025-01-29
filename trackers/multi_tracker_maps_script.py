@@ -844,7 +844,7 @@ def create_search_column(dict_of_gdfs):
         for col in col_names:
             if col in one_gdf.columns:
                 print(one_gdf[col].head(10))
-                new_col_name = f'search_{col}'
+                new_col_name = f'{col}_search'
                 one_gdf[new_col_name] = one_gdf[col].apply(lambda x: remove_diacritics(x))
                 print(one_gdf[new_col_name].head(10))
         

@@ -8,8 +8,8 @@ from creds import client_secret
 # trackers_to_update = ['Plumes']
 # trackers_to_update = ['Bioenergy Plants']
 # trackers_to_update = ['Oil & Gas Plants'] # egt and agt and latam and then oct aet too 
-# trackers_to_update = ['Oil & Gas Plants']
-trackers_to_update = ['Coal Terminals']
+trackers_to_update = ['Oil & Gas Plants']
+# trackers_to_update = ['Coal Terminals']
 tracker_folder_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
 goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
 goget_orig_tab = ['Main data','Production and reserves']
@@ -17,20 +17,24 @@ goget_orig_tab = ['Main data','Production and reserves']
 augmented = True
 data_filtering = True
 
+#### CREATE ####
 map_create = True # work on subnat
-dwlnd_create = False
-about_create = False # read api error
-refine = False 
+dwlnd_create = True
+about_create = True # read api error
 # summary_create = False
+
+#### TEST #####
+run_pre_tests = False # TODO need to add so that there is utility here
+run_post_tests = False
 map_to_test = '' # change if testing a single map not a regional one
+
+#### REFINE ####
+refine = True 
 local_copy = False  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
+final_formatting = True
 
-run_pre_tests = True # TODO need to add so that there is utility here
-run_post_tests = True
-
-final_formatting = False
-
-
+# CAN CHANGE IN MULTI SCRIPT IF PRI EXISTS GOOD IF ONLY REFINING 
+# priority = ['']
 # Get today's date
 today_date = datetime.today()
 
@@ -40,6 +44,8 @@ iso_today_date_folder = f'{iso_today_date}/'
 # client_secret = "/GEM_INFO/client_secret.json"
 client_secret_full_path = os.path.expanduser("~/") + client_secret
 gem_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
+path_for_pkl = gem_path + '/local_pkl/'
+pkl_file = f'about_df_dict_by_map_{iso_today_date}.pkl'
 gspread_creds = gspread.oauth(
         scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
         credentials_filename=client_secret_full_path,
@@ -501,3 +507,5 @@ latam_countries = [
     'Jamaica', 'Mexico', 'Nicaragua', 'Panama', 'Paraguay',
     'Peru', 'Suriname', 'Trinidad and Tobago', 'Uruguay', 'Venezuela'
 ]
+
+

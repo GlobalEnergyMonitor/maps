@@ -152,8 +152,6 @@ def create_prep_file(multi_tracker_log_sheet_key, prep_file_tab): # needed_map_l
         
         with open(f'local_pkl/prep_df{iso_today_date}.pkl', 'wb') as f:
             pickle.dump(prep_df, f)
-
-    
     return prep_df
 
 # # #### useful geo functions ####
@@ -509,8 +507,8 @@ def insert_incomplete_WKTformat_ggit_eu(df_to_drop):
     
     merged_df = df_to_drop.drop(columns='geometry').merge(ggit_routes, on='ProjectID', how='left')
     # Update the 'route' column in gdf with the new values where there is a match
-    print(f'this is length of df_to_drop {len(df_to_drop)} should be 10')
-    input('check')
+    # print(f'this is length of df_to_drop {len(df_to_drop)} should be 10')
+    # input('check')
     # df_to_drop.drop(columns=['geometry'], inplace=True)
     # df_to_drop['geometry'] = df_to_drop['geometry_new']
     # # Drop the temporary 'route_new' column
@@ -519,9 +517,9 @@ def insert_incomplete_WKTformat_ggit_eu(df_to_drop):
     print(f'done issues/check_out_df_to_drop_cols_after_merge_routes {iso_today_date}.csv')
     # drop row if geometry equals none
     # df_to_drop = df_to_drop[df_to_drop['geometry'].notna()]
-    print(df_to_drop['tracker-acro'])
-    print(df_to_drop)
-    input('check this after merge and drop geo, should be 10!')
+    # print(df_to_drop['tracker-acro'])
+    # print(df_to_drop)
+    # input('check this after merge and drop geo, should be 10!')
 
     return df_to_drop
 
@@ -565,15 +563,15 @@ def convert_google_to_gdf(df):
             to_drop_pid.append(pid)
             # print(f'{index} {value!r}')
         # input('Dropped pipeline')
-    print(to_drop_pid)
-    print(len(to_drop_again))
-    input('check if new json will fix this') # it will
+    # print(to_drop_pid)
+    # print(len(to_drop_again))
+    # input('check if new json will fix this') # it will
     #['P5853', 'P6206', 'P6202', 'P6203', 'P4383', 'P6212', 'P5850', 'P4418', 'P6220', 'P6223', 'P6224']
     # let's drop them but create a new separate df with them
      
     df_to_drop = df.loc[to_drop_again]
-    print(df_to_drop)
-    input('Inspect that it is a df and only 10')
+    # print(df_to_drop)
+    # input('Inspect that it is a df and only 10')
     # then add geometry column from separate file and drop wkt, 
     # then concat later in two steps after this main df is a gdf  
     df_to_drop = insert_incomplete_WKTformat_ggit_eu(df_to_drop)
@@ -604,6 +602,32 @@ def convert_google_to_gdf(df):
     
     gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
     return gdf
+
+
+diacritic_map = {
+    'a': ["a", "á", "à", "â", "ã", "ä", "å"],
+    'e': ["e", "é", "è", "ê", "ë"],
+    'i': ["i", "í", "ì", "î", "ï"],
+    'o': ["o", "ó", "ò", "ô", "õ", "ö", "ø"],
+    'u': ["u", "ú", "ù", "û", "ü"],
+    'c': ["c", "ç"],
+    'n': ["n", "ñ"],
+}
+
+
+def remove_diacritics(name_value):
+    # name_value = name_value.fillna('')
+    no_diacritics_name_value = ''
+    if type(name_value) != float:
+        no_diacritics_name_value = name_value[:]
+        for char in no_diacritics_name_value:
+            for k, v in diacritic_map.items():
+                if char in v:
+                    no_diacritics_name_value = no_diacritics_name_value.replace(char, k)
+
+    return no_diacritics_name_value
+
+
 
 def convert_coords_to_point(df):
     crs = 'EPSG: 4326'
@@ -857,11 +881,70 @@ def format_values(df):
     
     df['status'] = df['status'].apply(lambda x: x.lower())
     
-    df[['start-year', 'retired-year', 'owner', 'parent-port-name']] = df[['start-year', 'retired-year',  'owner', 'parent-port-name']].replace('-', '', regex=True)
+    # df[['start-year', 'retired-year', 'owner', 'parent-port-name']] = df[['start-year', 'retired-year',  'owner', 'parent-port-name']].replace('-', '', regex=True)
         
-    df['capacity_mt_display'] = df['capacity-(mt)'].fillna('').replace('*', '')
+    df['capacity-mt-display'] = df['capacity-(mt)'].fillna('').replace('*', '')
 
     return df
+
+# from GOGPT make, check that its not gogpt specific
+
+def harmonize_countries(df, countries_dict):
+    df = df.copy()
+
+    region_col = set(df['region'].to_list())
+    results = []
+    for region in region_col:
+        df_mask = df[df['region']==region]
+        df_mask['country-harmonize-pass'] = df_mask['country/area'].apply(lambda x: 'true' if x in countries_dict[region] else f"false because {x}")
+        results_len = df_mask[df_mask['country-harmonize-pass'] == 'false']
+        results.append((region, len(results_len)))
+        print(f'\nWe want this to be 0: {results}\n')
+        
+    # df['areas-subnat-sat-display'] = df.apply(lambda row: f"{row['country']}" if row['state/province'] == '' else f"{row['state/province']}, {row['country']}", axis=1)   
+    return df
+
+def remove_implied_owner(df):
+    # filter df where owner or parent contains no semicolon
+    # filter furhter where owner parent contains 0 or 100 %
+    df = df.copy()
+    # mask2 = df['owner'].str.contains('[0%]')
+    mask2 = ~df['owner(s)'].str.contains(';')
+    mask3 = df['owner(s)'].str.contains('[100%]')
+    mask4 = ~df['owner(s)'].str.contains(',')
+    mask5 = df['owner(s)'].str.contains('[100.0%]')
+
+
+    maskimplied = mask2 & mask3 & mask4 & mask5
+    df.loc[maskimplied, 'owner(s)'] = df.loc[maskimplied, 'owner(s)'].str.replace('[100%]', '', regex=False).replace('[100.0%]', '', regex=False)
+    
+    print(df['owner(s)'])
+    # input('check mask 100% owner')
+    print(df['parent(s)'])
+    input('check mask 100% parent')
+    
+    # loop through each row of df
+    # if the parent or owner value contains no semicolon so is a single value
+    # then remove the implied owner of 0 or 100 otherwise keep it
+    return df
+
+def formatting_checks(df): # gogpt
+    df = df.copy()    
+    # make sure date is not a float
+    df['start-year'] = df['start-year'].replace('not found', np.nan)
+    # df['start_year'] = df['start_year'].replace('', np.nan)
+    # mask2 = np.isfinite(df['start_year'])
+    mask_notna = df['start-year'].notna()
+    mask_notstring = ~df['start-year'].apply(lambda x: isinstance(x, str))
+    df.loc[mask_notna & mask_notstring, 'start-year'] = df.loc[mask_notna & mask_notstring, 'start-year'].astype(int)
+    # round the capacity float
+    # replace nans with ''
+    # check country and region harmonization
+    # harmonize_countries(df, full_country_list)
+    df['capacity-mw-display'] = df['capacity-(mw)'].fillna('').replace('*', '')
+
+    return df
+
 
 # Function to check if any item in the row's list is in needed_geo
 def check_list(row_list, needed_geo):

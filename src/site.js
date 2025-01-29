@@ -751,13 +751,21 @@ $('#projection-toggle').on("click", function() {
 /*
   legend filters
 */ 
+
+
+
 function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
-        
+        // go through each filter in config 
         if (config.color.field != filter.field) {
             $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h7>');
         }
+        // if (filter.hover_text != ''){
+        //     $('#filter-form').append('<div class="info-box" id="infoBox"><span class="info-icon">i</span><div class="tooltip" id="tooltip">' + filter.values_hover_text[i] + '</div></div>');
+        //     console.log(filter.values_hover_text[i])
+        // }
+
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
             let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
@@ -766,6 +774,9 @@ function buildFilters() {
             check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "");
             check +=  `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
             check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+            if (filter.values_hover_text && filter.values_hover_text[i]) {
+                check += `<div class="info-box" id="infoBox-${check_id}"><span class="info-icon">i</span><div class="tooltip" id="tooltip-${check_id}">${filter.values_hover_text[i]}</div></div>`;
+            }
             $('#filter-form').append(check);
         }
     });
@@ -1703,4 +1714,18 @@ document.addEventListener('keydown', (e) => {
             btnSpinToggle.innerHTML = 'Start rotation';
         }
     }
+});
+
+
+const infoBox = document.getElementById('infoBox');
+const tooltip = document.getElementById('tooltip');
+
+infoBox.addEventListener('mouseover', () => {
+    tooltip.style.opacity = '1';
+    tooltip.style.visibility = 'visible';
+});
+
+infoBox.addEventListener('mouseout', () => {
+    tooltip.style.opacity = '0';
+    tooltip.style.visibility = 'hidden';
 });

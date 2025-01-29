@@ -1,5 +1,5 @@
 var config = {
-    csv: 'compilation_output/europe_2025-01-17-test.csv',
+    json: 'compilation_output/europe_2025-01-17.geojson',
     geometries: ['Point','LineString'],
     center: [8, 30],
     zoomFactor: 1.9,
@@ -7,63 +7,39 @@ var config = {
     statusField: 'status-legend',
     statusDisplayField: 'status',
     color: {
-        field: 'fuel-filter',
+        field: 'tracker-custom',
         values: {
-            'hy': 'blue',
-            'methane': 'green',
-            'blend': 'red'
+            'GOGPT': 'blue',
+            'GOGET-oil': 'red',
+            'GGIT-euhy': 'green',
+            'GGIT-eu': 'green',
+            'GGIT-import':'green',
+            'GGIT-export':'green',
+
+
         }
-        // field: 'tracker-custom',
-        // values: {  
-        //     'GOGPT-hy': 'blue',
-        //     'GOGPT': 'blue',
-        //     'GOGET-oil': 'red',
-        //     'GGIT-hy-eu': 'green',
-        //     'GGIT-eu': 'green',
-        //     "GGIT-hy-import": 'green', 
-        //     'GGIT-import':'green',
-        //     "GGIT-hy-export": 'green',
-        //     'GGIT-export':'green',
-
-        // }
     },
-
+    //filter values should have no spaces
     filters: [
         {
-            field: 'fuel-filter',
-            label: 'Fuels',
-            values: ['hy', 'methane', 'blend'],
-            values_labels: ['Hydrogen', 'Methane', 'Blend'],
-            values_hover_text: ['hover text for fuels', '', '']
-        },
-        {
             field: 'tracker-custom',
-            label: 'Type',
-            values: ["GOGPT-hy", "GOGPT",  "GGIT-hy-eu", "GGIT-eu","GGIT-hy-import",], 
-            values_labels: ['Gas pipelines', 'LNG import terminals', 'LNG export terminals', 'Gas power units', "Gas extraction units",],
+            values: ["GOGPT",  "GGIT-euhy", "GGIT-eu","GGIT-import", "GGIT-export", "GOGET-oil", ], 
+            values_labels: ['gas power units', 'hydrogen gas pipelines', "methane gas pipelines",'LNG import terminals', 'LNG export terminals', 'gas extraction areas',],
+            primary: true
         },
         {
             field: 'status-legend',
             label: 'Status',
             values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved', 'not-found'],
-            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
+            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
         },
         {
             field: 'pci-list',
             label: 'EU Projects of Common Interest (PCI)',
-            values: ['5', '6', 'both', 'none',], // can we join both into 5 and 6??? can we merge? both should show up in pci 5 and pci 6 separately
-            values_labels: ['PCI-5 only', 'PCI-6 only', 'PCI 5 & PCI 6 Overlap', 'Non-PCI'] 
+            values: ['5', '6', 'both', 'none',],
+            values_labels: ['PCI-5', 'PCI-6', 'PCI-5 & PCI-6', 'Non-PCI'] 
 
         },
-        {
-            field: 'maturity', 
-            label: 'Progress Demonstrated (Hydrogen Only)', // info button explaining what it means
-            values: ['y', 'n', 'none'],
-            values_labels: ['yes', 'no', 'n/a'],
-            values_hover_text: ['hover tesct for fuels', '', '']
-
-
-        }
 
     ],
     capacityField: 'scaling-capacity',
@@ -72,16 +48,12 @@ var config = {
     capacityLabel: {
         field: 'tracker-custom',
         values: {
-            'GOGPT-hy': 'MW',
             'GOGPT': 'MW',
             // 'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
             'GGIT-eu':	'bcm/y of gas', 
-            'GGIT-hy-eu': 'bcm/y of gas',
-            'GGIT-hy-import': 'MTPA of natural gas',
-            'GGIT-hy-export': 'MTPA of natural gas',            
+            'GGIT-euhy': 'bcm/y of gas',
             'GGIT-import': 'MTPA of natural gas',
             'GGIT-export': 'MTPA of natural gas',            
-
 
         }
     },
