@@ -233,6 +233,23 @@ def geojson_to_gdf(geojson_file):
     return gdf, crs
 
 
+diacritic_map = {
+    'a': ["a", "á", "à", "â", "ã", "ä", "å"],
+    'e': ["e", "é", "è", "ê", "ë"],
+    'i': ["i", "í", "ì", "î", "ï"],
+    'o': ["o", "ó", "ò", "ô", "õ", "ö", "ø"],
+    'u': ["u", "ú", "ù", "û", "ü"],
+    'c': ["c", "ç"],
+    'n': ["n", "ñ"],
+}
+
+def remove_diacritics(value):
+    no_diacritics_value = value
+    for char in value:
+        for key, values in diacritic_map.items():
+            if char in values:
+                no_diacritics_value = no_diacritics_value.replace(char, key)
+    return no_diacritics_value
 
 def get_standard_country_names():
     
@@ -850,7 +867,7 @@ def assign_eu_hydrogen_legend(gdf):
 
     return gdf
 
-def format_values(df):
+def format_values_gctt(df):
     """this will lowercase status values, 
     and replace dashes and stars with blanks, 
     and create display capacity field as string to hide nan"""
@@ -861,6 +878,34 @@ def format_values(df):
         
     df['capacity_mt_display'] = df['capacity-(mt)'].fillna('').replace('*', '')
 
+    return df
+
+
+def remove_float_year(df):
+    year_cols = ['start-year', 'retired-year']
+    
+    for col in year_cols:
+        df[col] = df[col].apply(lambda x: str(x).split('.')[0])
+    
+    return df
+
+def format_values_gcpt(df):
+    """this will lowercase status values, 
+    and replace dashes and stars with blanks, 
+    and create display capacity field as string to hide nan and 
+    convert years to integer without decimal with remove_float_year """
+    
+    df['status'] = df['status'].apply(lambda x: x.lower())
+    
+    df[['start-year', 'retired-year', 'owner']] = df[['start-year', 'retired-year', 'owner']].replace('-', '', regex=True)
+    
+        
+    # read in df set special characters to be a nan, use parameter to set na values
+    # tracker_df = pd.read_csv(tracker_file_path, na_values=["--"])
+    # tracker_df = tracker_df.fillna("")
+
+    df = remove_float_year(df)
+    
     return df
 
 # Function to check if any item in the row's list is in needed_geo

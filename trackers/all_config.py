@@ -5,31 +5,25 @@ import gspread
 from numpy import true_divide
 from creds import client_secret
 
-# trackers_to_update = ['Plumes']
-# trackers_to_update = ['Bioenergy Plants']
-# trackers_to_update = ['Oil & Gas Plants'] # egt and agt and latam and then oct aet too 
-# trackers_to_update = ['Oil & Gas Plants']
-trackers_to_update = ['Coal Terminals']
-tracker_folder_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
-goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
-goget_orig_tab = ['Main data','Production and reserves']
+# ALL MAP FLAGS
+trackers_to_update = ['Coal Plants']  # Declare which tracker to update, important for run_maps script. Usually one at a time, but can be multiple if there are new data for more than one release. Determines which single global map files get created. Along with regional ones dependent on those trackers to be up to date. 
 
-augmented = True
-data_filtering = True
+# MULTI MAP FLAGS
+map_to_test = '' # This is not needed I don't think because it was replaced by the run_maps file where we run the single global map before calling the multi map script.
+local_copy = False  # This saves time by pulling from the daily pkl file, but we run into an error with the refining function around Europe. # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
 
-map_create = True # work on subnat
-dwlnd_create = False
-about_create = False # read api error
-refine = False 
-# summary_create = False
-map_to_test = '' # change if testing a single map not a regional one
-local_copy = False  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
+augmented = True # This does?? 
+data_filtering = True # This decides how the data will need to be filtered: which countries and which fuels. 
 
-run_pre_tests = True # TODO need to add so that there is utility here
-run_post_tests = True
+map_create = True # This creates the map files for all needed regional maps. The main difference between data downloads will be we exclude any data rows with corrupted or missing location data. 
+dwlnd_create = True # This creates the data tabs for each of the regional map's trackers. We later send the final data download for all regional maps to April. Minus Europe, Rob usually does that? 
+about_create = True # This often enounters an API error but pulls all the latest about pages from the datasets, the regional about pages can be clunky
+refine = True  # This glues the data tabs with the appropriate about tabs and reorders them 
+# summary_create = False # This mimics the basic summary tables to help confirm data accuracy and maybe save PM time creating them
+run_pre_tests = True # This must be run to compare with post tests and also flags issues to be fixed by PM - should be a colab soon! 
+run_post_tests = True # This runs comparisons between map and data download files and original source data from PM
 
-final_formatting = False
-
+final_formatting = True # This is run right before sending to April 
 
 # Get today's date
 today_date = datetime.today()
@@ -37,6 +31,9 @@ today_date = datetime.today()
 # Format the date in ISO format
 iso_today_date = today_date.isoformat().split('T')[0]
 iso_today_date_folder = f'{iso_today_date}/'
+
+tracker_folder_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
+path_for_pkl = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/local_pkl'
 # client_secret = "/GEM_INFO/client_secret.json"
 client_secret_full_path = os.path.expanduser("~/") + client_secret
 gem_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
@@ -48,6 +45,10 @@ gspread_creds = gspread.oauth(
 region_cols = 'Region'
 dtype_spec = {} #{'Latitude': float, 'Longitude': float}
 numeric_cols = [] #TODO 
+
+goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
+goget_orig_tab = ['Main data','Production and reserves']
+
 list_official_tracker_names = ['Oil & Gas Plants', 'Coal Plants', 'Solar', 'Wind', 'Hydropower', 'Geothermal', 'Bioenergy', 'Nuclear', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Extraction', 'Oil Pipelines', 'Gas Pipelines', 'LNG Terminals']
 
 maps_with_needed_conversion = ['asia', 'europe', 'africa', 'latam', 'ggit']

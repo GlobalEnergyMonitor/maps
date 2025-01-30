@@ -1589,7 +1589,6 @@ def gather_all_about_pages(prev_key_dict, prep_df, new_release_date, previous_re
         if mapname == 'Global':
             print('skip this')
         
-      
             
         else:
             if local_copy:
@@ -1597,11 +1596,20 @@ def gather_all_about_pages(prev_key_dict, prep_df, new_release_date, previous_re
                 with open(f'local_pkl/about_df_dict_by_map_{iso_today_date}.pkl', 'rb') as f:
                     about_df_dict_by_map = pickle.load(f)
             
-            elif pkl_file in os.listdir(path_for_pkl):
-                with open(f'local_pkl/about_df_dict_by_map_{iso_today_date}.pkl', 'rb') as f:
-                    about_df_dict_by_map = pickle.load(f)      
+            # elif pkl_file in os.listdir(path_for_pkl): # AVOID ERROR ON API CALLS AND USE LOCAL ABOUT FILE
+            #     with open(f'local_pkl/about_df_dict_by_map_{iso_today_date}.pkl', 'rb') as f:
+            #         about_df_dict_by_map = pickle.load(f)      
                     
             else:
+                # for file in os.listdir(path_for_pkl): # AVOID ERROR ON API CALLS AND USE LOCAL ABOUT FILE
+                #     if file.endswith(".pkl"):
+                #         with open(f'{path_for_pkl}/about_df_dict_by_map_{iso_today_date}.pkl', 'rb') as f:
+                #             about_df_dict_by_map = pickle.load(f)
+                #             print(f'this is  {about_df_dict_by_map}')      
+                #             input('check about_df_dict_by_map')
+                # if len(about_df_dict_by_map) < 1:
+                    # we need to create from scratch
+                    
                 # needed_trackers = value[0] # list of tracker names to include in list of dfs
                 # needed_geo = value[1] # list of countries or global for gipt to filter each df in the list by
                 list_of_tuples_holding_about_page_name_df = []
@@ -2645,8 +2653,8 @@ if map_create:
     custom_dict_list_gdfs_by_map = split_goget_ggit(incorporated_dict_list_gdfs_by_map)  #incorporated_dict_list_gdfs_by_map
     custom_dict_list_gdfs_by_map_with_conversion = assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df)
     renamed_one_gdf_by_map = rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion)
-    renamed_one_gdf_by_map_with_search = create_search_column(renamed_one_gdf_by_map)
-    input('done with create_search_column')
+    # renamed_one_gdf_by_map_with_search = create_search_column(renamed_one_gdf_by_map)
+    # input('done with create_search_column')
     # renamed_one_gdf_by_map = add_boed_routes_from_baird(renamed_one_gdf_by_map)
     # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
     

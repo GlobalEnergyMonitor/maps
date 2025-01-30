@@ -1,9 +1,13 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
-    csv: 'compilation_output/data-2024-07-30.csv', // Coal Plants-map-file-2025-01-29.csv
-    
+    json: 'output/coal-finance-eg-map 2024-10-28.geojson',
     /* define the column and associated values for color application */
-    linkField: 'gem-location-id',
+    geometries: ['Point','LineString'],
+    center: [8, 30],
+    zoomFactor: 1.9,
+    img_detail_zoom: 10,
+    linkField: 'tid',
+    urlField: 'wiki',
     color: {
         field: 'status',
         values: {
@@ -27,12 +31,16 @@ var config = {
         {
             field: 'status',
             values: ['operating','construction','permitted','pre-permit', 'announced','retired','cancelled', 'shelved','mothballed'],
+        },
+        {
+            type: 'Domestic/International',
+            values: ['Domestic', 'International', 'Not found']
         }
     ],
 
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
-    capacityField: 'capacity',
+    capacityField: 'megawatts',
     capacityLabel: 'Capacity (MW)',
 
     /* Labels for describing the assets */
@@ -40,8 +48,8 @@ var config = {
     assetLabel: 'units',
 
     /* the column that contains the asset name. this varies between trackers */
-    nameField: 'plant-name',
-    countryField: 'country/area',
+    nameField: 'project-name',
+    countryField: 'target_country',
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
@@ -54,9 +62,9 @@ var config = {
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Plant': ['plant-name'], 
-        'Companies': ['owner', 'parent'],
-        'Start Year': ['start-year']
+    searchFields: { 'Project': ['project-name'], 
+        'Companies': ['financer', 'parent'],
+        'Start Year': ['close-year']
     },
 
     /* define fields and how they are displayed. 
