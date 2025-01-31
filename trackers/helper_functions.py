@@ -434,6 +434,7 @@ def coordinate_qc(df, col_country_name):
 
                 
         # check that the numbers fall within a range
+        # QC
         acceptable_range = {
             'lat': {'min': -90, 'max': 90},
             'lng': {'min': -180, 'max': 180}
@@ -839,9 +840,7 @@ def handle_goget_gas_only_workaround(goget_orig_file):
 def pci_eu_map_read(gdf):
     # take columns PCI5 and PCI6 
     # create one column, both, 5, 6, none, all as strings
-    print(gdf.head())
-    print(gdf['tracker-acro'])
-    input('check why no PCI5')
+
     gdf['pci-list'] = ''
     for row in gdf.index:
         pci5 = gdf.loc[row, 'PCI5']
@@ -1232,18 +1231,18 @@ def create_filtered_df_list_by_map(trackerdf, col_country_name, col_reg_name, ma
     # input('check')
     return filtered_df
 
-def conversion_equal_area(row):
-    cap = float(row['cleaned_cap'])
-    factor = float(row['conversion_factor'])
-    # print(f'this is factor! {factor}')
-    converted = float(cap * factor)
-    # result = math.sqrt((4 * converted) / np.pi) # CURRENT
-    result = (((4*converted)/np.pi))**(1/2)
-    return result
-    # result = math.sqrt(4 * (float(cap * factor)) / np.pi) # PREVIOUS
+# def conversion_equal_area(row):
+#     cap = float(row['cleaned_cap'])
+#     factor = float(row['conversion_factor'])
+#     # print(f'this is factor! {factor}')
+#     converted = float(cap * factor)
+#     # result = math.sqrt((4 * converted) / np.pi) # CURRENT
+#     result = (((4*converted)/np.pi))**(1/2)
+#     return result
+#     # result = math.sqrt(4 * (float(cap * factor)) / np.pi) # PREVIOUS
 
     
-    return result 
+#     return result 
 
 def conversion_multiply(row):
     cap = float(row['cleaned_cap'])

@@ -1,5 +1,5 @@
 var config = {
-    csv: 'compilation_output/europe_2025-01-17-test.csv',
+    geojson: 'compilation_output/europe_2025-01-31_colab.geojson',
     geometries: ['Point','LineString'],
     center: [8, 30],
     zoomFactor: 1.9,
@@ -7,40 +7,38 @@ var config = {
     statusField: 'status-legend',
     statusDisplayField: 'status',
     color: {
-        field: 'fuel-filter',
-        values: {
-            'hy': 'blue',
-            'methane': 'green',
-            'blend': 'red'
-        }
-        // field: 'tracker-custom',
-        // values: {  
-        //     'GOGPT-hy': 'blue',
-        //     'GOGPT': 'blue',
-        //     'GOGET-oil': 'red',
-        //     'GGIT-hy-eu': 'green',
-        //     'GGIT-eu': 'green',
-        //     "GGIT-hy-import": 'green', 
-        //     'GGIT-import':'green',
-        //     "GGIT-hy-export": 'green',
-        //     'GGIT-export':'green',
-
+        // field: 'fuel-filter',
+        // values: {
+        //     'hy': 'blue',
+        //     'methane': 'green',
+        //     'blend': 'red'
         // }
+        field: 'tracker-custom',
+        values: {  
+            'GOGPT': 'blue',
+            'GGIT': 'green',
+            'GGIT-import':'green',
+            'GGIT-export':'green',
+            'GOGET-oil': 'red',
+
+        }
     },
 
     filters: [
         {
             field: 'fuel-filter',
-            label: 'Fuels',
-            values: ['hy', 'methane', 'blend'],
-            values_labels: ['Hydrogen', 'Methane', 'Blend'],
-            values_hover_text: ['hover text for fuels', '', '']
+            label: 'Hydrogen',
+            values: ['hy', 'blend', 'methane'],
+            values_labels: ['100%', 'Blended', 'Methane Only'],
+            // values_hover_text: ['hover text for fuels', '', '']
+            field_hover_text: 'Hydrogen projects are classified as either planning to blend hydrogen into methane gas or use 100% hydrogen. For the projects that plan to use hydrogen but do not specify a percentage, it is assumed they are blending. Blended projects only appear as hydrogen projects and do not also appear as methane projects, though they will use both fuel types.',
+            primary: true
         },
         {
             field: 'tracker-custom',
             label: 'Type',
-            values: ["GOGPT-hy", "GOGPT",  "GGIT-hy-eu", "GGIT-eu","GGIT-hy-import",], 
-            values_labels: ['Gas pipelines', 'LNG import terminals', 'LNG export terminals', 'Gas power units', "Gas extraction units",],
+            values: ["GOGPT", "GGIT","GGIT-import", "GGIT-export","GOGET-oil"], 
+            values_labels: ['Gas power units','Gas pipelines', 'LNG import terminals', 'LNG export terminals',  "Gas extraction areas",],
         },
         {
             field: 'status-legend',
@@ -49,36 +47,31 @@ var config = {
             values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
         },
         {
+            field: 'maturity', 
+            label: 'Progress Demonstrated (Hydrogen Only)', // info button explaining what it means
+            values: ['y', 'n', 'none'],
+            values_labels: ['yes', 'no', 'n/a'],
+            // values_hover_text: ['hover tesct for fuels', '', '']
+            field_hover_text: 'GEM assesses whether hydrogen projects have met criteria (specific to each infrastructure type) demonstrating progress toward completion, since many hydrogen projects lack core details or commitments from stakeholders. For more information on these criteria, see the <a href="https://globalenergymonitor.org/projects/europe-gas-tracker/methodology/">EGT methodology page</a>'
+
+        },
+        {
             field: 'pci-list',
             label: 'EU Projects of Common Interest (PCI)',
             values: ['5', '6', 'both', 'none',], // can we join both into 5 and 6??? can we merge? both should show up in pci 5 and pci 6 separately
             values_labels: ['PCI-5 only', 'PCI-6 only', 'PCI 5 & PCI 6 Overlap', 'Non-PCI'] 
 
         },
-        {
-            field: 'maturity', 
-            label: 'Progress Demonstrated (Hydrogen Only)', // info button explaining what it means
-            values: ['y', 'n', 'none'],
-            values_labels: ['yes', 'no', 'n/a'],
-            values_hover_text: ['hover tesct for fuels', '', '']
-
-
-        }
 
     ],
     capacityField: 'scaling-capacity',
     
-    // capacityDisplayField: 'capacity-display',
     capacityLabel: {
         field: 'tracker-custom',
         values: {
-            'GOGPT-hy': 'MW',
             'GOGPT': 'MW',
-            // 'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
-            'GGIT-eu':	'bcm/y of gas', 
-            'GGIT-hy-eu': 'bcm/y of gas',
-            'GGIT-hy-import': 'MTPA of natural gas',
-            'GGIT-hy-export': 'MTPA of natural gas',            
+            'GOGET-oil': '',	//'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
+            'GGIT': 'bcm/y of gas',
             'GGIT-import': 'MTPA of natural gas',
             'GGIT-export': 'MTPA of natural gas',            
 
@@ -107,21 +100,22 @@ var config = {
     countryField: 'areas',
     //if multicountry, always end values with a comma
     multiCountry: true,
-
+    capacityDisplayField: 'capacity-table',
+    
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-gas', 'prod-year-gas', 'fuel', 'tracker-display'],
-        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)', 'Fuel', 'Facility Type'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-gas', 'prod-year-gas','tracker-display'],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', 'units','Status','Country/Area(s)','Start year', 'Production (Million m³/y)', 'Production year (gas)', 'Type'],
         clickColumns: ['name'],
-        rightAlign: ['unit','capacity','prod-gas','start-year','prod-year-gas'], 
+        rightAlign: ['capacity-table','prod-gas','start-year','prod-year-gas'], 
         removeLastComma: ['areas'], 
 
     },
-    searchFields: { 'Project': ['name'], 
+    searchFields: { 'Project': ['name', 'other-name', 'local-name'], 
         'Companies': ['owner', 'parent'],
         'Start Year': ['start-year'],
-        'Infrastructure Type': ['tracker-display'],
-        'Status': ['status'],
-        'Province/State': ['subnat']
+        // 'Infrastructure Type': ['tracker-display'],
+        // 'Status': ['status'],
+        // 'Province/State': ['subnat']
     },
     detailView: {
         'name': {'display': 'heading'},
@@ -130,11 +124,12 @@ var config = {
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
-        'river': {'label': 'River'},
-        'tracker-display': {'label': 'Type'},
+        // 'river': {'label': 'River'},
+        // 'tracker-display': {'label': 'Type'},
         'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
     },
+    showToolTip: true,
 
         /* radius associated with minimum/maximum value on map */
     // minRadius: 2,
