@@ -725,46 +725,35 @@ $('#projection-toggle').on("click", function() {
 
     }
 })
-// ,
-// for egt 
-// $('#hydrogen-fuel-toggle').on("click", function() {
-//     if (config.projection == 'globe') {
-//         config.projection = "naturalEarth";
-//         map.setProjection('naturalEarth');
-//         $('#btn-spin-toggle').hide();
-//         map.setCenter(config.center);
-//         map.setZoom(determineZoom());
-
-//     } else {
-//         config.projection = "globe";
-//         map.setProjection("globe");
-//         map.setCenter(config.center);
-//         $('#btn-spin-toggle').show();
-//         spinGlobe();
-//         map.setZoom(determineZoom());
-
-//     }
-// })
-
 
 
 /*
   legend filters
 */ 
 
-
-
 function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
         // go through each filter in config 
-        if (config.color.field != filter.field) {
+        if (config.showToolTip){
+            // create more space for europe legend
+            if (filter.primary && filter.field_hover_text){
+                $('#filter-form').append('<h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text + '</div></div></h7>');
+    // add eventlistener for infobox and tooltip to show on hover
+
+            }
+            else if (filter.field_hover_text){
+                $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text + '</div></div></h7>');
+
+            }
+            else {
+            // do same as below but append infobox
+            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h7>');
+            }
+        }
+        else if (config.color.field != filter.field) {
             $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h7>');
         }
-        // if (filter.hover_text != ''){
-        //     $('#filter-form').append('<div class="info-box" id="infoBox"><span class="info-icon">i</span><div class="tooltip" id="tooltip">' + filter.values_hover_text[i] + '</div></div>');
-        //     console.log(filter.values_hover_text[i])
-        // }
 
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
@@ -774,12 +763,44 @@ function buildFilters() {
             check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "");
             check +=  `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
             check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
-            if (filter.values_hover_text && filter.values_hover_text[i]) {
-                check += `<div class="info-box" id="infoBox-${check_id}"><span class="info-icon">i</span><div class="tooltip" id="tooltip-${check_id}">${filter.values_hover_text[i]}</div></div>`;
-            }
+            // if we want hover text unique on filter's value not just filter title
+            // if (filter.values_hover_text && filter.values_hover_text[i]) {
+            //     check += `<div class="info-box" id="infoBox-${check_id}"><span class="info-icon">i</span><div class="tooltip" id="tooltip-${check_id}">${filter.values_hover_text[i]}</div></div>`;
+            // }
             $('#filter-form').append(check);
         }
+    // add eventlistener for infobox and tooltip to show on hover 
+    $('.infobox').each(function() {
+        $(this).on('mouseover', function() {
+            const infoBox = document.getElementById('infobox');
+            const toolTip = document.getElementById('tooltip');
+            const infoBoxRect = infoBox.getBoundingClientRect();
+            const toolTipRect = toolTip.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            if (infoBoxRect.top < toolTipRect.height + 20) {
+                // Position the tooltip below the infobox
+                toolTip.style.bottom = 'auto';
+                toolTip.style.top = '110%';
+            } else {
+                // Position the tooltip above the infobox
+                toolTip.style.top = 'auto';
+                toolTip.style.bottom = '110%';
+            }
+            
+            $(this).find('.tooltip').css({
+                'opacity': '1',
+                'visibility': 'visible'
+            });
+        });
+        $(this).on('mouseout', function() {
+            $(this).find('.tooltip').css({
+                'opacity': '0',
+                'visibility': 'hidden'
+            });
+        });
     });
+    });
+    
     $('.filter-row').each(function() {
         this.addEventListener("click", function() {
             $('#' + this.dataset.checkid).click();
@@ -792,7 +813,10 @@ function buildFilters() {
 
         });
     });
+
 }
+
+
 function toggleFilter(id) {
     $('#' + id + '-checkmark').toggleClass('checkmark uncheckmark');
 }
@@ -1716,16 +1740,3 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-
-const infoBox = document.getElementById('infoBox');
-const tooltip = document.getElementById('tooltip');
-
-infoBox.addEventListener('mouseover', () => {
-    tooltip.style.opacity = '1';
-    tooltip.style.visibility = 'visible';
-});
-
-infoBox.addEventListener('mouseout', () => {
-    tooltip.style.opacity = '0';
-    tooltip.style.visibility = 'hidden';
-});
