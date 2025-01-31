@@ -1,7 +1,7 @@
 var config = {
     geojson: 'compilation_output/europe_2025-01-31_colab.geojson',
     geometries: ['Point','LineString'],
-    center: [8, 30],
+    center: [8, 50],
     zoomFactor: 1.9,
     img_detail_zoom: 10,
     statusField: 'status-legend',
