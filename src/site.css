@@ -146,17 +146,19 @@ table.dataTable td {
 }
 
 .mapboxgl-ctrl-bottom-right {
-    top: 50%;
+    top: 0;
     right: 10px;
     bottom: auto;
-    opacity: 0 !important;
+    z-index: -1;
+    opacity: 1 !important;
 }
 
 .mapboxgl-ctrl-bottom-left {
-    top: 50%;
+    top: 0;
     right: 10px;
     bottom: auto;
-    opacity: 0 !important;
+    z-index: -1;
+    opacity: 1 !important;
 }
 
 @media screen and (max-width: 1170) {
