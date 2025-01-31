@@ -272,9 +272,9 @@ def input_to_output(df, output_file):
 ### CALL ALL
 
 df = gspread_access_file_read_only(input_file_key, ['Gas & Oil units'])
-old_df = open_csv_no_error('/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gas-plant/data.csv')
+# old_df = open_csv_no_error('/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gas-plant/data.csv')
 cols = df_info(df, 'gogpt_current')
-cols_old = df_info(old_df, 'gogpt_old')
+# cols_old = df_info(old_df, 'gogpt_old')
 renamed_df = rename(df)
 formatted_df = formatting_checks(renamed_df)
 input_to_output(formatted_df, f'{output_folder}data-{iso_today_date}.csv')

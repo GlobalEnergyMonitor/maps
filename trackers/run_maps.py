@@ -16,12 +16,14 @@ for tracker in trackers_to_update:
 
         output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/compilation_output/'
 
-        input_file_xls = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/compilation_input/Global Bioenergy Power Tracker (GBPT) - V2 DATA TEAM COPY.xlsx'
+        # input_file_xls = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/compilation_input/Global Bioenergy Power Tracker (GBPT) - V2 DATA TEAM COPY.xlsx'
                 
 
-        key = '1WRRFRuR9mWxZpko-VMYH5xm0LzRX_qM7W73nGGi4Jmg'
-        tabs = ['Data', 'Below Threshold']
+        # key = '1WRRFRuR9mWxZpko-VMYH5xm0LzRX_qM7W73nGGi4Jmg'
+        # tabs = ['Data', 'Below Threshold']
         # creates single map file
+        key, tabs = get_key_tabs_prep_file(tracker)
+
         df = create_df(key, tabs)
         df = rename_cols(df)
         df = fix_status_inferred(df)
@@ -33,83 +35,12 @@ for tracker in trackers_to_update:
         df = input_to_output(df, f'{output_folder}{tracker}-map-file-{iso_today_date}.csv')
         test_stats(df)
         # creates multi-map files 
-        if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
-            print('Start augmented')
-            needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab)
-            # map_country_region has the list of needed maps to be created and their countries/regions
-            needed_tracker_geo_by_map = what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, needed_map_and_tracker_dict)
-            # TODO for about generation maybe add in the prev_key for each map's results
-            # needed_tracker_geo_by_map = pull_in_prev_key_map(needed_tracker_geo_by_map, multi_tracker_log_sheet_key)
-            folder_setup(needed_tracker_geo_by_map)
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print(f'Ended augmented {elapsed_time}')
-            
-        if data_filtering: # this creates gdfs and dfs for all filtered datasets per map, lots of repetition here
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('Start data filtering')
-            prep_df = create_prep_file(multi_tracker_log_sheet_key, prep_file_tab) 
-            conversion_df = create_conversion_df(conversion_key, conversion_tab)
-
-            dict_list_dfs_by_map, dict_list_gdfs_by_map = pull_gsheet_data(prep_df, needed_tracker_geo_by_map) # map_country_region
-            incorporated_dict_list_gdfs_by_map, incorporated_dict_list_dfs_by_map = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson,dict_list_dfs_by_map, dict_list_gdfs_by_map) 
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print(f'Ended data filtering {elapsed_time}')
-            
-        if about_create: # this creates and saves a preliminary file with all about pages no adjustments made
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('Start about creation')
-            about_df_dict_by_map = gather_all_about_pages(prev_key_dict, prep_df, new_release_date, previous_release_date, needed_tracker_geo_by_map)
-            create_about_page_file(about_df_dict_by_map)
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print(f'End about creation {elapsed_time}')
-
-        if dwlnd_create: # this creates and saves the tabular data sheets for the data download from the filtered dfs
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print(f'Start dwlnd creation {elapsed_time}')
-            create_data_dwnld_file(incorporated_dict_list_dfs_by_map) 
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print(f'End dwlnd creation {elapsed_time}')
-            
-        if refine: # this reorders the data download file
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('Start refining')
-            if local_copy:
-                about_df_dict_by_map = ''
-                incorporated_dict_list_dfs_by_map = ''
-            reorder_dwld_file_tabs(about_df_dict_by_map, incorporated_dict_list_dfs_by_map) 
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('End refining')    
-
-            
-        if map_create:
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('Start map file creation')
-            custom_dict_list_gdfs_by_map = split_goget_ggit(incorporated_dict_list_gdfs_by_map)  #incorporated_dict_list_gdfs_by_map
-            custom_dict_list_gdfs_by_map_with_conversion = assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df)
-            renamed_one_gdf_by_map = rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion)
-            # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
-            cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map)
-            cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
-            
-            cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
-            one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
-            one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
-            final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
-            final_count(final_dict_gdfs)
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('End map file creation')
-            
+        print('DONE MAKING GBPT SINGLE MAP onto MULTI MAPS')
+        input('continue?')
+        # creates multi-tracker maps
+        # if tracker to update is coal terminals then look at sheet and create all regional and of course single
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+          
         # if test:
         #     check_expected_number(incorporated_dict_list_gdfs_by_map) # TODO HANDLE THIS ONE for dict or use the one thats been concatenated
 
@@ -132,93 +63,25 @@ for tracker in trackers_to_update:
         df = create_df(key, tabs)
         df = rename_cols(df)
         df = fix_status_inferred(df)
-        df = filter_cols(df,final_cols=['country/area', 'plant-name', 'fuel', 'unit-name', 'plant-name-in-local-language-/-script',
-                                        'capacity-(mw)', 'status', 'start-year', 'retired-year',
+        df = filter_cols(df,final_cols=['gem-location-id','country/area', 'plant-name', 'fuel', 'unit-name', 'plant-name-in-local-language-/-script',
+                                        'capacity-(mw)', 'status', 'start-year', 'retired-year', 'parent(s)', 'turbine/engine-technology',
                                         'operator(s)', 'owner(s)', 'lat', 'lng', 'location-accuracy', 'city', 'state/province',
-                                        'region', 'unit-name', 'url'          
+                                        'region', 'url'          
                                         ])
+        # make sure 0% and 100% is removed from owners
+
+        df = remove_implied_owner(df)
+        df = formatting_checks(df)
+
+        
         df = input_to_output(df, f'{output_folder}{tracker}-map-file-{iso_today_date}.csv')
         # test_stats(df)
-        
-        # creates multi-map files 
-        if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
-            print('Start augmented')
-            needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab)
-            # map_country_region has the list of needed maps to be created and their countries/regions
-            needed_tracker_geo_by_map = what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, needed_map_and_tracker_dict)
-            # print(path_for_download_and_map_files)
-            folder_setup(needed_tracker_geo_by_map)
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print(f'Ended augmented {elapsed_time}')
-            
-        if data_filtering: # this creates gdfs and dfs for all filtered datasets per map, lots of repetition here
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('Start data filtering')
-            prep_df = create_prep_file(multi_tracker_log_sheet_key, prep_file_tab) 
-            conversion_df = create_conversion_df(conversion_key, conversion_tab)
+        print('DONE MAKING GOGPT SINGLE MAP onto MULTI MAPS')
+        input('Continue?')
+        # creates multi-tracker maps
+        # if tracker to update is coal terminals then look at sheet and create all regional and of course single
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
 
-            dict_list_dfs_by_map, dict_list_gdfs_by_map = pull_gsheet_data(prep_df, needed_tracker_geo_by_map) # map_country_region
-            incorporated_dict_list_gdfs_by_map, incorporated_dict_list_dfs_by_map = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson,dict_list_dfs_by_map, dict_list_gdfs_by_map) 
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print(f'Ended data filtering {elapsed_time}')
-            
-        if about_create: # this creates and saves a preliminary file with all about pages no adjustments made
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('Start about creation')
-            about_df_dict_by_map = gather_all_about_pages(prev_key_dict, prep_df, new_release_date, previous_release_date, needed_tracker_geo_by_map)
-            create_about_page_file(about_df_dict_by_map)
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print(f'End about creation {elapsed_time}')
-
-        if dwlnd_create: # this creates and saves the tabular data sheets for the data download from the filtered dfs
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print(f'Start dwlnd creation {elapsed_time}')
-            create_data_dwnld_file(incorporated_dict_list_dfs_by_map) 
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print(f'End dwlnd creation {elapsed_time}')
-            
-        if refine: # this reorders the data download file
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('Start refining')
-            if local_copy:
-                about_df_dict_by_map = ''
-                incorporated_dict_list_dfs_by_map = ''
-            reorder_dwld_file_tabs(about_df_dict_by_map, incorporated_dict_list_dfs_by_map) 
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('End refining')    
-
-            
-        if map_create:
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('Start map file creation')
-            custom_dict_list_gdfs_by_map = split_goget_ggit(incorporated_dict_list_gdfs_by_map)  #incorporated_dict_list_gdfs_by_map
-            custom_dict_list_gdfs_by_map_with_conversion = assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df)
-            renamed_one_gdf_by_map = rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion)
-            # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
-            cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map)
-            cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
-            
-            cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
-            one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
-            one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
-            final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
-            final_count(final_dict_gdfs)
-            end_time = time.time()  # Record the end time
-            elapsed_time = end_time - start_time  # Calculate the elapsed time
-            print('End map file creation')
-            
-        # if test:
-        #     check_expected_number(incorporated_dict_list_gdfs_by_map) # TODO HANDLE THIS ONE for dict or use the one thats been concatenated
     elif tracker == 'Plumes':
         print(f'Starting GMET for release {tracker}')
         if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
@@ -430,6 +293,7 @@ for tracker in trackers_to_update:
         # test_stats(df)
 
         print('DONE MAKING GCTT SINGLE MAP onto MULTI MAPS')
+        input('continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
         subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 

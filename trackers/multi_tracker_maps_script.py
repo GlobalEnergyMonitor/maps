@@ -844,7 +844,7 @@ def create_search_column(dict_of_gdfs):
         for col in col_names:
             if col in one_gdf.columns:
                 print(one_gdf[col].head(10))
-                new_col_name = f'search_{col}'
+                new_col_name = f'{col}_search'
                 one_gdf[new_col_name] = one_gdf[col].apply(lambda x: remove_diacritics(x))
                 print(one_gdf[new_col_name].head(10))
         
@@ -924,7 +924,7 @@ def capacity_conversions(cleaned_dict_map_by_one_gdf):
     
 
         pd.options.display.float_format = '{:.0f}'.format
-        gdf_converted['ea_scaling_capacity'] = gdf_converted.apply(lambda row: conversion_equal_area(row), axis=1) # square root(4 * capacity / pi)
+        # gdf_converted['ea_scaling_capacity'] = gdf_converted.apply(lambda row: conversion_equal_area(row), axis=1) # square root(4 * capacity / pi)
 
         gdf_converted['scaling_capacity'] = gdf_converted.apply(lambda row: conversion_multiply(row), axis=1)
         # must be float for table to sort
@@ -1461,7 +1461,7 @@ def create_map_file(one_gdf_by_maptype_fixed):
         gdf.to_excel(f'{path_for_download_and_map_files}{mapname}_{iso_today_date}.xlsx', index=False)
         gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.xlsx', index=False)
         if mapname == 'africa':
-            gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/dt_dwnld/{mapname}_{iso_today_date}.xlsx', index=False)
+            gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_output/{mapname}_{iso_today_date}.xlsx', index=False)
         # # printf'Saved xlsx version just in case to {path_for_download_and_map_files}{mapname}_{iso_today_date}.xlsx')
         final_dict_gdfs[mapname] = gdf
     print(final_dict_gdfs.keys())
@@ -2650,7 +2650,7 @@ if map_create:
     # renamed_one_gdf_by_map = add_boed_routes_from_baird(renamed_one_gdf_by_map)
     # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
     
-    cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map)
+    cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map_with_search)
     cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
     
     cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)

@@ -510,3 +510,147 @@ table.dataTable td {
     color: #000;
     opacity: .5;
 }
+
+.infobox {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgb(2, 2, 174);
+    border-radius: 50%;
+    width: 1em;
+    height: 1em;
+    cursor: pointer;
+    font-family: bootstrap-icons !important;
+    text-transform: lowercase;
+    line-height: 1;
+    font-size: 12px;
+    color: rgb(2, 2, 174);
+    left: 3px;
+    top: -3px;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 80%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #6d6a6a;
+    color: #fff;
+    padding: 10px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    max-height: 400px; /* Set a maximum height for the tooltip */
+    min-width: 200px;
+    max-width: 400px; /* Set a maximum height for the tooltip */
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: auto; /* Enable horizonal scrolling */
+    white-space: normal;
+    /* z-index: 9999; */
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    /* top: 100%; */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    opacity:1;
+    border-color: #656161 transparent transparent transparent;
+}
+
+
+/* // from database */
+
+/* .info-icon {
+    /* color: rgb(2, 2, 174); */
+  /* } */
+  
+  /* .info-icon::after {
+    content: "\f431";
+    display: inline-block;
+    font-family: bootstrap-icons !important;
+    line-height: 1;
+    font-size: 12px;
+    color: rgb(2, 2, 174);
+    position: relative;
+    left: 3px;
+    top: -5px;
+  }
+
+  .dismiss-popover {
+    position: absolute;
+    right: 2px;
+    top: 0px;
+    cursor: pointer;
+  } */ */
+
+
+  /* $('body').on('click', '.dismiss-popover', function(e) {
+    $( '[data-toggle="popover"]' ).each(
+        (num, element) => {
+            var popover = bootstrap.Popover.getInstance(element)
+            if (popover) {
+                popover.hide()
+            }
+        }
+    )
+})
+
+
+$('[data-toggle="popover"]').on("shown.bs.popover", function(evt) {
+    $( "body" ).one( "click", function( event ) {
+        if ( $(event.target).hasClass("badge") ) {
+            $( "body" ).one( "click", function( event ) {
+                if ( $(event.target).hasClass("badge") ) {
+                    return
+                }
+                $( '[data-toggle="popover"]' ).each(
+                    (num, element) => {
+                        var popover = bootstrap.Popover.getInstance(element)
+                        if (popover) {
+                            popover.hide()
+                        }
+                    }
+                )
+            })
+            return
+        }
+        $( '[data-toggle="popover"]' ).each(
+            (num, element) => {
+                var popover = bootstrap.Popover.getInstance(element)
+                if (popover) {
+                    popover.hide()
+                }
+            }
+        )
+    })
+})
+
+$('.info-popover').on("shown.bs.popover", function(evt) {
+    console.log("shown.bs.popover")
+    $( ".popover-body" ).each(function(index) {
+        htmx.process(this);
+    })
+    $( "body" ).one( "click", function( event ) {
+        if ( $(event.target).hasClass("bi-info-circle") ) {
+            return
+        }
+        if ( $(event.target).hasClass("badge") ) {
+            return
+        }
+        $( '.info-popover' ).each(
+            (num, element) => {
+                var popover = bootstrap.Popover.getInstance(element)
+                if (popover) {
+                    popover.hide()
+                }
+            }
+        )
+    });
+}) */
