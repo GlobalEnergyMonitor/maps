@@ -328,6 +328,35 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
         # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+    
+    elif tracker == 'Coal Plants':
+        # continue for all of them that are in or not in multi tracker maps
+        test_results_folder = f'{tracker_folder_path}coal-plant/test_results/'
+
+        output_folder = f'{tracker_folder_path}coal-plant/compilation_output/'
+        
+        os.makedirs(test_results_folder, exist_ok=True)
+        os.makedirs(output_folder, exist_ok=True)       
+             
+
+        # creates single map file
+        key, tabs = get_key_tabs_prep_file(tracker)
+        df = create_df(key, tabs)
+        df = rename_cols(df)
+        df = fix_status_inferred(df)
+        df = filter_cols(df,final_cols=['gem-location-id', 'gem-unit/phase-id', 'country/area', 'unit-name', 'plant-name', 'plant-name-(other)',
+                                        'plant-name-(local)', 'capacity-(mw)', 'status', 'start-year', 'retired-year', 'location-accuracy',
+                                         'owner', 'parent','lat', 'lng', 'combustion-technology',
+                                        'region', 'url', 'subnational-unit-(province,-state)'        
+                                        ])
+                
+        
+        df = input_to_output(df, f'{output_folder}{tracker}-map-file-{iso_today_date}.csv')
+        # test_stats(df)
+
+        print('DONE MAKING Coal SINGLE MAP onto MULTI MAPS')
+        input('continue?')
+    
     subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
           
 # if tracker in tracker to update is part of a multi tracker map then run that script in addition

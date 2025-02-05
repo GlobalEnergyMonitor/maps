@@ -25,8 +25,21 @@ from openpyxl import load_workbook
 from openpyxl.styles import Font
 from openpyxl.styles import Alignment
 import pickle
+from sqlalchemy import create_engine, text
 
+import psycopg2
 
+DATABASE_URL = 'postgresql://readonly:pc1d65885e80e7709675a2e635adcd9cb71bf91a375e5276f8ee143c623e2fb34@ec2-44-222-6-135.compute-1.amazonaws.com:5432/d8ik14rsae6026'
+SQL = ''' 
+    select unit_id, string_agg(all_entity_names, ', ') all_entity_names from (
+    select 
+    coalesce(pu.id, po.powerplant_unit_id) unit_id, 
+    coalesce(c.name, '') || coalesce(c."nameOther"::text, '') || 
+    coalesce(c.abbreviation, '') ||
+    coalesce(c.name_local, '') all_entity_names
+    from plant_owner po left join powerplant_unit pu on pu.plant_id = po.plant_id join company c on c.id = po.company_id) a
+    group by unit_id;
+    '''
 # #### useful general functions ####
 
 # def track_missing_data(dict_list_dfs_by_map, acro, maptype):
@@ -75,7 +88,23 @@ def set_up_df(df, t_name, acro, release):
 
     return df_renamed
                 
+
+def pull_from_db_sql():
+
+    engine = create_engine(DATABASE_URL)
+    conn = engine.connect()
     
+    df = pd.read_sql(SQL, conn)
+    # columns unit_id, string to search on for all entity name unit_id      all_entity_names
+    # print(df.head())
+    # print(df['unit_id'])
+    # print(df.info())
+    # input('CHECK IT WIHT DAVID HERE')
+    
+    return df
+
+# pull_from_db_sql()
+
 
 def split_multiple_delimiters(text, delimiters):
     regex_pattern = '|'.join(map(re.escape, delimiters))

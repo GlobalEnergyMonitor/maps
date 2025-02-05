@@ -833,6 +833,7 @@ def rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion):
 
 
 def create_search_column(dict_of_gdfs):
+    # this can be one string with or without spaces 
     # this creates a new column for project and project in local language
     # in the column it'll be removed of any diacritics 
     # this allows for quick searching
