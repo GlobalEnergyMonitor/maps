@@ -344,7 +344,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         df = create_df(key, tabs)
         df = rename_cols(df)
         df = fix_status_inferred(df)
-        df = filter_cols(df,final_cols=['gem-location-id', 'gem-unit/phase-id', 'country/area', 'unit-name', 'plant-name', 'plant-name-(other)',
+        df = filter_cols(df,final_cols=['gem-location-id', 'gem-unit/phase-id', 'country', 'unit-name', 'plant-name', 'plant-name-(other)',
                                         'plant-name-(local)', 'capacity-(mw)', 'status', 'start-year', 'retired-year', 'location-accuracy',
                                          'owner', 'parent','lat', 'lng', 'combustion-technology',
                                         'region', 'url', 'subnational-unit-(province,-state)'        

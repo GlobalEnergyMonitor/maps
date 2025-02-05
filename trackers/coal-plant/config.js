@@ -75,5 +75,7 @@ var config = {
         'retired-year': {'label': 'Retired Year'},
         'subnational-unit-(province,-state)': {'display': 'location'},
         'country/area': {'display': 'location'}
-    } 
+    },
+
+    showMinCapacity: true
 }

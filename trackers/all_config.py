@@ -8,7 +8,7 @@ from creds import client_secret
 # trackers_to_update = ['Plumes']
 # trackers_to_update = ['Bioenergy Plants']
 # trackers_to_update = ['Oil & Gas Plants'] # egt and agt and latam and then oct aet too 
-trackers_to_update = ['Coal Plants','Wind','Solar']
+trackers_to_update = ['Coal Plants']
 # trackers_to_update = ['Coal Terminals']
 tracker_folder_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
 goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
