@@ -44,7 +44,7 @@ var config = {
         {
             field: 'technology-type',
             label: 'Technology Type',
-            values: ['Solar Thermal', 'PV', 'Assumed PV'],
+            values: ['Solar-Thermal', 'PV', 'Assumed-PV'],
             values_labels: ['Solar Thermal', 'PV', 'Assumed PV']
 
         },
