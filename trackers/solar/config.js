@@ -69,8 +69,8 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['project-name', 'project-name-in-local-language-/-script', 'phase-name', 'capacity-(mw)', 'technology-type', 'status', 'start-year', 'owner', 'operator',  'state/province', 'country/area'],
-        labels: ['Project', 'Project Name in Local Language / Script', 'Phase','Capacity (MW)', 'Status', 'Technology Type', 'Start year', 'Owner', 'Operator','Location Accuracy', 'State/Province', 'Country/Area'],
+        values: ['project-name', 'project-name-in-local-language-/-script', 'phase-name', 'capacity-(mw)', 'technology-type', 'status', 'start-year', 'owner', 'operator', 'location-accuracy', 'state/province', 'country/area'],
+        labels: ['Project', 'Project Name Local', 'Phase','Capacity (MW)', 'Technology Type', 'Status', 'Start year', 'Owner', 'Operator','Location Accuracy', 'State/Province', 'Country/Area'],
         clickColumns: ['project-name'],
         rightAlign: ['Capacity (MW)','Start year']
     },
@@ -105,5 +105,5 @@ var config = {
 
     statusField: 'status', // this strays from default, make it all the same!!
     statusDisplayField: 'status', // this strays from default, make it all the same!!
-
+    showMinCapacity: true
 }

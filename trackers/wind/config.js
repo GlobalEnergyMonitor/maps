@@ -103,5 +103,6 @@ var config = {
 
     statusField: 'status', // this strays from default, make it all the same!!
     statusDisplayField: 'status', // this strays from default, make it all the same!!
+    showMinCapacity: true
 
 }
