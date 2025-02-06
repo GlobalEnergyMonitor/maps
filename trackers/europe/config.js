@@ -50,7 +50,7 @@ var config = {
             field: 'maturity', 
             label: 'Progress Demonstrated (Hydrogen Only)', // info button explaining what it means
             values: ['y', 'n', 'none'],
-            values_labels: ['yes', 'no', 'n/a'],
+            values_labels: ['yes', 'no', 'N/A (Methane)'],
             // values_hover_text: ['hover tesct for fuels', '', '']
             field_hover_text: 'GEM assesses whether hydrogen projects have met criteria (specific to each infrastructure type) demonstrating progress toward completion, since many hydrogen projects lack core details or commitments from stakeholders. For more information on these criteria, see the <a href="https://globalenergymonitor.org/projects/europe-gas-tracker/methodology/">EGT methodology page</a>'
 
