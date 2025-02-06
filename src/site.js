@@ -991,6 +991,8 @@ function filterGeoJSON() {
                     // console.log(feature.properties[field])
                     // console.log('Before remove diacritics function')
                     let mapValue = removeDiacritics(feature.properties[field]);
+                    // let mapValue = feature.properties[field];
+
                     // console.log(mapValue)
                     // console.log('After remove diacritics function')
                     return mapValue.toLowerCase().includes(config.searchText);
@@ -1029,7 +1031,22 @@ function updateSummary() {
         }
     });
 
-    if (config.showMaxCapacity) {
+
+    if (config.showMinCapacity & config.showMaxCapacity) {
+        if (config.maxCapacityLabel) {
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);
+            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toString());
+            $('#capacity_summary_min').html("Minimum " + config.maxCapacityLabel);
+        } else {
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#capacity_summary').html("Maximum " + config.capacityLabel);
+            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toString());
+            $('#capacity_summary_min').html("Minimum " + config.capacityLabel);
+        }
+    }
+
+    else if (config.showMaxCapacity) {
         if (config.maxCapacityLabel) {
             $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
             $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);

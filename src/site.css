@@ -141,7 +141,7 @@ table.dataTable td {
 #card-body {
     min-width: 300px;
 }
-#summary, #capacity_summary {
+#summary, #capacity_summary, #capacity_summary_min {
     font-size: 9px;
 }
 

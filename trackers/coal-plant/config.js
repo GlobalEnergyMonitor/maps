@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
-    csv: 'compilation_output/data-2024-07-30.csv',
+    csv: 'compilation_output/Coal Plants-map-file-2025-02-05.csv',
     /* define the column and associated values for color application */
     linkField: 'gem-location-id',
     color: {
@@ -31,8 +31,9 @@ var config = {
 
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
-    capacityField: 'capacity',
-    capacityLabel: 'Capacity (MW)',
+    capacityField: 'capacity-(mw)',
+    capacityDisplayField: 'capacity-(mw)',
+    capacityLabel: '(MW)',
 
     /* Labels for describing the assets */
     assetFullLabel: "Coal-fired Units",
@@ -45,10 +46,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['plant-name','unit-name','plant-name-(local)','owner', 'parent', 'capacity', 'status', 'start-year', 'retired-year', 'region', 'country/area', 'subnational'],
+        values: ['plant-name','unit-name','plant-name-(local)','owner', 'parent', 'capacity-(mw)', 'status', 'start-year', 'retired-year', 'region', 'country/area', 'subnational-unit-(province,-state)'],
         labels: ['Plant','Unit','Plant name (local)','Owner','Parent','Capacity (MW)','Status','Start year', 'Retired year','Region','Country/Area','Subnational unit (province, state)'],
         clickColumns: ['plant-name'],
-        rightAlign: ['unit-name','capacity','start-year','retired-year']
+        rightAlign: ['unit-name','capacity-(mw)','start-year','retired-year']
     },
 
     /* configure the search box; 
@@ -70,9 +71,11 @@ var config = {
         'plant-name-(local)': {'label': 'Local plant name'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
-        'start-year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
-        'retired-year': {'display':'range', 'label': ['Retired Year', 'Retired Year Range']},
-        'subnational': {'display': 'location'},
+        'start-year': {'label': 'Start Year'},
+        'retired-year': {'label': 'Retired Year'},
+        'subnational-unit-(province,-state)': {'display': 'location'},
         'country/area': {'display': 'location'}
-    } 
+    },
+
+    showMinCapacity: true
 }

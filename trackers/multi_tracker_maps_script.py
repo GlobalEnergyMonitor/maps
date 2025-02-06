@@ -7,6 +7,7 @@ import statistics
 import pandas as pd
 import geopandas as gpd
 import numpy as np
+from tqdm import tqdm
 # from shapely.geometry import Point, LineString
 # from shapely import wkt
 # # import polyline
@@ -463,7 +464,7 @@ def incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, d
     # print(f'This is dict: {dict_list_gdfs_by_map}')
     # print(dict_list_gdfs_by_map.keys())
 
-    for mapname, list_of_gdfs in dict_list_gdfs_by_map.items():
+    for mapname, list_of_gdfs in tqdm(dict_list_gdfs_by_map.items(), desc="Processing incorpoate_geojson_trackers"):
         list_of_gdfs_geojson = []
  
         print(f'{mapname}')
@@ -832,6 +833,7 @@ def rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion):
 
 
 def create_search_column(dict_of_gdfs):
+    # this can be one string with or without spaces 
     # this creates a new column for project and project in local language
     # in the column it'll be removed of any diacritics 
     # this allows for quick searching
