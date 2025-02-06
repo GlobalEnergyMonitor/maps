@@ -1,5 +1,5 @@
 var config = {
-    geojson: 'compilation_output/europe_2025-01-31_colab.geojson',
+    geojson: 'compilation_output/europe_2025-02-06.geojson',
     geometries: ['Point','LineString'],
     center: [8, 50],
     zoomFactor: 1.9,
