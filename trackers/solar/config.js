@@ -69,8 +69,8 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['project-name', 'project-name-in-local-language-/-script', 'phase-name', 'capacity-(mw)', 'technology-type', 'status', 'start-year', 'owner', 'operator', 'location-accuracy', 'state/province', 'country/area'],
-        labels: ['Project', 'Project Name Local', 'Phase','Capacity (MW)', 'Technology Type', 'Status', 'Start year', 'Owner', 'Operator','Location Accuracy', 'State/Province', 'Country/Area'],
+        values: ['project-name', 'phase-name', 'capacity-(mw)', 'technology-type', 'status', 'start-year', 'owner', 'operator', 'location-accuracy', 'state/province', 'country/area'],
+        labels: ['Project', 'Phase','Capacity (MW)', 'Technology Type', 'Status', 'Start year', 'Owner', 'Operator','Location Accuracy', 'State/Province', 'Country/Area'],
         clickColumns: ['project-name'],
         rightAlign: ['Capacity (MW)','Start year']
     },
@@ -91,6 +91,7 @@ var config = {
     */
     detailView: {
         'project-name': {'display': 'heading'},
+        'project-name-in-local-language-/-script': {'label': 'Project in Local Language / Script'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'start-year': {'label': 'Start Year'},
