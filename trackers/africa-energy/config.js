@@ -1,5 +1,5 @@
 var config = {
-    json: 'compilation_output/africa_2025-01-17.geojson',
+    json: 'compilation_output/africa_2025-02-07.geojson',
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
