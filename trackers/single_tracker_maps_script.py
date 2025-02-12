@@ -18,16 +18,34 @@ def get_key_tabs_prep_file(tracker):
 
 
 def create_df(key, tabs):
+    print(tabs)
     dfs = []
-    for tab in tabs:
-        gsheets = gspread_creds.open_by_key(key)
-        spreadsheet = gsheets.worksheet(tab)
-        df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-        dfs += [df]
-    df = pd.concat(dfs).reset_index(drop=True)
-    # df = pd.read_excel(input_file_xls, sheet_name=None)
-    # print(df)
-    print(df.info())
+    # other logic for goget 
+    if 'Production & reserves' in tabs:
+        for tab in tabs:
+            print(tab)
+            if tab == 'Main data':
+                gsheets = gspread_creds.open_by_key(key)
+                spreadsheet = gsheets.worksheet(tab)
+                main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                print(main_df.info())
+            elif tab == 'Production & reserves':
+                gsheets = gspread_creds.open_by_key(key)
+                spreadsheet = gsheets.worksheet(tab)
+                prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                print(prod_df.info())
+        return main_df, prod_df
+        
+    else:
+        for tab in tabs:
+            gsheets = gspread_creds.open_by_key(key)
+            spreadsheet = gsheets.worksheet(tab)
+            df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            dfs += [df]
+        df = pd.concat(dfs).reset_index(drop=True)
+        # df = pd.read_excel(input_file_xls, sheet_name=None)
+        # print(df)
+        print(df.info())
     
     return df
 
