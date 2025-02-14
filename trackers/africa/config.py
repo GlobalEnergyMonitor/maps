@@ -32,7 +32,6 @@ list_official_tracker_names = ['Oil & Gas Plants', 'Coal Plants', 'Solar', 'Wind
 
 gas_only_maps = ['AGT', 'EGT', 'asia', 'europe']
 non_gsheet_data = ['Gas Pipelines', 'LNG Terminals', 'Oil Pipelines']
-
 conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']
 gcmt_closed_tab = 'Global Coal Mine Tracker (Close'
@@ -42,7 +41,6 @@ final_cols = ['mapname','tracker acro','official_name','url', 'areas','name', 'u
        'production', 'Latitude', 'Longitude', 'id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas']
 
 renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country/Area': 'areas', 'Plant name': 'name', 'Unit name': 'unit_name', 
-
                                 'Capacity (MW)': 'capacity', 'Status': 'status',
                                 'Start year': 'start_year', 'Subnational unit (province, state)': 'subnat', 'Region': 'region', 'Owner':'owner', 'Parent': 'parent'},
                       'GCPT': {'GEM unit/phase ID': 'id','Country/Area': 'areas', 'Wiki URL':'url',
@@ -74,7 +72,6 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country/A
                                 'GEM region': 'region','Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'prod_oil', 'Production - Gas (Million m³/y)': 'prod_gas',
                                 'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)': 'capacity','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'
                                 , 'Country List':'mult_countries'},
-
                       'GCMT': {'GEM Mine ID':'id','Country': 'areas', 'Mine Name': 'name', 'Status': 'status', 'Owners': 'owner', 'Parent Company': 'parent', 'Capacity (Mtpa)': 'capacity', 
                                'Production (Mtpa)':'production', 'Opening Year': 'start_year', 'State, Province': 'subnat', 'Region': 'region', },
                       'GOIT': {'ProjectID':'id','Countries': 'areas', 'Wiki': 'url', 'PipelineName': 'name', 'SegmentName': 'unit_name', 'Status': 'status', 'Owner': 'owner',
@@ -84,7 +81,6 @@ renaming_cols_dict = {'GOGPT': {'GEM unit ID': 'id','Wiki URL': 'url','Country/A
                                    'PipelineName':'name', 'SegmentName':'unit_name', 'Status':'status', 'Owner':'owner', 'Parent': 'parent',
                                    'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat',
                                    'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2'
-
                                    }, 
                       'GGIT-lng': {'ComboID':'id','Wiki': 'url', 'TerminalName': 'name',
                                    'UnitName': 'unit_name', 'Status': 'status', 'Country': 'areas', 'Owner': 'owner', 
@@ -388,5 +384,3 @@ Africa_countries = [
     "Zambia",
     "Zimbabwe"
   ]
-
-
