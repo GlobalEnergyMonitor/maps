@@ -1,5 +1,4 @@
 var config = {
-    // csv: 'data/data.csv',
     json: 'data/data.geojson',
 
     colors: {
@@ -45,6 +44,7 @@ var config = {
 
     // statusDisplayField: 'status',
     // statusField: 'status-legend',
+
     // # O&G extraction areas and coal mines by status 
     // plumes by "has attribution information"
     // infrastructure emissions estimates
@@ -80,6 +80,7 @@ var config = {
     tableHeaders: {
         values: ['name', 'status','plume_emissions', 'emission_uncertainty','infra_type', 'date','subnational', 'country','infra_name', 'infra_url', 'well_id', 'gov_assets'],
         labels: ['Project', 'Status','Emissions (kg/hr)', 'Emissions Uncertainty (kg/hr)','Type of Infrastructure','Observation Date', 'Subnational', 'Country/Area(s)','Nearby Infrastructure Project Name', 'Infrastructure Wiki', 'Government Well ID', 'Other Government ID Assets'],
+
         clickColumns: ['name'],
         rightAlign: ['Government Well ID','plume_emissions','date'],
         removeLastComma: ['country']
@@ -93,6 +94,7 @@ var config = {
         'Type of Infrastructure': ['infra_type'],
         'Government Well ID': ['well_id'],
         'Other Government ID Assets': ['gov_assets']
+
     },
 
     /* define fields and how they are displayed. 

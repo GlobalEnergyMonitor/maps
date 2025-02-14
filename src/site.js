@@ -638,6 +638,7 @@ function addEvents() {
         } else {
             var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6>";
 
+
             let ul = $('<ul>');
             selectedFeatures.forEach((feature) => {
                 var link = $('<li class="asset-select-option">' + feature.properties[config.nameField] + "</li>");
@@ -750,6 +751,7 @@ function buildFilters() {
             // do same as below but append infobox
             $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h7>');
             }
+
         }
         else if (config.color.field != filter.field) {
             $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h7>');
@@ -1192,6 +1194,7 @@ function displayDetails(features) {
     Object.keys(config.detailView).forEach((detail) => {
         // replace apostrophe in displayDetails to resolve invalid or unexpected token
 
+
         if (Object.keys(config.detailView[detail]).includes('display')) {
 
             if (config.detailView[detail]['display'] == 'heading') {
@@ -1273,6 +1276,7 @@ function displayDetails(features) {
             else {
                 console.log(features[0].properties[detail])
                 console.log('outer else issue')
+
             }
             
 

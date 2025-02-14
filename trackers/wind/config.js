@@ -73,6 +73,7 @@ var config = {
         labels: ['Project', 'Phase','Capacity (MW)','Installation Type','Status','Start year', 'Owner', 'Operator', 'State/Province', 'Country/Area'],
         clickColumns: ['project-name'],
         rightAlign: ['capacity-(mw)','start-year']
+
     },
 
     /* configure the search box; 
