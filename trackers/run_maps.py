@@ -10,17 +10,44 @@ from tqdm import tqdm # can adapt more, special tweaking for dataframe!
 
 for tracker in tqdm(trackers_to_update, desc='Baking'):
     # print(tracker)
-    if tracker == 'Bioenergy Plants':
+    
+    if tracker == 'Oil & Gas Extraction':
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/goget/test_results/'
+
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/goget/compilation_output/'
+
+        # creates single map file
+        # handle production data
+        key, tabs = get_key_tabs_prep_file(tracker)
+
+        df_tuple = create_df(key, tabs)
+        main = df_tuple[0]
+        prod = df_tuple[1]
+        # df has df['other'] column to distinguish between main and prod/res
+        # result will be data ready for map, after scott's code
+        df = process_goget_reserve_prod_data(main, prod)
+        df = rename_cols(df) # will need to adjust for goget's columns
+        df = fix_status_inferred(df)         
+        df = filter_cols(df,final_cols=['country/area', 'wiki-name',
+                                        'status', 'production-start-year',  
+                                        'operator', 'owner', 'parent','lat', 'lng', 'location-accuracy', 'subnational-unit-(province,-state)',
+                                        'gem-region', 'unit-id', 'url', 'country-list', 'discovery-year', 'fid-year', 'production---oil-(million-bbl/y)',
+                                        'production-year---oil', 'production---gas-(million-m³/y)', 'production-year---gas', 'production---total-(oil,-gas-and-hydrocarbons)-(million-boe/y)'             
+                                        ])
+        
+        # adjust statuses 'operating', 'in_development', 'discovered', 'shut_in', 'decommissioned', 'cancelled', 'abandoned', 'UGS', ""
+        
+        df = input_to_output(df, f'{output_folder}{tracker}-map-file-{iso_today_date}.csv')
+        # creates multi-map files 
+        print('DONE MAKING GOGET SINGLE MAP onto MULTI MAPS')
+        input('continue?')
+        
+    elif tracker == 'Bioenergy':
 
         test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/test_results/'
 
         output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/compilation_output/'
 
-        # input_file_xls = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/compilation_input/Global Bioenergy Power Tracker (GBPT) - V2 DATA TEAM COPY.xlsx'
-                
-
-        # key = '1WRRFRuR9mWxZpko-VMYH5xm0LzRX_qM7W73nGGi4Jmg'
-        # tabs = ['Data', 'Below Threshold']
         # creates single map file
         key, tabs = get_key_tabs_prep_file(tracker)
 

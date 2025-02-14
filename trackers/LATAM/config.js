@@ -1,8 +1,5 @@
-// /Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/LATAM/compilation_output/latam_2024-09-19.geojson
-
-
 var config = {
-    json: 'compilation_output/latam_2025-02-07.geojson',
+    json: 'compilation_output/latam_2025-02-14.geojson',
     geometries: ['Point','LineString'],
     center: [-90, -14],
     zoomFactor: 1.7,
