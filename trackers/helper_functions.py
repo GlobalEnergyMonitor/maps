@@ -865,6 +865,241 @@ def handle_goget_gas_only_workaround(goget_orig_file):
     list_ids = df['Unit ID'].to_list()
     return list_ids
 
+def process_goget_reserve_prod_data(main, prod):
+    # output is to return df with scott's code adjustments
+    # split into two dfs
+    main_data_df = main
+    production_reserves_df = prod
+    filtered_main_data_df = main_data_df
+    # Convert 'Data year' to integers in the 'production_reserves_df'
+    production_reserves_df['Data year'] = pd.to_numeric(production_reserves_df['Data year'], errors='coerce').fillna(-1).astype(int)
+
+    # Update for Production - Oil and its year
+    filtered_main_data_df[["Production - Oil", "Production Year - Oil"]] = filtered_main_data_df.apply(
+        lambda x: pd.Series(get_most_recent_value_and_year_goget(x["Unit ID"], "production", "million bbl/y", production_reserves_df)),
+        axis=1
+    )
+    # Update for Production - Gas and its year
+    filtered_main_data_df[["Production - Gas", "Production Year - Gas"]] = filtered_main_data_df.apply(
+        lambda x: pd.Series(get_most_recent_value_and_year_goget(x["Unit ID"], "production", "million m³/y", production_reserves_df)),
+        axis=1
+    )
+
+    # Update for Production - Hydrocarbons (unspecified) and its year
+    filtered_main_data_df[["Production - Hydrocarbons (unspecified)", "Production Year - Hydrocarbons (unspecified)"]] = filtered_main_data_df.apply(
+        lambda x: pd.Series(get_most_recent_value_and_year_goget(x["Unit ID"], "production", "million boe/y", production_reserves_df)),
+        axis=1
+    )
+
+    # Calculate total reserves and production
+    #filtered_main_data_df['Reserves- Total (Oil, Gas and Hydrocarbons)'] = filtered_main_data_df.apply(calculate_total_reserves, axis=1)
+    filtered_main_data_df['Production - Total (Oil, Gas and Hydrocarbons)'] = filtered_main_data_df.apply(calculate_total_production_goget, axis=1)
+
+
+    # Convert Discovery Year to String
+    filtered_main_data_df['Discovery year'] = filtered_main_data_df['Discovery year'].astype(object)
+
+    # Ensure there are no NaN values in the year columns before conversion to avoid errors
+    filtered_main_data_df['Production Year - Oil'].fillna(0, inplace=True)
+    filtered_main_data_df['Production Year - Gas'].fillna(0, inplace=True)
+    filtered_main_data_df['Production Year - Hydrocarbons (unspecified)'].fillna(0, inplace=True)
+
+    # Convert to integer first to remove the trailing zero, then to string
+    filtered_main_data_df['Production Year - Oil'] = filtered_main_data_df['Production Year - Oil'].astype(int).astype(str)
+    filtered_main_data_df['Production Year - Gas'] = filtered_main_data_df['Production Year - Gas'].astype(int).astype(str)
+    filtered_main_data_df['Production Year - Hydrocarbons (unspecified)'] = filtered_main_data_df['Production Year - Hydrocarbons (unspecified)'].astype(int).astype(str)
+
+    # Replace "0" with np.nan or a placeholder if you had NaN values initially
+    filtered_main_data_df.replace('0', np.nan, inplace=True)
+
+    # Check the conversion by printing the dtypes again
+    column_data_types = filtered_main_data_df.dtypes
+    print(column_data_types)
+    
+    # Apply the function to create a new column 'Country List'
+    filtered_main_data_df['Country List'] = filtered_main_data_df['Country/Area'].apply(get_country_list)
+    # print(filtered_main_data_df.head()) 
+    # input('check it corresponds with scotts output')   # we are here at coffee break 2/11/2025 
+    
+    dropped_filtered_main_data = filtered_main_data_df.drop(['Government unit ID',  'Basin', 'Concession / block'], axis=1)
+    average_production_total = filtered_main_data_df["Production - Total (Oil, Gas and Hydrocarbons)"].mean()
+    # print("Average Production - Total (Oil, Gas and Hydrocarbons):", average_production_total)
+    # input('check avg production total seems right, previous was 6.3041')
+
+    # Create new column for scaling where there is a fill in value based on average when data is not there.
+    dropped_filtered_main_data["Production for Map Scaling"] = np.where(dropped_filtered_main_data["Production - Total (Oil, Gas and Hydrocarbons)"] != 0,
+                                                                dropped_filtered_main_data["Production - Total (Oil, Gas and Hydrocarbons)"],
+                                                                average_production_total)
+
+    dropped_production_Wiki_name = create_goget_wiki_name(dropped_filtered_main_data)
+    regions_df = pull_in_official_gem_region_mapping(region_key, region_tab)
+
+
+    dropped_production_Wiki_name = pd.merge(
+        dropped_production_Wiki_name,
+        regions_df[['GEM Standard Country Name', 'GEM region']],
+        left_on='Country/Area',
+        right_on='GEM Standard Country Name',
+        how='left'
+    )
+
+    # After the merge, you might have an extra column 'GEM Standard Country Name' which is a duplicate of 'Country'.
+    # You can drop this extra column if it's not needed.
+    dropped_production_Wiki_name.drop('GEM Standard Country Name', axis=1, inplace=True)
+    # print(dropped_production_Wiki_name.head())
+    # input('check that it matches Scotts after dropped_production_Wiki_name')
+    # print(dropped_production_Wiki_name.dtypes)
+    # input('check thosul be objects for all but prod oil prod gas prod hydrocarbons prod total prod for map scaling, lat and lng')
+    # drop superfluous columns
+    clean_export = dropped_production_Wiki_name.drop(['Fuel type', 'Unit type'], axis=1)
+    
+    # Use not centroid but descriptive point
+    # Set up DF of Units without locations
+    clean_export[['Longitude', 'Latitude']] = clean_export[['Longitude', 'Latitude']].fillna('')
+    missing_location_df = clean_export[clean_export['Latitude']=='']
+    # Get unique entries from the 'Country/Area' column
+    unique_countries_with_missing_locations = missing_location_df['Country/Area'].unique()
+
+    # Display the unique countries
+    unique_countries_df = pd.DataFrame(unique_countries_with_missing_locations, columns=['Country/Area'])
+    # print(unique_countries_df)
+    # input('check unique countries that need descriptive points')
+    # normally would use descriptive point
+    
+    centroid_df = gspread_access_file_read_only(centroid_key, centroid_tab) # TODO update this with descriptive point on subregion
+    # print(centroid_df.head())
+    # input('check centroid df')
+    
+    clean_export_center = pd.merge(clean_export, centroid_df, how='left', on='Country/Area')
+
+    # Fill in missing latitudes and longitudes
+    clean_export_center['Latitude_x'] = clean_export_center.apply(lambda row: row['Latitude_y'] if pd.isna(row['Latitude_x']) else row['Latitude_x'], axis=1)
+    clean_export_center['Longitude_x'] = clean_export_center.apply(lambda row: row['Longitude_y'] if pd.isna(row['Longitude_x']) else row['Longitude_x'], axis=1)
+
+    # Update 'Location accuracy' for filled-in values
+    clean_export_center['Location accuracy'] = clean_export_center.apply(lambda row: 'country level only' if pd.isna(row['Latitude_x']) or pd.isna(row['Longitude_x']) else row['Location accuracy'], axis=1)
+    #drop centroid fill in columns
+    clean_export_center_clean = clean_export_center.drop(['Latitude_y', 'Longitude_y'], axis=1)
+    
+    
+    print(clean_export_center_clean.head())
+    
+    # Define a dictionary with old column names as keys and new names with units as values
+    column_rename_map = {
+        'Production - Oil': 'Production - Oil (Million bbl/y)',
+        'Production - Gas': 'Production - Gas (Million m³/y)',
+        'Production - Total (Oil, Gas and Hydrocarbons)': 'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)',
+        'Latitude_x': 'Latitude',
+        'Longitude_x': 'Longitude',
+        # Add other columns you wish to rename similarly here
+    }
+    
+    # Set output order, dropping more columns
+    desired_column_order = [
+        'Unit ID',
+        'Wiki name',
+        'Status',
+        'Country/Area',
+        'Country List',
+        'Subnational unit (province, state)',
+        'GEM region',
+        'Latitude',
+        'Longitude',
+        'Location accuracy',
+        'Discovery year',
+        'FID Year',
+        'Production start year',
+        'Operator',
+        'Owner',
+        'Parent',
+        'Project or complex',
+        'Production - Oil (Million bbl/y)',
+        'Production Year - Oil',
+        'Production - Gas (Million m³/y)',
+        'Production Year - Gas',
+        'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)',
+        'Wiki URL',
+    ]
+ 
+
+    # Rename the columns
+    clean_export_center_clean_rename = clean_export_center_clean.rename(columns=column_rename_map)
+    
+    # Reorder the columns
+    clean_export_center_clean_reorder_rename = clean_export_center_clean_rename[desired_column_order]
+
+    
+    return clean_export_center_clean_reorder_rename
+
+def create_goget_wiki_name(df):
+    # df['Wiki name'] = df['Unit Name'] + ' Oil and Gas Field ('+ df['Country'] + ')'
+    
+    df['Wiki name'] = df.apply(lambda row: f"{row['Unit Name']} Oil and Gas Field ({row['Country/Area']})", axis=1)
+    # 'Wiki name'
+    # print(df[['Country/Area', 'Unit Name', 'Wiki name']].head())
+    # input('Check that Wiki name came out alright')
+    return df 
+
+def pull_in_official_gem_region_mapping(key, tab):
+    # 1yaKdLauJ2n1FLSeqPsYNxZiuF5jBngIrQOIi9fXysAw
+    # mapping 
+    df = gspread_access_file_read_only(key, tab)
+    return df
+
+# # test
+# df = pull_in_official_gem_region_mapping(region_key, region_tab)
+# From scott's script
+#Define functions for getting the most recent value, calculate the total reserves, calculate the total production and define the conversion factor
+# Function to get the most recent value based on the criteria
+def get_most_recent_value_and_year_goget(unit_id, prod_res, units, df):
+    # Filter based on Unit ID, Production/reserves, and Units (converted)
+    filtered = df[
+        (df["Unit ID"] == unit_id) &
+        (df["Production/reserves"] == prod_res) &
+        (df["Units (converted)"] == units)
+    ]
+
+    # Sort by Data year and get the most recent entry
+    filtered = filtered.sort_values(by="Data year", ascending=False)
+    if not filtered.empty:
+        most_recent = filtered.iloc[0]
+        return most_recent["Quantity (converted)"], most_recent["Data year"]
+    else:
+        return np.nan, np.nan
+
+# Function to calculate the total production = from Scott's script https://colab.research.google.com/drive/1HbBp2H7TWkrhWzUkOjnGrFyEss5Hka7k#scrollTo=SWmVCIzhnvap 
+def calculate_total_production_goget(row):
+    # Conversion factor from million m³ to million boe for gas
+    conversion_factor = 5.883 / 1000 
+    if pd.notna(row['Production - Hydrocarbons (unspecified)']):
+        return row['Production - Hydrocarbons (unspecified)']
+    else:
+        # Convert gas production to boe
+        gas_in_boe = row['Production - Gas'] * conversion_factor if pd.notna(row['Production - Gas']) else 0
+        oil_production = row['Production - Oil'] if pd.notna(row['Production - Oil']) else 0
+        return gas_in_boe + oil_production
+
+# GEM Standard Country Name and Area List mappings
+gem_country_area_mapping = {
+    'Azerbaijan-Turkmenistan': 'Azerbaijan; Turkmenistan',
+    'Iran-Iraq': 'Iran; Iraq',
+    'Kuwait-Saudi Arabia': 'Kuwait; Saudi Arabia',
+    'Kuwait-Saudi Arabia-Iran': 'Kuwait; Saudi Arabia; Iran',
+    'Saudi Arabia-Bahrain': 'Saudi Arabia; Bahrain',
+    'Saudi Arabia-Iran': 'Saudi Arabia; Iran',
+    'Senegal-Mauritania': 'Senegal; Mauritania',
+    'South China Sea': 'China; Taiwan; Philippines',
+    'Thailand-Malaysia': 'Thailand; Malaysia',
+    'Timor Gap': 'East Timor; Australia; Indonesia',
+    'United Arab Emirates-Iran': 'United Arab Emirates; Iran'
+}
+
+# Function to find Area List based on GEM Standard Country Name
+def get_country_list(gem_name):
+    return gem_country_area_mapping.get(gem_name, '')
+
+# end of Scott's script 
+
 
 def pci_eu_map_read(gdf):
     # take columns PCI5 and PCI6 
