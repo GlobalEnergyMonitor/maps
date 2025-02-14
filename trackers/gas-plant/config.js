@@ -34,6 +34,7 @@ var config = {
         labels: ['Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year'],
         clickColumns: ['plant-name'],
         rightAlign: ['unit-name','capacity-(mw)','start-year']
+
     },
     searchFields: { 'Plant': ['plant-name'], 
         'Companies': ['owner(s)', 'parent(s)', 'operator(s)'],

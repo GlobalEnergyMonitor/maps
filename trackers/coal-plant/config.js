@@ -50,6 +50,7 @@ var config = {
         labels: ['Plant','Unit','Plant name (local)','Owner','Parent','Capacity (MW)','Status','Start year', 'Retired year','Region','Country/Area','Subnational unit (province, state)'],
         clickColumns: ['plant-name'],
         rightAlign: ['unit-name','capacity-(mw)','start-year','retired-year']
+
     },
 
     /* configure the search box; 

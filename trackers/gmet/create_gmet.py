@@ -319,6 +319,7 @@ def create_scaling_col(df):
     plume_df['plume_emissions'] = plume_df['plume_emissions'].astype(float).round(2)
     # make it round to 2
     plume_df['Emissions Uncertainty (kg/hr)'] = plume_df['Emissions Uncertainty (kg/hr)'].astype(float).round(2)
+
     
     # concat them back 
 
@@ -822,6 +823,14 @@ def investigate_goget_missing(df):
     # return nothing 
     return df
 df = investigate_goget_missing(df)
+
+# TODO fix start year if not stated replace with ''
+def round_cap_emissions(df):
+    print(df.columns)
+    print('TODO round the emissions and cap columns')
+    return df
+
+df = round_cap_emissions(df)
 
 def create_geo(df):
 # def convert_coords_to_point(df): from compile all trackers for AET
