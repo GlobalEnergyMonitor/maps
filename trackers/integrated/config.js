@@ -1,9 +1,8 @@
 var config = {
-    csv: 'compilation_output/csv-data-2025-01-27.csv', //csv-data-2024-09-20.csv',
+    csv: 'compilation_output/csv-data-2025-02-14.csv', 
     tiles: [
         // 'https://gem.dev.c10e.org/2024-03-12/{z}/{x}/{y}.pbf'
-        // 'https://bucketeer-cf25e1cc-bfe0-4e0f-957c-65e8e9492475.s3.amazonaws.com/maps/integrated-2024-03-14/{z}/{x}/{y}.pbf'
-        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2025-01-27/{z}/{x}/{y}.pbf'
+        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2025-02-14/{z}/{x}/{y}.pbf'
         ],
     tileSourceLayer: 'integrated',
 
