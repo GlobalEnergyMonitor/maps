@@ -1,7 +1,7 @@
 var config = {
 
     /* name of the data file; use key `csv` if data file is CSV format */
-    csv: 'compilation_output/Oil & Gas Extraction-map-file-2025-02-11.csv',
+    csv: 'GOGET_Earthgenome_file2024-04-01.csv',
     
     /* Define labels for sitewide colors, referenced in tracker config */
     colors: {
@@ -40,38 +40,35 @@ var config = {
             values_labels: ['Operating','In development','Discovered','Shut in','Decommissioned','Cancelled','Abandoned','UGS','Unknown']
         }
     ],
-    countryField: 'country/area',
-    linkField: 'unit-id',
-    urlField: 'url',
+
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
-    capacityField: 'production---total-(oil,-gas-and-hydrocarbons)-(million-boe/y)',
-    capacityDisplayField: 'capacity',
+    capacityField: 'capacity',
     // capacityLabel: 'million boe/y',
-    capacityLabel: '(million boe/y)',
+    capacityLabel: '',
     /* Labels for describing the assets */
     assetFullLabel: "Oil & Gas Extraction Areas",
     assetLabel: 'areas',
 
     /* the column that contains the asset name. this varies between trackers */
-    nameField: 'wiki-name',
+    nameField: 'unit_name',
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     
     tableHeaders: {
-        values: ['wiki-name', 'operator', 'status', 'country/area', 'subnational-unit-(province,-state)', 'production---oil-(million-bbl/y)', 'production---gas-(million-m³/y)', 'production-year---oil', 'production-year---gas', 'production-start-year',],
+        values: ['unit_name', 'operator', 'status', 'country', 'province', 'production_oil', 'production_gas', 'production_oil_year', 'production_gas_year', 'production_start_year',],
         labels: ['Extraction Area', 'Operator', 'Status','Country/Area(s)','Subnational unit (province/state)', 'Production - Oil (Million bbl/y)', 'Production - Gas (Million m³/y)', 'Production Year - Oil', 'Production Year - Gas', 'Production start year',],
-        clickColumns: ['wiki-name'],
-        rightAlign: ['wiki-name','discovery-year', 'fid-year', 'production-start-year', 'production-year---gas', 'production---gas-(million-m³/y)', 'production-year---oil', 'production---oil-(million-bbl/y)', ]
+        clickColumns: ['unit_name'],
+        rightAlign: ['unit_name','discovery_year', 'fid_year', 'production_start_year', 'production_gas_year', 'production_gas', 'production_oil_year', 'production_oil', ]
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Extraction Area': ['wiki-name'], 
+    searchFields: { 'Extraction Area': ['unit_name'], 
         'Companies': ['owner', 'operator', 'parent'],
-        'Discovery Year': ['discovery-year'],
-        'Production start year': ['production-start-year']
+        'Discovery Year': ['discovery_year'],
+        'Production start year': ['production_start_year']
     },
 
     /* define fields and how they are displayed. 
@@ -82,19 +79,19 @@ var config = {
       `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'wiki-name': {'display': 'heading'},
+        'unit_name': {'display': 'heading'},
         'status': {'label': 'Status'},
-        'location-accuracy': {'label': 'Location Accuracy'},
+        'loc_accuracy': {'label': 'Location Accuracy'},
         'operator': {'label': 'Operator'},
-        'discovery-year': {'label': 'Discovery Year'},
-        'fid-year': {'label': 'FID Year'},
-        'production-start-year': {'label': 'Production Start Year'},
-        'production-year---oil': {'label': 'Production Year - Oil'},
-        'production-year---gas': {'label': 'Production Year - Gas'},
-        'production---oil-(million-bbl/y)': {'label': 'Production - Oil (Million bbl/y)'},
-        'production---gas-(million-m³/y)': {'label': 'Production - Gas (Million m³/y)'},
-        'subnational-unit-(province,-state)': {'display': 'location'},
-        'country/area': {'display': 'location'}
+        'discovery_year': {'label': 'Discovery Year'},
+        'fid_year': {'label': 'FID Year'},
+        'production_start_year': {'label': 'Production Start Year'},
+        'production_oil_year': {'label': 'Production Year - Oil'},
+        'production_gas_year': {'label': 'Production Year - Gas'},
+        'production_oil': {'label': 'Production - Oil (Million bbl/y)'},
+        'production_gas': {'label': 'Production - Gas (Million m³/y)'},
+        'province': {'display': 'location'},
+        'country': {'display': 'location'}
     },
     countryFile: './countries.js'
 }
