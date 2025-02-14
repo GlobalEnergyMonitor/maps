@@ -1,8 +1,7 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
-    csv: 'data.csv',
-
+    csv: 'compilation_output/Wind-map-file-2025-02-04.csv',
     colors: {
         'red greeninfo': '#c00',
         'light blue greeninfo': '#1e90ff',
@@ -17,7 +16,7 @@ var config = {
 
     /* define the column and associated values for color application */
     color: {
-        field: 'Status',
+        field: 'status',
         values: {
             'operating': 'green greeninfo',
             'construction': 'yellow greeninfo',
@@ -37,13 +36,13 @@ var config = {
       */
     filters: [
         {
-            field: 'Status',
+            field: 'status',
             values: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved', 'cancelled', 'retired'],
             values_labels: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved',  'cancelled', 'retired'],
             primary: true
         },
         {
-            field: 'Installation-Type',
+            field: 'installation-type',
             label: 'Installation Type',
             values: ['Onshore', 'Offshore hard mount', 'Unknown', 'Offshore mount unknown', 'Offshore floating'],
             values_labels: ['Onshore', 'Offshore hard mount', 'Unknown', 'Offshore mount unknown', 'Offshore floating']
@@ -53,34 +52,35 @@ var config = {
 
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
-    capacityField: 'Capacity (MW)',
-    capacityDisplayField: 'Capacity (MW)',
-    capacityLabel: 'Capacity (MW)',
+    capacityField: 'capacity-(mw)',
+    capacityDisplayField: 'capacity-(mw)',
+    capacityLabel: '(MW)',
 
     /* Labels for describing the assets */
     assetFullLabel: "Wind farm phases",
     assetLabel: 'phase',
 
     /* the column that contains the asset name. this varies between trackers */
-    nameField: 'Project Name',
-    linkField: 'Wiki URL',
-    urlField: 'Wiki URL',
-    countryField: 'Country',
+    nameField: 'project-name',
+    linkField: 'gem-location-id',
+    urlField: 'url',
+    countryField: 'country/area',
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['Project Name', 'Project Name in Local Language / Script', 'Phase Name', 'Capacity (MW)', 'Installation-Type', 'Status', 'Start year', 'Owner', 'Operator',  'State/Province', 'Country'],
-        labels: ['Project', 'Project Name in Local Language / Script', 'Phase','Capacity (MW)','Installation Type','Status','Start year', 'Owner', 'Operator', 'State/Province', 'Country/Area'],
-        clickColumns: ['Project Name'],
-        rightAlign: ['Capacity (MW)','Start year']
+        values: ['project-name','phase-name', 'capacity-(mw)', 'installation-type', 'status', 'start-year', 'owner', 'operator',  'state/province', 'country/area'],
+        labels: ['Project', 'Phase','Capacity (MW)','Installation Type','Status','Start year', 'Owner', 'Operator', 'State/Province', 'Country/Area'],
+        clickColumns: ['project-name'],
+        rightAlign: ['capacity-(mw)','start-year']
+
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Project': ['Project Name'], 
-        'Companies': ['Owner', 'Operator'],
-        'Start Year': ['Start year']
+    searchFields: { 'Project': ['project-name', 'project-name-in-local-language-/-script', 'other-name(s)'], 
+        'Companies': ['owner', 'operator', 'owner-name-in-local-language-/-script', 'operator-name-in-local-language-/-script'],
+        'Start Year': ['start-year']
     },
 
     /* define fields and how they are displayed. 
@@ -91,17 +91,19 @@ var config = {
       `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'Project Name': {'display': 'heading'},
-        'Status': {'label': 'Status'},
-        'Capacity (MW)': {'label': 'Capacity (MW)'},
-        'Owner': {'label': 'Owner'},
-        'Operator': {'label': 'Operator'},
-        'Start Year': {'label': 'Start Year'},
-        'Installation-Type': {'label': 'Technology Type'},
-        'Location accuracy': {'label': 'Location Accuracy'},
-        'State/Province': {'display': 'location'},
-        'Country': {'display': 'location'},
+        'project-name': {'display': 'heading'},
+        'project-name-in-local-language-/-script': {'label': 'Project in Local Language / Script'},
+        'owner': {'label': 'Owner'},
+        'operator': {'label': 'Operator'},
+        'start-year': {'label': 'Start Year'},
+        'installation-type': {'label': 'Technology Type'},
+        'location-accuracy': {'label': 'Location Accuracy'},
+        'state/province': {'display': 'location'},
+        'country/area': {'display': 'location'},
 
     },
-    showCapacityTable: false, 
+
+    statusField: 'status', // this strays from default, make it all the same!!
+    statusDisplayField: 'status', // this strays from default, make it all the same!!
+
 }

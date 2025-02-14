@@ -79,8 +79,6 @@ var config = {
     */
     detailView: {
         'project_name': {'display': 'heading'},
-        'status': {'label': 'Status'},
-        'capacity_(mw)': {'label': 'Capacity (MW)'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'start_year': {'label': 'Start Year'},
@@ -92,5 +90,5 @@ var config = {
         'country': {'display': 'location'},
 
     },
-    showCapacityTable: false, 
+
 }

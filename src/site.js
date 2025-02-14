@@ -21,15 +21,19 @@ const map = new mapboxgl.Map({
     center: config.center,
     projection: config.projection
 });
+
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
     closeButton: false,
     closeOnClick: false
 });
-map.dragRotate.disable();
-map.touchZoomRotate.disableRotation();
 
-map.on('style.load', function () {
+map.on('load', function () {
+    if (config.projection != 'globe'){
+        // map.setFog({}); // Set the default atmosphere style
+        $('#btn-spin-toggle').hide();
+
+    }
     loadData();
 });
 function determineZoom() {
@@ -40,12 +44,27 @@ function determineZoom() {
     return zoom;
 }
 
+
 /*
   load data in various formats, and prepare for use in application
 */
 function loadData() {
+    // Here we could load in data from csv always minus what's needed for map dots?
     if ("tiles" in config) {
+        console.log('addTiles');
         addTiles();
+        Papa.parse(config.csv, {
+            download: true,
+            header: true,
+            error: function(error, file) {
+                console.log(error);
+                console.log(file);
+            },
+            complete: function(results) {
+                console.log('addGeoJSON');
+                addGeoJSON(results.data);   
+            }
+        });
     } else if ("geojson" in config) {
         $.ajax({
             type: "GET",
@@ -61,17 +80,25 @@ function loadData() {
             success: function(jsonData) {addGeoJSON(jsonData);}
         });
     } else {
-        $.ajax({
-            type: "GET",
-            url: config.csv,
-            dataType: "text",
-            success: function(csvData) {
-                addGeoJSON($.csv.toObjects(csvData));
-            }
-        });        
-    }
+        // $.ajax({
+        //     type: "GET",
+        //     url: config.csv,
+        //     dataType: "text",
+        //     success: function(csvData) {
+        //         addGeoJSON($.csv.toObjects(csvData));
+        //     }
+        // });      
+        Papa.parse(config.csv, {
+            download: true,
+            header: true,
+            complete: function(results) {
+                addGeoJSON(results.data);   
+            }  
+    });
+}
 }
 function addGeoJSON(jsonData) {
+    // converts all to geojson 
     if ('type' in jsonData && jsonData['type'] == 'FeatureCollection') {
         config.geojson = jsonData;
     } else {
@@ -90,54 +117,76 @@ function addGeoJSON(jsonData) {
                 "properties": {}
             }
             for (let key in asset) {
+           
                 if (key == config.capacityField) {
                     feature.properties[key] = Number(asset[key]);
                 } else if (key != config.locationColumns['lng'] && key != config.locationColumns['lat']) {
                     feature.properties[key] = asset[key];
                 }
             }
-            config.geojson.features.push(feature);
+            if (feature.properties[config['countryField']]){
+                config.geojson.features.push(feature);
+            }
+            else {
+                console.log(feature)
+            }
         });
 
     }
 
     // Now that GeoJSON is created, store in processedGeoJSON, and link assets, then add layers to the map
-    config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
-    setMinMax();
-    findLinkedAssets();
-    map.on('load', function () {
+    // config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
+    config.processedGeoJSON = config.geojson; // copy
+
+    console.log('setMinMax');
+    setMinMax(); // TODO We need to change this so that the max is max of grouped units, and min is smallest unit, currently its max unit not project
+    console.log('findLinkedAssets');
+    findLinkedAssets(); // we should apply area-based scaling at this point, on the grouped capacity, then it'll be used in addPointLayer
+
+    // map.addSource('assets-source', {
+    //     'type': 'geojson',
+    //     'data': config.processedGeoJSON
+    // });
+    // part to optimize csv only maps 
+    if (!config.tiles) {
         map.addSource('assets-source', {
             'type': 'geojson',
             'data': config.processedGeoJSON
         });
-        addLayers();
-        map.on('idle', enableUX);
-    });
+    }
+
+    console.log('addLayers');
+    addLayers();
+
+    setTimeout(enableUX, 3000);
+
+    console.log('enableUX');
+    map.on('idle', enableUX); // enableUX starts to render data
 }
+
 function addTiles() {
-    map.on('load', function () {
-        map.addSource('assets-source', {
-            'type': 'vector',
-            'tiles': config.tiles,
-            'minzoom': 0,
-            'maxzoom': 10 // ?
-        });
-
-        /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
-        config.geometries.forEach(geometry => {
-            map.addLayer({
-                'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
-                'type': geometry == "LineString" ? 'line' : 'circle',
-                'source': 'assets-source',
-                'source-layer': config.tileSourceLayer,
-                'layout': {},
-                'filter': ["==",["geometry-type"],geometry],
-                'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
-            });
-        });
-
-        map.on('idle', geoJSONFromTiles);
+    map.addSource('assets-source', {
+        'type': 'vector',
+        'tiles': config.tiles,
+        'minzoom': 0,
+        'maxzoom': 10 // ?
     });
+
+    /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
+//     config.geometries.forEach(geometry => {
+//         map.addLayer({
+//             'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
+//             'type': geometry == "LineString" ? 'line' : 'circle',
+//             'source': 'assets-source',
+//             'source-layer': config.tileSourceLayer,
+//             'layout': {},
+//             'filter': ["==",["geometry-type"],geometry],
+//             'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
+//         });
+//     });
+
+//     map.on('idle', geoJSONFromTiles);
+
 }
 function geoJSONFromTiles() {
     map.off('idle', geoJSONFromTiles);
@@ -148,22 +197,32 @@ function geoJSONFromTiles() {
         "type": "FeatureCollection", 
         "features": map.queryRenderedFeatures({layers: layers})  
     }
-    config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
-    setMinMax();
 
+    config.processedGeoJSON = JSON.parse(JSON.stringify(config.geojson)); //deep copy
+    
+    setMinMax(); 
     layers.forEach(layer => {
         map.removeLayer(layer);
     });
     findLinkedAssets();
     addLayers();
-    map.on('idle', enableUX);
+    map.on('idle', enableUX); // enableUX starts to renders data 
+    
+
 }
+
 // Builds lookup of linked assets by the link column
 //  and when linked assets share location, rebuilds processedGeoJSON with summed capacity and custom icon
+// what if we change this so instead of rebuilding on initial load we load the geojson directly?! to solve globe issue 
+// until David implements his fix
+
+
 function findLinkedAssets() {
+    
     map.off('idle', findLinkedAssets);
 
-    config.preLinkedGeoJSON = JSON.parse(JSON.stringify(config.processedGeoJSON));
+    // config.preLinkedGeoJSON = JSON.parse(JSON.stringify(config.processedGeoJSON));
+    config.preLinkedGeoJSON = config.processedGeoJSON;
     config.totalCount = 0;
 
     // First, create a lookup table for linked assets based on linkField
@@ -185,6 +244,7 @@ function findLinkedAssets() {
                 if (! (key in grouped)) {
                     grouped[key] = [];
                 }
+                // adds feature to dictonary grouped if shares a linkField id and coords, not done for lines
                 grouped[key].push(feature);
             }
         }
@@ -203,6 +263,11 @@ function findLinkedAssets() {
         let capacity = features.reduce((previous, current) => {
             return previous + Number(current.properties[config.capacityField]);
         }, 0);
+        // TODO HERE is where we want to apply the area-based scaling formula, to THIS capacity
+        // sqrt((4 * (float(cap * factor))) / np.pi) 
+        // math.sqrt((4 * converted) / np.pi)
+        // areaBasedScaledCapacity = Math.sqrt((4 * capacity) / Math.PI)
+        // features[0].properties[config.capacityField] = areaBasedScaledCapacity;
         features[0].properties[config.capacityField] = capacity;
 
         // Build summary count of capacity across all linked assets
@@ -224,6 +289,7 @@ function findLinkedAssets() {
                 if (! config.icons.includes(string_icon)) {
                     generateIcon(icon);
                     config.icons.push(string_icon);
+
                 }
             }
         }
@@ -240,6 +306,7 @@ function findLinkedAssets() {
         config.totalCount += features.length;
 
         config.processedGeoJSON.features.push(features[0]);
+
     });
 }
 function generateIcon(icon) {
@@ -284,6 +351,14 @@ function generateIcon(icon) {
     });
 }
 function setMinMax() {
+    // If I can find a way to incorporate the linked asset calculation in this or before
+    // this runs then we would be closer to solving the area-based scaling issue
+
+
+    // Maisie says we should show the full range
+    // which is smallest unit, and largest project level capacity
+    // We could remove these defaults and then returns a error if no value is assigned to the min and max keys
+    // But could be okay to not use project-level since easier in JS and biggest might be a project with one unit
     config.maxPointCapacity = 0;
     config.minPointCapacity = 1000000;
     config.maxLineCapacity = 0;
@@ -298,6 +373,12 @@ function setMinMax() {
             minCapacityKey = 'minPointCapacity';
             maxCapacityKey = 'maxPointCapacity';
         }
+        // this says, if the capacity is more than the max capacity so far then it should be used
+        // vice versa for min capacity
+        // later this is used to size the assets along smoothly by interpolation across the width between min and maxPoint and LineWidth
+        // this min and max Line and Point Capacity is crucial to the scaling, along with the unit's capacity
+        // we need to be using the summed project's capacity not the unit's capacity to inform this, 
+        // either later in addPointLayer where we consider the unit's capacity during interpolation, or here where we find the min and max unit size
         if (parseFloat(feature.properties[config.capacityField]) > config[maxCapacityKey]) {
             config[maxCapacityKey] =  parseFloat(feature.properties[config.capacityField]);
         }
@@ -312,14 +393,28 @@ function setMinMax() {
 */
 function enableUX() {
     map.off('idle', enableUX);
-
-    buildFilters();
-    updateSummary();
+    if (config.UXEnabled) {
+        console.log('ux already enabled');
+        return
+    };
+    config.UXEnabled = true;
     
+    console.log('buildFilters');
+    buildFilters();
+    console.log('updateSummary');
+    updateSummary();
+    console.log('buildTable');
     buildTable(); 
-
+    console.log('enableModal');
     enableModal();
+    console.log('enableNavFilters');
     enableNavFilters();
+    $('#spinner-container').addClass('d-none')
+    $('#spinner-container').removeClass('d-flex')
+    if (config.projection == 'globe') {
+        console.log('spinGlobe');
+        spinGlobe();
+    }
 }
 
 function addLayers() {
@@ -352,8 +447,6 @@ function addLayers() {
         }
     , config.layers[0]);
 
-
-
     addEvents();
 }
 function addPointLayer() {
@@ -368,6 +461,8 @@ function addPointLayer() {
             "#000000"
         ];
     }
+// LET"S ADD exponential NOT linear TODO Maisie 
+// ["exponential", base] if base is 1 then it is linear the same, power of 1/2 to do squareroot area based
 
     let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
     paint['circle-radius'] = [
@@ -396,6 +491,7 @@ function addPointLayer() {
         'paint': paint
     });
     config.layers.push('assets-points');
+
 
     // Add layer with proportional icons
     map.addLayer({
@@ -516,9 +612,9 @@ function addEvents() {
     map.on('click', (e) => {
         const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea]];
         const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
-
-        if (selectedFeatures.length == 0) return;
         
+        if (selectedFeatures.length == 0) return;
+
         const links = selectedFeatures.map(
             (feature) => feature.properties[config.linkField]
         );
@@ -527,14 +623,22 @@ function addEvents() {
 
         if (selectedFeatures.length == 1) {
             config.selectModal = '';
-            if (config.tiles) {
-                displayDetails([selectedFeatures[0]]); //use clicked point
-            } else {
-                displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
-            }
+
+            displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
+            // commenting this out because it creates a bug in summary capacity section 
+            // if (config.tiles) {
+            //     displayDetails([selectedFeatures[0]]); //use clicked point
+
+
+            // } else {
+            // displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]);
+
+
+            // }
         } else {
-            // console.log(displayDetails(config.linked[selectedFeatures[0].properties[config.linkField]]))
-            var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6><ul>";
+            var modalText = "<h6 class='p-3'>There are multiple " + config.assetFullLabel + " near this location. Select one for more details</h6>";
+
+
             let ul = $('<ul>');
             selectedFeatures.forEach((feature) => {
                 var link = $('<li class="asset-select-option">' + feature.properties[config.nameField] + "</li>");
@@ -568,12 +672,28 @@ function addEvents() {
            // $('#basemap-toggle').text("Streets");
            config.baseMap = "Satellite";
            map.setLayoutProperty('satellite', 'visibility', 'visible');
+           map.setFog({
+            "range": [0.8, 8],
+            "color": "#dc9f9f",
+            "horizon-blend": 0.5,
+            "high-color": "#245bde",
+            "space-color": "#000000",
+            "star-intensity": 0.3
+            });
         } else {
            // $('#basemap-toggle').text("Satellite");
            config.baseMap = "Streets";
            map.setLayoutProperty('satellite', 'visibility', 'none');
+
+           map.setFog(null);
         }
     });
+
+    $('#reset-all-button').on("click", function() {
+        enableResetAll();
+    });
+
+
     $('#collapse-sidebar').on("click", function() {
         $('#filter-form').hide();
         $('#all-select').hide();
@@ -588,16 +708,55 @@ function addEvents() {
     });
 }
 
+$('#projection-toggle').on("click", function() {
+    if (config.projection == 'globe') {
+        config.projection = "naturalEarth";
+        map.setProjection('naturalEarth');
+        $('#btn-spin-toggle').hide();
+        map.setCenter(config.center);
+        map.setZoom(determineZoom());
+
+    } else {
+        config.projection = "globe";
+        map.setProjection("globe");
+        map.setCenter(config.center);
+        $('#btn-spin-toggle').show();
+        spinGlobe();
+        map.setZoom(determineZoom());
+
+    }
+})
+
+
 /*
   legend filters
 */ 
+
 function buildFilters() {
     countFilteredFeatures();
     config.filters.forEach(filter => {
-        
-        if (config.color.field != filter.field) {
-            $('#filter-form').append('<hr /><h6 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h6>');
+        // go through each filter in config 
+        if (config.showToolTip){
+            // create more space for europe legend
+            if (filter.primary && filter.field_hover_text){
+                $('#filter-form').append('<h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text + '</div></div></h7>');
+    // add eventlistener for infobox and tooltip to show on hover
+
+            }
+            else if (filter.field_hover_text){
+                $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '<div class="infobox" id="infobox"><span>i</span><div class="tooltip" id="tooltip">' + filter.field_hover_text + '</div></div></h7>');
+
+            }
+            else {
+            // do same as below but append infobox
+            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h7>');
+            }
+
         }
+        else if (config.color.field != filter.field) {
+            $('#filter-form').append('<hr /><h7 class="card-title">' + (filter.label || filter.field.replaceAll("_"," ")) + '</h7>');
+        }
+
         for (let i=0; i<filter.values.length; i++) {
             let check_id =  filter.field + '_' + filter.values[i];
             let check = `<div class="row filter-row" data-checkid="${(check_id).replace('/','\\/')}">`;
@@ -605,18 +764,61 @@ function buildFilters() {
             check += `<div class="col-8"><input type="checkbox" checked class="form-check-input d-none" id="${check_id}">`;
             check += (config.color.field == filter.field ? '<span class="legend-dot" style="background-color:' + config.color.values[ filter.values[i] ] + '"></span>' : "");
             check +=  `<span id='${check_id}-label'>` + ('values_labels' in filter ? filter.values_labels[i] : filter.values[i].replaceAll("_", " ")) + '</span></div>';
-            check += '<div class="col-3 text-end" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+            check += '<div class="col-3 text-end" style="text-align: right;" id="' + check_id + '-count">' + config.filterCount[filter.field][filter.values[i]] + '</div></div>';
+            // if we want hover text unique on filter's value not just filter title
+            // if (filter.values_hover_text && filter.values_hover_text[i]) {
+            //     check += `<div class="info-box" id="infoBox-${check_id}"><span class="info-icon">i</span><div class="tooltip" id="tooltip-${check_id}">${filter.values_hover_text[i]}</div></div>`;
+            // }
             $('#filter-form').append(check);
         }
+    // add eventlistener for infobox and tooltip to show on hover 
+    $('.infobox').each(function() {
+        $(this).on('mouseover', function() {
+            const infoBox = document.getElementById('infobox');
+            const toolTip = document.getElementById('tooltip');
+            const infoBoxRect = infoBox.getBoundingClientRect();
+            const toolTipRect = toolTip.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            if (infoBoxRect.top < toolTipRect.height + 20) {
+                // Position the tooltip below the infobox
+                toolTip.style.bottom = 'auto';
+                toolTip.style.top = '110%';
+            } else {
+                // Position the tooltip above the infobox
+                toolTip.style.top = 'auto';
+                toolTip.style.bottom = '110%';
+            }
+            
+            $(this).find('.tooltip').css({
+                'opacity': '1',
+                'visibility': 'visible'
+            });
+        });
+        $(this).on('mouseout', function() {
+            $(this).find('.tooltip').css({
+                'opacity': '0',
+                'visibility': 'hidden'
+            });
+        });
     });
+    });
+    
     $('.filter-row').each(function() {
         this.addEventListener("click", function() {
             $('#' + this.dataset.checkid).click();
             toggleFilter(this.dataset.checkid);
+
+            $('#spinner-container-filter').removeClass('d-none')
+            $('#spinner-container-filter').addClass('d-flex')
+
             filterData();
+
         });
     });
+
 }
+
+
 function toggleFilter(id) {
     $('#' + id + '-checkmark').toggleClass('checkmark uncheckmark');
 }
@@ -627,7 +829,12 @@ function selectAllFilter() {
             toggleFilter(this.dataset.checkid);
         }
     });
+
+    $('#spinner-container-filter').removeClass('d-none')
+    $('#spinner-container-filter').addClass('d-flex')
+
     filterData();
+
 }
 function clearAllFilter() {
     $('.filter-row').each(function() {
@@ -637,6 +844,7 @@ function clearAllFilter() {
         }
     });
     filterData();
+
 }
 function countFilteredFeatures() {
     config.filterCount = {};
@@ -680,9 +888,12 @@ function countFilteredFeatures() {
 }
 function filterData() {
     if (config.tiles) {
+
         filterTiles();
     } else {
+
         filterGeoJSON();
+
     }
 }
 
@@ -699,9 +910,12 @@ function filterTiles() {
     });
 
     config.filterExpression = [];
+    // TODO apply diacritic solution here for GIPT as well
     if (config.searchText.length >= 3) {
         let searchExpression = ['any'];
         config.selectedSearchFields.split(',').forEach((field) => {
+            // let mapValue = removeDiacritics(field); // too slow so we'll do it the data input way for removing diacritics in search
+
             searchExpression.push(['in', ['literal', config.searchText], ['downcase', ["get", field]]]);
 
         });
@@ -713,13 +927,14 @@ function filterTiles() {
         let countryExpression = ['any'];
         config.selectedCountries.forEach(country => {
             if (config.multiCountry) {
-                country = country + ',';
-                countryExpression.push(['in', ['string', country], ['string',['get', config.countryField]]]);
+                country = country + ';'; //this is needed to filter integrated file by country select but doesn't affect filtering by region
+                countryExpression.push(['in', ['string', country], ['string',['get', removeLastComma(config.countryField)]]]);
             } else {
-                countryExpression.push(['==', ['string', country], ['string',['get', config.countryField]]]);
+                countryExpression.push(['==', ['string', country], ['string',['get', removeLastComma(config.countryField)]]]);
             }
         })
         config.filterExpression.push(countryExpression);
+
     }
     for (let field in filterStatus) {
         config.filterExpression.push(['in', ['get', field], ['literal', filterStatus[field]]]);
@@ -742,6 +957,8 @@ function filterTiles() {
 
     if ($('#table-container').is(':visible')) {
         filterGeoJSON();
+        $('btn-spin-toggle').hide();
+
     } else {
         map.on('idle', filterGeoJSON);
     }
@@ -771,9 +988,19 @@ function filterGeoJSON() {
         }
         if (config.searchText.length >= 3) {
             if (config.selectedSearchFields.split(',').filter((field) => {
-                return feature.properties[field].toLowerCase().includes(config.searchText);
-            }).length == 0) include = false;
+                // remove diacritics from mapValue
+                if (feature.properties[field] != null){
+                    // console.log(feature.properties[field])
+                    // console.log('Before remove diacritics function')
+                    let mapValue = removeDiacritics(feature.properties[field]);
+                    // let mapValue = feature.properties[field];
+
+                    // console.log(mapValue)
+                    // console.log('After remove diacritics function')
+                    return mapValue.toLowerCase().includes(config.searchText);
+                }}).length == 0) include = false;
         }
+        
         if (config.selectedCountries.length > 0) {
             //update to handle multiple countries selected, and handle when countries are substrings of each other
             if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(';').includes(value)).length == 0) include = false;
@@ -784,7 +1011,8 @@ function filterGeoJSON() {
             filteredGeoJSON.features.push(feature);
         }
     });
-    config.processedGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
+    // config.processedGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
+    config.processedGeoJSON = filteredGeoJSON;
     findLinkedAssets();
     config.tableDirty = true;
     updateTable();
@@ -805,11 +1033,35 @@ function updateSummary() {
         }
     });
 
-    if (config.showMaxCapacity) {
-        $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString())
-        $('#capacity_summary').html("Maximum " + config.capacityLabel);
+
+    if (config.showMinCapacity & config.showMaxCapacity) {
+        if (config.maxCapacityLabel) {
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);
+            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toString());
+            $('#capacity_summary_min').html("Minimum " + config.maxCapacityLabel);
+        } else {
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#capacity_summary').html("Maximum " + config.capacityLabel);
+            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toString());
+            $('#capacity_summary_min').html("Minimum " + config.capacityLabel);
+        }
     }
+
+    else if (config.showMaxCapacity) {
+        if (config.maxCapacityLabel) {
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);
+        } else {
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#capacity_summary').html("Maximum " + config.capacityLabel);
+        }
+    }
+
+    $('#spinner-container-filter').addClass('d-none')
+    $('#spinner-container-filter').removeClass('d-flex')
 }
+
 
 /*
   table view
@@ -817,18 +1069,25 @@ function updateSummary() {
 function buildTable() {
     $('#table-toggle').on("click", function() {
         if (! $('#table-container').is(':visible')) {
-            $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15'>");
+            $('#table-toggle-label').html("Map view <img src='../../src/img/arrow-right.svg' width='15' height='50' style='text-align: center;'>");
             $('#map').hide();
+            $('#btn-spin').hide();
             $('#sidebar').hide();
             $('#table-container').show();
             $('#basemap-toggle').hide();
+            $('btn-spin-toggle').hide();
+            $('#projection-toggle').hide();
             updateTable(true);
         } else {
-            $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15'>");
+            $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15' height='50' style='text-align: center;'>");
             $('#map').show();
+            $('#btn-spin').show();
             $('#sidebar').show();
             $('#table-container').hide();
             $('#basemap-toggle').show();
+            $('btn-spin-toggle').show();
+            $('#projection-toggle').show();
+
         }
     });
 }
@@ -934,12 +1193,11 @@ function displayDetails(features) {
     var location_text = '';
     Object.keys(config.detailView).forEach((detail) => {
         // replace apostrophe in displayDetails to resolve invalid or unexpected token
-        // features[0].properties[detail] = features[0].properties[detail].replace("'", "\'")
+
 
         if (Object.keys(config.detailView[detail]).includes('display')) {
 
             if (config.detailView[detail]['display'] == 'heading') {
-
                 detail_text += '<h4>' + features[0].properties[detail] + '</h4>';
 
             } else if (config.detailView[detail]['display'] == 'join') {
@@ -988,27 +1246,37 @@ function displayDetails(features) {
                     if (location_text.length > 0) {
                         location_text += ', ';
                     }
+                    //TODO figure out why subnational and country are reversed in nuclear
+                    // console.log(location_text)
+
                     location_text += features[0].properties[detail];
                 }
             }
         } else {
+            // console.log('we are in the last else')
+            // console.log(features[0].properties[detail])
+            // if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN && features[0].properties[detail] != null && features[0].properties[detail] != 'Unknown [unknown %]'){
+                // if (config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
+            if (features[0].properties[detail] != '' && features[0].properties[detail] != NaN && features[0].properties[detail] != null && features[0].properties[detail] != 'Unknown [unknown %]') {
+                if (config.multiCountry == true && config.detailView[detail] && config.detailView[detail]['label'] && config.detailView[detail]['label'].includes('Country')) {
+                    detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
+                }
+                //     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
 
-            if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN &&  features[0].properties[detail] != null &&  features[0].properties[detail] != 'not found' && features[0].properties[detail] != 'Unknown [unknown %]'){
-                    if (features[0].properties[detail].includes(';') && config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
-                        // console.log(config.detailView[detail]['label'])
-                        // remove semi colon in areas country for multi country
-                        // features[0].properties[detail] = removeLastComma(features[0].properties[detail])
-                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
 
+                // }
+                else if (Object.keys(config.detailView[detail]).includes('label')) {
+                    detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
+                } else {
+                    console.log(features[0].properties[detail])
+                    console.log('inner else issue')
+                    // detail_text += features[0].properties[detail] + '<br/>';
+                }
+            }
+            else {
+                console.log(features[0].properties[detail])
+                console.log('outer else issue')
 
-                    }
-                    else if (Object.keys(config.detailView[detail]).includes('label')) {
-                        // console.log(features[0].properties[detail])
-                        detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
-                    } else {
-                        console.log(features[0].properties[detail])
-                        // detail_text += features[0].properties[detail] + '<br/>';
-                    }
             }
             
 
@@ -1025,43 +1293,65 @@ function displayDetails(features) {
 
     // Need this to be customizable for trackers that do not need summary because no units 
     // Build capacity summary
-    if (capacityLabel == ''){
-        detail_text += '';
-    }
-    else if (features.length > 1) {   
-       let filterIndex = 0;
-        for (const[index, filter] of config.filters.entries()) {
-            if (filter.field == config.statusField) {
-                filterIndex = index;
+    if (capacityLabel != ''){
+        if (features.length > 1) { 
+        let filterIndex = 0;
+            for (const[index, filter] of config.filters.entries()) {
+                if (filter.field == config.statusField) {
+                    filterIndex = index;
+                }
             }
-        }
-        let capacity = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
-        let count = Object.assign(...config.filters[filterIndex].values.map(f => ({[f]: 0})));
+
+        // Initialize capacity and count objects using reduce to resolve summary build bug
+        let capacity = config.filters[filterIndex].values.reduce((acc, f) => {
+            acc[f] = 0;
+            return acc;
+        }, {});
+
+        let count = config.filters[filterIndex].values.reduce((acc, f) => {
+            acc[f] = 0;
+            return acc;
+        }, {});
 
         features.forEach((feature) => {
-            capacity[feature.properties[config.statusField]] += feature.properties[config.capacityDisplayField];
+            let capacityInt = parseInt(feature.properties[config.capacityDisplayField], 10);
+
+            capacity[feature.properties[config.statusField]] += capacityInt;
             count[feature.properties[config.statusField]]++;
+
         });
 
-        let detail_capacity = '';
-        Object.keys(count).forEach((k) => {
-            if (count[k] != 0) {
-                detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[ k ] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
-            }
-        });
-        detail_text += '<div>' + 
-            '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
-            '<div class="row" style="height: 2px"><hr/></div>' +
-            '<div class="row "><div class="col-5 text-capitalize">' + config.statusField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
-            detail_capacity +
-            '</div>';
+            let detail_capacity = '';
+
+            Object.keys(count).forEach((k) => {
+                if (config.color.field == config.statusField){ 
+
+                    if (count[k] != 0) {
+                        detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                    }
+                }
+                else {
+                    if (count[k] != 0) {
+                        detail_capacity += '<div class="row"><div class="col-5">' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                    }
+                }
+            });
+            detail_text += '<div>' + 
+                '<div class="row pt-2 justify-content-md-center">Total ' + assetLabel + ': ' + features.length + '</div>' +
+                '<div class="row" style="height: 2px"><hr/></div>' +
+                '<div class="row "><div class="col-5 text-capitalize">' + config.statusDisplayField + '</div><div class="col-4">' + capacityLabel + '</div><div class="col-3">#&nbsp;of&nbsp;' + assetLabel + '</div></div>' +
+                detail_capacity +
+                '</div>';
+        }
+        else {
+            detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
+                '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
+            detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + features[0].properties[config.capacityDisplayField] + ' ' + capacityLabel;
+        }
     }
     else {
-        detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-            '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-        detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + features[0].properties[config.capacityDisplayField] + ' ' + capacityLabel;
+        detail_text += '';
     }
-
     //Location by azizah from <a href="https://thenounproject.com/browse/icons/term/location/" target="_blank" title="Location Icons">Noun Project</a> (CC BY 3.0)
     //Arrow Back by Nursila from <a href="https://thenounproject.com/browse/icons/term/arrow-back/" target="_blank" title="Arrow Back Icons">Noun Project</a> (CC BY 3.0)
     $('.modal-body').html('<div class="row m-0">' +
@@ -1110,6 +1400,8 @@ function enableNavFilters() {
     enableSearchSelect();
     enableCountrySelect();
 
+    // this is the event that starts loading but not complete
+
     document.addEventListener("DOMContentLoaded", function() {
 
         // make it as accordion for smaller screens
@@ -1146,6 +1438,7 @@ function enableNavFilters() {
     }); 
 }
 function enableCountrySelect() {
+
     $.ajax({
         type: "GET",
         url: config.countryFile,
@@ -1166,17 +1459,22 @@ function buildCountrySelect() {
             }
         });
         dropdown_html += "</ul></li>";
+
         if (continent_idx != Object.keys(config.countries).length - 1) {
             dropdown_html += '<li><hr class="dropdown-divider"></li>';
         }
+
         $('#country_select').append(dropdown_html);
     });
 
     $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
             config.selectedCountryText = this.dataset.countrytext;
-            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []);
+            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []); // I think this needs to be exchanged with ; for multiple countries 
             $('#selectedCountryLabel').text(config.selectedCountryText || "all");
+
+            $('#spinner-container-filter').removeClass('d-none')
+            $('#spinner-container-filter').addClass('d-flex')
             filterData();
         });
     });
@@ -1184,10 +1482,37 @@ function buildCountrySelect() {
     config.selectedCountries = [];
     config.selectedCountryText = '';
 }
+
+const diacriticMap = {
+    a: ["a", "á", "à", "â", "ã", "ä", "å"],
+    e: ["e", "é", "è", "ê", "ë"],
+    i: ["i", "í", "ì", "î", "ï"],
+    o: ["o", "ó", "ò", "ô", "õ", "ö", "ø"],
+    u: ["u", "ú", "ù", "û", "ü"],
+    c: ["c", "ç"],
+    n: ["n", "ñ"],
+  };
+  
+function removeDiacritics(value) {
+    let noDiacriticsValue = value;
+    for (const char of value) {
+        for (const [key, values] of Object.entries(diacriticMap)) {
+            if (values.includes(char)) {
+                noDiacriticsValue = noDiacriticsValue.replace(char, key);
+            }
+        }
+    }
+    return noDiacriticsValue;
+}
+
+
 function enableSearch() {
     $('#search-text').on('keyup paste', debounce(function() {
         config.searchText = $('#search-text').val().toLowerCase();
+        // console.log(config.searchText) 
+        // console.log('before diacritic function')
         filterData();
+
     }, 500));
     config.searchText = '';
 }
@@ -1206,12 +1531,54 @@ function enableSearchSelect() {
         this.addEventListener("click", function() {
             config.selectedSearchFields = this.dataset.searchfields;
             $('#selectedSearchLabel').text(this.dataset.searchfieldtext);
+
+            $('#spinner-container-filter').removeClass('d-none')
+            $('#spinner-container-filter').addClass('d-flex')
             filterData();
         });
     });
 
     config.selectedSearchFields = allSearchFields.join(',');
 }
+
+function enableResetAll() {
+    // need to also handle for table view - it works the same no special handling needed.
+
+    // clear country filter by returning selectedCountryLabel to 'All' DONE!
+    $('#selectedCountryLabel').text("all");
+    config.selectedCountryText = '';
+    config.selectedCountries = [];
+    
+    // // clear search text by making search text ''
+    config.searchText = ''; 
+    $('#search-text').val('');
+
+    // put search field category back to all
+    let allSearchFields = [];
+    Object.keys(config.searchFields).forEach((field_label) => {
+        allSearchFields = allSearchFields.concat(config.searchFields[field_label]);
+    });
+    config.selectedSearchFields = allSearchFields.join(',');
+    $('#selectedSearchLabel').text("all");
+
+    // clear legend by checking checked boxes DONE! 
+    $('.filter-row').each(function() {
+        if (! $('#' + this.dataset.checkid)[0].checked) {
+            $('#' + this.dataset.checkid)[0].checked = true;
+            toggleFilter(this.dataset.checkid);
+        }
+    }); 
+
+    // start the spinner
+    $('#spinner-container-filter').removeClass('d-none')
+    $('#spinner-container-filter').addClass('d-flex')
+
+    // then filter data
+    filterData();
+
+}  
+
+
 
 /* 
   Util functions
@@ -1298,3 +1665,99 @@ function removeLastComma(str) {
     }
     return str;
 }
+
+// TODO
+// // The following values can be changed to control rotation speed:
+
+// At low zooms, complete a revolution every two minutes.
+const secondsPerRevolution = 120;
+// Above zoom level 5, do not rotate.
+const maxSpinZoom = 5;
+// Rotate at intermediate speeds between zoom levels 3 and 5.
+const slowSpinZoom = 3;
+const btnSpinToggle = document.querySelector('#btn-spin-toggle');
+
+
+let userInteracting = false;
+let spinEnabled = true;
+
+function spinGlobe() {
+
+    const zoom = map.getZoom();
+    if (config.projection == 'globe'){
+
+        if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
+            let distancePerSecond = 360 / secondsPerRevolution;
+            if (zoom > slowSpinZoom) {
+                // Slow spinning at higher zooms
+                const zoomDif =
+                    (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
+                distancePerSecond *= zoomDif;
+            }
+            const center = map.getCenter();
+            center.lng -= distancePerSecond;
+            // Smoothly animate the map over one second.
+            // When this animation is complete, it calls a 'moveend' event.
+            map.easeTo({ center, duration: 1000, easing: (n) => n });
+        }
+    }
+}
+
+// Pause spinning on interaction
+map.on('mousedown', () => {
+    userInteracting = true;
+});
+
+// Restart spinning the globe when interaction is complete
+map.on('mouseup', () => {
+    userInteracting = false;
+    spinGlobe();
+});
+
+// // These events account for cases where the mouse has moved
+// // off the map, so 'mouseup' will not be fired.
+map.on('dragend', () => {
+    userInteracting = false;
+    spinGlobe();
+});
+map.on('pitchend', () => {
+    userInteracting = false;
+    spinGlobe();
+});
+map.on('rotateend', () => {
+    userInteracting = false;
+    spinGlobe();
+});
+
+// // When animation is complete, start spinning if there is no ongoing interaction
+map.on('moveend', () => {
+    spinGlobe();
+});
+
+document.getElementById('btn-spin-toggle').addEventListener('click', (e) => {
+    spinEnabled = !spinEnabled;
+    if (spinEnabled) {
+        spinGlobe();
+        e.target.innerHTML = 'Pause rotation';
+    } else {
+        map.stop(); // Immediately end ongoing animation
+        e.target.innerHTML = 'Start rotation';
+    }
+});
+
+
+// # adding option to pause spin with space important for smaller screens
+document.addEventListener('keydown', (e) => {
+    spinEnabled = !spinEnabled;
+    if (e.code === "Space") {
+        if (spinEnabled) {
+            spinGlobe();
+            btnSpinToggle.innerHTML = 'Pause rotation'; // not working not sure why
+        } else {
+            map.stop(); // Immediately end ongoing animation
+            spinGlobe();
+            btnSpinToggle.innerHTML = 'Start rotation';
+        }
+    }
+});
+

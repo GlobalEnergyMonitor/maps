@@ -1,7 +1,8 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
-    csv: 'GCPT-coal-plant-2024-02-08.csv',
+    csv: 'compilation_output/Coal Plants-map-file-2025-02-05.csv',
     /* define the column and associated values for color application */
+    linkField: 'gem-location-id',
     color: {
         field: 'status',
         values: {
@@ -24,37 +25,39 @@ var config = {
     filters: [
         {
             field: 'status',
-            values: ['operating','construction','announced','permitted','pre-permit','retired','cancelled','mothballed','shelved'],
+            values: ['operating','construction','permitted','pre-permit', 'announced','retired','cancelled', 'shelved','mothballed'],
         }
     ],
 
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
-    capacityField: 'capacity',
-    capacityLabel: 'Capacity (MW)',
+    capacityField: 'capacity-(mw)',
+    capacityDisplayField: 'capacity-(mw)',
+    capacityLabel: '(MW)',
 
     /* Labels for describing the assets */
     assetFullLabel: "Coal-fired Units",
-    assetLabel: 'unit',
+    assetLabel: 'units',
 
     /* the column that contains the asset name. this varies between trackers */
-    nameField: 'plant',
-
+    nameField: 'plant-name',
+    countryField: 'country/area',
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['plant','unit','chinese_name','owner', 'parent', 'capacity', 'status', 'region', 'country', 'subnational', 'start_year'],
-        labels: ['Plant','Unit','Chinese Name','Owner','Parent','Capacity (MW)','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year'],
-        clickColumns: ['plant'],
-        rightAlign: ['unit','capacity','start_year']
+        values: ['plant-name','unit-name','plant-name-(local)','owner', 'parent', 'capacity-(mw)', 'status', 'start-year', 'retired-year', 'region', 'country/area', 'subnational-unit-(province,-state)'],
+        labels: ['Plant','Unit','Plant name (local)','Owner','Parent','Capacity (MW)','Status','Start year', 'Retired year','Region','Country/Area','Subnational unit (province, state)'],
+        clickColumns: ['plant-name'],
+        rightAlign: ['unit-name','capacity-(mw)','start-year','retired-year']
+
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Plant': ['plant'], 
+    searchFields: { 'Plant': ['plant-name'], 
         'Companies': ['owner', 'parent'],
-        'Start Year': ['start_year']
+        'Start Year': ['start-year']
     },
 
     /* define fields and how they are displayed. 
@@ -65,12 +68,15 @@ var config = {
       `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'plant': {'display': 'heading'},
-        'chinese_name': {},
+        'plant-name': {'display': 'heading'},
+        'plant-name-(local)': {'label': 'Local plant name'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
-        'start_year': {'display': 'range', 'label': ['Start Year', 'Start Year Range']},
-        'subnational': {'display': 'location'},
-        'country': {'display': 'location'}
-    } 
+        'start-year': {'label': 'Start Year'},
+        'retired-year': {'label': 'Retired Year'},
+        'subnational-unit-(province,-state)': {'display': 'location'},
+        'country/area': {'display': 'location'}
+    },
+
+    showMinCapacity: true
 }

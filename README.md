@@ -1,3 +1,9 @@
+## 
+[Steps to create and test multi-tracker maps WIP]([https://docs.google.com/document/d/1LacVuubl4T4CtGzy1KT_GsWrjV-DOI8XQFuLsUliT88]
+) https://docs.google.com/document/d/1LacVuubl4T4CtGzy1KT_GsWrjV-DOI8XQFuLsUliT88
+
+
+
 # gem-tracker-maps
 
 GEM Tracker Maps is served entirely staticly, with no build process. Each tracker only requires a JSON based configuration file, and a data file (CSV or JSON, as currently produced for GEM Trackers).
@@ -82,6 +88,7 @@ Live branch is gitpages-production
 * bootstrap for styling
 * DataTables for table view
 
+
 ## New Features Planned
 * Fly to unit
 * Area based scaling
@@ -96,7 +103,6 @@ Live branch is gitpages-production
 * GOIT (able to change soon)
 
 * Steel & Iron (able to change soon, planned for early 2025) 
-
 * Coal Project Finance Tracker (no plans)
 * Global Energy Ownership (no plans, no map) 
 * Private Equity tracker (no plans, no map)

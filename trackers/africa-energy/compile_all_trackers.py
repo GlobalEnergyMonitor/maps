@@ -62,7 +62,6 @@ def gspread_access_file_read_only(key, tab_list):
         spreadsheet = gsheets.worksheet(tab)
         df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
         df = df.replace('*', pd.NA).replace('Unknown', pd.NA).replace('--', pd.NA) # TODO maybe deal in another way?
-        df = df.dropna()
         df = df.fillna('')
         list_of_dfs.append(df)
 
@@ -71,9 +70,6 @@ def gspread_access_file_read_only(key, tab_list):
         
         df = pd.concat(list_of_dfs, sort=False).reset_index(drop=True).fillna('')
 
-    else: 
-        for i in list_of_dfs:
-            df = i.fillna('') # NEW
     return df
  
 
@@ -245,7 +241,7 @@ def find_missing_coords(df):
     nan_df = df[df.isna().any(axis=1)]
     # nan_df.to_csv(f'{path_for_test_results}{df["tracker"].loc[0]}_nan_coords_{today_date}.csv')
 
-    df = df.dropna(subset = ['float_col_clean_lat', 'float_col_clean_lng'])
+    df = df.dropna(subset = ['float_col_clean_lat', 'float_col_clean_lng'], how = 'any')
 
     return df
     
@@ -274,16 +270,32 @@ def convert_coords_to_point(df):
     
     return gdf
 
+def update_previous_about_page(prev_key, new_release_date):
+    gspread_creds = gspread.oauth(
+            scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
+            credentials_filename=client_secret_full_path,
+            # authorized_user_filename=json_token_name,
+        )
+    wait_time = 5
+    time.sleep(wait_time)
+    gsheets = gspread_creds.open_by_key(prev_key)
+        # List all sheet names
+    sheet_names = [sheet.title for sheet in gsheets.worksheets()]
+    print(f"Sheet names previous release:", sheet_names)
+    # adjust About Africa Energy Tracker tab with new release date
+    aet_about = sheet_names[0]
+    aet_about = gsheets.worksheet(aet_about) 
 
-def find_about_page(key):
-        # Print the keys (sheet names) and the first few rows of each DataFrame
-        # for sheet_name, df in dict_df.items():
-        #     print(f"Sheet name: {sheet_name}")
-        #     print(df.head())
-        #     if 'About' | 'about' in sheet_name:
-        #         about_df = df.copy()
-        #     else:
-        #         'Not About page skip'
+    aet_data = pd.DataFrame(aet_about.get_all_records(expected_headers=[]))
+    updated_aet_data = aet_data.replace('July 2024', 'August 2024')
+    
+    updated_aet_data.to_excel(f'{path_for_test_results}aet_about_page{today_date}.xlsx')
+    print(f'Pause to check test results folder for updated AET about page data.')
+    input("Press Enter to continue...")
+    
+    return updated_aet_data
+
+def find_about_page(tracker,key):
         gspread_creds = gspread.oauth(
             scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
             credentials_filename=client_secret_full_path,
@@ -295,23 +307,31 @@ def find_about_page(key):
             
         # List all sheet names
         sheet_names = [sheet.title for sheet in gsheets.worksheets()]
-        # print("Sheet names:", sheet_names)
-        
-        
+        print(f"{tracker} Sheet names:", sheet_names)
         # Access a specific sheet by name
-        tab = sheet_names[0]
-        sheet = gsheets.worksheet(tab)  # Access the first sheet, for example
+        first_tab = sheet_names[0]
+        first_sheet = gsheets.worksheet(first_tab)  # Access the first sheet
+        
+        last_tab = sheet_names[-1]
+        last_sheet = gsheets.worksheet(last_tab)  # Access the last sheet
 
         # print("First sheet name:", sheet.title)
-        if 'About' not in sheet.title:
-            # print('UHOH try the lat sheet then')
+        if 'About' not in first_sheet.title:
+            print('Looking for about page in last tab now, first one no.')
             # handle for goget and ggit, goit who put it in the last tab
-            tab = sheet_names[-1]
-            sheet = gsheets.worksheet(tab)  # Access the first sheet, for example
-            if 'About' not in sheet.title:
-                if 'Copyright' not in sheet.title:
-                    print('UHOH for real')
-
+            if 'About' not in last_sheet.title:
+                if 'Copyright' not in last_sheet.title:
+                    print('Checked first and last tab, no about page found not even for copyright. Pausing.')
+                    input("Press Enter to continue...")
+                else:
+                    print(f'Found about page in last tab: {last_tab}')
+                    sheet = last_sheet
+            else:
+                print(f'Found about page in last tab: {last_tab}')
+                sheet = last_sheet
+        else:
+            print(f'Found about page in first tab: {first_tab}')
+            sheet = first_sheet
         
         # TODO why does GCPT and GCTT not pull in all data? formatting? GCMT was fine and merged.
         data = pd.DataFrame(sheet.get_all_records(expected_headers=[]))
@@ -320,26 +340,43 @@ def find_about_page(key):
         return about_df
     
 def write_to_about_page_file(about_page_df_dict):
-        about_output = f'{path_for_data_dwnld}{today_date}about_pages.xlsx'
+
+        # I should update this so that we can have the full data download
+        about_output = f'{path_for_data_dwnld}{today_date}_about_pages.xlsx'        
+        # pull out previous overall about page - done in dict
+        
         # Write each DataFrame to a separate sheet
-        try:
-            with pd.ExcelWriter(about_output, engine='openpyxl', mode='a', if_sheet_exists='new') as writer:
+
+        if os.path.exists(about_output):
+            
+            # try:
+            with pd.ExcelWriter(about_output, engine='xlsxwriter', mode='a') as writer:
                 for sheet_name, df in about_page_df_dict.items():
-                    # print(sheet_name)
+                    print(sheet_name)
+                    print(len(df))
+                    try:
+                        df.to_excel(writer, sheet_name=sheet_name, index=False) # if_sheet_exists='replace'
+                    except AttributeError as e:
+                        print(f'problem on {sheet_name}: {e}')
+        else:
+            with pd.ExcelWriter(about_output, engine='xlsxwriter') as writer:
+                for sheet_name, df in about_page_df_dict.items():
+                    print(sheet_name)
                     try:
                         df.to_excel(writer, sheet_name=sheet_name, index=False)
                     except AttributeError as e:
                         print(f'problem on {sheet_name}: {e}')
-        except FileNotFoundError:
-            with pd.ExcelWriter(about_output, engine='openpyxl') as writer:
-                for sheet_name, df in about_page_df_dict.items():
-                    # print(sheet_name)
-                    try:
-                        df.to_excel(writer, sheet_name=sheet_name, index=False)
-                    except AttributeError as e:
-                        print(f'problem on {sheet_name}: {e}')
-        finally:
-            print(f'this always runs.')
+        # except FileNotFoundError:
+        #     with pd.ExcelWriter(about_output, engine='openpyxl') as writer:
+        #         for sheet_name, df in about_page_df_dict.items():
+        #             # print(sheet_name)
+        #             try:
+        #                 df.to_excel(writer, sheet_name=sheet_name, index=False)
+        #             except AttributeError as e:
+        #                 print(f'problem on {sheet_name}: {e}')
+        # finally:
+        #     print(f'this always runs.')
+
             
         return about_output
 
@@ -356,7 +393,14 @@ def find_region_colname(df):
             col_reg_name = col 
             print(f'this is region col: {col_reg_name} to filter on!')
              
-    return col_reg_name       
+    return col_reg_name    
+
+
+# def col_differences(df):
+    # todo pull over what you have in the other script for release notes to help highlight code changes
+    # needed based on column name changes 
+   
+
 
 def create_all_dfs(df):
     all_dict = df.to_dict(orient='index')
@@ -365,20 +409,42 @@ def create_all_dfs(df):
     list_of_dfs = [] # data download 
     about_page_df_dict = {} # tracker: sheetname: tracker_df_tabs (pull out )
     
-    
     for key, value in all_dict.items():
-        # print(f'we are on tracker: {key}')
-        if all_dict[key]['gspread_tabs'] == 'n/a':
-            pass
+        print(f'we are on tracker: {key}')
+        # we could read in the sheet that has the release date that I manage 15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8 
 
-        else:
+        if local_copy == False:
+
             # print(all_dict[key]['gspread_tabs'])
             # dfs_about_dict = pd.read_excel(all_dict[key]['gspread_key'], sheet_name=None)
-            about_page_df = find_about_page(all_dict[key]['gspread_key'])
+            about_page_df = find_about_page(key, all_dict[key]['gspread_key'])
             about_page_df_dict[f'About {key}'] = about_page_df
             
-        
+            # get the df for each acro key
             df = gspread_access_file_read_only(all_dict[key]['gspread_key'], all_dict[key]['gspread_tabs'])
+            # find all col name changes 
+            col_info = {}
+
+            for col in df.columns:                
+                if 'ref' in col.lower():
+                    print('ref found pass')
+                else:  
+                    col_types = [set(df[col].to_list())] # len can be a lot, cap at 30
+                    col_values = [df[col].dtype] # len = 1
+                    col_range = [df[col].min(), df[col].max()] # len = 2
+                    col_mid = df[col].mean() # len = 1
+                    col_sum = df[col].sum()   # len = 1
+                    # cap for readability 
+                    for colinfo in [col_types, col_values, col_range, col_mid, col_sum]:
+                        if len(colinfo) >30:
+                            colinfo = colinfo[:30]
+                    col_info[col] = {'col_values': set(df[col].to_list()), 'col_type': df[col].dtype}
+                
+            col_info_df = pd.DataFrame(col_info)
+            # col_info_df = col_info_df.T # transpose
+            col_info_df.to_csv(f'test_results/{key}_column_info_{iso_today_date}.csv')
+            print(f'saved col info for {key} here: "test_results/{key}_column_info_{iso_today_date}.csv"')
+            
             df['tracker'] = key
             
             # filter by Africa, but GOGET names it GEM region .. key error?
@@ -386,27 +452,61 @@ def create_all_dfs(df):
             df = df[df[col_reg_name] == 'Africa'] 
             
             df = df.fillna('')
-            df.dropna()
-            list_of_dfs.append(df)
-
-            # append df to list of dfs for data download
+            
+            col_info_df = pd.DataFrame(col_info)
+            # col_info_df = col_info_df.T # transpose
+            col_info_df.to_csv(f'test_results/{key}_column_info_{iso_today_date}.csv')
+            print(f'saved col info again for {key} here: "test_results/{key}_column_info_{iso_today_date}.csv"')
+             
+            
             # clean up missing coords, # do latercapacity, status, country
             df = find_missing_coords(df)
             # handle lat lng into geometry so when concat all gdfs already
-            gdf = convert_coords_to_point(df)
             # convert df to gdf
-            
-            # list_of_dfs.append(df)
+
+            gdf = convert_coords_to_point(df)
+            # append df to list of dfs for data download
+            list_of_dfs.append(df)
+            df.to_excel(f'{path_for_test_results}{key}_df_{today_date}.xlsx', index=False)
+
+            # append gdf to list of gdfs for map - though now we can have it as a csv for faster AET non tile load
             list_of_gdfs.append(gdf)
-            # print(f'added {key}')
+            print(f'added {key}')
             
-    about_output = write_to_about_page_file(about_page_df_dict)
+            # here let's save the gdfs you pulled from the gspreadsheet since that's time consuming, local copy
+            gdf_to_geojson(gdf, f'{path_for_test_results}{key}_gdf_{today_date}.geojson')
         
+        
+        else:
+            # local copy
+            for file in os.listdir(path_for_test_results):
+                if file.endswith(".geojson") & (key in file):
+                    gdf = gpd.read_file(f'{path_for_test_results}{file}')
+                    list_of_gdfs.append(gdf)
+                    print(f'added {file} to list of gdfs')
+                elif file.endswith(".xlsx") & (key in file):
+                    df = pd.read_excel(f'{path_for_test_results}{file}')
+                    list_of_dfs.append(df)
+                    print(f'added {file} to list of dfs')                    
+    
+    
+    prev_about_page_df = update_previous_about_page(prev_key, new_release_date)
+    about_page_df_dict['About Africa Energy Tracker'] = prev_about_page_df             
+    # about_page_dfs = pd.DataFrame(about_page_df_dict, index=False)
+    # about_page_dfs.to_excel(f'{path_for_data_dwnld}{today_date}about_pages.xlsx')
+    
+    # about_output = write_to_about_page_file(about_page_df_dict)
+    about_output = 'to do'
+    
     return list_of_gdfs, list_of_dfs, about_output
 
 list_of_gdfs, list_of_dfs, about_output = create_all_dfs(prep_df)
 
 # add into list of dfs, GGIT and GOIT 
+
+# def get_about_page_prev(prev_key):
+#     prev_key = prev_key
+    
 
 def incorporate_geojson_trackers(GOIT, GGIT, GGIT_lng, list_of_gdfs):
     
@@ -421,7 +521,8 @@ def incorporate_geojson_trackers(GOIT, GGIT, GGIT_lng, list_of_gdfs):
     list_of_gdfs.append(ggit_gdf)
     list_of_gdfs.append(ggit_lng_gdf)
 
-    return list_of_gdfs
+    # to do, we need to convert gdf to df so the data download has all the data
+
 
 
 list_of_gdfs = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, list_of_gdfs)
@@ -480,7 +581,7 @@ def create_data_download(list_of_gdfs, list_of_dfs, about_output):
     # merge this file with the one with about page stuff
     about_output # file name to merge with
   
-create_data_download(list_of_gdfs, list_of_dfs, about_output) 
+# create_data_download(list_of_gdfs, list_of_dfs, about_output) 
 
 
 
@@ -619,9 +720,11 @@ def rename_dfs(list_of_dfs_with_conversion):
     
     
     # print(f'This is oned_df columns lets see if there are two names: {one_df.columns}')
-    df = one_df[final_cols]
+    # df = one_df[final_cols]
+    df = one_df.copy()
     # print(df.columns)
-    df.to_csv(f'{path_for_test_results}concatted_df{today_date}.csv')
+    df.to_csv(f'{path_for_test_results}concatted_df_{today_date}.csv')
+
     
     return df
 
@@ -742,6 +845,9 @@ def filter_by_country_all_gdfs(gdf):
     # africa_df1 = gdf[gdf['area'].isin(africa_countries)] 
     # don't need this anymore because should have all fixed so no need to use region 
     # africa_df2 = gdf[gdf['area1'].isin(africa_countries)]
+    
+    # need this to remove pipeline regions that are not in africa
+
     africa_df = gdf[gdf['region']=='Africa']
     # africa_df = pd.concat([africa_df1, africa_df2])
     # africa_df = pd.concat([africa_df, africa_df3])
@@ -836,7 +942,6 @@ def workaround_display_cap_total(row):
     else:
         result = ''
     return result
-
 
 
 def capacity_conversions(gdf): 
@@ -1076,9 +1181,10 @@ def workarounds_eg_interim(gdf):
 
     # here we want to get the total number of units at the project level and put it at each row
     # so however it gets pulled into details it is shown
-    units_per_project = gdf.groupby(['name', 'status'], as_index=False)['geometry'].count()
-    print(len(f'length of units_per_project series from groupby: {units_per_project}'))
-    print(units_per_project.columns)
+    # units_per_project = gdf.groupby(['name', 'status'], as_index=False)['geometry'].count()
+    # print(len(f'length of units_per_project series from groupby: {units_per_project}'))
+    # print(units_per_project.columns)
+
     # gdf = pd.merge(left=gdf, right=units_per_project, on='name', how='outer')
     
     #### figure out 

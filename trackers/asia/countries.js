@@ -1,0 +1,32 @@
+{
+    "Asia": [
+        "China",
+        "Hong Kong",
+        "Japan",
+        "Macao",
+        "Mongolia",
+        "North Korea",
+        "South Korea",
+        "Taiwan",
+        "Brunei",
+        "Cambodia",
+        "Indonesia",
+        "Laos",
+        "Malaysia",
+        "Myanmar",
+        "Philippines",
+        "Singapore",
+        "Thailand",
+        "Timor-Leste",
+        "Vietnam",
+        "Afghanistan",
+        "Iran",
+        "Bangladesh",
+        "Bhutan",
+        "India",
+        "Maldives",
+        "Nepal",
+        "Pakistan",
+        "Sri Lanka"
+    ]
+}

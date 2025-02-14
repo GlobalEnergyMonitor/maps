@@ -36,22 +36,27 @@ status_legend = {
                 'proposed': 'proposed-plus',
                 'announced': 'proposed-plus',
                 'discovered': 'proposed-plus',
-                # pre-construction-plus
-                'pre-construction': 'pre-construction-plus',
-                'pre-permit': 'pre-construction-plus',
-                'permitted': 'pre-construction-plus',
+                # # pre-construction-plus
+                # 'exploration': 'pre-construction-plus',
+                # 'pre-construction': 'pre-construction-plus',
+                # 'pre-permit': 'pre-construction-plus',
+                # 'permitted': 'pre-construction-plus',
                 # construction-plus
+                'exploration': 'construction-plus',
                 'construction': 'construction-plus',
                 'in development': 'construction-plus',
                 # mothballed
                 'mothballed': 'mothballed-plus',
+                'abandoned': 'mothballed-plus',
                 'idle': 'mothballed-plus',
                 'shut in': 'mothballed-plus',
                 # retired
                 'retired': 'retired-plus',
                 'closed': 'retired-plus',
                 'decommissioned': 'retired-plus',
+                'cancelled': 'retired-plus',
                 # unknown
+                'ugs': 'unknown-plus',
                 'n/a': 'unknown-plus',
                 'unknown': 'unknown-plus'
                 }

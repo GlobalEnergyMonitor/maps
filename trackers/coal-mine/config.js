@@ -105,7 +105,7 @@ var config = {
         'coalfield': {'display': 'location'},
         'country': {'display': 'location'}
     }, 
-    showCapacityTable: false,
+
     showMaxCapacity: false,
     
 }

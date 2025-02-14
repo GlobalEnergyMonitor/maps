@@ -111,15 +111,21 @@ table.dataTable td {
     content: '✔';
     margin-right: 5px;
 }
+/* .map-border {
+    overflow-y: scroll;
+    overflow-x: scroll;
+} */
 
 .sidebar {
     /* padding: 10px; */
     position: fixed;
-    bottom: 100px;
+    bottom: 100px; /* trying 75*/
     left: 0px;
-    z-index: 1;
+    z-index: 2;
     overflow-y:scroll; 
-    max-height: 100%;
+    overflow-x:scroll !important;
+    max-height: 80%;
+    max-width: 35%;
     white-space: nowrap;
 }
 #collapse-sidebar, #expand-sidebar {
@@ -135,16 +141,38 @@ table.dataTable td {
 #card-body {
     min-width: 300px;
 }
-#summary, #capacity_summary {
+#summary, #capacity_summary, #capacity_summary_min {
     font-size: 9px;
 }
 
 .mapboxgl-ctrl-bottom-right {
-    bottom: 90px;
+    top: 0;
+    right: 10px;
+    bottom: auto;
+    z-index: -1;
+    opacity: 1 !important;
 }
+
 .mapboxgl-ctrl-bottom-left {
-    bottom: 88px;
+    top: 0;
+    right: 10px;
+    bottom: auto;
+    z-index: -1;
+    opacity: 1 !important;
 }
+
+@media screen and (max-width: 1170) {
+    .navbar{
+        #basemap-toggle {
+            display: none;
+        }
+        #projection-toggle {
+            display: none;
+        }
+    }
+}
+
+
 @media screen and (max-width: 900px) {
     .sidebar {
         bottom: 25px;
@@ -158,12 +186,16 @@ table.dataTable td {
     .navbar {
         visibility: hidden;
     }
+
     .mapboxgl-ctrl-bottom-left{
-        bottom: 0px;
+        bottom: auto;
+        opacity: 0 !important;
     }
 
     .mapboxgl-ctrl-bottom-right {
-        bottom: 0px;
+        bottom: auto;
+        opacity: 0 !important;
+
     }
 }
 
@@ -179,14 +211,13 @@ table.dataTable td {
 /* HACK */
 #search-form {
     position: relative;
-    top: -3px;
-    min-height: 74px;
+    top: 3px;
+    max-height: 74px;
 }
 #search-type {
     position: relative;
-    top: 1px;
+    top: 3px;
     font-family: 'Familjen Grotesk';
-    min-height: 74px;
 }
 
 
@@ -216,18 +247,22 @@ table.dataTable td {
   .dropdown-menu .dropdown-menu{
       margin-left:0.7rem; margin-right:0.7rem; margin-bottom: .5rem;
   }
+
 }	
 /* ============ small devices .end// ============ */
 
 .dropdown-menu.submenu {
      max-height: 400px;
      overflow-y: auto;
+     overflow-x: auto;
 }
 
 .navbar {
     opacity: 0.90; 
     filter:(opacity=90);
     padding: 2px;
+    overflow: visible;
+    z-index: 2;
 }
 
 #country {
@@ -357,10 +392,267 @@ table.dataTable td {
 #table_length {
     display: none;
 }
-#table-toggle {
-    min-height: 55px;
-}
-#table-toggle-label {
+
+
+#country {
     position: relative;
     top: 3px;
+    bottom: 3px;
+    
 }
+
+#table-toggle {
+    position: relative; 
+    top: 0.5px;
+    height: 74px;
+}
+
+#basemap-toggle {
+    position: relative;
+    top: 0.5px;
+    height: 74px;
+}
+
+#projection-toggle {
+    position: relative;
+    top: 0.5px;
+    height: 74px;
+}
+
+/* #table-toggle-label {
+    position: absolue;
+    top: 3px;
+}
+
+#basemap-toggle-label {
+    position: absolute;
+    top: 3px;
+
+} */
+
+/* #projection-toggle-label {
+    position: relative;
+} */
+
+#spinner-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    visibility: visible; 
+}
+
+.spinner-grow {
+
+    --bs-spinner-animation-speed: 1.5s !important ;
+
+}
+
+/* rotation */
+
+#btn-spin {
+    font:
+        bold 12px/20px 'Helvetica Neue',
+        Arial,
+        Helvetica,
+        sans-serif;
+    background-color: #3386c0;
+    color: #fff;
+    position: relative;
+    /* visibility: visible; */
+    /* top: 50%; */
+    left: 80%;
+    z-index: 1; 
+    right: 0px;
+    border: none;
+    width: 200px;
+    margin-top: 10%;
+    margin-right: 30%;
+    /* margin-left: auto; */
+    display: block;
+    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 3px;
+}
+
+#btn-spin-toggle {
+    position: relative;  /* keep this */ 
+    top: 10px; /* keep this */ 
+    left: 10px;
+    font:
+        bold 12px/20px 'Helvetica Neue',
+        Arial,
+        Helvetica,
+        sans-serif;
+    background-color: #3386c0;
+    color: #fff;
+    /* right: 30%; */
+    display: block; 
+    cursor: pointer; 
+    border: none;  /* keep this */ 
+    width: 200px;
+    padding: 10px 20px;  /* keep this */ 
+    border-radius: 3px;  /* keep this */ 
+}
+
+
+#btn-spin-toggle:hover {
+    background-color: #4ea0da;
+}
+
+
+#reset-all-button {
+    width: 2em;
+    height: 5em;
+    padding-left: 1em;
+    padding-right: .25em;
+    color: #000;
+    opacity: .5;
+}
+
+.infobox {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgb(2, 2, 174);
+    border-radius: 50%;
+    width: 1em;
+    height: 1em;
+    cursor: pointer;
+    font-family: bootstrap-icons !important;
+    text-transform: lowercase;
+    line-height: 1;
+    font-size: 12px;
+    color: rgb(2, 2, 174);
+    left: 3px;
+    top: -3px;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 80%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #6d6a6a;
+    color: #fff;
+    padding: 10px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    max-height: 400px; /* Set a maximum height for the tooltip */
+    min-width: 200px;
+    max-width: 400px; /* Set a maximum height for the tooltip */
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: auto; /* Enable horizonal scrolling */
+    white-space: normal;
+    /* z-index: 9999; */
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    /* top: 100%; */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    opacity:1;
+    border-color: #656161 transparent transparent transparent;
+}
+
+
+/* // from database */
+
+/* .info-icon {
+    /* color: rgb(2, 2, 174); */
+  /* } */
+  
+  /* .info-icon::after {
+    content: "\f431";
+    display: inline-block;
+    font-family: bootstrap-icons !important;
+    line-height: 1;
+    font-size: 12px;
+    color: rgb(2, 2, 174);
+    position: relative;
+    left: 3px;
+    top: -5px;
+  }
+
+  .dismiss-popover {
+    position: absolute;
+    right: 2px;
+    top: 0px;
+    cursor: pointer;
+  } */ */
+
+
+  /* $('body').on('click', '.dismiss-popover', function(e) {
+    $( '[data-toggle="popover"]' ).each(
+        (num, element) => {
+            var popover = bootstrap.Popover.getInstance(element)
+            if (popover) {
+                popover.hide()
+            }
+        }
+    )
+})
+
+
+$('[data-toggle="popover"]').on("shown.bs.popover", function(evt) {
+    $( "body" ).one( "click", function( event ) {
+        if ( $(event.target).hasClass("badge") ) {
+            $( "body" ).one( "click", function( event ) {
+                if ( $(event.target).hasClass("badge") ) {
+                    return
+                }
+                $( '[data-toggle="popover"]' ).each(
+                    (num, element) => {
+                        var popover = bootstrap.Popover.getInstance(element)
+                        if (popover) {
+                            popover.hide()
+                        }
+                    }
+                )
+            })
+            return
+        }
+        $( '[data-toggle="popover"]' ).each(
+            (num, element) => {
+                var popover = bootstrap.Popover.getInstance(element)
+                if (popover) {
+                    popover.hide()
+                }
+            }
+        )
+    })
+})
+
+$('.info-popover').on("shown.bs.popover", function(evt) {
+    console.log("shown.bs.popover")
+    $( ".popover-body" ).each(function(index) {
+        htmx.process(this);
+    })
+    $( "body" ).one( "click", function( event ) {
+        if ( $(event.target).hasClass("bi-info-circle") ) {
+            return
+        }
+        if ( $(event.target).hasClass("badge") ) {
+            return
+        }
+        $( '.info-popover' ).each(
+            (num, element) => {
+                var popover = bootstrap.Popover.getInstance(element)
+                if (popover) {
+                    popover.hide()
+                }
+            }
+        )
+    });
+}) */

@@ -1,7 +1,7 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
-    csv: 'data.csv',
+    csv: 'compilation_output/Solar-map-file-2025-02-04.csv',
 
     colors: {
         'red greeninfo': '#c00',
@@ -16,7 +16,7 @@ var config = {
 
     /* define the column and associated values for color application */
     color: {
-        field: 'Status',
+        field: 'status',
         values: {
             'operating': 'green greeninfo',
             'construction': 'yellow greeninfo',
@@ -36,15 +36,15 @@ var config = {
       */
     filters: [
         {
-            field: 'Status',
+            field: 'status',
             values: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved', 'cancelled', 'retired'],
             values_labels: ['operating', 'announced', 'construction', 'pre-construction', 'mothballed', 'shelved',  'cancelled', 'retired'],
             primary: true
         },
         {
-            field: 'Technology-Type',
+            field: 'technology-type',
             label: 'Technology Type',
-            values: ['Solar Thermal', 'PV', 'Assumed PV'],
+            values: ['Solar-Thermal', 'PV', 'Assumed-PV'],
             values_labels: ['Solar Thermal', 'PV', 'Assumed PV']
 
         },
@@ -52,37 +52,36 @@ var config = {
 
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
-    capacityField: 'Capacity (MW)',
-    capacityDisplayField: 'Capacity (MW)',
-    capacityLabel: 'Capacity (MW)',
+    capacityField: 'capacity-(mw)',
+    capacityDisplayField: 'capacity-(mw)',
+    capacityLabel: '(MW)',
 
     /* Labels for describing the assets */
     assetFullLabel: "Solar photovoltaic farm phases",
     assetLabel: 'phase',
 
     /* the column that contains the asset name. this varies between trackers */
-    nameField: 'Project Name',
-    nameField: 'Project Name',
-    linkField: 'Wiki URL',
-    urlField: 'Wiki URL',
-    countryField: 'Country',
-
+    nameField: 'project-name',
+    linkField: 'gem-location-id',
+    urlField: 'url',
+    countryField: 'country/area',
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['Project Name', 'Project Name in Local Language / Script', 'Phase Name', 'Capacity (MW)', 'Status', 'Technology-Type', 'Start year', 'Owner', 'Operator', 'Location accuracy', 'State/Province', 'Country'],
-        labels: ['Project', 'Project Name in Local Language / Script', 'Phase','Capacity (MW)', 'Status', 'Technology Type', 'Start year', 'Owner', 'Operator','Location Accuracy', 'State/Province', 'Country/Area'],
-        clickColumns: ['Project Name'],
-        rightAlign: ['Capacity (MW)','Start year']
+        values: ['project-name', 'phase-name', 'capacity-(mw)', 'technology-type', 'status', 'start-year', 'owner', 'operator', 'location-accuracy', 'state/province', 'country/area'],
+        labels: ['Project', 'Phase','Capacity (MW)', 'Technology Type', 'Status', 'Start year', 'Owner', 'Operator','Location Accuracy', 'State/Province', 'Country/Area'],
+        clickColumns: ['project-name'],
+
+        rightAlign: ['capacity-(mw)','start-year']
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Project': ['Project Name'], 
-        'Companies': ['Owner', 'Operator'],
-        'Start Year': ['Start year']
-    },
+        searchFields: { 'Project': ['project-name', 'project-name-in-local-language-/-script', 'other-name(s)'], 
+            'Companies': ['owner', 'operator', 'owner-name-in-local-language-/-script', 'operator-name-in-local-language-/-script'],
+            'Start Year': ['start-year']
+        },
 
     /* define fields and how they are displayed. 
       `'display': 'heading'` displays the field in large type
@@ -92,18 +91,21 @@ var config = {
       `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'Project Name': {'display': 'heading'},
-        'Status': {'label': 'Status'},
-        'Capacity (MW)': {'label': 'Capacity (MW)'},
-        'Owner': {'label': 'Owner'},
-        'Operator': {'label': 'Operator'},
-        'Start year': {'label': 'Start year'},
-        'Technology-Type': {'label': 'Technology Type'},
-        'Location accuracy': {'label': 'Location Accuracy'},
-        'State/Province': {'display': 'location'},
-        'Country': {'display': 'location'},
+        'project-name': {'display': 'heading'},
+        'project-name-in-local-language-/-script': {'label': 'Project in Local Language / Script'},
+        'owner': {'label': 'Owner'},
+        'operator': {'label': 'Operator'},
+        'start-year': {'label': 'Start Year'},
+        'technology-type': {'label': 'Technology Type'},
+        'location-accuracy': {'label': 'Location Accuracy'},
+        'state/province': {'display': 'location'},
+        'country/area': {'display': 'location'},
 
     },
-    showCapacityTable: false, 
+    minRadius: 3,
+    maxRadius: 10,
 
+    statusField: 'status', // this strays from default, make it all the same!!
+    statusDisplayField: 'status', // this strays from default, make it all the same!!
+    showMinCapacity: true
 }
