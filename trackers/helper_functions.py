@@ -984,28 +984,37 @@ def process_goget_reserve_prod_data(main, prod):
     centroid_df = gspread_access_file_read_only(centroid_key, centroid_tab) # TODO update this with descriptive point on subregion
     # print(centroid_df.head())
     # input('check centroid df')
+    centroid_df.rename(columns={'Latitude':'Latitude-centroid', 'Longitude':'Longitude-centroid'},inplace=True)
     
     clean_export_center = pd.merge(clean_export, centroid_df, how='left', on='Country/Area')
 
-    # Fill in missing latitudes and longitudes
-    clean_export_center['Latitude_x'] = clean_export_center.apply(lambda row: row['Latitude_y'] if pd.isna(row['Latitude_x']) else row['Latitude_x'], axis=1)
-    clean_export_center['Longitude_x'] = clean_export_center.apply(lambda row: row['Longitude_y'] if pd.isna(row['Longitude_x']) else row['Longitude_x'], axis=1)
-
     # Update 'Location accuracy' for filled-in values
-    clean_export_center['Location accuracy'] = clean_export_center.apply(lambda row: 'country level only' if pd.isna(row['Latitude_x']) or pd.isna(row['Longitude_x']) else row['Location accuracy'], axis=1)
+    print(clean_export_center.columns)
+    clean_export_center['Location accuracy'] = clean_export_center.apply(lambda row: 'country level only' if pd.isna(row['Latitude']) or pd.isna(row['Longitude']) else row['Location accuracy'], axis=1)
+
+    # mask to check if merge fills in missing coordinates
+    empty_coord_mask = clean_export_center[clean_export_center['Latitude']=='']
+    print(f'How many missing coords before?: {len(empty_coord_mask)}')
+    
+    # Fill in missing latitudes and longitudes if lat lng is '' blank string
+    clean_export_center[['Latitude', 'Longitude']] = clean_export_center[['Latitude', 'Longitude']].fillna('')
+     
+    clean_export_center['Latitude'] = clean_export_center.apply(lambda row: row['Latitude-centroid'] if (row['Latitude'] == '') else row['Latitude'], axis=1)
+    clean_export_center['Longitude'] = clean_export_center.apply(lambda row: row['Longitude-centroid'] if (row['Longitude'] == '') else row['Longitude'], axis=1)
+
     #drop centroid fill in columns
-    clean_export_center_clean = clean_export_center.drop(['Latitude_y', 'Longitude_y'], axis=1)
+    clean_export_center_clean = clean_export_center.drop(['Latitude-centroid', 'Longitude-centroid'], axis=1)
     
-    
-    print(clean_export_center_clean.head())
+    # mask to check if merge fills in missing coordinates
+    empty_coord_mask = clean_export_center_clean[clean_export_center_clean['Latitude']=='']
+    print(f'How many missing coords after?: {len(empty_coord_mask)}')
+    input('Check before and after for empty coord logic!')
     
     # Define a dictionary with old column names as keys and new names with units as values
     column_rename_map = {
         'Production - Oil': 'Production - Oil (Million bbl/y)',
         'Production - Gas': 'Production - Gas (Million m³/y)',
         'Production - Total (Oil, Gas and Hydrocarbons)': 'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)',
-        'Latitude_x': 'Latitude',
-        'Longitude_x': 'Longitude',
         # Add other columns you wish to rename similarly here
     }
     
@@ -1115,6 +1124,22 @@ def get_country_list(gem_name):
 
 # end of Scott's script 
 
+def find_most_granular_loc(df):
+    '''This will find the most granular location for each row so we can find the best coordinates 
+    for the project. For now we will just use the country as the most granular polygon. In the future
+    we will make it more robust.'''
+    
+    # gadm file of all country and province polygon geometries
+    # convert all gem data to align with country and province spelling
+    
+    return df
+
+def apply_representative_point(df):
+    '''This will apply representative point function to all rows that have missing coordinates'''
+    polygon_name_loc = find_most_granular_loc(df)
+    
+    
+    return df
 
 def pci_eu_map_read(gdf):
     # take columns PCI5 and PCI6 
