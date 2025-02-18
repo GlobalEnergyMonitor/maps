@@ -122,40 +122,55 @@ def gspread_access_file_read_only(key, tab_list):
         # authorized_user_filename=json_token_name,
     )
     list_of_dfs = []
-       # # add in an exponential backoff 
+    if 'Production & reserves' in tab_list:
+        for tab in tab_list:
+            if tab == 'Main data':
+                gsheets = gspread_creds.open_by_key(key)
+                spreadsheet = gsheets.worksheet(tab)
+                main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                print(main_df.info())
+            elif tab == 'Production & reserves':
+                gsheets = gspread_creds.open_by_key(key)
+                spreadsheet = gsheets.worksheet(tab)
+                prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                print(prod_df.info())
+        df = process_goget_reserve_prod_data(main_df, prod_df)
 
-    for tab in tab_list:
-        if tab == gcmt_closed_tab:
-            # print(tab)
-            wait_time = 5
-            time.sleep(wait_time)
-            gsheets = gspread_creds.open_by_key(key)
-            # Access a specific tab
-            spreadsheet = gsheets.worksheet(tab)
 
-            df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-            if 'Status' in df.columns:
-                print('Look at GCMT closed tab status col should not be there but is?')
-            else:
-                df['Status'] = 'Retired'
-            list_of_dfs.append(df)
-        else: 
-            print(tab)
-            wait_time = 5
-            time.sleep(wait_time)
-            gsheets = gspread_creds.open_by_key(key)
-            # Access a specific tab
-            # print(tab)
-            # input('review tab to diagnose error')
-            spreadsheet = gsheets.worksheet(tab)
+    else:
+        for tab in tab_list:
+            if tab == gcmt_closed_tab:
+                # print(tab)
+                wait_time = 5
+                time.sleep(wait_time)
+                gsheets = gspread_creds.open_by_key(key)
+                # Access a specific tab
+                spreadsheet = gsheets.worksheet(tab)
 
-            df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                if 'Status' in df.columns:
+                    print('Look at GCMT closed tab status col should not be there but is?')
+                else:
+                    df['Status'] = 'Retired'
+                list_of_dfs.append(df)
+                
+            else: 
+                print(tab)
+                wait_time = 5
+                time.sleep(wait_time)
+                gsheets = gspread_creds.open_by_key(key)
+                # Access a specific tab
+                # print(tab)
+                # input('review tab to diagnose error')
+                spreadsheet = gsheets.worksheet(tab)
 
-            list_of_dfs.append(df)
-    if len(list_of_dfs) > 1: 
-        # df = pd.concat(list_of_dfs, sort=False).reset_index(drop=True).fillna('')
-        
-        df = pd.concat(list_of_dfs, sort=False).reset_index(drop=True)
+                df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+
+                list_of_dfs.append(df)
+        if len(list_of_dfs) > 1: 
+            # df = pd.concat(list_of_dfs, sort=False).reset_index(drop=True).fillna('')
+            
+            df = pd.concat(list_of_dfs, sort=False).reset_index(drop=True)
 
     return df
  

@@ -41,7 +41,9 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         # creates multi-map files 
         print('DONE MAKING GOGET SINGLE MAP onto MULTI MAPS')
         input('continue?')
-        
+        # creates multi-tracker maps
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+                  
     elif tracker == 'Bioenergy':
 
         test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/test_results/'
