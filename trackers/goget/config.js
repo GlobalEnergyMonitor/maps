@@ -50,7 +50,7 @@ var config = {
     capacityField: 'production---total-(oil,-gas-and-hydrocarbons)-(million-boe/y)',
     capacityDisplayField: 'capacity',
     // capacityLabel: 'million boe/y',
-    capacityLabel: '(million boe/y)',
+    capacityLabel: '', // (million boe/y)
     /* Labels for describing the assets */
     assetFullLabel: "Oil & Gas Extraction Areas",
     assetLabel: 'areas',
@@ -84,7 +84,7 @@ var config = {
     */
     detailView: {
         'wiki-name': {'display': 'heading'},
-        'status': {'label': 'Status'},
+        // 'status': {'label': 'Status'},
         'loc_accuracy': {'label': 'Location Accuracy'},
         'operator': {'label': 'Operator'},
         'discovery-year': {'label': 'Discovery Year'},
