@@ -34,7 +34,7 @@ local_copy = False  # TODO issue when not local for refining! # no local_pkl/eur
 final_formatting = False
 
 # CAN CHANGE IN MULTI SCRIPT IF PRI EXISTS GOOD IF ONLY REFINING 
-# priority = ['']
+priority = ['']
 # Get today's date
 today_date = datetime.today()
 
