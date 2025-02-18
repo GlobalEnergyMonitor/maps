@@ -1,6 +1,9 @@
 var config = {
     json: 'compilation_output/africa_2025-02-07.geojson',
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
@@ -33,7 +36,10 @@ var config = {
             field: 'tracker-custom',
             values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-import", "GGIT-export","GCTT", "GOGET-oil", "GCMT"], 
             values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
             primary: true
         },
         {
@@ -41,7 +47,10 @@ var config = {
             label: 'Status',
             values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved', 'not-found'],
             values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
         },
 
     ],
@@ -49,7 +58,10 @@ var config = {
     
     // capacityDisplayField: 'capacity-table',
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     //can be string for single value, or hash. always single value is showMaxCapacity is true
     capacityLabel: {
         field: 'tracker-custom',
@@ -108,7 +120,10 @@ var config = {
 
     assetFullLabel: "Units / Phases / Pipelines", 
     assetLabel: 'units',
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
 
     // can be string for single value, or hash
     // assetLabel: {
@@ -145,7 +160,10 @@ var config = {
 
         clickColumns: ['name'],
         rightAlign: ['unit','capacity-table','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
         removeLastComma: ['areas'], 
         // displayValue: {'tracker-display': "assetLabel"},
         // appendValue: {'capacity': "capItemLabel"},
@@ -171,7 +189,10 @@ var config = {
         'prod-gas': {'label': 'Production (Million m³/y)'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
@@ -193,6 +214,9 @@ var config = {
     // highZoomMaxLineWidth: 32,
     // showAllPhases: true
     
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
 
 };

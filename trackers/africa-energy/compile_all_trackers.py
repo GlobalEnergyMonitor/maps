@@ -32,7 +32,6 @@ from openpyxl.styles import Alignment
 
 # #### useful general functions ####
 
-
 def gspread_access_file_read_only(key, tab_list):
     """
     key = Google Sheets unique key in the URL
@@ -296,6 +295,10 @@ def update_previous_about_page(prev_key, new_release_date):
     return updated_aet_data
 
 def find_about_page(tracker,key):
+<<<<<<< HEAD
+
+=======
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
         gspread_creds = gspread.oauth(
             scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
             credentials_filename=client_secret_full_path,
@@ -376,7 +379,10 @@ def write_to_about_page_file(about_page_df_dict):
         #                 print(f'problem on {sheet_name}: {e}')
         # finally:
         #     print(f'this always runs.')
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
             
         return about_output
 
@@ -400,7 +406,10 @@ def find_region_colname(df):
     # todo pull over what you have in the other script for release notes to help highlight code changes
     # needed based on column name changes 
    
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
 
 def create_all_dfs(df):
     all_dict = df.to_dict(orient='index')
@@ -522,7 +531,11 @@ def incorporate_geojson_trackers(GOIT, GGIT, GGIT_lng, list_of_gdfs):
     list_of_gdfs.append(ggit_lng_gdf)
 
     # to do, we need to convert gdf to df so the data download has all the data
+<<<<<<< HEAD
+    return list_of_gdfs
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
 
 
 list_of_gdfs = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, list_of_gdfs)
@@ -582,7 +595,10 @@ def create_data_download(list_of_gdfs, list_of_dfs, about_output):
     about_output # file name to merge with
   
 # create_data_download(list_of_gdfs, list_of_dfs, about_output) 
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
 
 
 def split_goget_ggit(list_of_gdfs):
@@ -724,7 +740,10 @@ def rename_dfs(list_of_dfs_with_conversion):
     df = one_df.copy()
     # print(df.columns)
     df.to_csv(f'{path_for_test_results}concatted_df_{today_date}.csv')
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     
     return df
 
@@ -847,7 +866,10 @@ def filter_by_country_all_gdfs(gdf):
     # africa_df2 = gdf[gdf['area1'].isin(africa_countries)]
     
     # need this to remove pipeline regions that are not in africa
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     africa_df = gdf[gdf['region']=='Africa']
     # africa_df = pd.concat([africa_df1, africa_df2])
     # africa_df = pd.concat([africa_df, africa_df3])
@@ -1184,7 +1206,10 @@ def workarounds_eg_interim(gdf):
     # units_per_project = gdf.groupby(['name', 'status'], as_index=False)['geometry'].count()
     # print(len(f'length of units_per_project series from groupby: {units_per_project}'))
     # print(units_per_project.columns)
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     # gdf = pd.merge(left=gdf, right=units_per_project, on='name', how='outer')
     
     #### figure out 

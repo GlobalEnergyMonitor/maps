@@ -20,6 +20,7 @@ var site_config = {
         'green': '#4c9d4f',
         'grey': '#8f8f8e'
     },
+    /* style test parameters!
 
     /* Mapbox styling applied to all trackers */
     pointPaint: {

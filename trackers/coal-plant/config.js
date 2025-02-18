@@ -49,7 +49,10 @@ var config = {
         labels: ['Plant','Unit','Plant name (local)','Owner','Parent','Capacity (MW)','Status','Start year', 'Retired year','Region','Country/Area','Subnational unit (province, state)'],
         clickColumns: ['plant-name'],
         rightAlign: ['unit-name','capacity-(mw)','start-year','retired-year']
+<<<<<<< HEAD
+=======
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     },
 
     /* configure the search box; 

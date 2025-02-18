@@ -72,8 +72,12 @@ var config = {
         values: ['project-name', 'phase-name', 'capacity-(mw)', 'technology-type', 'status', 'start-year', 'owner', 'operator', 'location-accuracy', 'state/province', 'country/area'],
         labels: ['Project', 'Phase','Capacity (MW)', 'Technology Type', 'Status', 'Start year', 'Owner', 'Operator','Location Accuracy', 'State/Province', 'Country/Area'],
         clickColumns: ['project-name'],
+<<<<<<< HEAD
+        rightAlign: ['Capacity (MW)','Start year']
+=======
 
         rightAlign: ['capacity-(mw)','start-year']
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     },
 
     /* configure the search box; 

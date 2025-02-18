@@ -318,8 +318,12 @@ def create_scaling_col(df):
     # make it round to 2
     plume_df['plume_emissions'] = plume_df['plume_emissions'].astype(float).round(2)
     # make it round to 2
+<<<<<<< HEAD
+    plume_df['emission_uncertainty'] = plume_df['emission_uncertainty'].astype(float).round(2)
+=======
     plume_df['Emissions Uncertainty (kg/hr)'] = plume_df['Emissions Uncertainty (kg/hr)'].astype(float).round(2)
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     
     # concat them back 
 
@@ -730,6 +734,12 @@ def fix_countries(df):
 df = fix_countries(df)
 
 
+<<<<<<< HEAD
+# TODO fix start year if not stated replace with ''
+def round_cap_emissions(df):
+    print(df.columns)
+    print('TODO round the emissions and cap columns')
+=======
 # TODO fix status year if not stated replace with '' DONE
 # TODO replace null subnational FIX MULT COUNTRY DONE
 # TODO if search field is empty undefined fix search DONE
@@ -790,10 +800,13 @@ def round_cap_emissions(df):
         
         
         df[col] = df[col].apply(lambda x: round(x, 2) if is_valid(x) else '')
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     return df
 
 df = round_cap_emissions(df)
 
+<<<<<<< HEAD
+=======
 
 # def make_table_wiki_url(df):
 #     df = df.copy()
@@ -832,6 +845,7 @@ def round_cap_emissions(df):
 
 df = round_cap_emissions(df)
 
+>>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
 def create_geo(df):
 # def convert_coords_to_point(df): from compile all trackers for AET
     crs = 'EPSG: 4326'
