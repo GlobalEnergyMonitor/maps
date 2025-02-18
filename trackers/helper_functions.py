@@ -1183,10 +1183,11 @@ def format_values(df):
     and create display capacity field as string to hide nan"""
     
     df['status'] = df['status'].apply(lambda x: x.lower())
+    df['status'] = df['status'].replace(' ', '_')
     
     # df[['start-year', 'retired-year', 'owner', 'parent-port-name']] = df[['start-year', 'retired-year',  'owner', 'parent-port-name']].replace('-', '', regex=True)
         
-    df['capacity-mt-display'] = df['capacity-(mt)'].fillna('').replace('*', '')
+    # df['capacity-mt-display'] = df['capacity-(mt)'].fillna('').replace('*', '')
 
     return df
 
@@ -1362,21 +1363,28 @@ def create_filtered_df_list_by_map(trackerdf, col_country_name, col_reg_name, ma
 
         if tracker == 'GOGET':
             # using this just to filter from columns not in map file but in official release
-            goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
+            # goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
 
-            # filter out oil
-            list_ids = handle_goget_gas_only_workaround(goget_orig_file)
+            # # filter out oil
+            # list_ids = handle_goget_gas_only_workaround(goget_orig_file)
             # print(len(ndf)) # 3095 will be less because not all trackers
             # filter = (df['tracker-acro']=='GOGET') & (df['prod-gas']=='') #2788
             # filter = df['id'] in list_ids #2788
             # df = df[(df['tracker-acro']=='GOGET') & (df['id'] in list_ids)]
             drop_row = []
+            print(filtered_df.columns)
             for row in filtered_df.index:
                 # if df.loc[row, 'tracker-acro'] == 'GOGET':
-                if filtered_df.loc[row, 'Unit ID'] not in list_ids:
+                # if filtered_df.loc[row, 'Unit ID'] not in list_ids:
+                #     drop_row.append(row)
+                
+                if filtered_df.loc[row, 'Fuel type'] == 'oil':
                     drop_row.append(row)
             # drop all rows from df that are goget and not in the gas list ids 
-            filtered_df.drop(drop_row, inplace=True)           
+            print(f'Length of goget before oil drop: {len(filtered_df)}')
+            filtered_df.drop(drop_row, inplace=True)        
+            print(f'Length of goget after oil drop: {len(filtered_df)}')
+            input('Check the above to see if gas only!')
             # print(len(ndf)) # 3012 after removing goget 
         elif tracker in ['GGIT-eu', 'GGIT']:
             # filter for hydrogen only, but also gas for pci europe uses this instead of other release
@@ -1685,6 +1693,18 @@ def fix_status_inferred(df):
     #         df.loc[row, 'status'] = 'shelved'
     
     # print(f"Statuses after: {set(df['status'].to_list())}")
+
+    return df
+
+def fix_status_space(df):
+    import logging
+
+    # input('check all status options')
+    df['status'] = df['status'].replace('in development', 'in_development')
+    df['status'] = df['status'].replace('shut in','shut_in')
+    print(set(df['status'].to_list()))
+    logging.basicConfig(level=logging.INFO)
+    logging.info(set(df['status'].to_list()))
 
     return df
 
