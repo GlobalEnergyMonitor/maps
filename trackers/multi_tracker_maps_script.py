@@ -2606,7 +2606,7 @@ if data_filtering: # this creates gdfs and dfs for all filtered datasets per map
     prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)  # so we are using source, so can delete prep file
     conversion_df = create_conversion_df(conversion_key, conversion_tab)
     
-    priority = ['latam', 'africa'] # ['africa', 'asia', 'europe', 'latam']
+    # priority = ['latam', 'africa'] # ['africa', 'asia', 'europe', 'latam']
     to_pass = []
     if priority != ['']:
         for key, value in needed_tracker_geo_by_map.items():
