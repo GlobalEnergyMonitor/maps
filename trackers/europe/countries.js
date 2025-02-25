@@ -1,5 +1,5 @@
 {
-  "Europe": [
+  "Country/Areas": [
     "Albania",
     "Algeria",
     "Austria",
