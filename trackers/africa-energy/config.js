@@ -33,10 +33,7 @@ var config = {
             field: 'tracker-custom',
             values: ["GCPT", "GOGPT", "GBPT", "GNPT", "GSPT", "GWPT", "GHPT", "GGPT", "GOIT", "GGIT", "GGIT-import", "GGIT-export","GCTT", "GOGET-oil", "GCMT"], 
             values_labels: ['coal units', 'oil&gas units', 'bioenergy units', 'nuclear units', 'solar phases', 'wind phases', 'hydropower plants', 'geothermal units', 'oil pipelines', 'gas pipelines', 'LNG import terminals', 'LNG export terminals', 'coal terminals', 'oil&gas extraction areas','coal mines'],
-<<<<<<< HEAD
-=======
 
->>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
             primary: true
         },
         {
