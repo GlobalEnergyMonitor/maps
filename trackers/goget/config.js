@@ -29,7 +29,7 @@ var config = {
             'cancelled': 'green',
             'abandoned': 'grey',
             'UGS': 'grey',
-            '': 'black'
+            'not_found': 'black'
         }
     },
 
@@ -41,7 +41,7 @@ var config = {
         {
             field: 'status',
             values: ['operating', 'in_development', 'discovered', 'shut_in', 'decommissioned', 'cancelled', 'abandoned', 'UGS', ""],
-            values_labels: ['Operating','In development','Discovered','Shut in','Decommissioned','Cancelled','Abandoned','UGS','Unknown']
+            values_labels: ['Operating','In development','Discovered','Shut in','Decommissioned','Cancelled','Abandoned','UGS','Not found']
         }
     ],
 
