@@ -2,7 +2,7 @@ var config = {
 
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'GOGET_Earthgenome_file2024-04-01.csv',
-    csv: 'compilation_output/Oil & Gas Extraction-map-file-2025-02-18.csv',
+    csv: 'compilation_output/Oil & Gas Extraction-map-file-2025-02-21.csv',
     
     /* Define labels for sitewide colors, referenced in tracker config */
     colors: {
@@ -29,7 +29,7 @@ var config = {
             'cancelled': 'green',
             'abandoned': 'grey',
             'UGS': 'grey',
-            '': 'black'
+            'not_found': 'black'
         }
     },
 
@@ -41,7 +41,7 @@ var config = {
         {
             field: 'status',
             values: ['operating', 'in_development', 'discovered', 'shut_in', 'decommissioned', 'cancelled', 'abandoned', 'UGS', ""],
-            values_labels: ['Operating','In development','Discovered','Shut in','Decommissioned','Cancelled','Abandoned','UGS','Unknown']
+            values_labels: ['Operating','In development','Discovered','Shut in','Decommissioned','Cancelled','Abandoned','UGS','Not found']
         }
     ],
 
@@ -57,12 +57,12 @@ var config = {
 
     /* the column that contains the asset name. this varies between trackers */
     nameField: 'wiki-name',
-
+    statusDisplayField: 'status_display',
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     
     tableHeaders: {
-        values: ['wiki-name', 'operator', 'status', 'country/area', 'subnational-unit-(province,-state)', 'production---oil-(million-bbl/y)', 'production---gas-(million-m³/y)', 'production-year---oil', 'production-year---gas', 'production-start-year',],        labels: ['Extraction Area', 'Operator', 'Status','Country/Area(s)','Subnational unit (province/state)', 'Production - Oil (Million bbl/y)', 'Production - Gas (Million m³/y)', 'Production Year - Oil', 'Production Year - Gas', 'Production start year',],
+        values: ['wiki-name', 'operator', 'status_display', 'country/area', 'subnational-unit-(province,-state)', 'production---oil-(million-bbl/y)', 'production---gas-(million-m³/y)', 'production-year---oil', 'production-year---gas', 'production-start-year',],        labels: ['Extraction Area', 'Operator', 'Status','Country/Area(s)','Subnational unit (province/state)', 'Production - Oil (Million bbl/y)', 'Production - Gas (Million m³/y)', 'Production Year - Oil', 'Production Year - Gas', 'Production start year',],
         clickColumns: ['wiki-name'],
         rightAlign: ['wiki-name','discovery-year', 'fid-year', 'production-start-year', 'production-year---gas', 'production---gas-(million-m³/y)', 'production-year---oil', 'production---oil-(million-bbl/y)', ]
     },
