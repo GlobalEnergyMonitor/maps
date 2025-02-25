@@ -29,7 +29,7 @@ var config = {
             'cancelled': 'green',
             'abandoned': 'grey',
             'UGS': 'grey',
-            'not_found': 'black'
+            'not found': 'black'
         }
     },
 
