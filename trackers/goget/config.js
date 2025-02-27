@@ -2,7 +2,7 @@ var config = {
 
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'GOGET_Earthgenome_file2024-04-01.csv',
-    csv: 'compilation_output/Oil & Gas Extraction-map-file-2025-02-21.csv',
+    csv: 'compilation_output/Oil & Gas Extraction-map-file-2025-02-26.csv',
     
     /* Define labels for sitewide colors, referenced in tracker config */
     colors: {
