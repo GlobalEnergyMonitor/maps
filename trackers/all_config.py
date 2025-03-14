@@ -8,29 +8,27 @@ from creds import client_secret
 
 trackers_to_update = ['Oil & Gas Extraction']
 new_release_date = 'February 2025' 
-priority = ['europe'] # europe
+priority = [''] # europe
 
 augmented = True
 data_filtering = True
 
 #### CREATE ####
-map_create = True # work on subnat
+map_create = False # work on subnat
 dwlnd_create = True
 about_create = True 
 # summary_create = False
 
 #### TEST #####
-run_pre_tests = True # TODO need to add so that there is utility here
+run_pre_tests = False # TODO need to add so that there is utility here
 run_post_tests = True
 map_to_test = '' # change if testing a single map not a regional one
 
 #### REFINE ####
-refine = True 
-local_copy = False  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
-final_formatting = True
+refine = False 
+local_copy = True  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
+final_formatting = False
 
-# Get today's date
-today_date = datetime.today()
 
 tracker_folder_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
 # goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
@@ -48,6 +46,9 @@ region_tab = ['mapping']
 centroid_key = '1ETg632Bkwnr96YQbtmDwyWDpSHqmg5He0GQwJjJz8IU'
 centroid_tab = ['centroids']
 # Format the date in ISO format
+# Get today's date
+today_date = datetime.today()
+
 iso_today_date = today_date.isoformat().split('T')[0]
 iso_today_date_folder = f'{iso_today_date}/'
 # client_secret = "/GEM_INFO/client_secret.json"
@@ -60,7 +61,7 @@ gspread_creds = gspread.oauth(
         # authorized_user_filename=json_token_name,
     )
 dtype_spec = {} #{'Latitude': float, 'Longitude': float}
-numeric_cols = [] #TODO 
+numeric_cols = ['capacity', 'start_year', 'capacity2', 'prod_start_year', 'prod_gas', 'prod_year_gas', 'prod_oil', 'prod_year_oil', 'prod-coal', ] #STOPPED AT GCMT March 3rd 2025
 list_official_tracker_names = ['Oil & Gas Plants', 'Coal Plants', 'Solar', 'Wind', 'Hydropower', 'Geothermal', 'Bioenergy', 'Nuclear', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Extraction', 'Oil Pipelines', 'Gas Pipelines', 'LNG Terminals']
 
 maps_with_needed_conversion = ['asia', 'europe', 'africa', 'latam', 'ggit']
@@ -128,12 +129,11 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                                    'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat',
                                    'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2',
                                    },
-                      'GGIT-hy': {'ProjectID':'id','Countries': 'areas','Wiki': 'url',
-                                   'PipelineName':'name', 'SegmentName':'unit_name', 'Status':'status', 'Owner':'owner', 'Parent': 'parent',
-                                   'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat',
-                                   'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2'
-                                   }, 
-
+                      
+                      # gogpt-eu fuel, h2%, h2-usage-proposed-%, pci5, pci6
+                      'GOGPT-eu': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wiki URL': 'url','Country/Area': 'areas', 'Plant name': 'name', 'Unit name': 'unit_name', 
+                                'Capacity (MW)': 'capacity', 'Status': 'status', 'Fuel': 'fuel', 'Owner(s)': 'owner', 'Parent(s)': 'parent',
+                                'Start year': 'start_year', 'Subnational unit (province, state)': 'subnat', 'Region': 'region', 'Owner':'owner', 'Parent': 'parent'},
                       'plants': {'gem-location-id':'pid', 'gem-unit-id': 'id','wiki-url': 'url','country/area': 'areas', 'plant-name': 'name', 'unit-name': 'unit_name',
                                 'capacity-(mw)': 'capacity', 'owner(s)': 'owner', 'parent(s)': 'parent', 'plant-name-in-local-language-/-script': 'other-local', 'other-name(s)': 'other-name',
                                 'start-year': 'start_year', 'state/province': 'subnat'},
@@ -210,7 +210,7 @@ tracker_to_legendname = {
 # new_release_date = 'February 2025' # get from spreadsheet I manage 15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8
 # previous_release = 'data/Africa-Energy-Tracker-data-July-2024.xlsx' # key 1B8fwCQZ3ZMCf7ZjQPqETKNeyFN0uNFZMFWw532jv480
 # previous_map = 'data/africa_energy_tracker_2024-07-10.geojson' 
-prev_key_dict = {'africa': '128rAsbENoUzzKJAv1V0Z3AuCc6kNanCclKJVGkSOmhM', 'latam': '1ZKY-jSs2vxXSq5dLkp6-qGbhaxhz9Sh9Xo50ZG3LG7Q', 'asia': '1x-n4YLSRA3RIz80Jm5yfyWiMtbVfYHhOtHXsWhg3d-k', 'europe': '1EKgmib3_19231yAP0SOetP__NCUQCvqshSMR2U5QBcY', 'GIPT': '1SZVpnXQ1iE5kJJfmAZQ64q9LaG4wfq4urVX7jdBmIlk'} # ideally pull this from the results tabs in the map log sheet
+prev_key_dict = {'africa': '128rAsbENoUzzKJAv1V0Z3AuCc6kNanCclKJVGkSOmhM', 'latam': '1ZKY-jSs2vxXSq5dLkp6-qGbhaxhz9Sh9Xo50ZG3LG7Q', 'asia': '1x-n4YLSRA3RIz80Jm5yfyWiMtbVfYHhOtHXsWhg3d-k', 'europe': '1h8Nr8lJJiUIsSIzEmwnici4Js9Brxt7GChDo_DBQF2s', 'GIPT': '1SZVpnXQ1iE5kJJfmAZQ64q9LaG4wfq4urVX7jdBmIlk'} # ideally pull this from the results tabs in the map log sheet
 # also TODO ideally save new release data file of map to gsheets and put htat link in the results tab
 # if in colab could save to tracker release and update this dict automatically
 # print('Handle multi tracker map creation for more than just AET')
@@ -219,12 +219,6 @@ multi_tracker_log_sheet_key = '15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8'
 source_data_tab = ['source']
 map_tab = ['map']
 multi_tracker_log_sheet_tab = ['regional_multi_map'] # regional 
-
-all_multi_tracker_log_sheet_tab = ['all_multi_map']
-# MOVE TO JUST USE THIS ONE FILE FOR SINGLE, MULTI, REGIONAL MAPS! TODO 
-maps_guide = ['maps_guide']
-
-prep_file_tab = ['prep_file']
 
 multi_tracker_countries_sheet = '1UUTNERZYT1kHNMo_bKpwSGrUax9WZ8eyGPOyaokgggk'
 # will be commenting all this out soon! get to map file
@@ -252,12 +246,16 @@ goit_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/G
 ggit_lng_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-LNG-Terminals-2024-09 DATA TEAM COPY.geojson'
 ggit_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2024-12.geojson' #'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2023-12 copy.geojson'
 
+ggit_lng_eu_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-EGT-Terminals-2025-02 DATA TEAM COPY.geojson'
+ggit_eu_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-EGT-Gas-Hydrogen-Pipelines-2025-02 DATA TEAM COPY.geojson'
+
 
 # fixed routes and capacity conversions goit (capacity boed) and ggit (route) Oct 23rd 2024
 # merge on projectID only specific columns so as to keep rest of data consistent with public release 
+# temporary until next release
 goit_cap_updated = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GOIT-Oil-NGL-Pipelines-2024-10-29.geojson'
 # shouldn't need these anymore FEB 24th
-# ggit_routes_updated = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Hydrogen-Pipelines-2024-11-05.geojson'
+# ggit_routes_updated = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2024-12 DATA TEAM COPY.geojson'
 # ggit_eu_temp = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Europe-Gas-Tracker-2024-05 DATA TEAM COPY.xlsx' # convert to geojson and add in missing coords from global json file 
 
 tracker_summary_pages = {
@@ -405,113 +403,54 @@ full_country_list = [
 ]
 
 africa_countries = [
-    "Algeria",
-    "Angola",
-    "Benin",
-    "Botswana",
-    "British Indian Ocean Territory",
-    "Burkina Faso",
-    "Burundi",
-    "Cabo Verde",
-    "Cameroon",
-    "Central African Republic",
-    "Chad",
-    "Comoros",
-    "DR Congo",
-    "Republic of the Congo",
-    "Côte d'Ivoire",
-    "Djibouti",
-    "Egypt",
-    "Equatorial Guinea",
-    "Eritrea",
-    "Eswatini",
-    "Ethiopia",
-    "French Southern Territories",
-    "Gabon",
-    "The Gambia",
-    "Ghana",
-    "Guinea",
-    "Guinea-Bissau",
-    "Kenya",
-    "Lesotho",
-    "Liberia",
-    "Libya",
-    "Madagascar",
-    "Malawi",
-    "Mali",
-    "Mauritania",
-    "Mauritius",
-    "Mayotte",
-    "Morocco",
-    "Mozambique",
-    "Namibia",
-    "Niger",
-    "Nigeria",
-    "Réunion",
-    "Rwanda",
-    "Saint Helena, Ascension, and Tristan da Cunha",
-    "Sao Tome and Principe",
-    "Senegal",
-    "Seychelles",
-    "Sierra Leone",
-    "Somalia",
-    "South Africa",
-    "South Sudan",
-    "Sudan",
-    "Tanzania",
-    "Togo",
-    "Tunisia",
-    "Uganda",
-    "Western Sahara",
-    "Zambia",
-    "Zimbabwe"
-  ]
-
-
-asia_countries = [ 
-        "China",
-        "Hong Kong",
-        "Japan",
-        "Macao",
-        "Mongolia",
-        "North Korea",
-        "South Korea",
-        "Taiwan",
-        "Brunei",
-        "Cambodia",
-        "Indonesia",
-        "Laos",
-        "Malaysia",
-        "Myanmar",
-        "Philippines",
-        "Singapore",
-        "Thailand",
-        "Timor-Leste",
-        "Vietnam",
-        "Afghanistan",
-        "Iran",
-        "Bangladesh",
-        "Bhutan",
-        "India",
-        "Maldives",
-        "Nepal",
-        "Pakistan",
-        "Sri Lanka"]
-
-european_union_countries = [
-    'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus',
-    'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France', 
-    'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 
-    'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands', 
-    'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 
-    'Spain', 'Sweden',
+    "Algeria", "Angola", "Angola-Republic of the Congo", "Benin", "Botswana",
+    "British Indian Ocean Territory", "Burkina Faso", "Burundi", "Cabo Verde",
+    "Cameroon", "Central African Republic", "Chad", "Comoros", "Côte d'Ivoire",
+    "Djibouti", "DR Congo", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini",
+    "Ethiopia", "French Southern Territories", "Gabon", "Ghana", "Guinea",
+    "Guinea-Bissau", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar",
+    "Malawi", "Mali", "Mauritania", "Mauritius", "Mayotte", "Morocco",
+    "Mozambique", "Namibia", "Niger", "Nigeria", "Republic of the Congo",
+    "Réunion", "Rwanda", "Saint Helena, Ascension, and Tristan da Cunha",
+    "Sao Tome and Principe", "Senegal", "Senegal-Mauritania", "Seychelles",
+    "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan",
+    "Tanzania", "The Gambia", "Togo", "Tunisia", "Uganda", "Western Sahara",
+    "Zambia", "Zimbabwe"
 ]
-other_europe_countries = [
-    'Albania', 'Andorra', 'Belarus', 'Bosnia and Herzegovina', 'Holy See', 'Iceland',
-    'Liechtenstein', 'Moldova', 'Monaco', 'Montenegro', 'North Macedonia', 
-    'Norway', 'San Marino', 'Serbia', 'Switzerland', 'Türkiye', 'Ukraine', 
-    'United Kingdom', 'Israel',
+
+
+asia_countries = [
+    # South Asia
+    "Afghanistan", "Bangladesh", "Bhutan", "India", "Iran",
+    "Maldives", "Nepal", "Pakistan", "Sri Lanka",
+
+    # Southeast Asia
+    "Brunei", "Cambodia", "Indonesia", "Laos", "Malaysia",
+    "Myanmar", "Philippines", "Singapore", "Thailand",
+    "Timor-Leste", "Vietnam", "Thailand-Malaysia",  "Vietnam-Malaysia",
+
+    # East Asia
+    "China", "China-Japan", "Hong Kong", "Japan", "Macao",
+    "Mongolia", "North Korea", "South Korea", "Taiwan",
+
+    # Multinational or Maritime Areas
+    "South China Sea"
 ]
+
+# european_union_countries = [
+#     'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus',
+#     'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France', 
+#     'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 
+#     'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands', 
+#     'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 
+#     'Spain', 'Sweden',
+# ]
+# other_europe_countries = [
+#     'Albania', 'Andorra', 'Belarus', 'Bosnia and Herzegovina', 'Holy See', 'Iceland',
+#     'Liechtenstein', 'Moldova', 'Monaco', 'Montenegro', 'North Macedonia', 
+#     'Norway', 'San Marino', 'Serbia', 'Switzerland', 'Türkiye', 'Ukraine', 
+#     'United Kingdom', 'Israel',
+# ]
 
 europe_countries = [
     'Åland Islands', 'Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 
@@ -528,55 +467,28 @@ europe_countries = [
 
 
 
-
 latam_countries = [
-    "Anguilla",
-    "Antigua and Barbuda",
-    "Argentina",
-    "Aruba",
-    "Bahamas",
-    "Barbados",
-    "Belize",
-    "Bolivia",
-    "Bonaire, Sint Eustatius, and Saba",
-    "Bouvet Island",
-    "Brazil",
-    "Cayman Islands",
-    "Chile",
-    "Colombia",
-    "Costa Rica",
-    "Cuba",
-    "Curaçao",
-    "Dominica",
-    "Dominican Republic",
-    "Ecuador",
-    "El Salvador",
-    "Falkland Islands",
-    "French Guiana",
-    "Grenada",
-    "Guadeloupe",
-    "Guatemala",
-    "Guyana",
-    "Haiti",
-    "Honduras",
-    "Jamaica",
-    "Martinique",
-    "Mexico",
-    "Montserrat",
-    "Nicaragua",
-    "Panama",
-    "Paraguay",
-    "Peru",
-    "Saint Barthélemy",
-    "Saint Kitts and Nevis",
-    "Saint Lucia",
-    "Saint Martin (French part)",
-    "Saint Vincent and the Grenadines",
-    "Sint Maarten (Dutch part)",
-    "South Georgia and the South Sandwich Islands",
-    "Suriname",
-    "Trinidad and Tobago",
-    "Turks and Caicos Islands",
-    "Uruguay",
-    "Venezuela",
-    "Virgin Islands (British)"]
+    # Caribbean
+    "Anguilla", "Antigua and Barbuda", "Aruba", "Bahamas", "Barbados",
+    "Belize", "Cayman Islands", "Cuba", "Curaçao", "Dominica",
+    "Dominican Republic", "Grenada", "Guadeloupe", "Haiti", "Jamaica",
+    "Martinique", "Montserrat",  "Saint Barthélemy",
+    "Saint Kitts and Nevis", "Saint Lucia", "Saint Martin (French part)",
+    "Saint Vincent and the Grenadines", "Sint Maarten (Dutch part)",
+    "Trinidad and Tobago", "Turks and Caicos Islands", "Virgin Islands (British)",
+   # "Virgin Islands (U.S.)", "Puerto Rico", -  gregor excludes
+
+    # Central America
+    "Costa Rica", "El Salvador", "Guatemala", "Honduras", "Mexico",
+    "Nicaragua", "Panama",
+
+    # South America
+    "Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Ecuador",
+    "French Guiana", "Guyana", "Paraguay", "Peru", "Suriname",
+    "Uruguay", "Venezuela",
+
+    # Special Cases
+    "Bonaire, Sint Eustatius, and Saba", "Bouvet Island",
+    "Falkland Islands", "South Georgia and the South Sandwich Islands",
+    "Venezuela-Trinidad and Tobago"
+]

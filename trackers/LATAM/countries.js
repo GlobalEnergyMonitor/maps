@@ -50,7 +50,8 @@
   "Turks and Caicos Islands",
   "Uruguay",
   "Venezuela",
-  "Virgin Islands (British)"
+  "Virgin Islands (British)",
+  "Venezuela-Trinidad and Tobago",
   ]
 }
 

@@ -24,9 +24,21 @@
         "Bangladesh",
         "Bhutan",
         "India",
+        "Iran-Iraq",
         "Maldives",
         "Nepal",
         "Pakistan",
-        "Sri Lanka"
+        "Sri Lanka",
+        "Saudi Arabia-Bahrain",
+        "Saudi Arabia-Iran",
+        "United Arab Emirates-Iran",  
+        "Kuwait-Saudi Arabia", 
+        "Kuwait-Saudi Arabia-Iran",
+        "China-Japan",
+        "Thailand-Malaysia",
+        "Vietnam-Malaysia",
+        "Russia-Kazakhstan"
+
     ]
+
 }
