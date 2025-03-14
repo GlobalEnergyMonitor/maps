@@ -31,7 +31,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         # df = format_values(df)
         df = fix_status_inferred(df)         
         df = filter_cols(df,final_cols=['country/area', 'wiki-name',
-                                        'status', 'production-start-year',  
+                                        'status', 'status_display','production-start-year',  
                                         'operator', 'owner', 'parent','lat', 'lng', 'location-accuracy', 'subnational-unit-(province,-state)',
                                         'gem-region', 'unit-id', 'url', 'country-list', 'discovery-year', 'fid-year', 'production---oil-(million-bbl/y)',
                                         'production-year---oil', 'production---gas-(million-m³/y)', 'production-year---gas', 'production---total-(oil,-gas-and-hydrocarbons)-(million-boe/y)'             

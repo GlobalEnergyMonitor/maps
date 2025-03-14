@@ -1,7 +1,6 @@
 # previously called create_map_datadwnld_about.py froma africa-energy
 # creates the files for the multi maps
 
-from curses import OK
 from pstats import Stats
 import statistics
 import pandas as pd
@@ -15,29 +14,24 @@ from tqdm import tqdm
 import gspread
 # from gspread_dataframe import get_as_dataframe, set_with_dataframe
 # import xlwings
-import json
 from gspread.exceptions import APIError
 import time
 from itertools import permutations
-import copy
 import os
 from datetime import date
-import openpyxl
 from scipy import stats
-import xlsxwriter
 from all_config import *
-import re
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from openpyxl.styles import Font
 from openpyxl.styles import Alignment
 from helper_functions import *
-import pyogrio
 from collections import Counter
 import time
 import pickle
 from stubb_about_page import stubb_file
 from googleapiclient.errors import HttpError
+import subprocess
 
 start_time = time.time()  # Record the start time
 
@@ -58,14 +52,14 @@ def what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab):
 
     with open('local_pkl/map_tab_df.pkl', 'wb') as f:
         pickle.dump(map_tab_df, f)
-    print("DataFrame have been saved to map_tab_df.pkl")
+    # print("DataFrame have been saved to map_tab_df.pkl")
 
-    print("Now go through and create the needed tracker dict based on new data in trackers to update.")
+    # print("Now go through and create the needed tracker dict based on new data in trackers to update.")
     for tracker in trackers_to_update:
         for row in map_tab_df.index:
             # use the tracker to filter the map_tab_df df for only rows that contain the tracker in source column
-            print(map_tab_df)
-            print(map_tab_df.info())
+            # print(map_tab_df)
+            # print(map_tab_df.info())
 
             # input('This is map_tab_df df')
             sources = map_tab_df.loc[row, 'source'].split(',')
@@ -79,10 +73,10 @@ def what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab):
 
             else:
                 map_tab_df.drop(row, inplace=True)
-    print(map_tab_df)
-    input('This is map_tab_df_copy after dropping irrelevant rows')
-    print(needed_map_and_tracker_dict)
-    input('this is dict')
+    # print(map_tab_df)
+    # input('This is map_tab_df_copy after dropping irrelevant rows')
+    # # print(needed_map_and_tracker_dict)
+    # input('this is dict')
         # for row in map_tab_df.index:
         #     if tracker in row['source'].to_list():
             # needed_map_and_tracker_dict[row['mapname']] = (row['source'],row['geo'],row['fuel'])
@@ -110,24 +104,24 @@ def what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_ta
     if local_copy:
         with open('local_pkl/map_log_df.pkl', 'rb') as f:
             map_log_df = pickle.load(f)
-        print("DataFrame have been loaded from map_log_df.pkl")
+        # print("DataFrame have been loaded from map_log_df.pkl")
     else: 
         map_log_df = gspread_access_file_read_only(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab)
         # # printf'Trackers with updates to be incorporated: {trackers_to_update}')
 
         with open('local_pkl/map_log_df.pkl', 'wb') as f:
             pickle.dump(map_log_df, f)
-        print("DataFrame have been saved to map_log_df.pkl")
+        # print("DataFrame have been saved to map_log_df.pkl")
     
-    print("Now go through and create the needed tracker dict based on new data in trackers to update.")
+    # print("Now go through and create the needed tracker dict based on new data in trackers to update.")
     for tracker in trackers_to_update:
-        print(map_log_df)
+        # print(map_log_df)
         # filter out the map tracker tab df 
         # so that we only have the row that matches the tracker to be updated
         # and also find the tracker names for the map to be updated beyond the new tracker data but existing tracker data as well
         map_log_df_sel = map_log_df[map_log_df['official release tab name'] == tracker]
-        print(map_log_df_sel)
-        input('check that it is gogets offiical name')
+        # print(map_log_df_sel)
+        # input('check that it is gogets offiical name')
         for col in map_log_df_sel.columns:
             if 'yes' in map_log_df_sel[col].values:
                 map_log_df_map_sel = map_log_df[map_log_df[col] == 'yes']
@@ -135,7 +129,7 @@ def what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_ta
                 tracker_name_col_map_sel = map_log_df.columns[tracker_col_index]
                 list_of_trackers_relevant_to_map = map_log_df_map_sel[tracker_name_col_map_sel].to_list()
                 needed_map_and_tracker_dict[col] = list_of_trackers_relevant_to_map
-                print(f'Map {col} needs to be updated with the new data for {tracker}, and existing data for {list_of_trackers_relevant_to_map} minus {tracker}.')
+                # print(f'Map {col} needs to be updated with the new data for {tracker}, and existing data for {list_of_trackers_relevant_to_map} minus {tracker}.')
                 # ##(input('Check this with ggit-hy')
             
     return needed_map_and_tracker_dict
@@ -145,7 +139,7 @@ def what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, 
     # map_by_region = gspread_creds.open_by_key(multi_tracker_countries_sheet)
 
     for map, list_needed_trackers in needed_map_and_tracker_dict.items():
-        print(map)
+        # print(map)
         if map in ['GIPT', 'Global']:
             list_needed_geo = '' # global
             needed_tracker_geo_by_map[map] = [list_needed_trackers, list_needed_geo]
@@ -306,18 +300,133 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                 # input('pause because this is where we have issues with df')
                 
                 if tracker in non_gsheet_data:
-                    # skips all geojson data because already perfect geometry col
+                    # skips all geojson data because already perfect geometry col AND we'll incorporate later 
                     # # printf'{tracker} is not in gsheet data so skipping this tracker.')
                     continue
                 
+                elif tracker == 'Oil & Gas Extraction':
+                    # do main prod processing where we do not want to concat them so do not use the gspread_access_file_read_only function 
+                    key = prep_dict[tracker]['gspread_key']
+                    tabs = prep_dict[tracker]['gspread_tabs']
+
+                    df_tuple = create_df_goget(key, tabs)
+                    main = df_tuple[0]
+                    prod = df_tuple[1]
+                    df = process_goget_reserve_prod_data(main, prod)
+                    
+                    df['tracker-acro'] = prep_dict[tracker]['tracker-acro']
+                    df['official_name'] = tracker
+                    
+                    df = df.replace('*', pd.NA).replace('Unknown', pd.NA).replace('--', pd.NA)
+                    df = df.fillna('')
+                    col_reg_name, col_country_name = find_region_country_colname(df)
+                    # print(df.columns)
+                    # input('check if fuel oil is in there')
+                    df = create_filtered_df_list_by_map(df,col_country_name, col_reg_name, mapname, needed_geo)
+                    # with open(f'local_pkl/{mapname}_{tracker}_df_{iso_today_date}.pkl', 'wb') as f:
+                    #     pickle.dump(df, f)
+
+                    # print(f"DataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_df_{iso_today_date}.pkl") 
+                    
+                    # print(f'len of df after filter geo {len(df)}')
+                    list_dfs_by_map.append(df)
+                    # print(list_dfs_by_map)
+                    # input('check above was just latam for geojson')
+                    # df.to_excel(f'{path_for_test_results}{mapname}_{tracker}_df_{iso_today_date}.xlsx', index=False)
+                    count_of_files = 0
+                    with open(f'local_pkl/{mapname}_{tracker}_df_{iso_today_date}.pkl', 'wb') as f:
+                        pickle.dump(df, f)
+                        print(f'File is: {f}')
+                        count_of_files += 1
+                        
+
+                    print(f"DataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_df_{iso_today_date}.pkl")         
+                    # df_dd has all units even with missing coords
+                    # df_map only has units with coords
+                    df_map, issues_coords = coordinate_qc(df) 
+                    print(f'len of df after coordinate qc: {len(df_map)}') 
+                    # df.to_excel(f'{path_for_test_results}{mapname}_{tracker}_df-altered-coords_{iso_today_date}.xlsx', index=False)
+                    # if len(issues_coords) > 0:
+                        
+                    #     print(f'These are coordinate issues FIX THEM: {issues_coords}')
+                    #     ##(input('please')
+                    for col in df.columns:
+                        print(col)
+                    
+                    if 'latitude' in df_map.columns:
+                        print('latitude in cols')
+                        gdf = convert_coords_to_point(df_map) 
+                        print(f'len of gdf after convert coords: {len(gdf)}')
+                        # append gdf to list of gdfs for map - though now we can have it as a csv for faster AET non tile load
+                        list_gdfs_by_map.append(gdf)
+                        # gdf_to_geojson(gdf, f'{path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson')
+                        with open(f'local_pkl/{mapname}_{tracker}_gdf_{iso_today_date}.pkl', 'wb') as f:
+                            pickle.dump(gdf, f)
+                            print(f'File is: {f}')
+                            count_of_files += 1
+
+                        print(f"GeoDataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.pkl")         
+                        # if gdf['tracker-acro'].iloc[0] == 'GCTT':
+                        #     print(gdf)
+                        #     input('This is gctt gdf ... ')
+                    elif 'WKTFormat' in df.columns:
+                        # print('Latitude not in cols')
+                        print(tracker)
+                        # input('check if eu pipelines eventually come up here - if so check the next inputs that they are not empty until "GeoDataFrames have been saved to"')
+    
+                        # df_map = insert_incomplete_WKTformat_ggit_eu(df_map)
+                        # if 'WKTFormat' in df.columns:
+
+                        gdf = convert_google_to_gdf(df_map) # this drops all empty WKTformat cols
+                        
+                        print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
+
+                        list_gdfs_by_map.append(gdf)
+                    # print(list_gdfs_by_map)
+                    # gdf_to_geojson(gdf, f'{path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson')        
+                
+                    # # printf'Added gdf {tracker} for map {mapname} to list of gdfs for map and saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson.')
+                        with open(f'local_pkl/{mapname}_{tracker}_gdf_{iso_today_date}.pkl', 'wb') as f:
+                            pickle.dump(gdf, f)
+                            print(f'File is: {f}')
+                            count_of_files += 1
+
+                        print(f"GeoDataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.pkl")         
+                    else:
+                        print(tracker)
+                        for col in df.columns:
+                            print(col)
+                        
+                        
+                        input('Figure out how to turn this into a gdf')
+                ## do we want to handle gogpt eu the same as oil and gas extraction? no because we don't know the future of it.           
                 else:
+                    
+                    count_of_files = 0
+
                     try:
                         df = gspread_access_file_read_only(prep_dict[tracker]['gspread_key'], prep_dict[tracker]['gspread_tabs'])
-                        
-                        print(f'Shape of df: {df.shape}')
-                        # ##(input('check shape!')
+                        # print(prep_dict[tracker]['gspread_key'])
+                        # print(prep_dict[tracker]['gspread_tabs'])
+                        # print(df.columns)
+                    except HttpError as e:
+                        # Handle rate limit error (HTTP status 429)
+                        if e.resp.status == 429:
+                            print(f"Rate limit exceeded. Retrying in {delay} seconds...")
+                            time.sleep(delay)
+                            delay *= 2  # Exponential backoff
+                        else:
+                            raise e  # Re-raise other errors
+
+                    except Exception as e:
+                        print(f"An error occurred: {e}")
+                        input('Check why error occurred in pull_gsheet_data function')
+                        break
+
                     
-                        
+                    finally:
+                        print(f'Shape of df: {df.shape}')
+                        # input('check shape!')
                         # df.to_excel(f'{path_for_test_results}{mapname}_{tracker}_df_{iso_today_date}.xlsx', index=False)
                         # save df as pickle file
 
@@ -341,18 +450,22 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
 
                         # print(f"DataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_df_{iso_today_date}.pkl") 
                         
-                        print(f'len of df after filter geo {len(df)}')
+                        # print(f'len of df after filter geo {len(df)}')
                         list_dfs_by_map.append(df)
-                        print(list_dfs_by_map)
+                        # print(list_dfs_by_map)
                         # input('check above was just latam for geojson')
                         # df.to_excel(f'{path_for_test_results}{mapname}_{tracker}_df_{iso_today_date}.xlsx', index=False)
+                        count_of_files = 0
                         with open(f'local_pkl/{mapname}_{tracker}_df_{iso_today_date}.pkl', 'wb') as f:
                             pickle.dump(df, f)
+                            print(f'File is: {f}')
+                            count_of_files += 1
+                            
 
                         print(f"DataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_df_{iso_today_date}.pkl")         
                         # df_dd has all units even with missing coords
                         # df_map only has units with coords
-                        df_map, issues_coords = coordinate_qc(df, col_country_name) 
+                        df_map, issues_coords = coordinate_qc(df) 
                         print(f'len of df after coordinate qc: {len(df_map)}') 
                         # df.to_excel(f'{path_for_test_results}{mapname}_{tracker}_df-altered-coords_{iso_today_date}.xlsx', index=False)
                         # if len(issues_coords) > 0:
@@ -360,62 +473,68 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                         #     print(f'These are coordinate issues FIX THEM: {issues_coords}')
                         #     ##(input('please')
                         
-                        if 'Latitude' in df_map.columns:
-                            print('Latitude in cols')
+                        if 'latitude' in df_map.columns:
+                            print('latitude in cols')
                             gdf = convert_coords_to_point(df_map) 
                             print(f'len of gdf after convert coords: {len(gdf)}')
                             # append gdf to list of gdfs for map - though now we can have it as a csv for faster AET non tile load
                             list_gdfs_by_map.append(gdf)
-                            gdf_to_geojson(gdf, f'{path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson')
+                            # gdf_to_geojson(gdf, f'{path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson')
                             with open(f'local_pkl/{mapname}_{tracker}_gdf_{iso_today_date}.pkl', 'wb') as f:
                                 pickle.dump(gdf, f)
-
+                                print(f'File is: {f}')
+                                count_of_files += 1
 
                             print(f"GeoDataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.pkl")         
                             # if gdf['tracker-acro'].iloc[0] == 'GCTT':
                             #     print(gdf)
                             #     input('This is gctt gdf ... ')
-                        else:
+                        elif 'WKTFormat' in df.columns:
                             # print('Latitude not in cols')
-                            # print(tracker)
+                            print(tracker)
                             # input('check if eu pipelines eventually come up here - if so check the next inputs that they are not empty until "GeoDataFrames have been saved to"')
-     
-                            df_map = insert_incomplete_WKTformat_ggit_eu(df_map)
+        
+                            # df_map = insert_incomplete_WKTformat_ggit_eu(df_map)
+                            # if 'WKTFormat' in df.columns:
+
                             gdf = convert_google_to_gdf(df_map) # this drops all empty WKTformat cols
                             
                             print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
 
                             list_gdfs_by_map.append(gdf)
-                            print(list_gdfs_by_map)
-                            gdf_to_geojson(gdf, f'{path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson')        
+                            # print('Latitude not in cols')
+                            # print(tracker)
+                            # input('check if eu pipelines eventually come up here - if so check the next inputs that they are not empty until "GeoDataFrames have been saved to"')
+                            
+                            # df_map = insert_incomplete_WKTformat_ggit_eu(df_map) # this was a temporary thing before the ggit pipeline release
+                            gdf = convert_google_to_gdf(df_map) # this drops all empty WKTformat cols
+                            
+                            print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
+
+                            list_gdfs_by_map.append(gdf)
+                            # print(list_gdfs_by_map)
+                            # gdf_to_geojson(gdf, f'{path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson')        
                         
                             # # printf'Added gdf {tracker} for map {mapname} to list of gdfs for map and saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson.')
                             with open(f'local_pkl/{mapname}_{tracker}_gdf_{iso_today_date}.pkl', 'wb') as f:
                                 pickle.dump(gdf, f)
+                                print(f'File is: {f}')
+                                count_of_files += 1
 
-                            print(f"GeoDataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.pkl")         
-                                                
-                    except HttpError as e:
-                        # Handle rate limit error (HTTP status 429)
-                        if e.resp.status == 429:
-                            print(f"Rate limit exceeded. Retrying in {delay} seconds...")
-                            time.sleep(delay)
-                            delay *= 2  # Exponential backoff
+                            # print(f"GeoDataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.pkl")         
                         else:
-                            raise e  # Re-raise other errors
-
-                    except Exception as e:
-                        print(f"An error occurred: {e}")
-                        input('Check why error occurred in pull_gsheet_data function')
-                        break
+                            print(tracker)
+                            for col in df.columns:
+                                print(col)
+                            input('Figure out how to turn this into a gdf')                                                
                     
         dict_list_gdfs_by_map[mapname] = list_gdfs_by_map
         dict_list_dfs_by_map[mapname] = list_dfs_by_map
 
-        print(f'This is dict list gdfs by map: {dict_list_gdfs_by_map}')
-        print(f'This is dict list dfs by map: {dict_list_dfs_by_map}') #empty for latam
-        print(dict_list_gdfs_by_map.keys())
-        print(dict_list_dfs_by_map.keys())
+        # print(f'This is dict list gdfs by map: {dict_list_gdfs_by_map}')
+        # print(f'This is dict list dfs by map: {dict_list_dfs_by_map}') #empty for latam
+        # print(dict_list_gdfs_by_map.keys())
+        # print(dict_list_dfs_by_map.keys())
         # #(input('check the above')
         # issues_coords_df = pd.DataFrame(issues_coords).to_csv(path_for_test_results + mapname + 'issue_coords_dropped.csv')
             
@@ -429,16 +548,16 @@ def incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, d
     pipes_gdf['tracker-acro'] = 'GOIT'
     pipes_gdf['official_name'] = 'Oil Pipelines'
     # pipes_gdf = find_missing_geo(pipes_gdf) 
-    print(len(pipes_gdf))
+    # print(len(pipes_gdf))
     pipes_gdf = add_goit_boedcap_from_baird(pipes_gdf)
-    print(len(pipes_gdf))
+    # print(len(pipes_gdf))
     # input('check that after baird merge function goit')
    
     ggit_gdf = gpd.read_file(ggit_geojson)
     ggit_gdf['tracker-acro'] = 'GGIT'
     ggit_gdf['official_name'] = 'Gas Pipelines'
     # ggit_gdf = find_missing_geo(ggit_gdf)
-    print(len(ggit_gdf))
+    # print(len(ggit_gdf))
     # ggit_gdf = add_ggit_routes_from_baird(ggit_gdf)
     # print(len(ggit_gdf))
     # input('check that after baird merge function ggit')
@@ -447,7 +566,7 @@ def incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, d
     ggit_lng_gdf = gpd.read_file(ggit_lng_geojson)
     ggit_lng_gdf['tracker-acro'] = 'GGIT-lng'
     ggit_lng_gdf['official_name'] = 'LNG Terminals'
-    print(len(ggit_lng_gdf))
+    # print(len(ggit_lng_gdf))
     
     # ggit_lng_gdf = find_missing_coords(ggit_lng_gdf) # TODO 
 ##### set up dfs
@@ -458,8 +577,8 @@ def incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, d
     col_reg_name_pipes, col_country_name_pipes= find_region_country_colname(pipes_gdf)
     col_reg_name_ggit, col_country_name_ggit = find_region_country_colname(ggit_gdf)
     col_reg_name_ggit_lng, col_country_name_ggit_lng = find_region_country_colname(ggit_lng_gdf)
-    print('Done with finding column for region name and country name')
-    print(col_country_name_pipes)
+    # print('Done with finding column for region name and country name')
+    # print(col_country_name_pipes)
     incorporated_dict_list_gdfs_by_map = {}
     incorporated_dict_list_dfs_by_map = {}
 
@@ -469,9 +588,9 @@ def incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, d
     for mapname, list_of_gdfs in tqdm(dict_list_gdfs_by_map.items(), desc="Processing incorpoate_geojson_trackers"):
         list_of_gdfs_geojson = []
  
-        print(f'{mapname}')
-        # input('CHECK')
-        input(list_of_gdfs)  
+        # print(f'{mapname}')
+        # # input('CHECK')
+        # input(list_of_gdfs)  
          
         if mapname in gas_only_maps:
 
@@ -547,7 +666,7 @@ def incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, d
     # NOW handle dfs    
     for mapname, list_of_dfs in dict_list_dfs_by_map.items():
         list_of_dfs_geojson = []
-        print(f'{mapname}')
+        # print(f'{mapname}')
         # input('CHECK')
         # input(list_of_dfs) #empty latam
 
@@ -622,28 +741,28 @@ def incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, d
 # MAKE MAP FILE #
 ################
 
-def create_conversion_df(conversion_key, conversion_tab):
-    if local_copy:
+# def create_conversion_df(conversion_key, conversion_tab):
+#     if local_copy:
 
-        # Load the list of GeoDataFrames from the pickle file
-        with open('local_pkl/conversion_df.pkl', 'rb') as f:
-            df = pickle.load(f)
+#         # Load the list of GeoDataFrames from the pickle file
+#         with open('local_pkl/conversion_df.pkl', 'rb') as f:
+#             df = pickle.load(f)
 
-        print("DataFrames have been loaded from conversion_df.pkl")        
+#         print("DataFrames have been loaded from conversion_df.pkl")        
                 
-    else:
-        df = gspread_access_file_read_only(conversion_key, conversion_tab)
-        # # # printf'this is conversion df: {df}')
+#     else:
+#         df = gspread_access_file_read_only(conversion_key, conversion_tab)
+#         # # # printf'this is conversion df: {df}')
         
-        df = df[['tracker', 'type', 'original units', 'conversion factor (capacity/production to common energy equivalents, TJ/y)']]
-        df = df.rename(columns={'conversion factor (capacity/production to common energy equivalents, TJ/y)': 'conversion_factor', 'original units': 'original_units'})
-        df['tracker'] = df['tracker'].apply(lambda x: x.strip())
+#         df = df[['tracker', 'type', 'original units', 'conversion factor (capacity/production to common energy equivalents, TJ/y)']]
+#         df = df.rename(columns={'conversion factor (capacity/production to common energy equivalents, TJ/y)': 'conversion_factor', 'original units': 'original_units'})
+#         df['tracker'] = df['tracker'].apply(lambda x: x.strip())
         
-        with open('local_pkl/conversion_df.pkl', 'wb') as f:
-            pickle.dump(df, f)
-        print("DataFrames have been saved to conversion_df.pkl")
+#         with open('local_pkl/conversion_df.pkl', 'wb') as f:
+#             pickle.dump(df, f)
+#         print("DataFrames have been saved to conversion_df.pkl")
 
-    return df  
+#     return df  
 
 
 def split_goget_ggit(dict_list_gdfs_by_map):
@@ -747,12 +866,12 @@ def assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df):
                 if len(gdf) > 0:
                     gdf = gdf.reset_index(drop=True)
                     conversion_df = conversion_df.reset_index(drop=True)
-                    print(f'printing this out to troubleshoot no zero: {gdf}')
+                    # print(f'printing this out to troubleshoot no zero: {gdf}')
                     gdf['tracker_custom'] = gdf["tracker-acro"].iloc[0]
                     tracker = gdf["tracker-acro"].iloc[0]
-                    print(tracker)
-                    print(len(gdf))
-                    print(len(conversion_df))
+                    # print(tracker)
+                    # print(len(gdf))
+                    # print(len(conversion_df))
                     gdf['original_units'] = conversion_df[conversion_df['tracker']==tracker]['original_units'].values[0]
                     gdf['conversion_factor'] = conversion_df[conversion_df['tracker']==tracker]['conversion_factor'].values[0]
                     custom_list_of_gdfs.append(gdf)                
@@ -814,12 +933,12 @@ def rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion):
             # #(input('tChek this')
 
 
-        print(f'This is renamed_gdfs after the look {renamed_gdfs}')
+        # print(f'This is renamed_gdfs after the look {renamed_gdfs}')
 
     
         one_gdf = pd.concat(renamed_gdfs, sort=False, verify_integrity=True, ignore_index=True) 
         # one_gdf = one_gdf.drop_duplicates('id').reset_index(drop=True)
-        print(one_gdf.index)
+        # print(one_gdf.index)
 
         cols_to_be_dropped = set(one_gdf.columns) - set(final_cols)
         # # if slowmo:
@@ -834,29 +953,29 @@ def rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion):
     return renamed_one_gdf_by_map
 
 
-def create_search_column(dict_of_gdfs):
-    # this can be one string with or without spaces 
-    # this creates a new column for project and project in local language
-    # in the column it'll be removed of any diacritics 
-    # this allows for quick searching
-    #     for mapname, one_gdf in cleaned_dict_map_by_one_gdf.items():
-    dict_of_gdfs_with_search = {}
-    for mapname, one_gdf in dict_of_gdfs.items():
+# def create_search_column(dict_of_gdfs):
+#     # this can be one string with or without spaces 
+#     # this creates a new column for project and project in local language
+#     # in the column it'll be removed of any diacritics 
+#     # this allows for quick searching
+#     #     for mapname, one_gdf in cleaned_dict_map_by_one_gdf.items():
+#     dict_of_gdfs_with_search = {}
+#     for mapname, one_gdf in dict_of_gdfs.items():
 
-        print('testing create_search_column with no diacritics for first time')
-        col_names = ['plant-name', 'parent(s)', 'owner(s)', 'operator(s)', 'name', 'owner', 'parent']
-        for col in col_names:
-            if col in one_gdf.columns:
-                print(one_gdf[col].head(10))
-                new_col_name = f'{col}_search'
-                one_gdf[new_col_name] = one_gdf[col].apply(lambda x: remove_diacritics(x))
-                print(one_gdf[new_col_name].head(10))
+#         # print('testing create_search_column with no diacritics for first time')
+#         col_names = ['plant-name', 'parent(s)', 'owner(s)', 'operator(s)', 'name', 'owner', 'parent']
+#         for col in col_names:
+#             if col in one_gdf.columns:
+#                 # print(one_gdf[col].head(10))
+#                 new_col_name = f'{col}_search'
+#                 one_gdf[new_col_name] = one_gdf[col].apply(lambda x: remove_diacritics(x))
+#                 # print(one_gdf[new_col_name].head(10))
         
-        dict_of_gdfs_with_search[mapname] = one_gdf
+#         dict_of_gdfs_with_search[mapname] = one_gdf
         
-        print(dict_of_gdfs_with_search.keys)
-        print('above are keys in dict_of_gdfs_with_search')
-    return dict_of_gdfs_with_search
+#         # print(dict_of_gdfs_with_search.keys)
+#         # print('above are keys in dict_of_gdfs_with_search')
+#     return dict_of_gdfs_with_search
 
 
 def capacity_conversions(cleaned_dict_map_by_one_gdf): 
@@ -877,17 +996,17 @@ def capacity_conversions(cleaned_dict_map_by_one_gdf):
         else:
             # first let's get GHPT cap added 
             # # printmapname) # africa
-            # # printset(gdf_converted['tracker-acro'].to_list())) # only pipeline 
+            # # printset(gdf_converted['tracker-acro'].to_list())) # only pipeline
+             
             ghpt_only = gdf_converted[gdf_converted['tracker-acro']=='GHPT'] # for GGPT we need to re run it to get it 
-            print(len(ghpt_only))
             print(mapname)
             # ##(input('check')
             gdf_converted = gdf_converted[gdf_converted['tracker-acro']!='GHPT']
-            # # printlen(ghpt_only['capacity']))
-            # # printlen(ghpt_only['capacity1']))
-            # # printlen(ghpt_only['capacity2']))
-            # # # ##(input('Check that they are all equal GHPT')
-            ghpt_only['capacity'] = ghpt_only.apply(lambda row: row['capacity'] + row['capacity2'], axis=1)
+            for col in ghpt_only.columns:
+                print(col)
+            print(ghpt_only['tracker_custom'])
+            print(ghpt_only['capacity'])
+            ghpt_only['capacity'] = ghpt_only.apply(lambda row: row['capacity'] + row['capacity2'], axis=1) 
             gdf_converted = pd.concat([gdf_converted, ghpt_only],sort=False).reset_index(drop=True)
         # # # printlen(gdf_converted))
     
@@ -949,214 +1068,219 @@ def capacity_conversions(cleaned_dict_map_by_one_gdf):
     return cleaned_dict_map_by_one_gdf_with_conversions
 
 
-def map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions):
-    cleaned_dict_by_map_one_gdf_with_better_statuses = {}
-    for mapname, gdf in cleaned_dict_map_by_one_gdf_with_conversions.items():
-        path_for_test_results = gem_path + mapname + '/test_results/'           
+# def map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions):
+#     cleaned_dict_by_map_one_gdf_with_better_statuses = {}
+#     for mapname, gdf in cleaned_dict_map_by_one_gdf_with_conversions.items():
+#         path_for_test_results = gem_path + mapname + '/test_results/'           
 
-        # print(set(gdf['status'].to_list()))
-        mask_gbpt = gdf['tracker-acro'] == 'GBPT'
-        # print(gdf.loc[mask_gbpt, 'status'])
-        # #(input('check statuses of bio before')
+#         # print(set(gdf['status'].to_list()))
+#         mask_gbpt = gdf['tracker-acro'] == 'GBPT'
+#         # print(gdf.loc[mask_gbpt, 'status'])
+#         # #(input('check statuses of bio before')
         
-        gdf['status'] = gdf['status'].fillna('Not Found') # ValueError: Cannot mask with non-boolean array containing NA / NaN values
-        gdf['status'] = gdf['status'].replace('', 'Not Found') # ValueError: Cannot mask with non-boolean array containing NA / NaN values
-        # print(set(gdf['status'].to_list()))
-        gdf_map_ready = fix_status_inferred(gdf)
+#         gdf['status'] = gdf['status'].fillna('Not Found') # ValueError: Cannot mask with non-boolean array containing NA / NaN values
+#         gdf['status'] = gdf['status'].replace('', 'Not Found') # ValueError: Cannot mask with non-boolean array containing NA / NaN values
+#         # print(set(gdf['status'].to_list()))
+#         gdf_map_ready = fix_status_inferred(gdf)
         
-        # Create masks for the 'tracker-acro' conditions
-        mask_gcmt = gdf_map_ready['tracker-acro'] == 'GCMT'
-        mask_goget = gdf_map_ready['tracker-acro'] == 'GOGET'
-        mask_gbpt = gdf_map_ready['tracker-acro'] == 'GBPT'
+#         # Create masks for the 'tracker-acro' conditions
+#         mask_gcmt = gdf_map_ready['tracker-acro'] == 'GCMT'
+#         mask_goget = gdf_map_ready['tracker-acro'] == 'GOGET'
+#         mask_gbpt = gdf_map_ready['tracker-acro'] == 'GBPT'
         
-        # Update 'status' to 'Retired' where both masks are True
-        gdf_map_ready['status'].fillna('', inplace=True)
-        mask_status_empty = gdf_map_ready['status'] == ''
-        # print(mask_status_empty)
-        # # #(input('check the above for empty statuses')
-        # print(gdf_map_ready.loc[mask_gbpt, 'status'])
-        # #(input('check statuses of bio')
+#         # Update 'status' to 'Retired' where both masks are True
+#         gdf_map_ready['status'].fillna('', inplace=True)
+#         mask_status_empty = gdf_map_ready['status'] == ''
+#         # print(mask_status_empty)
+#         # # #(input('check the above for empty statuses')
+#         # print(gdf_map_ready.loc[mask_gbpt, 'status'])
+#         # #(input('check statuses of bio')
         
-        # Update 'status' to 'Not Found' where both masks are True
-        gdf_map_ready.loc[mask_status_empty & mask_gcmt, 'status'] = 'retired'
-        gdf_map_ready.loc[mask_status_empty & mask_goget, 'status'] = 'not found'
-        gdf_map_ready['status_legend'] = gdf_map_ready.copy()['status'].str.lower().replace({
-                    # proposed_plus
-                    'proposed': 'proposed_plus',
-                    'announced': 'proposed_plus',
-                    'discovered': 'proposed_plus',
-                    # pre-construction_plus
-                    'pre-construction': 'pre-construction_plus',
-                    'pre-permit': 'pre-construction_plus',
-                    'permitted': 'pre-construction_plus',
-                    # construction_plus
-                    'construction': 'construction_plus',
-                    'in development': 'construction_plus',
-                    # mothballed
-                    'mothballed': 'mothballed_plus',
-                    'idle': 'mothballed_plus',
-                    'shut in': 'mothballed_plus',
-                    # retired
-                    'retired': 'retired_plus',
-                    'closed': 'retired_plus',
-                    'decommissioned': 'retired_plus',
-                    'not found': 'not-found'})
+#         # Update 'status' to 'Not Found' where both masks are True
+#         gdf_map_ready.loc[mask_status_empty & mask_gcmt, 'status'] = 'retired'
+#         gdf_map_ready.loc[mask_status_empty & mask_goget, 'status'] = 'not found'
+#         gdf_map_ready['status_legend'] = gdf_map_ready.copy()['status'].str.lower().replace({
+#                     # proposed_plus
+#                     'proposed': 'proposed_plus',
+#                     'announced': 'proposed_plus',
+#                     'discovered': 'proposed_plus',
+#                     # pre-construction_plus
+#                     'pre-construction': 'pre-construction_plus',
+#                     'pre-permit': 'pre-construction_plus',
+#                     'permitted': 'pre-construction_plus',
+#                     # construction_plus
+#                     'construction': 'construction_plus',
+#                     'in development': 'construction_plus',
+#                     # mothballed
+#                     'mothballed': 'mothballed_plus',
+#                     'idle': 'mothballed_plus',
+#                     'shut in': 'mothballed_plus',
+#                     # retired
+#                     'retired': 'retired_plus',
+#                     'closed': 'retired_plus',
+#                     'decommissioned': 'retired_plus',
+#                     'not found': 'not-found'})
 
 
-        # Create a mask for rows where 'status' is empty
+#         # Create a mask for rows where 'status' is empty
 
-        gdf_map_ready_no_status = gdf_map_ready.loc[mask_status_empty]
-        # # # ##(input(f'check no status df: {gdf_map_ready_no_status}')
+#         gdf_map_ready_no_status = gdf_map_ready.loc[mask_status_empty]
+#         # # # ##(input(f'check no status df: {gdf_map_ready_no_status}')
 
-        gdf_map_ready_no_status.to_csv(f'issues/no-status-{mapname}_{iso_today_date}.csv')
-        # make sure all statuses align with no space rule
-        # gdf_map_ready['status'] = gdf_map_ready['status'].apply(lambda x: x.strip().replace(' ','-'))
-        gdf_map_ready['status_legend'] = gdf_map_ready['status_legend'].apply(lambda x: x.strip().replace('_','-'))
-        # # printset(gdf_map_ready['status'].to_list()))
-        gdf_map_ready['status'] = gdf_map_ready['status'].apply(lambda x: x.lower())
-        # # printset(gdf_map_ready['status'].to_list()))
+#         gdf_map_ready_no_status.to_csv(f'issues/no-status-{mapname}_{iso_today_date}.csv')
+#         # make sure all statuses align with no space rule
+#         # gdf_map_ready['status'] = gdf_map_ready['status'].apply(lambda x: x.strip().replace(' ','-'))
+#         gdf_map_ready['status_legend'] = gdf_map_ready['status_legend'].apply(lambda x: x.strip().replace('_','-'))
+#         # # printset(gdf_map_ready['status'].to_list()))
+#         gdf_map_ready['status'] = gdf_map_ready['status'].apply(lambda x: x.lower())
+#         # # printset(gdf_map_ready['status'].to_list()))
         
-        cleaned_dict_by_map_one_gdf_with_better_statuses[mapname] = gdf_map_ready
+#         cleaned_dict_by_map_one_gdf_with_better_statuses[mapname] = gdf_map_ready
     
-    # # printcleaned_dict_by_map_one_gdf_with_better_statuses.keys())
-    # # # ##(input('check that there are enough maps')
-    return cleaned_dict_by_map_one_gdf_with_better_statuses
+#     # # printcleaned_dict_by_map_one_gdf_with_better_statuses.keys())
+#     # # # ##(input('check that there are enough maps')
+#     return cleaned_dict_by_map_one_gdf_with_better_statuses
 
 
 
-def map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses):
-    cleaned_dict_by_map_one_gdf_with_better_countries = {}
-    for mapname, gdf in cleaned_dict_by_map_one_gdf_with_better_statuses.items():
-        print(f'We are on mapname: {mapname}')
+# def map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses):
+#     cleaned_dict_by_map_one_gdf_with_better_countries = {}
+#     for mapname, gdf in cleaned_dict_by_map_one_gdf_with_better_statuses.items():
+#         print(f'We are on mapname: {mapname}')
         
-        # check that areas isn't empty
-        tracker_sel = gdf['tracker-acro'].iloc[0]
-        # if tracker_sel == 'GCTT':
-        #     print(gdf['areas'])
-        gdf['areas'] = gdf['areas'].fillna('')
+#         # check that areas isn't empty
+#         tracker_sel = gdf['tracker-acro'].iloc[0]
+#         # if tracker_sel == 'GCTT':
+#         #     print(gdf['areas'])
+#         gdf['areas'] = gdf['areas'].fillna('')
 
-        empty_areas = gdf[gdf['areas']=='']
-        if len(empty_areas) > 0:
-            print(f'Check out which rows are empty for countries for map: {mapname}')
-            print(empty_areas)
-            # #(input('Remove above')
-            empty_areas.to_csv(f'issues/empty-areas-{tracker_sel}{iso_today_date}.csv')
+#         empty_areas = gdf[gdf['areas']=='']
+#         if len(empty_areas) > 0:
+#             print(f'Check out which rows are empty for countries for map: {mapname}')
+#             print(empty_areas)
+#             # #(input('Remove above')
+#             empty_areas.to_csv(f'issues/empty-areas-{tracker_sel}{iso_today_date}.csv')
 
-        # this formats subnational area for detail maps
-        # we would also want to overwrite the subnat and say nothing ""
-        gdf['count-of-semi'] = gdf.apply(lambda row: row['areas'].strip().split(';'), axis=1) # if len of list is more than 2, then split more than once
-        gdf['count-of-semi'] = gdf.apply(lambda row: row['areas'].strip().split('-'), axis=1) # for goget
-        gdf['count-of-semi'] = gdf.apply(lambda row: row['areas'].strip().split(','), axis=1) # just adding in case
+#         # this formats subnational area for detail maps
+#         # we would also want to overwrite the subnat and say nothing ""
+#         gdf['count-of-semi'] = gdf.apply(lambda row: row['areas'].strip().split(';'), axis=1) # if len of list is more than 2, then split more than once
+#         gdf['count-of-semi'] = gdf.apply(lambda row: row['areas'].strip().split('-'), axis=1) # for goget
+#         gdf['count-of-semi'] = gdf.apply(lambda row: row['areas'].strip().split(','), axis=1) # just adding in case
 
-        gdf['multi-country'] = gdf.apply(lambda row: 't' if len(row['count-of-semi']) > 1 else 'f', axis=1)
-        # # printgdf['multi-country'])
-        # if t then make areas-display 
-        gdf['subnat'].fillna('', inplace=True)
-        # if one country and subnat exists TEST THIS
-        gdf['areas-subnat-sat-display'] = gdf.apply(lambda row: f"{row['subnat'].strip().strip('')}, {row['areas'].strip().strip('')}" if row['multi-country'] == 'f' and row['subnat'] != '' else row['areas'].strip(), axis=1) # row['areas'].strip()
-        # if more than one country replace the '' with mult countries
+#         gdf['multi-country'] = gdf.apply(lambda row: 't' if len(row['count-of-semi']) > 1 else 'f', axis=1)
+#         # # printgdf['multi-country'])
+#         # if t then make areas-display 
+#         gdf['subnat'].fillna('', inplace=True)
+#         # if one country and subnat exists TEST THIS
+#         gdf['areas-subnat-sat-display'] = gdf.apply(lambda row: f"{row['subnat'].strip().strip('')}, {row['areas'].strip().strip('')}" if row['multi-country'] == 'f' and row['subnat'] != '' else row['areas'].strip(), axis=1) # row['areas'].strip()
+#         # if more than one country replace the '' with mult countries
         
-        # print('Printing all count of semi more than 1')
-        # print(gdf[gdf['count-of-semi'].apply(len) > 1])
-        # print('Printing multi-country t')
-        # print(gdf[gdf['multi-country']=='t'])
+#         # print('Printing all count of semi more than 1')
+#         # print(gdf[gdf['count-of-semi'].apply(len) > 1])
+#         # print('Printing multi-country t')
+#         # print(gdf[gdf['multi-country']=='t'])
         
-        # print(gdf[gdf['name']== 'Mexico-Northern Central America Gas Pipeline'])
-        # #(input('This should be not empty!')
-        maskt = gdf['multi-country']=='t'
-        # print(len(maskt))
-        # #(input('check more than just hydro')
-        gdf.loc[maskt, 'areas-subnat-sat-display'] = 'multiple areas/countries'
-        # print(gdf[gdf['areas-subnat-sat-display']!=''])
-        # print(gdf[gdf['id']=='P0539'])
-        # #(input('check subnat mult countries test')
-        # just need to make sure all countries are separated by a comma and have a comma after last country as well
-        # GOGET has a hyphen in countries
-        # GOIT has comma separated in countries
-        # hydropower has two columns country1 and country2
-        # GGIT has comma separated in countries
-        # grouped_tracker_before = gdf.groupby('tracker-acro', as_index=False)['id'].count()
-        # # # printf'In map ready before adjustment: {grouped_tracker_before}')
-        # # no return
+#         # print(gdf[gdf['name']== 'Mexico-Northern Central America Gas Pipeline'])
+#         # #(input('This should be not empty!')
+#         maskt = gdf['multi-country']=='t'
+#         # print(len(maskt))
+#         # #(input('check more than just hydro')
+#         gdf.loc[maskt, 'areas-subnat-sat-display'] = 'multiple areas/countries'
+#         # print(gdf[gdf['areas-subnat-sat-display']!=''])
+#         # print(gdf[gdf['id']=='P0539'])
+#         # #(input('check subnat mult countries test')
+#         # just need to make sure all countries are separated by a comma and have a comma after last country as well
+#         # GOGET has a hyphen in countries
+#         # GOIT has comma separated in countries
+#         # hydropower has two columns country1 and country2
+#         # GGIT has comma separated in countries
+#         # grouped_tracker_before = gdf.groupby('tracker-acro', as_index=False)['id'].count()
+#         # # # printf'In map ready before adjustment: {grouped_tracker_before}')
+#         # # no return
 
-        # gdf_map_ready['area2'] = gdf_map_ready['area2'].fillna('')
+#         # gdf_map_ready['area2'] = gdf_map_ready['area2'].fillna('')
             
-        if mapname in gas_only_maps:
-            # handle for gas only maps
-            print('In not map only area of function')
-            gdf['areas'] = gdf['areas'].fillna('')
-            gdf['areas'] = gdf['areas'].str.replace(',', ';')
-            gdf['areas'] = gdf['areas'].apply(lambda x: f"{x.strip()};")
-            print(gdf['areas'])
-            # input('check above has semicolon')
+#         if mapname in gas_only_maps:
+#             # handle for gas only maps
+#             print('In not map only area of function')
+#             gdf['areas'] = gdf['areas'].fillna('')
+#             gdf['areas'] = gdf['areas'].apply(lambda x: x.replace(',', ';')) # try this to fix geojson multiple country issue
+#             gdf['areas'] = gdf['areas'].apply(lambda x: f"{x.strip()};")
+#             print(gdf['areas'])
+#             # input('check above has semicolon')
         
-        else: 
+#         else: 
             
-            # print(gdf_map_ready[['areas', 'tracker-acro', 'name']])
-            # print(set(gdf_map_ready['areas'].to_list()))
-            # print(set(gdf_map_ready['area2'].to_list()))
-            gdf['area2'] = gdf['area2'].fillna('')
-            gdf['areas'] = gdf['areas'].fillna('')
-            # print(set(gdf['areas'].to_list()))
-            # print(set(gdf['area2'].to_list()))
-            nan_areas = gdf[gdf['areas']=='']
-            print(f'Nan areas: {len(nan_areas)}')
-            # print(nan_areas)
-            input('check nan areas')
-            issues = []
-            tracker_issues = []
-            for row in gdf.index:
-                if gdf.loc[row, 'areas'] == '':
-                    issues.append(row)
-                    tracker_issues.append(gdf.loc[row, 'tracker-acro'])
-            # if len(issues) >0 :
-            #     print(f'No areas here for these trackers:')
-            #     print(set(tracker_issues))
-            gdf = gdf.drop(issues)
-            issues_df = {'missing_country': issues}
-            issues_df = pd.DataFrame(issues_df)
-            issues_df.to_csv(f'issues/missing_county{mapname}{iso_today_date}.csv')
-            print('Printed issues_df to file and dropped themf rom the df.')
-            # ##(input('All area2s in gdf check if any are numbers')
-            if mapname == 'Global':
-                gdf['areas'] = f"{gdf['areas']};"
+#             # print(gdf_map_ready[['areas', 'tracker-acro', 'name']])
+#             # print(set(gdf_map_ready['areas'].to_list()))
+#             # print(set(gdf_map_ready['area2'].to_list()))
+#             gdf['area2'] = gdf['area2'].fillna('')
+#             gdf['areas'] = gdf['areas'].fillna('')
+            
+#             gdf['areas'] = gdf['areas'].apply(lambda x: x.replace(',', ';')) # try this to fix geojson multiple country issue
+#             gdf['areas'] = gdf['areas'].apply(lambda x: f"{x.strip()};")
+#             # print(set(gdf['areas'].to_list()))
+#             # print(set(gdf['area2'].to_list()))
+#             # nan_areas = gdf[gdf['areas']=='']
+#             # print(f'Nan areas: {len(nan_areas)}')
+#             # # print(nan_areas)
+#             # input('check nan areas')
+#             # issues = []
+#             # tracker_issues = []
+#             # for row in gdf.index:
+#             #     if gdf.loc[row, 'areas'] == '':
+#             #         issues.append(row)
+#             #         tracker_issues.append(gdf.loc[row, 'tracker-acro'])
+#             # # if len(issues) >0 :
+#             # #     print(f'No areas here for these trackers:')
+#             # #     print(set(tracker_issues))
+#             # gdf = gdf.drop(issues)
+#             # issues_df = {'missing_country': issues}
+#             # issues_df = pd.DataFrame(issues_df)
+#             # issues_df.to_csv(f'issues/missing_county{mapname}{iso_today_date}.csv')
+#             # print('Printed issues_df to file and dropped themf rom the df.')
+            
+#             # # ##(input('All area2s in gdf check if any are numbers')
+#             # if mapname == 'Global':
+#             #     gdf['areas'] = f"{gdf['areas']};"
                 
-            else:
-                for row in gdf.index:
+#             # else:
+#             #     for row in gdf.index:
 
-                    if gdf.loc[row, 'area2'] != '':
+#             #         if gdf.loc[row, 'area2'] != '':
         
-                        gdf.at[row, 'areas'] = f"{gdf.loc[row, 'areas'].strip()};{gdf.loc[row, 'area2'].strip()};"
-                        # print(f"Found a area2! Hydro? {gdf.loc[row, 'areas']} {gdf.loc[row, 'tracker-acro']} {gdf.loc[row, 'name']}")
-                    
-                    else:
-                        # make it so all areas even just one end with a semincolon 
-                        gdf['areas'] = gdf['areas'].fillna('')
-                        # nan_areas = gdf[gdf['areas']=='']
-                        # print(f'in else: {set(gdf["areas"].to_list())}') # find the rows that are nan or float
-                        ser = gdf['areas']
-                        try:
-                            ser_str = ser.astype(str)
-                        except:
-                            for row in ser.index:
-                                val = ser.iloc[row]
-                                try:
-                                    val_str = str(val)
-                                except:
-                                    print("Error!" + f" val couldn't be converted to str: {val}")
+#             #             gdf.at[row, 'areas'] = f"{gdf.loc[row, 'areas'].strip()};{gdf.loc[row, 'area2'].strip()};"
+#             #             # print(f"Found a area2! Hydro? {gdf.loc[row, 'areas']} {gdf.loc[row, 'tracker-acro']} {gdf.loc[row, 'name']}")
+#             #             print(gdf.loc[row,'areas'])
+#             #             input('check above is ; ; not ,; mult country')
+#             #         else:
+#             #             # make it so all areas even just one end with a semincolon 
+#             #             gdf['areas'] = gdf['areas'].fillna('')
+#             #             # nan_areas = gdf[gdf['areas']=='']
+#             #             # print(f'in else: {set(gdf["areas"].to_list())}') # find the rows that are nan or float
+#             #             ser = gdf['areas']
+#             #             try:
+#             #                 ser_str = ser.astype(str)
+#             #             except:
+#             #                 for row in ser.index:
+#             #                     val = ser.iloc[row]
+#             #                     try:
+#             #                         val_str = str(val)
+#             #                     except:
+#             #                         print("Error!" + f" val couldn't be converted to str: {val}")
                         
-                        gdf.at[row, 'areas'] = f"{gdf.loc[row, 'areas'].strip()};"
+#             #             gdf.at[row, 'areas'] = f"{gdf.loc[row, 'areas'].strip()};"
 
-        # grouped_tracker_after = gdf.groupby('tracker-acro', as_index=False)['id'].count()
+#         # grouped_tracker_after = gdf.groupby('tracker-acro', as_index=False)['id'].count()
 
-        # # # printf'In map ready after adjustment: {grouped_tracker_after}')
-        # print(gdf.head())
-        # print(gdf.columns)
-        # #(input('check if semi and multi here?')
-        cleaned_dict_by_map_one_gdf_with_better_countries[mapname] = gdf  
-    # # printcleaned_dict_by_map_one_gdf_with_better_countries.keys())
-    # # # ##(input('check that there are enough maps')
-    return cleaned_dict_by_map_one_gdf_with_better_countries
+#         # # # printf'In map ready after adjustment: {grouped_tracker_after}')
+#         # print(gdf.head())
+#         # print(gdf.columns)
+#         # #(input('check if semi and multi here?')
+#         cleaned_dict_by_map_one_gdf_with_better_countries[mapname] = gdf  
+#     # # printcleaned_dict_by_map_one_gdf_with_better_countries.keys())
+#     # # # ##(input('check that there are enough maps')
+#     return cleaned_dict_by_map_one_gdf_with_better_countries
 
 
 def workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries):
@@ -1264,37 +1388,37 @@ def add_goit_boedcap_from_baird(gdf):
     return gdf
   
     
-def add_ggit_routes_from_baird(gdf):
-    # pull in capacity boed from new goit file on projectID
-    # pull in routes from new ggit file on projectID
+# def add_ggit_routes_from_baird(gdf):
+#     # pull in capacity boed from new goit file on projectID
+#     # pull in routes from new ggit file on projectID
 
-    print('BEFORE')
-    print(len(gdf))
-    print(gdf.info())
+#     print('BEFORE')
+#     print(len(gdf))
+#     print(gdf.info())
   
-    # set up fixed ggit file pd
-    ggit_routes = gpd.read_file(ggit_routes_updated)
+#     # set up fixed ggit file pd
+#     ggit_routes = gpd.read_file(ggit_routes_updated)
     
-    # ggit_routes = ggit_routes.rename(columns={'ProjectID':'id'})
+#     # ggit_routes = ggit_routes.rename(columns={'ProjectID':'id'})
 
-    # Merge ggit_routes with the main gdf on 'id'
-    gdf = gdf.merge(ggit_routes[['ProjectID', 'geometry']], on='ProjectID', how='left', suffixes=('', '_new'))
+#     # Merge ggit_routes with the main gdf on 'id'
+#     gdf = gdf.merge(ggit_routes[['ProjectID', 'geometry']], on='ProjectID', how='left', suffixes=('', '_new'))
 
-    # Update the 'route' column in gdf with the new values where there is a match
-    gdf['geometry'] = gdf['geometry_new'].combine_first(gdf['geometry'])
+#     # Update the 'route' column in gdf with the new values where there is a match
+#     gdf['geometry'] = gdf['geometry_new'].combine_first(gdf['geometry'])
     
-    # Drop the temporary 'route_new' column
-    gdf.drop(columns=['geometry_new'], inplace=True)
+#     # Drop the temporary 'route_new' column
+#     gdf.drop(columns=['geometry_new'], inplace=True)
     
-    print('AFTER')
+#     print('AFTER')
     
-    print(len(gdf))
+#     print(len(gdf))
 
-    # for col in gdf.columns:
-    #     print(col)
-    print(gdf.info())
-    # input('Check the above...')
-    return gdf
+#     # for col in gdf.columns:
+#     #     print(col)
+#     print(gdf.info())
+#     # input('Check the above...')
+#     return gdf
 
 # TODO
 def manual_lng_pci_eu_temp_fix(gdf):
@@ -1348,6 +1472,7 @@ def last_min_fixes(one_gdf_by_maptype):
         # # # ##(input('Handle missing countries')
         # handle situation where Guinea-Bissau IS official and ok not to be split into separate countries 
         gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Guinea,Bissau','Guinea-Bissau')) 
+        gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Timor,Leste','Timor-Leste')) 
         
         # something is happening when we concat, we lose goget's name ... 
         # gdf_empty_name = gdf[gdf['name']=='']
@@ -1412,15 +1537,29 @@ def last_min_fixes(one_gdf_by_maptype):
         # gdf['capacity'] = gdf['capacity'].fillna('')
         # gdf['capacity'] = gdf['capacity'].apply(lambda x: x.replace('', pd.NA))
         # gdf['capacity'] = gdf['capacity'].astype(float) # Stuck with concatting like strings for now? ValueError: could not convert string to float: ''
-        
+                # remove units-of-m if no capacity value ... goget in particular
+        for row in gdf.index:
+          if gdf.loc[row, 'capacity'] == '':
+              gdf.loc[row, 'units-of-m'] = ''
+          elif gdf.loc[row, 'capacity-details'] == '':
+              gdf.loc[row, 'units-of-m'] = ''
+          elif gdf.loc[row, 'capacity-table'] == np.nan:
+              gdf.loc[row, 'units-of-m'] = ''
+
+        year_cols = ['start-year', 'prod-year-gas', 'prod-year-oil']
+
+        for col in year_cols:
+            gdf[col] = gdf[col].apply(lambda x: str(x).split('.')[0])
+            gdf[col].replace('-1', 'not stated')
+        # TODO add check that year isn't a -1 ... goget.. for egt
         
         if mapname == 'europe':
             print(mapname)
             gdf = pci_eu_map_read(gdf)
-            gdf = assign_eu_hydrogen_legend(gdf)
-            gdf = gdf[gdf['tracker-acro']!='GGIT']
-            gdf = manual_lng_pci_eu_temp_fix(gdf)
-            gdf = swap_gas_methane(gdf)
+            # gdf = assign_eu_hydrogen_legend(gdf)
+            # gdf = gdf[gdf['tracker-acro']!='GGIT']
+            # gdf = manual_lng_pci_eu_temp_fix(gdf)
+            # gdf = swap_gas_methane(gdf)
         
         one_gdf_by_maptype_fixed[mapname] = gdf
     # # printone_gdf_by_maptype_fixed.keys())
@@ -1436,7 +1575,7 @@ def create_map_file(one_gdf_by_maptype_fixed):
         print(f'Saving file for map {mapname}')
         print(f'This is len of gdf {len(gdf)}')
         path_for_download_and_map_files = gem_path + mapname + '/compilation_output/'
-
+        path_for_download_and_map_files_af = gem_path + f'{mapname}-energy' + '/compilation_output/'
         # # printf'We are on map: {mapname} there are {len(one_gdf_by_maptype_fixed)} total maps')
         # # printf"This is cols for gdf: {gdf.columns}")
         # # # ##(input('STOP HERE')
@@ -1455,20 +1594,34 @@ def create_map_file(one_gdf_by_maptype_fixed):
         check_for_lists(gdf)
         # # if slowmo:
             # # ##(input('Check what is a list')
-        gdf.to_file(f'{path_for_download_and_map_files}{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
-        gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
         if mapname == 'africa':
-            gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/data/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
-        # gdf_to_geojson(gdf, f'{path_for_download_and_map_files}{geojson_file_of_all_africa}')
-        # # printf'Saved map geojson file to {path_for_download_and_map_files}{mapname}_{iso_today_date}.geojson')
+            gdf.to_file(f'{path_for_download_and_map_files_af}{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+            gdf.to_excel(f'{path_for_download_and_map_files_af}{mapname}_{iso_today_date}.xlsx', index=False)
+            gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+            gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.xlsx', index=False)
+            
+            newcountriesjs = set(gdf['areas'].to_list())
+            rebuild_countriesjs(mapname, newcountriesjs)
+            
 
-        gdf.to_excel(f'{path_for_download_and_map_files}{mapname}_{iso_today_date}.xlsx', index=False)
-        gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.xlsx', index=False)
-        if mapname == 'africa':
-            gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_output/{mapname}_{iso_today_date}.xlsx', index=False)
+        else:
+            gdf.to_file(f'{path_for_download_and_map_files}{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+            gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+            # if mapname == 'africa':
+            #     gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/c/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+            # gdf_to_geojson(gdf, f'{path_for_download_and_map_files}{geojson_file_of_all_africa}')
+            # # printf'Saved map geojson file to {path_for_download_and_map_files}{mapname}_{iso_today_date}.geojson')
+
+            gdf.to_excel(f'{path_for_download_and_map_files}{mapname}_{iso_today_date}.xlsx', index=False)
+            gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.xlsx', index=False)
+            newcountriesjs = set(gdf['areas'].to_list())
+            rebuild_countriesjs(mapname, newcountriesjs)
+            
+        # if mapname == 'africa':
+        #     gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_output/{mapname}_{iso_today_date}.xlsx', index=False)
         # # printf'Saved xlsx version just in case to {path_for_download_and_map_files}{mapname}_{iso_today_date}.xlsx')
         final_dict_gdfs[mapname] = gdf
-    print(final_dict_gdfs.keys())
+    # print(final_dict_gdfs.keys())
     return final_dict_gdfs
 
 ###############
@@ -1523,7 +1676,6 @@ def create_data_dwnld_file(dict_list_dfs_by_map):
                     # Apply the function to remove illegal characters
                     # TODO check illegal characters or just encoding 
                     df = df.map(remove_illegal_characters)
-                    print(df.columns)
                     tracker_curr = df['official_name'].loc[0]
                     
                     # # TODO handle for goget official data download
@@ -1583,7 +1735,7 @@ def create_data_dwnld_file(dict_list_dfs_by_map):
 # MAKE ABOUT FILE #
 ###############
 
-def gather_all_about_pages(prev_key_dict, prep_df, new_release_date, previous_release_date, needed_tracker_geo_by_map):
+def gather_all_about_pages(prev_key_dict, prep_df, needed_tracker_geo_by_map):
     # first iterate by map key in dict needed_tracker_geo_by_map
     # make it so that with mapname and dict of about is return
     # official name for sheet: {about page df}
@@ -1593,69 +1745,72 @@ def gather_all_about_pages(prev_key_dict, prep_df, new_release_date, previous_re
         if mapname == 'Global':
             print('skip this')
         else:
-            if local_copy:
+            # if local_copy:
 
-                with open(f'local_pkl/about_df_dict_by_map_{iso_today_date}.pkl', 'rb') as f:
-                    about_df_dict_by_map = pickle.load(f)
+            #     with open(f'local_pkl/about_df_dict_by_map_{iso_today_date}.pkl', 'rb') as f:
+            #         about_df_dict_by_map = pickle.load(f)
             
-            elif pkl_file in os.listdir(path_for_pkl):
-                with open(f'local_pkl/about_df_dict_by_map_{iso_today_date}.pkl', 'rb') as f:
-                    about_df_dict_by_map = pickle.load(f)      
+            # # elif pkl_file in os.listdir(path_for_pkl):
+            # #     with open(f'local_pkl/about_df_dict_by_map_{iso_today_date}.pkl', 'rb') as f:
+            # #         about_df_dict_by_map = pickle.load(f)      
                     
-            else:
+            # else:
                 # needed_trackers = value[0] # list of tracker names to include in list of dfs
                 # needed_geo = value[1] # list of countries or global for gipt to filter each df in the list by
-                list_of_tuples_holding_about_page_name_df = []
-                # TODO make a list in config of all previous releases to gather about page for multi tracker
-                # most_recent_map_results = list_of_dfs_trackers_geo_prev_info[2] # it is the third item in the list, this may not be true anymore
-                # prev_key = most_recent_map_results.iloc[0, most_recent_map_results.columns.get_loc('key')]
-                prev_key = prev_key_dict[mapname]
+            list_of_tuples_holding_about_page_name_df = []
+            # TODO make a list in config of all previous releases to gather about page for multi tracker
+            # most_recent_map_results = list_of_dfs_trackers_geo_prev_info[2] # it is the third item in the list, this may not be true anymore
+            # prev_key = most_recent_map_results.iloc[0, most_recent_map_results.columns.get_loc('key')]
+            prev_key = prev_key_dict[mapname]
 
-                # # printf'Creating about page file for map: {mapname} with prev key {prev_key}') # Africa Energy, Asia Gas, Europe Gas, LATAM SKIP #  GIPT FOR NOW        
-                
-                # about_df_dict = {} # official name for sheet: {about page df}
-                gspread_creds = gspread.oauth(
-                        scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
-                        credentials_filename=client_secret_full_path,
-                        # authorized_user_filename=json_token_name,
-                    )
-                wait_time = 30
-                time.sleep(wait_time)
-                gsheets = gspread_creds.open_by_key(prev_key) # this is the last release for this map
-                    # List all sheet names
-                # print(gsheets)
-                sheet_names = [sheet.title for sheet in gsheets.worksheets()]
-                # # printf"Sheet names previous release:", sheet_names)
-
-                multi_tracker_about_page = sheet_names[0]
-                multi_tracker_about_page = gsheets.worksheet(multi_tracker_about_page) 
-                multi_tracker_data = pd.DataFrame(multi_tracker_about_page.get_all_values())
-
-                list_of_tuples_holding_about_page_name_df.append((f'About {mapname}', multi_tracker_data))
-                print(list_of_tuples_holding_about_page_name_df)
+            # # printf'Creating about page file for map: {mapname} with prev key {prev_key}') # Africa Energy, Asia Gas, Europe Gas, LATAM SKIP #  GIPT FOR NOW        
             
-                needed_trackers = list_of_dfs_trackers_geo_prev_info[0] # list of tracker names to include in list of dfs
-                print(needed_trackers)
-                for tracker in needed_trackers:
-                    # # printtracker)
-                    if tracker == 'Oil & Gas Extraction':
-                        # currently Scott makes a special file for releases for maps 
-                        # this is the actual release file
-                        tracker_key = '1fdXqNS40NZuIVJreNZKkz1qZd5LB7avQuBQfhOByvgc'
-                    # these are separate from geojson data so not in prepdf, in config
-                    elif tracker == 'Gas Pipelines':
-                        tracker_key = about_page_ggit_goit[tracker]
-                    elif tracker == 'LNG Terminals':
-                        tracker_key = about_page_ggit_goit[tracker]
-                    elif tracker == 'Oil Pipelines':
-                        tracker_key = about_page_ggit_goit[tracker]
-                    # using the same as gas pipelines because about page was identical from last release dec 2023
-                    elif tracker == 'Gas Pipelines EU': 
-                        tracker_key = about_page_ggit_goit['Gas Pipelines']
-                        
-                    else:
-                        tracker_key = prep_df[prep_df['official name'] == tracker]['gspread_key'].values[0]
+            # about_df_dict = {} # official name for sheet: {about page df}
+            gspread_creds = gspread.oauth(
+                    scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
+                    credentials_filename=client_secret_full_path,
+                    # authorized_user_filename=json_token_name,
+                )
+            wait_time = 30
+            time.sleep(wait_time)
+            gsheets = gspread_creds.open_by_key(prev_key) # this is the last release for this map
+                # List all sheet names
+            # print(gsheets)
+            sheet_names = [sheet.title for sheet in gsheets.worksheets()]
+            # # printf"Sheet names previous release:", sheet_names)
 
+            multi_tracker_about_page = sheet_names[0]
+            multi_tracker_about_page = gsheets.worksheet(multi_tracker_about_page) 
+            multi_tracker_about_page = pd.DataFrame(multi_tracker_about_page.get_all_values())
+            multi_tracker_about_page = replace_old_date_about_page_reg(multi_tracker_about_page)
+            
+            list_of_tuples_holding_about_page_name_df.append((f'About {mapname}', multi_tracker_about_page))
+            print(list_of_tuples_holding_about_page_name_df)
+            input('Inspect what list_of_tuples_holding_about_page_name_df')
+        
+            needed_trackers = list_of_dfs_trackers_geo_prev_info[0] # list of tracker names to include in list of dfs
+            # print(needed_trackers)
+            for tracker in needed_trackers:
+                # # printtracker)
+                # these are separate from geojson data so not in prepdf, in config
+                if tracker == 'Gas Pipelines':
+                    tracker_key = about_page_ggit_goit[tracker]
+                elif tracker == 'LNG Terminals':
+                    tracker_key = about_page_ggit_goit[tracker]
+                elif tracker == 'Oil Pipelines':
+                    tracker_key = about_page_ggit_goit[tracker]
+                # using the same as gas pipelines because about page was identical from last release dec 2023
+                elif tracker == 'Gas Pipelines EU': 
+                    tracker_key = about_page_ggit_goit['Gas Pipelines']
+                elif tracker == 'LNG Terminals EU':
+                    tracker_key = about_page_ggit_goit['LNG Terminals']
+                elif tracker == 'Oil & Gas Plants EU':
+                    tracker_key = prep_df[prep_df['official name'] == 'Oil & Gas Plants']['gspread_key'].values[0]
+
+                                        
+                else:
+                    tracker_key = prep_df[prep_df['official name'] == tracker]['gspread_key'].values[0]
+                    print(tracker_key)
                     gsheets = gspread_creds.open_by_key(tracker_key)
                     sheet_names = [sheet.title for sheet in gsheets.worksheets()]
                     # # printsheet_names)
@@ -1721,9 +1876,9 @@ def gather_all_about_pages(prev_key_dict, prep_df, new_release_date, previous_re
                 
                 #         input('about page for hydro')
                 
-                #mapname "main about"
-                with open(f'local_pkl/about_df_dict_by_map_{iso_today_date}.pkl', 'wb') as f:
-                    pickle.dump(about_df_dict_by_map, f)
+                # #mapname "main about"
+                # with open(f'local_pkl/about_df_dict_by_map_{iso_today_date}.pkl', 'wb') as f:
+                #     pickle.dump(about_df_dict_by_map, f)
         
 
     return about_df_dict_by_map
@@ -1925,19 +2080,21 @@ def reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map):
                     path_for_download_and_map_files = f'{path_for_download_and_map_files}final{new_release_date}/'
                 for file in os.listdir(path_for_download_and_map_files): # use key for map name
                     # print(path_for_download_and_map_files)
-                    if file.endswith(".xlsx") and mapname in file and (new_release_date in file or previous_release_date in file) and ('download' in file): 
+                    if file.endswith(".xlsx") and mapname in file and (new_release_date in file) and ('download' in file): 
                         print(f'{path_for_download_and_map_files}{file}')
                         dd_df_dict = pd.read_excel(f'{path_for_download_and_map_files}{file}', sheet_name=None, engine='openpyxl') # TODO rework so it pulls all tabs
                         input('look at download file')
                         
-                    elif file.endswith(".xlsx") and mapname in file and (new_release_date in file or previous_release_date in file) and ('about' in file): 
+                    elif file.endswith(".xlsx") and mapname in file and (new_release_date in file) and ('about' in file): 
                         print(f'{path_for_download_and_map_files}{file}')
                         about_df_dict = pd.read_excel(f'{path_for_download_and_map_files}{file}', sheet_name=None , engine='openpyxl')  # TODO rework so it pulls all tabs
                         input('look at about file should be 15 tabs for africa latam')
 
                 print(f'Length of {mapname} dd: {len(dd_df_dict)}')    
                 print(f'Length of {mapname} about: {len(about_df_dict)}')
-
+                print(f'Keys of dd_df_dict: {dd_df_dict.keys}')
+                for key in dd_df_dict.keys():
+                    print(key)
                 input('check length of about dict')
                 
                 output = f'{path_for_download_and_map_files_reordered}{mapname}-energy-tracker-data-download-with-about {new_release_date}.xlsx'        
@@ -1956,28 +2113,32 @@ def reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map):
                             for about_sheetname, about_df in about_df_dict.items():
                                 trackername = about_sheetname.split('About ')[1].strip()
                                 if trackername == tracker_official:
-                                    tabular_df = dd_df_dict[trackername].reset_index(drop=True)
+                                    if final_formatting:
+                                        file_trackername = f'{trackername}'
+                                    else:
+                                        file_trackername = f'internal_{trackername}'
+                                    tabular_df = dd_df_dict[file_trackername].reset_index(drop=True)
                                     final_order[trackername] = (about_df, tabular_df) 
 
                                     final_order[f'About {tracker_official}'] = about_df_dict[f'About {tracker_official}']
-                                    final_order[tracker_official] = dd_df_dict[tracker_official]
+                                    final_order[tracker_official] = dd_df_dict[file_trackername]
 
                                     about_df_dict[f'About {tracker_official}'].to_excel(writer, sheet_name=f'About {tracker_official}', index=False)
-                                    dd_df_dict[tracker_official].to_excel(writer, sheet_name=f'{tracker_official}', index=False)         
+                                    dd_df_dict[file_trackername].to_excel(writer, sheet_name=f'{tracker_official}', index=False)         
                             
         else:
-            for mapname in ['africa', 'asia', 'europe', 'LATAM']:
+            for mapname in ['africa', 'asia', 'LATAM', 'europe']:
                 path_for_download_and_map_files_reordered = gem_path + mapname + '/compilation_output/' + f'{new_release_date}_reordered/'
                 path_for_download_and_map_files = gem_path + mapname + '/compilation_output/'    
                 os.makedirs(path_for_download_and_map_files_reordered, exist_ok=True)
 
                 for file in os.listdir(path_for_download_and_map_files): # use key for map name
                     # print(path_for_download_and_map_files)
-                    if file.endswith(".xlsx") and mapname in file and (new_release_date in file or previous_release_date in file) and ('download' in file): 
+                    if file.endswith(".xlsx") and mapname in file and (new_release_date in file in file) and ('download' in file): 
                         print(f'{path_for_download_and_map_files}{file}')
                         dd_df_dict = pd.read_excel(f'{path_for_download_and_map_files}{file}', sheet_name=None) # TODO rework so it pulls all tabs
                         
-                    elif file.endswith(".xlsx") and mapname in file and (new_release_date in file or previous_release_date in file) and ('about' in file): 
+                    elif file.endswith(".xlsx") and mapname in file and (new_release_date in file in file) and ('about' in file): 
                         print(f'{path_for_download_and_map_files}{file}')
                         about_df_dict = pd.read_excel(f'{path_for_download_and_map_files}{file}', sheet_name=None)  # TODO rework so it pulls all tabs
                             
@@ -1985,7 +2146,10 @@ def reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map):
                 print(f'Length of {mapname} about: {len(about_df_dict)}')
                 
                 print(dd_df_dict.keys()) # TODO handle this 
+                for key in dd_df_dict.keys():
+                    print(key)
                 print(about_df_dict.keys())  
+                input('Check these keys for dd_df_dict')
                 ##(input('check above keys should be tabs not column headers now')
                 #new info
                 output = f'{path_for_download_and_map_files_reordered}/{mapname}-energy-tracker-data-download-with-about {new_release_date}.xlsx'        
@@ -2004,14 +2168,18 @@ def reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map):
                             for about_sheetname, about_df in about_df_dict.items():
                                 trackername = about_sheetname.split('About ')[1].strip()
                                 if trackername == tracker_official:
-                                    tabular_df = dd_df_dict[trackername].reset_index(drop=True)
+                                    if final_formatting:
+                                        file_trackername = f'{trackername}'
+                                    else:
+                                        file_trackername = f'internal_{trackername}'
+                                    tabular_df = dd_df_dict[file_trackername].reset_index(drop=True)
                                     final_order[trackername] = (about_df, tabular_df) 
 
                                     final_order[f'About {tracker_official}'] = about_df_dict[f'About {tracker_official}']
-                                    final_order[tracker_official] = dd_df_dict[tracker_official]
+                                    final_order[tracker_official] = dd_df_dict[file_trackername]
 
                                     about_df_dict[f'About {tracker_official}'].to_excel(writer, sheet_name=f'About {tracker_official}', index=False)
-                                    dd_df_dict[tracker_official].to_excel(writer, sheet_name=f'{tracker_official}', index=False)         
+                                    dd_df_dict[file_trackername].to_excel(writer, sheet_name=f'{tracker_official}', index=False)         
                     
         # else:
         #     continue
@@ -2022,7 +2190,11 @@ def reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map):
         for mapname, map_df_dict in incorporated_dict_list_dfs_by_map.items(): # all the download data files
             # print(f'This is map_df_dict: {map_df_dict}') # map_df_dict is a list
             # input('check out map_df_dict list of dfs?')
-            path_for_download_and_map_files = gem_path + mapname + '/compilation_output/' 
+            if mapname == 'africa':
+                path_for_download_and_map_files = gem_path + mapname + '-energy' + '/compilation_output/' 
+
+            else:
+                path_for_download_and_map_files = gem_path + mapname + '/compilation_output/' 
             path_for_download_and_map_files_reordered = gem_path + mapname + '/compilation_output/' + f'{new_release_date}_reordered/'
             os.makedirs(path_for_download_and_map_files_reordered, exist_ok=True)
 
@@ -2033,32 +2205,38 @@ def reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map):
             for file in os.listdir(path_for_download_and_map_files): # use key for map name
                 # print(path_for_download_and_map_files)
 
-                if file.endswith(".xlsx") and mapname in file and (new_release_date in file) and ('about' in file):  # or previous_release_date in file missing hydro 
-                    print(f'{path_for_download_and_map_files}{file}')
-                    about_df_dict = pd.read_excel(f'{path_for_download_and_map_files}{file}', sheet_name=None)  # TODO rework so it pulls all tabs
-                    about_df_dict_by_map[mapname] = about_df_dict
+                # if file.endswith(".xlsx") and mapname in file and (new_release_date in file) and ('about' in file):  # or previous_release_date in file missing hydro 
+                #     print(f'{path_for_download_and_map_files}{file}')
+                #     about_df_dict = pd.read_excel(f'{path_for_download_and_map_files}{file}', sheet_name=None)  # TODO rework so it pulls all tabs
+                #     about_df_dict_by_map[mapname] = about_df_dict
             
             #     else, if config about_create False
             #     print(need to feed in about pages, will create stub ones for now)
                 
-                else: 
-                    input(f'creating stubb page for {mapname}')
-                    # key is sheet name value is data for about page
-                    stubb_about_data = stubb_file
-                    # cycle thorugh all trackers in map
-                    # create stubb page as value for key which is tracker name about tab 
-                    stubb_about_df_dict = {}
-                    for tracker_df in map_df_dict:
-                        # that goes through each df in the list associated with the mapnam
-                        tracker_df = tracker_df.reset_index(drop=True)
-                        tracker_name = tracker_df['official_name'].loc[0]
-                        about_tab_title = f'About {tracker_name}'
-                        stubb_about_df_dict[about_tab_title] = stubb_about_data
-                    
-                    about_df_dict_by_map[mapname] = stubb_about_df_dict
+                # else: 
+                # input(f'creating stubb page for {mapname}')
+                # key is sheet name value is data for about page
+                stubb_about_data = stubb_file
+                # cycle thorugh all trackers in map
+                # create stubb page as value for key which is tracker name about tab 
+                stubb_about_df_dict = {}
+                for tracker_df in map_df_dict:
+                    # that goes through each df in the list associated with the mapnam
+                    tracker_df = tracker_df.reset_index(drop=True)
+                    tracker_name = tracker_df['official_name'].loc[0]
+                    about_tab_title = f'About {tracker_name}'
+                    stubb_about_df_dict[about_tab_title] = stubb_about_data
+                
+                about_df_dict_by_map[mapname] = stubb_about_df_dict
 
-            output = f'{path_for_download_and_map_files}{mapname}-energy-tracker-data-download-with-about {new_release_date}.xlsx'        
-            testing_output = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}-energy-tracker-data-download-with-about {new_release_date}.xlsx'        
+            if mapname == 'LATAM':
+                # Portal Energético para América Latina
+                portal_insert = 'Portal Energético para América Latina'
+                output = f'{path_for_download_and_map_files}{portal_insert}-energy-tracker-data-download-with-about {new_release_date}.xlsx'        
+                testing_output = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{portal_insert}-energy-tracker-data-download-with-about {new_release_date}.xlsx' 
+            else:
+                output = f'{path_for_download_and_map_files}{mapname}-energy-tracker-data-download-with-about {new_release_date}.xlsx'        
+                testing_output = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}-energy-tracker-data-download-with-about {new_release_date}.xlsx'        
             final_order = {}
 
             for filename in [output, testing_output]:
@@ -2074,8 +2252,13 @@ def reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map):
                     map_about_stubb_content = f'Placeholder about page for {mapname}'
                     map_about_stubb['placeholder'] = map_about_stubb_content
                     first_about_page = pd.DataFrame(data=map_about_stubb, index=[0], dtype=str)
-                    first_about_page.to_excel(writer, sheet_name=f'About {mapname.title()} Energy Tracker', index=False)         
-
+                    if mapname == 'africa':
+                        first_about_page.to_excel(writer, sheet_name=f'About {mapname.title()} Energy Tracker', index=False)         
+                    elif mapname == 'LATAM':
+                        first_about_page.to_excel(writer, sheet_name=f'About Portal Energético', index=False)         
+                    else:
+                        first_about_page.to_excel(writer, sheet_name=f'About {mapname.title()} Gas Tracker', index=False)         
+                    
                     # final_order = {'Africa Energy Tracker': (first_about_page[1])} # tab name: (df of about data, df of tracker/tabular data)
                     # go through each item in the dict and list of dfs, pair up the tracker info, then put them in order based on prev key
                     # final_order = {first_about_page[0]: (first_about_page[1])} 
@@ -2101,8 +2284,7 @@ def reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map):
                                         break # break out of loop in the about df, go to next in outer loop of final order datadownlaod
                                         
                                 # break
-                    print(final_order)
-                    (input('check final order'))
+                    input('check final order')
 
     return final_order
 
@@ -2271,15 +2453,15 @@ def check_stats_prior(d):
     for value_list in d.values():
         for df in value_list:
             
-            print(df.columns)
-            print(df['tracker-acro'].iloc[0])
+            # print(df.columns)
+            # print(df['tracker-acro'].iloc[0])
             # print('why is capacity not in GNPT?')
             # input('check cap is in there')
                 
 
             # df = df.rename(columns = {'capacity (mw)': 'capacity'})    
-            print(df)
-            print(df['capacity'])
+            # print(df)
+            # print(df['capacity'])
             
             capacity_ser = pd.to_numeric(df['capacity'], errors='coerce')
             
@@ -2292,7 +2474,7 @@ def check_stats_prior(d):
             
             stats = [(mean,'mean'), (mode,'mode'), (quants,'quants'), (min,'min'), (max,'max'), (sum,'sum')]
             
-            print(df['tracker-acro'].iloc[0])
+            # print(df['tracker-acro'].iloc[0])
             
             for stat in stats:
                 print(f'{stat[1]}:')
@@ -2547,704 +2729,447 @@ def pre_tests():
         # with open(f'local_pkl/source_data_orig_dict_{iso_today_date}.pkl', 'wb') as f:
         #     pickle.dump(dict_holding_sdfs_orig, f) 
             
-        print('now we are out of loop and have a dict of dfs')
-        input(
-            f'This was actually saved to pkl file. {iso_today_date}'
-        )
+        # print('now we are out of loop and have a dict of dfs')
+        # input(
+        #     f'This was actually saved to pkl file. {iso_today_date}'
+        # )
     
     return dict_holding_sdfs # dict_holding_sdfs_orig
-    
 
-if run_pre_tests:
-    dict_holding_sdfs = pre_tests() 
-    # print(dict_holding_sdfs) 
-    # print(dict_holding_sdfs_orig)  
-    prior_count(dict_holding_sdfs)
-    
-    # check capacity of one project is never more than the total capacity of entire country
-    # also check if more than all of USA
-    capacity_conversion_check(dict_holding_sdfs)
-    
-    # check_stats_prior(dict_holding_sdfs)
-    # mis_cols(dict_holding_sdfs)
-    # validate_data_version(dict_holding_sdfs)    
-    # DONE ish. see if that matches the latest research date in the data
-            
-            
-    # DONE run tests from external notebook that checks source file for missing data
-    
-    # DONE create global pkl for all trackers unfiltered 
-    
-    # DONE get sum, max, min and mean of capacity/production (so be sure to rename)
-    
-    # TODO ideally pull out the tests on geography and other cleaning steps 
-        # from following sections so removed and file still runs to set up preview for PM while they fix data
-    
-    # TODO run tests comparing old and new dataset version of source
+if priority == ['europe']:
+    subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/eu_script.py"])                 
 
-    
-if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
-    print('Start augmented')
-    # print('TESTING what_maps_are_needed_new')
-    # result of new is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
-    # needed_map_and_tracker_dict_new = what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab) # result is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
-    needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab) # map_tab
-    # map_country_region has the list of needed maps to be created and their countries/regions
-    print(needed_map_and_tracker_dict)
-    # ##(input('inspect')
-    needed_tracker_geo_by_map = what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, needed_map_and_tracker_dict)
-    # print(path_for_download_and_map_files)
-    folder_setup(needed_tracker_geo_by_map)
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  # Calculate the elapsed time
-    print(f'Ended augmented {elapsed_time}')
-    
-if data_filtering: # this creates gdfs and dfs for all filtered datasets per map, lots of repetition here
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  # Calculate the elapsed time
-    print('Start data filtering')
-    prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)  # so we are using source, so can delete prep file
-    conversion_df = create_conversion_df(conversion_key, conversion_tab)
-    
-    priority = ['latam', 'africa'] # ['africa', 'asia', 'europe', 'latam']
-    to_pass = []
-    if priority != ['']:
-        for key, value in needed_tracker_geo_by_map.items():
-            if key not in priority:
-                to_pass.append(key)
-            else:
-                print(f'Prioritizing {key}')
-
+else:
         
-        for key in to_pass:
-            del needed_tracker_geo_by_map[key]
+
+    if run_pre_tests:
+        dict_holding_sdfs = pre_tests() 
+        # print(dict_holding_sdfs) 
+        # print(dict_holding_sdfs_orig)  
+        prior_count(dict_holding_sdfs)
         
-    
-    dict_list_dfs_by_map, dict_list_gdfs_by_map = pull_gsheet_data(prep_df, needed_tracker_geo_by_map) # map_country_region
-    incorporated_dict_list_gdfs_by_map, incorporated_dict_list_dfs_by_map = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, dict_list_dfs_by_map, dict_list_gdfs_by_map) 
-    # print(incorporated_dict_list_gdfs_by_map)
-    # print(len(incorporated_dict_list_gdfs_by_map))
-    # for map in incorporated_dict_list_dfs_by_map.items:
-    #     df = 
-    # (input(f'Check the above, should not be empty! were in filtering. that is the length of local geojson file dfs.')
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  # Calculate the elapsed time
-    print(f'Ended data filtering {elapsed_time}')  
-
-    
-if map_create:
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  # Calculate the elapsed time
-    print(f'Start map file creation {elapsed_time}')
-    custom_dict_list_gdfs_by_map = split_goget_ggit(incorporated_dict_list_gdfs_by_map)  #incorporated_dict_list_gdfs_by_map
-    custom_dict_list_gdfs_by_map_with_conversion = assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df)
-    renamed_one_gdf_by_map = rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion)
-    renamed_one_gdf_by_map_with_search = create_search_column(renamed_one_gdf_by_map)
-    input('done with create_search_column')
-    # renamed_one_gdf_by_map = add_boed_routes_from_baird(renamed_one_gdf_by_map)
-    # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
-    
-    cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map_with_search)
-    cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
-    
-    cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
-    one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
-    one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
-    # print(f'This is final gdf keys for: {one_gdf_by_maptype}')
-    final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
-    
-    final_count(final_dict_gdfs)
-
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  # Calculate the elapsed time
-    print(f'End map file creation {elapsed_time}')     
-
-if dwlnd_create: # this creates and saves the tabular data sheets for the data download from the filtered dfs
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  # Calculate the elapsed time
-    print(f'Start dwlnd creation {elapsed_time}')
-    create_data_dwnld_file(incorporated_dict_list_dfs_by_map) 
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  # Calculate the elapsed time
-    print(f'End dwlnd creation {elapsed_time}')
- 
-
-if about_create: # this creates and saves a preliminary file with all about pages no adjustments made
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time 
-    print('Start about creation')
-    about_df_dict_by_map = gather_all_about_pages(prev_key_dict, prep_df, new_release_date, previous_release_date, needed_tracker_geo_by_map)
-    create_about_page_file(about_df_dict_by_map)
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  
-    print(f'End about creation {elapsed_time}')
-
-   
-if refine: # this reorders the data download file
-    end_time = time.time()  
-    elapsed_time = end_time - start_time  
-    print('Start refining')
-    if local_copy:
-        about_df_dict_by_map = ''
-        incorporated_dict_list_dfs_by_map = ''
-    print(incorporated_dict_list_dfs_by_map)
-    # for map, gdfs in incorporated_dict_list_dfs_by_map.items():
-    #     print(map)
-    #     print(gdfs)
-    #     if map == 'latam':
-    #         input('pause for latam')
-    # for map, aboutdfs in about_df_dict_by_map.items():
-    #     print(map)
-    #     print(aboutdfs)
-    #     if map == 'latam':
-    #         input('pause for latam')
-
-
-    reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map) 
-    end_time = time.time()  # Record the end time
-    elapsed_time = end_time - start_time  # Calculate the elapsed time
-    print('End refining')  
-
-def from_orig_pkl_to_tuple_list():
-    orig_tup_list_map = []
-
-    # dict_holding_sdfs['source-global'] = list_sdfs # for map
-    # dict_holding_sdfs_orig['source-global'] = list_sdfs_orig # for dd, just added tracker acro to that df
-            
-        # add this to pickle  
-
-
-    with open(f'local_pkl/source_data_dict_{iso_today_date}.pkl', 'rb') as f:
-        dict_holding_sdfs = pickle.load(f) 
-
-    # handle for maps, we only need keys, key is a list of all dfs globally no filter
-    list_of_dfs_map = dict_holding_sdfs.get('source-global')   
-    print(list_of_dfs_map)
-    input('check list of dfs for map in robust tests')  
-    for item in list_of_dfs_map:
-        tracker_curr_map = item['tracker-acro'].loc[0] # maps need just the acro, dd needs acro space and official name
-        orig_tup_list_map.append((item, tracker_curr_map))    
-    ###############################################       
-
-#   with open(f'local_pkl/source_data_orig_dict_{iso_today_date}.pkl', 'rb') as f:
-#       dict_holding_sdfs_orig = pickle.load(f)
-
-    # handle for dd, we only need keys, key is a list of all dfs globally no filter
-    # list_of_dfs_dd = dict_holding_sdfs_orig.get('source-global')  
-    # print(list_of_dfs_dd)
-    # input('check list of dfs for dd in discrepancies[f'{tracker}{mapname}']')     
-    for item in list_of_dfs_map:
-        # TODO look into issue
-        # I think it has to do with using orig pkl not other pkl
-        # input('Check above, got error saying reitred retired plus when should not have been that for tracker')
-        tracker_curr_dd = item['tracker-acro'].loc[0] # maps need just the acro, dd needs acro space and official name
-        official_name_curr_dd = item['tracker-official'].loc[0] # maps need just the acro, dd needs acro space and official name
-        name_curr_dd = f'{tracker_curr_dd} {official_name_curr_dd}'
-
-
-    # print(orig_tup_list_map)
-    # # input('check tup list map in robust tests, we are returning this to be used for comparison')    
-    # print(orig_tup_list_dd)
-    # input('check tup list dd in robust tests, we are returning this to be used for comparison')  
-    
-    return orig_tup_list_map
-
-def from_final_file_to_tuple_list():
-    final_tup_list_map, final_tup_list_dd = [], []
-    testing_final_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/'
-    for file in os.listdir(testing_final_path): 
-        if map_to_test == '':
-            # print(f'Testing regional maps:')
-            if priority != ['']:
-                for mapname in priority:
-                    if (mapname in file) & file.endswith(".geojson") and iso_today_date in file:
-                        final_map = gpd.read_file(testing_final_path + file)
-                        final_tup_list_map.append((final_map, mapname))
-                        print(final_tup_list_map) 
-                    elif (mapname in file) & file.endswith(".xlsx") & (new_release_date in file) & ('about' in file):
-                        # Read all sheets into a dictionary
-                        final_dd = pd.read_excel(testing_final_path + file, sheet_name=None, engine='openpyxl')
-                        final_tup_list_dd.append((final_dd, mapname))
-                        print(final_tup_list_dd)   
-            else:     
-                for mapname in ['africa', 'asia', 'europe', 'latam']:
-                    if (mapname in file) & file.endswith(".geojson") and iso_today_date in file:
-                        final_map = gpd.read_file(testing_final_path + file)
-                        final_tup_list_map.append((final_map, mapname))
-                        print(final_tup_list_map) 
-                    elif (mapname in file) & file.endswith(".xlsx") & (new_release_date in file) & ('about' in file):
-                        # Read all sheets into a dictionary
-                        final_dd = pd.read_excel(testing_final_path + file, sheet_name=None, engine='openpyxl')
-                        final_tup_list_dd.append((final_dd, mapname))
-                        print(final_tup_list_dd)   
+        # check capacity of one project is never more than the total capacity of entire country
+        # also check if more than all of USA
+        capacity_conversion_check(dict_holding_sdfs)
         
-        else:
-            print(f'Testing single map: {map_to_test}')
-            if (map_to_test in file) & file.endswith(".geojson") and iso_today_date in file:
-                final_map = gpd.read_file(testing_final_path + file)
-                final_tup_list_map.append((final_map, map_to_test))
-                print(final_tup_list_map)
-            elif (map_to_test in file) & file.endswith(".xlsx") & (new_release_date in file) & ('about' in file):
-                # final_data = pd.ExcelFile(testing_final_path + file)
-                # Read all sheets into a dictionary
-                final_dd = pd.read_excel(testing_final_path + file, sheet_name=None, engine='openpyxl')
-                final_tup_list_dd.append((final_dd, map_to_test))
-                print(final_tup_list_dd)        
-    
-    
-    return final_tup_list_map, final_tup_list_dd
-
-def robust_tests_dd():
-    # TODO still need to apply better smart filtering for these dd source dfs
-    # tracker = ''
-    # map_to_test = '' not needed instead we'll go through all created unless a single map to be tested, set this in config
-    # final_map = '' # is actually equal to map_df when single map test, when multi need map_df = final_map[final_map['tracker-acro']==tracker]
-
-    # final_data_dict = '' this is actually equal to dd df when single map test, when multi need dd_df = final_data_dict[tracker_official].rename(columns=renaming_sel) 
-
-    final_tup_list_map, final_tup_list_dd = from_final_file_to_tuple_list() # final map and dd files from this iteration of the script     
-    orig_tup_list_map = from_orig_pkl_to_tuple_list() # source files from this iteration of the script, cols adjusted for map, and not
-    # orig_tup_list should be equivalent to list_of_trackers below. with df to left, and tracker acro to right. 
-    discrepancies_file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/issues/output_discrepancies_dd_{new_release_date} {iso_today_date}.xlsx'
-
-    discrepancies = {}            
-    for final_tuple_dd_to_test in final_tup_list_dd: # [(dict of sheet dfs, europe), (dict of sheet dfs, africa), (dict of sheet dfs, asia), (dict of sheet dfs, latam)]. 
-        
-        trackers_gas_only = ['GOGET', 'GGIT-lng', 'GGIT', 'GOGPT']
-        trackers_all = ['GCTT', 'GCMT', 'GCPT', 'GOGPT', 'GHPT', 'GWPT', 'GBPT',
-                        'GSPT', 'GGPT', 'GNPT', 'GOGET', 'GGIT-lng', 'GGIT', 'GOIT']
-    
-    
-        if map_to_test == '':
-            mapname = final_tuple_dd_to_test[1]
-            final_dd = final_tuple_dd_to_test[0]
-            print(f'This is final_dd: ')
-            
-            print(final_dd)
-            input('inspect this, it is a dict of sheet dfs, how to filter to macth source df')
-            if mapname == 'asia':
-                needed_geo = asia_countries
-            elif mapname == 'africa':
-                needed_geo = africa_countries
-            elif mapname == 'europe':
-                needed_geo = europe_countries
-            elif mapname == 'latam':
-                needed_geo = latam_countries
-            else:
-                print('we misunderstood mapname')
-                print(f'This is mapname {mapname}')            
-        # if it is a single map test then no filter on country
-        else: 
-            # mapname = final_tuple_map_to_test[1]
-            mapname = map_to_test
-            final_dd = final_tuple_dd_to_test[0]
-            needed_geo = ''
-
-# set up country now set up filter on tracker
-        if mapname not in gas_only_maps:                
-            for source_tracker_tup in orig_tup_list_map:
-
-                print("-" * 40)
-                print(f'MAP: {mapname}')
-                print(source_tracker_tup[1])
-                input('Check what is in source_tracker_tup[1]')
-                tracker_acro = source_tracker_tup[1].split(' ')[0]
-                # tracker_official = source_tracker_tup[1].split(' ')[1:]
-                # print(tracker_official)
-                # tracker_official = ''.join(tracker_official)
-                # print(tracker_official)
-                print(f'ACRO: {tracker_acro}') # example GOGPT
-                # print(f'LONG NAME: {tracker_official}')
-                input('check this for dd so that it gets renamed correctly so can be altered')
-                df = source_tracker_tup[0]
-                print(f'This is df from source_tracker_tup: {df}')
-
-                renaming_sel = renaming_cols_dict[tracker_acro]
-               
-                # rneame source tracker
-                df = df.rename(columns=renaming_sel) 
-                # print(final_dd) = {}
-                final_dd_minus_about = {}
-                final_dd_sel_df = pd.DataFrame()
-                for key, value in final_dd.items():
-                    if 'tracker-acro' in value.columns:
-                        final_dd_minus_about[key] = value
-                        if value['tracker-acro'].iloc[0] == tracker_acro:
-                            final_dd_sel_df = value
-                        
-                    else:
-                        print(value.columns)
-                        input(f'no tracker-acro in this final_dd tab for {mapname} {key}')
+        # check_stats_prior(dict_holding_sdfs)
+        # mis_cols(dict_holding_sdfs)
+        # validate_data_version(dict_holding_sdfs)    
+        # DONE ish. see if that matches the latest research date in the data
                 
-                print(final_dd_minus_about)
-                print(final_dd_sel_df)
-                dd_df = final_dd_sel_df 
+                
+        # DONE run tests from external notebook that checks source file for missing data
+        
+        # DONE create global pkl for all trackers unfiltered 
+        
+        # DONE get sum, max, min and mean of capacity/production (so be sure to rename)
+        
+        # TODO ideally pull out the tests on geography and other cleaning steps 
+            # from following sections so removed and file still runs to set up preview for PM while they fix data
+        
+        # TODO run tests comparing old and new dataset version of source
 
-                # rename final dd 
-
-                dd_df = dd_df.rename(columns=renaming_sel)                             
-
-                # filtering source on geo and fuel
-                if needed_geo == '':
-                    continue
+        
+    if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
+        print('Start augmented')
+        # print('TESTING what_maps_are_needed_new')
+        # result of new is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
+        # needed_map_and_tracker_dict_new = what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab) # result is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
+        needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab) # map_tab
+        # map_country_region has the list of needed maps to be created and their countries/regions
+        print(needed_map_and_tracker_dict)
+        # ##(input('inspect')
+        needed_tracker_geo_by_map = what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, needed_map_and_tracker_dict)
+        # print(path_for_download_and_map_files)
+        folder_setup(needed_tracker_geo_by_map)
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'Ended augmented {elapsed_time}')
+        
+    if data_filtering: # this creates gdfs and dfs for all filtered datasets per map, lots of repetition here
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print('Start data filtering')
+        prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)  # so we are using source, so can delete prep file
+        conversion_df = create_conversion_df(conversion_key, conversion_tab)
+        
+        to_pass = []
+        if priority != ['']:
+            for key, value in needed_tracker_geo_by_map.items():
+                if key not in priority:
+                    to_pass.append(key)
                 else:
-                    if tracker_acro in tracker_mult_countries:
-                        for sep in ',;-':
-                            # I want to break up any multiple countries into a list of countries
-                            # then check if any of those are in the needed_geo list
-                            df['country_to_check'] = df['areas'].str.strip().str.split(sep) 
+                    print(f'Prioritizing {key}')
 
-                        # filter the df on the country column to see if any of the countries in that list is in the needed geo
-                        df = df[df['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
-
-                        df = df.drop(columns=['country_to_check'])
-                        
-                    else:
-      
-                        df['country_to_check'] = df['areas'].str.strip()
-
-                        # need this by country because not a GEM region, problematic since goget uses region and numbers when filtered by country in the gem region do not match 636 versus 578 for africa
-                        df = df[df['country_to_check'].isin(needed_geo)]
-                    
-                        df = df.drop(columns=['country_to_check'])
-                    
-                    print(f'len after geo filter {tracker_acro} {len(df)}')  
-
-                    print(f'Source Data {tracker_acro}: {len(df)}')
-                    print(f'DD Data {tracker_acro}: {len(dd_df)}')
-                                            
-                        
-                    df = df[df['areas'].isin(needed_geo)]
-                    for column in dd_df.columns:
-                        print(column)
-                    input('is id in there?')
-                    if tracker_acro == 'GGIT-eu':
-                        pass
-                    else:
-                        df_missing_dd = df[~df['id'].isin(dd_df['id'])]
-                        df_missing_dd_reverse = dd_df[~dd_df['id'].isin(df['id'])]
-
-                        print(f'Source Data {tracker_acro}: {len(df)}')
-                        print(f'Data Download Data {tracker_acro}: {len(dd_df)}')
-                        print('DD Discrepancy Count')
-                        print(len(df_missing_dd))
-                        if len(df_missing_dd) > 0:
-                            print(f'df missing {df_missing_dd}')
-                            discrepancies[f'{tracker_acro}{mapname}'] = df_missing_dd
-                            print(df_missing_dd[['id', 'areas','geometry']])
-                            # input('check this')
-                        print(f'DD Discrepancy Count for {mapname}')
-                        print(len(df_missing_dd))
-
-                        if len(df_missing_dd_reverse) > 0:
-                            print(f'df reverse missing {df_missing_dd_reverse}')
-                            discrepancies[f'{tracker_acro}-dd-reverse missing {mapname}'] = df_missing_dd_reverse
-                            print(df_missing_dd_reverse[['id', 'areas','geometry']])
-                            # input('check this')
-                        print('DD Reverse Discrepancy Count')
-                        print(len(df_missing_dd_reverse))
-                        input('Check results not gas only')
-                
-
-        elif mapname in gas_only_maps:
-
-            for source_tracker_tup in orig_tup_list_map: # in gas
-
-                print("-" * 40)
-                print(f'MAP: {mapname}')
-
-                tracker_acro = source_tracker_tup[1].split(' ')[0]
-                # tracker_official = (' ').join(source_tracker_tup[1].split(' ')[1:]) 
-                print(tracker_acro)
-                # print(tracker_official)
-
-                df = source_tracker_tup[0]
-
-                renaming_sel = renaming_cols_dict[tracker_acro]
-                df = df.rename(columns=renaming_sel) 
-                
-                # print(final_dd)
-                final_dd_minus_about = {}
-                final_dd_sel_df = pd.DataFrame()
-
-                for key, value in final_dd.items():
-                    if 'tracker-acro' in value.columns:
-                        final_dd_minus_about[key] = value
-                        if value['tracker-acro'].iloc[0] == tracker_acro:
-                            final_dd_sel_df = value
-                    else:
-                        print(value.columns)
-                        input(f'no tracker-acro in this final_dd tab for {mapname} {key}')
-                
-                print(final_dd_minus_about)
-                print(final_dd_sel_df)
-                dd_df = final_dd_sel_df 
-
-                dd_df = dd_df.rename(columns=renaming_sel) 
-                
-                # df = df[df['areas'].isin(needed_geo)]
-                if needed_geo == '':
-                    pass    
-                else:
-                    if tracker_acro in tracker_mult_countries: # currently no lists like with regions since goit and ggit created countries a list from start and end countries
-                        # if any of the countries in the country column list is in the needed geo list then keep it if none then filter out
-                        for sep in ',;-':
-                            # I want to break up any multiple countries into a list of countries
-                            # then check if any of those are in the needed_geo list
-                            df['country_to_check'] = df['areas'].str.strip().str.split(sep) 
-
-                        # filter the df on the country column to see if any of the countries in that list is in the needed geo
-                        df = df[df['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
-
-                        df = df.drop(columns=['country_to_check'])
-
-                    else:
-
-                        df['country_to_check'] = df['areas'].str.strip()
-
-                        # need this by country because not a GEM region, problematic since goget uses region and numbers when filtered by country in the gem region do not match 636 versus 578 for africa
-                        df = df[df['country_to_check'].isin(needed_geo)]
-                    
-                        df = df.drop(columns=['country_to_check'])
-                    # print(f'len after geo filter {tracker_acro} {len(df)}')  
+            
+            for key in to_pass:
+                del needed_tracker_geo_by_map[key]
+            
         
-                if tracker_acro == 'GOGPT':
-                    # filter out oil only fuel # Alcúdia power station
-                    drop_row = []
-                    for row in df.index:
-                        fuel_cat_list = df.loc[row, 'fuel'].split(',')
-                        new_fuel_cat_list = []
-                        for fuel in fuel_cat_list:
-                            fuel = fuel.split(':')[0]
-                            new_fuel_cat_list.append(fuel)
-                        
-                        # for Alcudia does not contain gas, or only contains fossil liquids
-                        
-                        # fossil liquids: diesel, fossil gas: natural ga...      37.5  operating   
-                        if len(new_fuel_cat_list) > 1:
-                            if new_fuel_cat_list.count('fossil liquids') == len(new_fuel_cat_list):
-                                    drop_row.append(row)
+        dict_list_dfs_by_map, dict_list_gdfs_by_map = pull_gsheet_data(prep_df, needed_tracker_geo_by_map) # map_country_region
+        incorporated_dict_list_gdfs_by_map, incorporated_dict_list_dfs_by_map = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, dict_list_dfs_by_map, dict_list_gdfs_by_map) 
+        # print(incorporated_dict_list_gdfs_by_map)
+        # print(len(incorporated_dict_list_gdfs_by_map))
+        # for map in incorporated_dict_list_dfs_by_map.items:
+        #     df = 
+        # (input(f'Check the above, should not be empty! were in filtering. that is the length of local geojson file dfs.')
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'Ended data filtering {elapsed_time}')  
+
         
-                        elif new_fuel_cat_list == ['fossil liquids']:
-                            drop_row.append(row)
-                                
-                    # drop all rows from df that are goget and not in the gas list ids 
-                    df.drop(drop_row, inplace=True)  
-                    print(f'len after gas only filter {tracker_acro} {len(df)}')  
-                elif tracker_acro == 'GOGET':
-                    goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
+    if map_create:
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'Start map file creation {elapsed_time}')
+        custom_dict_list_gdfs_by_map = split_goget_ggit(incorporated_dict_list_gdfs_by_map)  #incorporated_dict_list_gdfs_by_map
+        custom_dict_list_gdfs_by_map_with_conversion = assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df)
+        renamed_one_gdf_by_map = rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion)
+        renamed_one_gdf_by_map_with_search = create_search_column(renamed_one_gdf_by_map)
+        input('done with create_search_column')
+        # renamed_one_gdf_by_map = add_boed_routes_from_baird(renamed_one_gdf_by_map)
+        # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
+        
+        cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map_with_search)
+        cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
+        
+        cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
+        one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
+        one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
+        # print(f'This is final gdf keys for: {one_gdf_by_maptype}')
+        final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
+        
+        final_count(final_dict_gdfs)
 
-                    # filter out oil
-                    list_ids = handle_goget_gas_only_workaround(goget_orig_file)
-                    # print(len(ndf)) # 3095 will be less because not all trackers
-                    # filter = (df['tracker-acro']=='GOGET') & (df['prod-gas']=='') #2788
-                    # filter = df['id'] in list_ids #2788
-                    # df = df[(df['tracker-acro']=='GOGET') & (df['id'] in list_ids)]
-                    drop_row = []
-                    for row in df.index:
-                        # if df.loc[row, 'tracker-acro'] == 'GOGET':
-                        if df.loc[row, 'id'] not in list_ids:
-                            drop_row.append(row)
-                    # drop all rows from df that are goget and not in the gas list ids 
-                    df.drop(drop_row, inplace=True)     
-                    print(f'len after gas only filter {tracker_acro} {len(df)}')  
-                
-                print(f'Source Data {tracker_acro}: {len(df)}')
-                print(f'Data Download Data {tracker_acro}: {len(dd_df)}')
-                input('is id in there?')
-                if tracker_acro == 'GGIT-eu':
-                    pass
-                else:            
-                    df_missing_dd = df[~df['id'].isin(dd_df['id'])] # TODO FEB 7th error no id ... 
-                    df_missing_dd_reverse = dd_df[~dd_df['id'].isin(df['id'])]
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'End map file creation {elapsed_time}')     
 
-                    print(f'DD Discrepancy Count for {mapname}')
-
-                    print(len(df_missing_dd))
-                    print('Reverse map discrepancy Count')
-                    print(len(df_missing_dd_reverse)) 
-                                
-                    if len(df_missing_dd) > 0:
-                        print(f'df missing {df_missing_dd}')
-
-                        discrepancies[f'{tracker_acro}{mapname}'] = df_missing_dd
-                        print(df_missing_dd)
-                        
-                    if len(df_missing_dd_reverse) > 0:
-                        print(f'df reverse missing dd {df_missing_dd_reverse}')
-                        discrepancies[f'{tracker_acro}-reverse missing {mapname}'] = df_missing_dd_reverse
-                        print(df_missing_dd_reverse[['id', 'areas','geometry']])
-
-            else:
-                continue # do we need this?
-            
-    with pd.ExcelWriter(discrepancies_file_name, engine='openpyxl') as writer:    
-
-        # print(type(discrepancies)) 
-        # print(discrepancies) 
-        for item in discrepancies.items():
-            df = item[1]
-            tracker_acro = item[0]
-            tab_name = tracker_acro.replace('-', '')
-            df.to_excel(writer, sheet_name = f'{tab_name} ({len(df)})', index=False)  
-            # df.to_excel(writer, sheet_name = f'{tracker_acro}', index=False)  
-
-            
-            
-def robust_tests_map():
-    print('we are in robust')
-    # input('pause')
+    if dwlnd_create: # this creates and saves the tabular data sheets for the data download from the filtered dfs
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'Start dwlnd creation {elapsed_time}')
+        create_data_dwnld_file(incorporated_dict_list_dfs_by_map) 
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'End dwlnd creation {elapsed_time}')
     
-    # tracker = ''
-    # map_to_test = '' not needed instead we'll go through all created unless a single map to be tested, set this in config
-    # final_map = '' # is actually equal to map_df when single map test, when multi need map_df = final_map[final_map['tracker-acro']==tracker]
 
-    # final_data_dict = '' this is actually equal to dd df when single map test, when multi need dd_df = final_data_dict[tracker_official].rename(columns=renaming_sel) 
+    if about_create: # this creates and saves a preliminary file with all about pages no adjustments made
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time 
+        print('Start about creation')
+        about_df_dict_by_map = gather_all_about_pages(prev_key_dict, prep_df, needed_tracker_geo_by_map)
+        create_about_page_file(about_df_dict_by_map)
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  
+        print(f'End about creation {elapsed_time}')
+
+    
+    if refine: # this reorders the data download file
+        end_time = time.time()  
+        elapsed_time = end_time - start_time  
+        print('Start refining')
+        if local_copy:
+            about_df_dict_by_map = ''
+            incorporated_dict_list_dfs_by_map = ''
+        print(incorporated_dict_list_dfs_by_map)
+        # for map, gdfs in incorporated_dict_list_dfs_by_map.items():
+        #     print(map)
+        #     print(gdfs)
+        #     if map == 'latam':
+        #         input('pause for latam')
+        # for map, aboutdfs in about_df_dict_by_map.items():
+        #     print(map)
+        #     print(aboutdfs)
+        #     if map == 'latam':
+        #         input('pause for latam')
 
 
-    final_tup_list_map, final_tup_list_dd = from_final_file_to_tuple_list() # final map and dd files from this iteration of the script     
-    orig_tup_list_map = from_orig_pkl_to_tuple_list() # source files from this iteration of the script, cols adjusted for map, and not
-    # orig_tup_list should be equivalent to list_of_trackers below. with df to left, and tracker acro to right. 
-    discrepancies_file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/issues/output_discrepancies {new_release_date} {iso_today_date}.xlsx'
+        reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map) 
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print('End refining')  
 
-    discrepancies = {}
+    def from_orig_pkl_to_tuple_list():
+        orig_tup_list_map = []
 
-    for final_tuple_map_to_test in final_tup_list_map: # [(df, europe), (df, africa), (df, asia), (df, latam)]
-        
-        trackers_gas_only = ['GOGET', 'GGIT-lng', 'GGIT', 'GOGPT']
-        trackers_all = ['GCTT', 'GCMT', 'GCPT', 'GOGPT', 'GHPT', 'GWPT', 'GBPT',
-                        'GSPT', 'GGPT', 'GNPT', 'GOGET', 'GGIT-lng', 'GGIT', 'GOIT']
-        # orig_tup_list_map = [(coal_terminals, 'GCTT'), (coal_mines, 'GCMT'), (gcpt,'GCPT'), (gogpt, 'GOGPT'), (hydro, 'GHPT'), (wind,'GWPT'), (bio,'GBPT'),
-        #                     (solar, 'GSPT'), (geo, 'GGPT'), (nuclear, 'GNPT'), (goget_formatted, 'GOGET'), (ggit_lng, 'GGIT-lng'), (ggit, 'GGIT'), (goit, 'GOIT')]
-
-        # # this one tests against actual data release for goget not the formatted map file
-        # orig_tup_list_dd = [(coal_terminals, 'GCTT Coal Terminals'), (coal_mines, 'GCMT Coal Mines'), (gcpt,'GCPT Coal Plants'), (gogpt, 'GOGPT Oil & GasPlants'), (hydro, 'GHPT Hydropower'), (wind,'GWPT Wind'), (bio,'GBPT Bioenergy'),
-        #                     (solar, 'GSPT Solar'), (geo, 'GGPT Geothermal'), (nuclear, 'GNPT Nuclear'), (goget, 'GOGET Oil & Gas Extraction'), (ggit_lng, 'GGIT-lng LNG Terminals'), 
-        #                     (ggit, 'GGIT Gas Pipelines'), (goit, 'GOIT Oil Pipelines')]
-
-        # file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/output_africa_discrepancies_{new_release_date}.xlsx'
-
-        if map_to_test == '':
-            mapname = final_tuple_map_to_test[1]
-
-            final_map = final_tuple_map_to_test[0]
-            print(final_map)
-            input('check this final map variable')
-            # needed_geo = f'{mapname}_countries' # doesn't work it s a string not the variable in all_config
-            if mapname == 'asia':
-                needed_geo = asia_countries
-            elif mapname == 'africa':
-                needed_geo = africa_countries
-            elif mapname == 'europe':
-                needed_geo = europe_countries
-            elif mapname == 'latam':
-                needed_geo = latam_countries
-            else:
-                print('we misunderstood mapname')
-                print(f'This is mapname {mapname}')
-        # if it is a single map test then no filter on country
-        else: 
-            # mapname = final_tuple_map_to_test[1]
-            mapname = map_to_test
-            map_df = final_tuple_map_to_test[0]
-            needed_geo = ''
-
-        if mapname not in gas_only_maps:
-
-            for source_tracker_tup in orig_tup_list_map:
-
-                print("-" * 40)
-                print(f'MAP: {mapname}')
-                print(source_tracker_tup[1])
-                tracker = source_tracker_tup[1]
-                df = source_tracker_tup[0]
-
-                renaming_sel = renaming_cols_dict[tracker]
-                df = df.rename(columns=renaming_sel) 
-                # print(final_map.columns)
-                map_df = final_map[final_map['tracker-acro']==tracker]
-                if needed_geo == '':
-                    continue
-                else:
-                    if tracker in tracker_mult_countries: # currently no lists like with regions since goit and ggit created countries a list from start and end countries
-                        # if any of the countries in the country column list is in the needed geo list then keep it if none then filter out
-                        for sep in ',;-':
-                            # I want to break up any multiple countries into a list of countries
-                            # then check if any of those are in the needed_geo list
-                            df['country_to_check'] = df['areas'].str.strip().str.split(sep) 
-
-                        # filter the df on the country column to see if any of the countries in that list is in the needed geo
-                        df = df[df['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
-
-                        df = df.drop(columns=['country_to_check'])
-
-                    else:
-      
-                        df['country_to_check'] = df['areas'].str.strip()
-
-                        # need this by country because not a GEM region, problematic since goget uses region and numbers when filtered by country in the gem region do not match 636 versus 578 for africa
-                        df = df[df['country_to_check'].isin(needed_geo)]
-                    
-                        df = df.drop(columns=['country_to_check'])
-                    
-                    # print(mapname)
-                    print(f'len after geo filter {tracker} {len(df)}')  
-
-                    print(f'Source Data {tracker}: {len(df)}')
-                    print(f'Map Data {tracker}: {len(map_df)}')
-
-                    df_missing = df[~df['id'].isin(map_df['id'])]
-                    df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
-                    
-                    if len(df_missing) > 0:
-                        print(f'df missing {df_missing}')
-                        discrepancies[f'{tracker}{mapname}'] = df_missing
-                        print(df_missing[['id', 'areas','geometry']])
-                        # input('check this')
-                    print(f'Map Discrepancy Count for {mapname}')
-                    print(len(df_missing))
-
-                    if len(df_missing_reverse) > 0:
-                        print(f'df reverse missing {df_missing_reverse}')
-                        discrepancies[f'{tracker}-reverse missing {mapname}'] = df_missing_reverse
-                        print(df_missing_reverse[['id', 'areas','geometry']])
-                        # input('check this')
-                    print('Map Reverse Discrepancy Count')
-                    print(len(df_missing_reverse))
-                    input('Check results not gas only')
+        # dict_holding_sdfs['source-global'] = list_sdfs # for map
+        # dict_holding_sdfs_orig['source-global'] = list_sdfs_orig # for dd, just added tracker acro to that df
                 
-        elif mapname in gas_only_maps:
-            # check asia, europe
-            # in it check ggit, ggitlng, goget, gogpt
+            # add this to pickle  
 
-            col_country_name = '' # used for hydro we're renaming so not as important we should find the country cols maybe to make this consistent for hydro
+
+        with open(f'local_pkl/source_data_dict_{iso_today_date}.pkl', 'rb') as f:
+            dict_holding_sdfs = pickle.load(f) 
+
+        # handle for maps, we only need keys, key is a list of all dfs globally no filter
+        list_of_dfs_map = dict_holding_sdfs.get('source-global')   
+        print(list_of_dfs_map)
+        input('check list of dfs for map in robust tests')  
+        for item in list_of_dfs_map:
+            tracker_curr_map = item['tracker-acro'].loc[0] # maps need just the acro, dd needs acro space and official name
+            orig_tup_list_map.append((item, tracker_curr_map))    
+        ###############################################       
+
+    #   with open(f'local_pkl/source_data_orig_dict_{iso_today_date}.pkl', 'rb') as f:
+    #       dict_holding_sdfs_orig = pickle.load(f)
+
+        # handle for dd, we only need keys, key is a list of all dfs globally no filter
+        # list_of_dfs_dd = dict_holding_sdfs_orig.get('source-global')  
+        # print(list_of_dfs_dd)
+        # input('check list of dfs for dd in discrepancies[f'{tracker}{mapname}']')     
+        for item in list_of_dfs_map:
+            # TODO look into issue
+            # I think it has to do with using orig pkl not other pkl
+            # input('Check above, got error saying reitred retired plus when should not have been that for tracker')
+            tracker_curr_dd = item['tracker-acro'].loc[0] # maps need just the acro, dd needs acro space and official name
+            official_name_curr_dd = item['tracker-official'].loc[0] # maps need just the acro, dd needs acro space and official name
+            name_curr_dd = f'{tracker_curr_dd} {official_name_curr_dd}'
+
+
+        # print(orig_tup_list_map)
+        # # input('check tup list map in robust tests, we are returning this to be used for comparison')    
+        # print(orig_tup_list_dd)
+        # input('check tup list dd in robust tests, we are returning this to be used for comparison')  
+        
+        return orig_tup_list_map
+
+    def from_final_file_to_tuple_list():
+        final_tup_list_map, final_tup_list_dd = [], []
+        testing_final_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/'
+        for file in os.listdir(testing_final_path): 
+            if map_to_test == '':
+                # print(f'Testing regional maps:')
+                if priority != ['']:
+                    for mapname in priority:
+                        if (mapname in file) & file.endswith(".geojson") and iso_today_date in file:
+                            final_map = gpd.read_file(testing_final_path + file)
+                            final_tup_list_map.append((final_map, mapname))
+                            print(final_tup_list_map) 
+                        elif (mapname in file) & file.endswith(".xlsx") & (new_release_date in file) & ('about' in file):
+                            # Read all sheets into a dictionary
+                            final_dd = pd.read_excel(testing_final_path + file, sheet_name=None, engine='openpyxl')
+                            final_tup_list_dd.append((final_dd, mapname))
+                            print(final_tup_list_dd)   
+                else:     
+                    for mapname in ['africa', 'asia', 'europe', 'latam']:
+                        if (mapname in file) & file.endswith(".geojson") and iso_today_date in file:
+                            final_map = gpd.read_file(testing_final_path + file)
+                            final_tup_list_map.append((final_map, mapname))
+                            print(final_tup_list_map) 
+                        elif (mapname in file) & file.endswith(".xlsx") & (new_release_date in file) & ('about' in file):
+                            # Read all sheets into a dictionary
+                            final_dd = pd.read_excel(testing_final_path + file, sheet_name=None, engine='openpyxl')
+                            final_tup_list_dd.append((final_dd, mapname))
+                            print(final_tup_list_dd)   
             
-            for source_tracker_tup in orig_tup_list_map:
-                print(source_tracker_tup[1])
-                if source_tracker_tup[1] in gas_only_maps:
+            else:
+                print(f'Testing single map: {map_to_test}')
+                if (map_to_test in file) & file.endswith(".geojson") and iso_today_date in file:
+                    final_map = gpd.read_file(testing_final_path + file)
+                    final_tup_list_map.append((final_map, map_to_test))
+                    print(final_tup_list_map)
+                elif (map_to_test in file) & file.endswith(".xlsx") & (new_release_date in file) & ('about' in file):
+                    # final_data = pd.ExcelFile(testing_final_path + file)
+                    # Read all sheets into a dictionary
+                    final_dd = pd.read_excel(testing_final_path + file, sheet_name=None, engine='openpyxl')
+                    final_tup_list_dd.append((final_dd, map_to_test))
+                    print(final_tup_list_dd)        
+        
+        
+        return final_tup_list_map, final_tup_list_dd
+
+    def robust_tests_dd():
+        # TODO still need to apply better smart filtering for these dd source dfs
+        # tracker = ''
+        # map_to_test = '' not needed instead we'll go through all created unless a single map to be tested, set this in config
+        # final_map = '' # is actually equal to map_df when single map test, when multi need map_df = final_map[final_map['tracker-acro']==tracker]
+
+        # final_data_dict = '' this is actually equal to dd df when single map test, when multi need dd_df = final_data_dict[tracker_official].rename(columns=renaming_sel) 
+
+        final_tup_list_map, final_tup_list_dd = from_final_file_to_tuple_list() # final map and dd files from this iteration of the script     
+        orig_tup_list_map = from_orig_pkl_to_tuple_list() # source files from this iteration of the script, cols adjusted for map, and not
+        # orig_tup_list should be equivalent to list_of_trackers below. with df to left, and tracker acro to right. 
+        discrepancies_file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/issues/output_discrepancies_for_dd_{new_release_date}_{iso_today_date}.xlsx'
+
+        discrepancies = {}            
+        for final_tuple_dd_to_test in final_tup_list_dd: # [(dict of sheet dfs, europe), (dict of sheet dfs, africa), (dict of sheet dfs, asia), (dict of sheet dfs, latam)]. 
+            
+            if map_to_test == '':
+                mapname = final_tuple_dd_to_test[1]
+                final_dd = final_tuple_dd_to_test[0]
+                print(f'This is final_dd: ')
+                
+                print(final_dd)
+                input('inspect this, it is a dict of sheet dfs, how to filter to macth source df')
+                if mapname == 'asia':
+                    needed_geo = asia_countries
+                elif mapname == 'africa':
+                    needed_geo = africa_countries
+                elif mapname == 'europe':
+                    needed_geo = europe_countries
+                elif mapname == 'latam':
+                    needed_geo = latam_countries
+                else:
+                    print('we misunderstood mapname')
+                    print(f'This is mapname {mapname}')            
+            # if it is a single map test then no filter on country
+            else: 
+                # mapname = final_tuple_map_to_test[1]
+                mapname = map_to_test
+                final_dd = final_tuple_dd_to_test[0]
+                needed_geo = ''
+
+    # set up country now set up filter on tracker
+            if mapname not in gas_only_maps:                
+                for source_tracker_tup in orig_tup_list_map:
 
                     print("-" * 40)
                     print(f'MAP: {mapname}')
                     print(source_tracker_tup[1])
-                    tracker = source_tracker_tup[1]
+                    input('Check what is in source_tracker_tup[1]')
+                    tracker_acro = source_tracker_tup[1].split(' ')[0]
+                    # tracker_official = source_tracker_tup[1].split(' ')[1:]
+                    # print(tracker_official)
+                    # tracker_official = ''.join(tracker_official)
+                    # print(tracker_official)
+                    print(f'ACRO: {tracker_acro}') # example GOGPT
+                    # print(f'LONG NAME: {tracker_official}')
+                    input('check this for dd so that it gets renamed correctly so can be altered')
                     df = source_tracker_tup[0]
+                    print(f'This is df from source_tracker_tup: {df}')
 
-                    renaming_sel = renaming_cols_dict[tracker]
+                    renaming_sel = renaming_cols_dict[tracker_acro]
+                
+                    # rneame source tracker
                     df = df.rename(columns=renaming_sel) 
-
-                    print(final_map)
-                    for key, value in final_map.items():
+                    # print(final_dd) = {}
+                    final_dd_minus_about = {}
+                    final_dd_sel_df = pd.DataFrame()
+                    for key, value in final_dd.items():
                         if 'tracker-acro' in value.columns:
+                            final_dd_minus_about[key] = value
+                            if value['tracker-acro'].iloc[0] == tracker_acro:
+                                final_dd_sel_df = value
+                            
+                        else:
+                            # expected for about pages
+                            print(value.columns)
+                            input(f'no tracker-acro in this final_dd tab for {mapname} {key}')
+                    
+                    print(final_dd_minus_about)
+                    print(final_dd_sel_df)
+                    dd_df = final_dd_sel_df 
+
+                    # rename final dd 
+
+                    dd_df = dd_df.rename(columns=renaming_sel)                             
+
+                    # filtering source on geo and fuel
+                    if needed_geo == '':
+                        continue
+                    else:
+                        if tracker_acro in tracker_mult_countries:
+                            for sep in ',;-':
+                                # I want to break up any multiple countries into a list of countries
+                                # then check if any of those are in the needed_geo list
+                                df['country_to_check'] = df['areas'].str.strip().str.split(sep) 
+
+                            # filter the df on the country column to see if any of the countries in that list is in the needed geo
+                            df = df[df['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
+
+                            df = df.drop(columns=['country_to_check'])
+                            
+                        else:
+        
+                            df['country_to_check'] = df['areas'].str.strip()
+
+                            # need this by country because not a GEM region, problematic since goget uses region and numbers when filtered by country in the gem region do not match 636 versus 578 for africa
+                            df = df[df['country_to_check'].isin(needed_geo)]
+                        
+                            df = df.drop(columns=['country_to_check'])
+                        
+                        print(f'len after geo filter {tracker_acro} {len(df)}')  
+
+                        print(f'Source Data {tracker_acro}: {len(df)}')
+                        print(f'DD Data {tracker_acro}: {len(dd_df)}')
+                                                
+                            
+                        df = df[df['areas'].isin(needed_geo)]
+                        # for column in dd_df.columns:
+                        #     print(column)
+                        print(dd_df.columns)
+                        input('is id in there?')
+                        if tracker_acro == 'GGIT-eu':
                             pass
                         else:
-                            print(value.columns)
-                            # input(f'no tracker-acro in this final_dd tab for {mapname} {key}')
+                            df_missing_dd = df[~df['id'].isin(dd_df['id'])]
+                            df_missing_dd_reverse = dd_df[~dd_df['id'].isin(df['id'])]
+
+                            print(f'Source Data {tracker_acro}: {len(df)}')
+                            print(f'Data Download Data {tracker_acro}: {len(dd_df)}')
+                            print('DD Discrepancy Count')
+                            print(len(df_missing_dd))
+                            if len(df_missing_dd) > 0:
+                                print(f'df missing {df_missing_dd}')
+                                discrepancies[f'{tracker_acro}{mapname}'] = df_missing_dd
+                                print(df_missing_dd[['id', 'areas','geometry']])
+                                # input('check this')
+                            print(f'DD Discrepancy Count for {mapname}')
+                            print(len(df_missing_dd))
+
+                            if len(df_missing_dd_reverse) > 0:
+                                print(f'df reverse missing {df_missing_dd_reverse}')
+                                discrepancies[f'{tracker_acro}-dd-reverse missing {mapname}'] = df_missing_dd_reverse
+                                print(df_missing_dd_reverse[['id', 'areas','geometry']])
+                                # input('check this')
+                            print('DD Reverse Discrepancy Count')
+                            print(len(df_missing_dd_reverse))
+                            input('Check results not gas only')
                     
-                    map_df = final_map[final_map['tracker-acro']==tracker]
+
+            elif mapname in gas_only_maps:
+
+                for source_tracker_tup in orig_tup_list_map: # in gas
+
+                    print("-" * 40)
+                    print(f'MAP: {mapname}')
+
+                    tracker_acro = source_tracker_tup[1].split(' ')[0]
+                    # tracker_official = (' ').join(source_tracker_tup[1].split(' ')[1:]) 
+                    print(tracker_acro)
+                    # print(tracker_official)
+
+                    df = source_tracker_tup[0]
+
+                    renaming_sel = renaming_cols_dict[tracker_acro]
+                    df = df.rename(columns=renaming_sel) 
+                    
+                    # print(final_dd)
+                    final_dd_minus_about = {}
+                    final_dd_sel_df = pd.DataFrame()
+
+                    for key, value in final_dd.items():
+                        if 'tracker-acro' in value.columns:
+                            final_dd_minus_about[key] = value
+                            if value['tracker-acro'].iloc[0] == tracker_acro:
+                                final_dd_sel_df = value
+                        else:
+                            print(value.columns)
+                            input(f'no tracker-acro in this final_dd tab for {mapname} {key}')
+                    
+                    print(final_dd_minus_about)
+                    print(final_dd_sel_df)
+                    dd_df = final_dd_sel_df 
+
+                    dd_df = dd_df.rename(columns=renaming_sel) 
+                    
+                    # df = df[df['areas'].isin(needed_geo)]
                     if needed_geo == '':
-                        pass
+                        pass    
                     else:
-                        if tracker in tracker_mult_countries: # currently no lists like with regions since goit and ggit created countries a list from start and end countries
+                        if tracker_acro in tracker_mult_countries: # currently no lists like with regions since goit and ggit created countries a list from start and end countries
                             # if any of the countries in the country column list is in the needed geo list then keep it if none then filter out
                             for sep in ',;-':
                                 # I want to break up any multiple countries into a list of countries
@@ -3264,42 +3189,9 @@ def robust_tests_map():
                             df = df[df['country_to_check'].isin(needed_geo)]
                         
                             df = df.drop(columns=['country_to_check'])
-                        print(f'len after geo filter {tracker} {len(df)}')  
-
-                        # # df = df[df['areas'].isin(needed_geo)] # TODO fix for this because it excludes when there is multiple countries and shouldn't OG0013150 for africa
-                        # print(f'Source Data {tracker}: {len(df)}')
-                        # print(f'Map Data {tracker}: {len(map_df)}')
-                        # df_missing = df[~df['id'].isin(map_df['id'])]
-                        # df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
-                        
-                        # print(f'Map Discrepancy Count for {mapname}')
-                        # print(len(df_missing))
-                        # print('Reverse map discrepancy Count')
-                        # print(len(df_missing_reverse))
-                        # # print(df_missing_reverse)
-                        
-                        # if len(df_missing) > 0:
-                        #     print(f'df missing {df_missing}')
-                        #     discrepancies[f'{tracker}{mapname}'] = df_missing
-                        #     print(df_missing[['id', 'areas','geometry']])
-                        #     if tracker == 'GGIT-eu':
-                        #         print(df_missing)
-                        #         input('check GGIT EU')
-                                
-                        # print(f'Map Discrepancy Count for {mapname}')
-                        # print(len(df_missing))
-
-                        # if len(df_missing_reverse) > 0:
-                        #     print(f'df reverse missing {df_missing_reverse}')
-                        #     discrepancies[f'{tracker}-reverse missing'] = df_missing_reverse
-                        #     print(df_missing_reverse[['id', 'areas','geometry']])
-                        #     if tracker == 'GGIT-eu':
-                        #         print(df_missing_reverse)
-                        #         input('check GGIT EU')
-                        # print('Map Reverse Discrepancy Count')
-                        # print(len(df_missing_reverse))
-                    
-                    if tracker == 'GOGPT':
+                        # print(f'len after geo filter {tracker_acro} {len(df)}')  
+            
+                    if tracker_acro == 'GOGPT':
                         # filter out oil only fuel # Alcúdia power station
                         drop_row = []
                         for row in df.index:
@@ -3321,246 +3213,550 @@ def robust_tests_map():
                                     
                         # drop all rows from df that are goget and not in the gas list ids 
                         df.drop(drop_row, inplace=True)  
-                        print(f'len after gas only filter {tracker} {len(df)}')  
+                        print(f'len after gas only filter {tracker_acro} {len(df)}')  
+                    elif tracker_acro == 'GOGET':
+                        # goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
 
-                        # df = df[df['areas'].isin(needed_geo)] # TODO fix for this because it excludes when there is multiple countries and shouldn't OG0013150 for africa
-                        # print(f'Source Data {tracker}: {len(df)}')
-                        # print(f'Map Data {tracker}: {len(map_df)}')
-                        # df_missing = df[~df['id'].isin(map_df['id'])]
-                        # df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
-                        
-                        # print(f'Map Discrepancy Count for {mapname}')
-                        # print(len(df_missing))
-                        # print('Reverse map discrepancy Count')
-                        # print(len(df_missing_reverse))
-                        # # print(df_missing_reverse)
-                        
-                        # if len(df_missing) > 0:
-                        #     print(f'df missing {df_missing}')
-                        #     discrepancies[f'{tracker}{mapname}'] = df_missing
-                        #     print(df_missing[['id', 'areas','geometry']])
-                        #     if tracker == 'GGIT-eu':
-                        #         print(df_missing)
-                        #         input('check GGIT EU')
-                                
-                        # print(f'Map Discrepancy Count for {mapname}')
-                        # print(len(df_missing))
-
-                        # if len(df_missing_reverse) > 0:
-                        #     print(f'df reverse missing {df_missing_reverse}')
-                        #     discrepancies[f'{tracker}-reverse missing'] = df_missing_reverse
-                        #     print(df_missing_reverse[['id', 'areas','geometry']])
-                        #     if tracker == 'GGIT-eu':
-                        #         print(df_missing_reverse)
-                        #         input('check GGIT EU')
-                        # print('Map Reverse Discrepancy Count')
-                        # print(len(df_missing_reverse))
-                    elif tracker == 'GOGET':
-                        goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
-
-                        # filter out oil
-                        list_ids = handle_goget_gas_only_workaround(goget_orig_file)
+                        # # filter out oil
+                        # list_ids = handle_goget_gas_only_workaround(goget_orig_file)
                         # print(len(ndf)) # 3095 will be less because not all trackers
                         # filter = (df['tracker-acro']=='GOGET') & (df['prod-gas']=='') #2788
                         # filter = df['id'] in list_ids #2788
                         # df = df[(df['tracker-acro']=='GOGET') & (df['id'] in list_ids)]
+                        print(set(df['Fuel type'].to_list()))
+                        input('Check if Oil is in the fuel type above or not and adjust if not!')
+
                         drop_row = []
                         for row in df.index:
                             # if df.loc[row, 'tracker-acro'] == 'GOGET':
-                            if df.loc[row, 'id'] not in list_ids:
+                            # if df.loc[row, 'id'] not in list_ids:
+                            if df.loc[row, 'Fuel type'] == 'oil':
                                 drop_row.append(row)
                         # drop all rows from df that are goget and not in the gas list ids 
                         df.drop(drop_row, inplace=True)     
-                        print(f'len after gas only filter {tracker} {len(df)}')  
-                        
-
-                        # df = df[df['areas'].isin(needed_geo)] # TODO fix for this because it excludes when there is multiple countries and shouldn't OG0013150 for africa
-                        # print(f'Source Data {tracker}: {len(df)}')
-                        # print(f'Map Data {tracker}: {len(map_df)}')
-                        # df_missing = df[~df['id'].isin(map_df['id'])]
-                        # df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
-                        
-                        # print(f'Map Discrepancy Count for {mapname}')
-                        # print(len(df_missing))
-                        # print('Reverse map discrepancy Count')
-                        # print(len(df_missing_reverse))
-                        # # print(df_missing_reverse)
-                        
-                        # if len(df_missing) > 0:
-                        #     print(f'df missing {df_missing}')
-                        #     discrepancies[f'{tracker}{mapname}'] = df_missing
-                        #     print(df_missing[['id', 'areas','geometry']])
-                        #     if tracker == 'GGIT-eu':
-                        #         print(df_missing)
-                        #         input('check GGIT EU')
-                                
-                        #     print(f'Map Discrepancy Count for {mapname}')
-                        #     print(len(df_missing))
-
-                        # if len(df_missing_reverse) > 0:
-                        #     print(f'df reverse missing {df_missing_reverse}')
-                        #     discrepancies[f'{tracker}-reverse missing'] = df_missing_reverse
-                        #     print(df_missing_reverse[['id', 'areas','geometry']])
-                        #     if tracker == 'GGIT-eu':
-                        #         print(df_missing_reverse)
-                        #         input('check GGIT EU')
-                        #     print('Map Reverse Discrepancy Count')
-                        #     print(len(df_missing_reverse))
-                    print(f'Source Data {tracker}: {len(df)}')
-                    print(f'Map Data {tracker}: {len(map_df)}')
-                    df_missing = df[~df['id'].isin(map_df['id'])]
-                    df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
+                        print(f'len after gas only filter {tracker_acro} {len(df)}')  
                     
-                    print(f'Map Discrepancy Count for {mapname}')
-                    print(len(df_missing))
-                    print('Reverse map discrepancy Count')
-                    print(len(df_missing_reverse))
-                    # print(df_missing_reverse)
-                    
-                    if len(df_missing) > 0:
-                        print(f'df missing {df_missing}')
-                        discrepancies[f'{tracker}{mapname}'] = df_missing
-                        print(df_missing[['id', 'areas','geometry']])
-                        if tracker == 'GGIT-eu':
-                            print(df_missing)
-                            input('check GGIT EU')
+                    print(f'Source Data {tracker_acro}: {len(df)}')
+                    print(f'Data Download Data {tracker_acro}: {len(dd_df)}')
+                    print(dd_df.columns)
+                    input('is id in there?')
+                    if tracker_acro == 'GGIT-eu':
+                        pass
+                    else:            
+                        df_missing_dd = df[~df['id'].isin(dd_df['id'])] # TODO FEB 7th error no id ... 
+                        df_missing_dd_reverse = dd_df[~dd_df['id'].isin(df['id'])]
+
+                        print(f'DD Discrepancy Count for {mapname}')
+
+                        print(len(df_missing_dd))
+                        print('Reverse map discrepancy Count')
+                        print(len(df_missing_dd_reverse)) 
+                                    
+                        if len(df_missing_dd) > 0:
+                            print(f'df missing {df_missing_dd}')
+
+                            discrepancies[f'{tracker_acro}{mapname}'] = df_missing_dd
+                            print(df_missing_dd)
                             
-                    print(f'Map Discrepancy Count for {mapname}')
-                    print(len(df_missing))
+                        if len(df_missing_dd_reverse) > 0:
+                            print(f'df reverse missing dd {df_missing_dd_reverse}')
+                            discrepancies[f'{tracker_acro}-reverse missing {mapname}'] = df_missing_dd_reverse
+                            print(df_missing_dd_reverse[['id', 'areas','geometry']])
 
-                    if len(df_missing_reverse) > 0:
-                        print(f'df reverse missing {df_missing_reverse}')
-                        discrepancies[f'{tracker}-reverse missing {mapname}'] = df_missing_reverse
-                        print(df_missing_reverse[['id', 'areas','geometry']])
-                        if tracker == 'GGIT-eu':
-                            print(df_missing_reverse)
-                            input('check GGIT EU')
-                    print('Map Reverse Discrepancy Count')
-                    print(len(df_missing_reverse))
-                    input('Check results gas only')
                 else:
-                    continue
-    with pd.ExcelWriter(discrepancies_file_name, engine='openpyxl') as writer:    
+                    continue # do we need this?
+                
+        with pd.ExcelWriter(discrepancies_file_name, engine='openpyxl') as writer:
+            if discrepancies:
+                for item in discrepancies.items():
+                    df = item[1]
+                    tracker = item[0]
+                    tab_name = tracker.replace('-', '')
+                    df.to_excel(writer, sheet_name=f'{mapname}{tab_name} ({len(df)})', index=False)
+            else:
+                # Create a fake sheet to ensure at least one sheet is visible
+                pd.DataFrame({'No discrepancies': []}).to_excel(writer, sheet_name=f'No discrepancies', index=False)
 
-        # print(type(discrepancies)) 
-        # print(discrepancies) 
-        input('about to save to excel...')
-        for item in discrepancies.items():
-            df = item[1]
-            tracker = item[0]
-            df.to_excel(writer, sheet_name = f'{tracker} ({len(df)})', index=False)
-            # Ensure the sheet is visible
-            # workbook = writer.book
-            # worksheet = workbook[sheet_name]
-            # worksheet.sheet_state = 'visible'        
+                
+                
+    def robust_tests_map():
+        print('we are in robust')
+        # input('pause')
+        
+        # tracker = ''
+        # map_to_test = '' not needed instead we'll go through all created unless a single map to be tested, set this in config
+        # final_map = '' # is actually equal to map_df when single map test, when multi need map_df = final_map[final_map['tracker-acro']==tracker]
+
+        # final_data_dict = '' this is actually equal to dd df when single map test, when multi need dd_df = final_data_dict[tracker_official].rename(columns=renaming_sel) 
 
 
+        final_tup_list_map, final_tup_list_dd = from_final_file_to_tuple_list() # final map and dd files from this iteration of the script     
+        orig_tup_list_map = from_orig_pkl_to_tuple_list() # source files from this iteration of the script, cols adjusted for map, and not
+        # orig_tup_list should be equivalent to list_of_trackers below. with df to left, and tracker acro to right. 
+        discrepancies_file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/issues/output_discrepancies_for_map_{new_release_date}_{iso_today_date}.xlsx'
 
-def post_tests(final_dict_gdfs):
-    discrepancies = {}
-    print('Testing Map Files')
-    # compare final map files to source files
-    # load un renamed dict source dfs from pickl
-    # this should always exist since it happens with local_copy or not
+        discrepancies = {}
 
-    with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/local_pkl/source_data_dict_{iso_today_date}.pkl', 'rb') as f:
-        dict_holding_sdfs = pickle.load(f) 
-    source_data = dict_holding_sdfs # from pre_test functions
-    print(source_data)
-    # input('Check source data')
-    #(input('Check that the above is a list of all gdfs')
-    # use global source data from pre-test section
-    for mapname, gdf in final_dict_gdfs.items():
-        # say mapname = asia gas tracker
-        # then that is the final, we want to compare to source
-        # mapname = source-global dict_holding_sdfs_orig
-        list_of_map_trackers = list(set(gdf['tracker-acro'].to_list()))
-        for map_acro in list_of_map_trackers:
-            #MAP DATA
-            sel_map_df = gdf[gdf['tracker-acro']==map_acro]
-            for gdf in source_data.values:
-                print(gdf['tracker-acro'].iloc[0])
-                source_acro = gdf['tracker-acro'].iloc[0]
-                if source_acro == map_acro:
-                    source_df = gdf.copy()
-                    # apply same filtering for each dataset
-                    # filter by country
-                    if mapname == 'asia':
-                        needed_geo = asia_countries
-                    elif mapname == 'latam':
-                        needed_geo = latam_countries
-                    elif mapname == 'europe':
-                        needed_geo = europe_countries
-                    elif mapname == 'africa':
-                        needed_geo = africa_countries
+        for final_tuple_map_to_test in final_tup_list_map: # [(df, europe), (df, africa), (df, asia), (df, latam)]
+            
+            trackers_gas_only = ['GOGET', 'GGIT-lng', 'GGIT', 'GOGPT']
+            trackers_all = ['GCTT', 'GCMT', 'GCPT', 'GOGPT', 'GHPT', 'GWPT', 'GBPT',
+                            'GSPT', 'GGPT', 'GNPT', 'GOGET', 'GGIT-lng', 'GGIT', 'GOIT']
+            # orig_tup_list_map = [(coal_terminals, 'GCTT'), (coal_mines, 'GCMT'), (gcpt,'GCPT'), (gogpt, 'GOGPT'), (hydro, 'GHPT'), (wind,'GWPT'), (bio,'GBPT'),
+            #                     (solar, 'GSPT'), (geo, 'GGPT'), (nuclear, 'GNPT'), (goget_formatted, 'GOGET'), (ggit_lng, 'GGIT-lng'), (ggit, 'GGIT'), (goit, 'GOIT')]
+
+            # # this one tests against actual data release for goget not the formatted map file
+            # orig_tup_list_dd = [(coal_terminals, 'GCTT Coal Terminals'), (coal_mines, 'GCMT Coal Mines'), (gcpt,'GCPT Coal Plants'), (gogpt, 'GOGPT Oil & GasPlants'), (hydro, 'GHPT Hydropower'), (wind,'GWPT Wind'), (bio,'GBPT Bioenergy'),
+            #                     (solar, 'GSPT Solar'), (geo, 'GGPT Geothermal'), (nuclear, 'GNPT Nuclear'), (goget, 'GOGET Oil & Gas Extraction'), (ggit_lng, 'GGIT-lng LNG Terminals'), 
+            #                     (ggit, 'GGIT Gas Pipelines'), (goit, 'GOIT Oil Pipelines')]
+
+            # file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/output_africa_discrepancies_{new_release_date}.xlsx'
+
+            if map_to_test == '':
+                mapname = final_tuple_map_to_test[1]
+
+                final_map = final_tuple_map_to_test[0]
+                print(final_map)
+                input('check this final map variable')
+                # needed_geo = f'{mapname}_countries' # doesn't work it s a string not the variable in all_config
+                if mapname == 'asia':
+                    needed_geo = asia_countries
+                elif mapname == 'africa':
+                    needed_geo = africa_countries
+                elif mapname == 'europe':
+                    needed_geo = europe_countries
+                elif mapname == 'latam':
+                    needed_geo = latam_countries
+                else:
+                    print('we misunderstood mapname')
+                    print(f'This is mapname {mapname}')
+            # if it is a single map test then no filter on country
+            else: 
+                # mapname = final_tuple_map_to_test[1]
+                mapname = map_to_test
+                map_df = final_tuple_map_to_test[0]
+                needed_geo = ''
+
+            if mapname not in gas_only_maps:
+
+                for source_tracker_tup in orig_tup_list_map:
+
+                    print("-" * 40)
+                    print(f'MAP: {mapname}')
+                    print(source_tracker_tup[1])
+                    tracker = source_tracker_tup[1]
+                    df = source_tracker_tup[0]
+
+                    renaming_sel = renaming_cols_dict[tracker]
+                    df = df.rename(columns=renaming_sel) 
+                    # print(final_map.columns)
+                    map_df = final_map[final_map['tracker-acro']==tracker]
+                    if needed_geo == '':
+                        continue
                     else:
-                        print(f'This is mapname: {mapname}') 
+                        # print(set(df['areas'].to_list()))
+                        # input('check final countries in goget')
+                        if tracker in tracker_mult_countries: # currently no lists like with regions since goit and ggit created countries a list from start and end countries
+                            # if any of the countries in the country column list is in the needed geo list then keep it if none then filter out
+                            for sep in ',;-':
+                                # I want to break up any multiple countries into a list of countries
+                                # then check if any of those are in the needed_geo list
+                                df['country_to_check'] = df['areas'].str.strip().str.split(sep) 
+
+                            # filter the df on the country column to see if any of the countries in that list is in the needed geo
+                            df = df[df['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
+
+                            df = df.drop(columns=['country_to_check'])
+
+                        else:
+                            df['country_to_check'] = df['areas'].str.strip()
+
+                            # need this by country because not a GEM region, problematic since goget uses region and numbers when filtered by country in the gem region do not match 636 versus 578 for africa
+                            df = df[df['country_to_check'].isin(needed_geo)]
+                        
+                            df = df.drop(columns=['country_to_check'])
+                            
+                        # print(mapname)
+                        print(f'len after geo filter {tracker} {len(df)}')  
+
+                        print(f'Source Data {tracker}: {len(df)}')
+                        print(f'Map Data {tracker}: {len(map_df)}')
+
+                        df_missing = df[~df['id'].isin(map_df['id'])]
+                        df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
+                        
+                        if len(df_missing) > 0:
+                            print(f'df missing {df_missing}')
+                            discrepancies[f'{tracker}{mapname}'] = df_missing
+                            print(df_missing[['id', 'areas','geometry']])
+                            # input('check this')
+                        print(f'Map Discrepancy Count for {mapname}')
+                        print(len(df_missing))
+
+                        if len(df_missing_reverse) > 0:
+                            print(f'df reverse missing {df_missing_reverse}')
+                            discrepancies[f'{tracker}-reverse missing {mapname}'] = df_missing_reverse
+                            print(df_missing_reverse[['id', 'areas','geometry']])
+                            # input('check this')
+                        print('Map Reverse Discrepancy Count')
+                        print(len(df_missing_reverse))
+                        input('Check results not gas only')
                     
-                    # handle countries in creating the source... TODO
+            elif mapname in gas_only_maps:
+                # check asia, europe
+                # in it check ggit, ggitlng, goget, gogpt
 
-                    reg_name_to_delete, col_country_name = find_region_country_colname(source_df)
-                    
-                    # filter by fuel
+                col_country_name = '' # used for hydro we're renaming so not as important we should find the country cols maybe to make this consistent for hydro
+                
+                for source_tracker_tup in orig_tup_list_map:
+                    print(source_tracker_tup[1])
+                    if source_tracker_tup[1] in gas_only_maps:
 
-                    source_df = create_filtered_df_list_by_map(source_df, col_country_name, reg_name_to_delete, mapname, needed_geo )
-                    
-                    # now rename so can do analysis easily
-                    renaming_dict_sel = renaming_cols_dict[map_acro]
-                    source_df = source_df.rename(columns=renaming_dict_sel) 
-                    # NOW we compare map data to source data
-                    print(f'Source Data {source_acro}: {len(source_df)}')
-                    print(f'Map Data {map_acro}: {len(sel_map_df)}')
-                    df_missing = source_df[~source_df['id'].isin(sel_map_df['id'])]
-                    df_missing_reverse = sel_map_df[~sel_map_df['id'].isin(source_df['id'])]                 
-                if len(df_missing) > 0:
-                    discrepancies[map_acro] = df_missing
-                    print(df_missing) 
-                    
-                if len(df_missing_reverse) > 0:
-                    discrepancies[f'{map_acro}_r'] = df_missing_reverse
-                    print(df_missing_reverse)           
-            # if discrepancy test if it is same amount as missing/misformatted for that tracker
-                # that would require tallying unique problem rows by tracker for all tabs which are on the col 
-                # TODO maybe update missing to be similar to misformatted where just one error message and one tab per tracker
-            
-            # if still discrepant, look at what is in the source but not in the map file
-            
-            # go through final gdf noting mapname
-            # go through source dict
-            # print tracker name
-            # filter based on mapname in source df
-            # first handle mutliple countries in source df
-            
-            # use something like the below to find what rows are missing
-            # print(f'Source Data {tracker}: {len(df)}')
-            # print(f'Map Data {tracker}: {len(map_df)}')
-            # df_missing = df[~df['id'].isin(map_df['id'])]
-            # df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
-            
-            
-            print('Testing DD Files')
-            # should be the same amount unless missing crucial data like a name
-            # if discrepant, look at what is in the source but not in the dd file
+                        print("-" * 40)
+                        print(f'MAP: {mapname}')
+                        print(source_tracker_tup[1])
+                        tracker = source_tracker_tup[1]
+                        df = source_tracker_tup[0]
 
-            
-            
-            print('Testing refined DD Files')
-            # should be the same amount unless missing crucial data like a name
-            # if discrepant, look at what is in the source but not in the dd file
+                        renaming_sel = renaming_cols_dict[tracker]
+                        df = df.rename(columns=renaming_sel) 
+
+                        print(final_map)
+                        for key, value in final_map.items():
+                            if 'tracker-acro' in value.columns:
+                                pass
+                            else:
+                                print(value.columns)
+                                # input(f'no tracker-acro in this final_dd tab for {mapname} {key}')
+                        
+                        map_df = final_map[final_map['tracker-acro']==tracker]
+                        if needed_geo == '':
+                            pass
+                        else:
+                            if tracker in tracker_mult_countries: # currently no lists like with regions since goit and ggit created countries a list from start and end countries
+                                # if any of the countries in the country column list is in the needed geo list then keep it if none then filter out
+                                for sep in ',;-':
+                                    # I want to break up any multiple countries into a list of countries
+                                    # then check if any of those are in the needed_geo list
+                                    df['country_to_check'] = df['areas'].str.strip().str.split(sep) 
+
+                                # filter the df on the country column to see if any of the countries in that list is in the needed geo
+                                df = df[df['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
+
+                                df = df.drop(columns=['country_to_check'])
+
+                            else:
+
+                                df['country_to_check'] = df['areas'].str.strip()
+
+                                # need this by country because not a GEM region, problematic since goget uses region and numbers when filtered by country in the gem region do not match 636 versus 578 for africa
+                                df = df[df['country_to_check'].isin(needed_geo)]
+                            
+                                df = df.drop(columns=['country_to_check'])
+                            print(f'len after geo filter {tracker} {len(df)}')  
+
+                            # # df = df[df['areas'].isin(needed_geo)] # TODO fix for this because it excludes when there is multiple countries and shouldn't OG0013150 for africa
+                            # print(f'Source Data {tracker}: {len(df)}')
+                            # print(f'Map Data {tracker}: {len(map_df)}')
+                            # df_missing = df[~df['id'].isin(map_df['id'])]
+                            # df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
+                            
+                            # print(f'Map Discrepancy Count for {mapname}')
+                            # print(len(df_missing))
+                            # print('Reverse map discrepancy Count')
+                            # print(len(df_missing_reverse))
+                            # # print(df_missing_reverse)
+                            
+                            # if len(df_missing) > 0:
+                            #     print(f'df missing {df_missing}')
+                            #     discrepancies[f'{tracker}{mapname}'] = df_missing
+                            #     print(df_missing[['id', 'areas','geometry']])
+                            #     if tracker == 'GGIT-eu':
+                            #         print(df_missing)
+                            #         input('check GGIT EU')
+                                    
+                            # print(f'Map Discrepancy Count for {mapname}')
+                            # print(len(df_missing))
+
+                            # if len(df_missing_reverse) > 0:
+                            #     print(f'df reverse missing {df_missing_reverse}')
+                            #     discrepancies[f'{tracker}-reverse missing'] = df_missing_reverse
+                            #     print(df_missing_reverse[['id', 'areas','geometry']])
+                            #     if tracker == 'GGIT-eu':
+                            #         print(df_missing_reverse)
+                            #         input('check GGIT EU')
+                            # print('Map Reverse Discrepancy Count')
+                            # print(len(df_missing_reverse))
+                        
+                        if tracker == 'GOGPT':
+                            # filter out oil only fuel # Alcúdia power station
+                            drop_row = []
+                            for row in df.index:
+                                fuel_cat_list = df.loc[row, 'fuel'].split(',')
+                                new_fuel_cat_list = []
+                                for fuel in fuel_cat_list:
+                                    fuel = fuel.split(':')[0]
+                                    new_fuel_cat_list.append(fuel)
+                                
+                                # for Alcudia does not contain gas, or only contains fossil liquids
+                                
+                                # fossil liquids: diesel, fossil gas: natural ga...      37.5  operating   
+                                if len(new_fuel_cat_list) > 1:
+                                    if new_fuel_cat_list.count('fossil liquids') == len(new_fuel_cat_list):
+                                            drop_row.append(row)
+                
+                                elif new_fuel_cat_list == ['fossil liquids']:
+                                    drop_row.append(row)
+                                        
+                            # drop all rows from df that are goget and not in the gas list ids 
+                            df.drop(drop_row, inplace=True)  
+                            print(f'len after gas only filter {tracker} {len(df)}')  
+
+                            # df = df[df['areas'].isin(needed_geo)] # TODO fix for this because it excludes when there is multiple countries and shouldn't OG0013150 for africa
+                            # print(f'Source Data {tracker}: {len(df)}')
+                            # print(f'Map Data {tracker}: {len(map_df)}')
+                            # df_missing = df[~df['id'].isin(map_df['id'])]
+                            # df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
+                            
+                            # print(f'Map Discrepancy Count for {mapname}')
+                            # print(len(df_missing))
+                            # print('Reverse map discrepancy Count')
+                            # print(len(df_missing_reverse))
+                            # # print(df_missing_reverse)
+                            
+                            # if len(df_missing) > 0:
+                            #     print(f'df missing {df_missing}')
+                            #     discrepancies[f'{tracker}{mapname}'] = df_missing
+                            #     print(df_missing[['id', 'areas','geometry']])
+                            #     if tracker == 'GGIT-eu':
+                            #         print(df_missing)
+                            #         input('check GGIT EU')
+                                    
+                            # print(f'Map Discrepancy Count for {mapname}')
+                            # print(len(df_missing))
+
+                            # if len(df_missing_reverse) > 0:
+                            #     print(f'df reverse missing {df_missing_reverse}')
+                            #     discrepancies[f'{tracker}-reverse missing'] = df_missing_reverse
+                            #     print(df_missing_reverse[['id', 'areas','geometry']])
+                            #     if tracker == 'GGIT-eu':
+                            #         print(df_missing_reverse)
+                            #         input('check GGIT EU')
+                            # print('Map Reverse Discrepancy Count')
+                            # print(len(df_missing_reverse))
+                        elif tracker == 'GOGET':
+                            # goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
+
+                            # # filter out oil
+                            # list_ids = handle_goget_gas_only_workaround(goget_orig_file)
+                            # print(len(ndf)) # 3095 will be less because not all trackers
+                            # filter = (df['tracker-acro']=='GOGET') & (df['prod-gas']=='') #2788
+                            # filter = df['id'] in list_ids #2788
+                            # df = df[(df['tracker-acro']=='GOGET') & (df['id'] in list_ids)]
+                            drop_row = []
+                            print(set(df['Fuel type'].to_list()))
+                            input('Check if Oil is in the fuel type above or not and adjust if not!')
+
+                            for row in df.index:
+                                # if df.loc[row, 'tracker-acro'] == 'GOGET':
+                                # if df.loc[row, 'id'] not in list_ids:
+                                if df.loc[row, 'Fuel type'] == 'oil':
+                                    drop_row.append(row)
+                            # drop all rows from df that are goget and not in the gas list ids 
+                            df.drop(drop_row, inplace=True)     
+                            print(f'len after gas only filter {tracker} {len(df)}')  
+                            
+
+                            # df = df[df['areas'].isin(needed_geo)] # TODO fix for this because it excludes when there is multiple countries and shouldn't OG0013150 for africa
+                            # print(f'Source Data {tracker}: {len(df)}')
+                            # print(f'Map Data {tracker}: {len(map_df)}')
+                            # df_missing = df[~df['id'].isin(map_df['id'])]
+                            # df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
+                            
+                            # print(f'Map Discrepancy Count for {mapname}')
+                            # print(len(df_missing))
+                            # print('Reverse map discrepancy Count')
+                            # print(len(df_missing_reverse))
+                            # # print(df_missing_reverse)
+                            
+                            # if len(df_missing) > 0:
+                            #     print(f'df missing {df_missing}')
+                            #     discrepancies[f'{tracker}{mapname}'] = df_missing
+                            #     print(df_missing[['id', 'areas','geometry']])
+                            #     if tracker == 'GGIT-eu':
+                            #         print(df_missing)
+                            #         input('check GGIT EU')
+                                    
+                            #     print(f'Map Discrepancy Count for {mapname}')
+                            #     print(len(df_missing))
+
+                            # if len(df_missing_reverse) > 0:
+                            #     print(f'df reverse missing {df_missing_reverse}')
+                            #     discrepancies[f'{tracker}-reverse missing'] = df_missing_reverse
+                            #     print(df_missing_reverse[['id', 'areas','geometry']])
+                            #     if tracker == 'GGIT-eu':
+                            #         print(df_missing_reverse)
+                            #         input('check GGIT EU')
+                            #     print('Map Reverse Discrepancy Count')
+                            #     print(len(df_missing_reverse))
+                        print(f'Source Data {tracker}: {len(df)}')
+                        print(f'Map Data {tracker}: {len(map_df)}')
+                        df_missing = df[~df['id'].isin(map_df['id'])]
+                        df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
+                        
+                        print(f'Map Discrepancy Count for {mapname}')
+                        print(len(df_missing))
+                        print('Reverse map discrepancy Count')
+                        print(len(df_missing_reverse))
+                        # print(df_missing_reverse)
+                        
+                        if len(df_missing) > 0:
+                            print(f'df missing {df_missing}')
+                            discrepancies[f'{tracker}{mapname}'] = df_missing
+                            print(df_missing[['id', 'areas','geometry']])
+                            if tracker == 'GGIT-eu':
+                                print(df_missing)
+                                input('check GGIT EU')
+                                
+                        print(f'Map Discrepancy Count for {mapname}')
+                        print(len(df_missing))
+
+                        if len(df_missing_reverse) > 0:
+                            print(f'df reverse missing {df_missing_reverse}')
+                            discrepancies[f'{tracker}-reverse missing {mapname}'] = df_missing_reverse
+                            print(df_missing_reverse[['id', 'areas','geometry']])
+                            if tracker == 'GGIT-eu':
+                                print(df_missing_reverse)
+                                input('check GGIT EU')
+                        print('Map Reverse Discrepancy Count')
+                        print(len(df_missing_reverse))
+                        input('Check results gas only')
+                    else:
+                        continue
+        with pd.ExcelWriter(discrepancies_file_name, engine='openpyxl') as writer:    
+
+            # print(type(discrepancies)) 
+            # print(discrepancies) 
+            # input('about to save to excel...')
+            if discrepancies:
+                for item in discrepancies.items():
+                    df = item[1]
+                    tracker = item[0]
+                    tab_name = tracker.replace('-', '')
+                    df.to_excel(writer, sheet_name=f'{mapname}{tab_name} ({len(df)})', index=False)
+            else:
+                # Create a fake sheet to ensure at least one sheet is visible
+                pd.DataFrame({'No discrepancies': []}).to_excel(writer, sheet_name=f'No discrepancies', index=False)
+
+                
+                
 
 
-            # run the tests from external notebook
-            
-            
-            
-            # run the tests any capacity scaling higher than total world energy in joules
-            
-            # run tests comparing old and new dataset version of final
-            print('to do')
-            
-    
-if run_post_tests:
-    # post_tests(final_dict_gdfs)
-    robust_tests_map()
-    robust_tests_dd()
-    
+    def post_tests(final_dict_gdfs):
+        discrepancies = {}
+        print('Testing Map Files')
+        # compare final map files to source files
+        # load un renamed dict source dfs from pickl
+        # this should always exist since it happens with local_copy or not
+
+        with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/local_pkl/source_data_dict_{iso_today_date}.pkl', 'rb') as f:
+            dict_holding_sdfs = pickle.load(f) 
+        source_data = dict_holding_sdfs # from pre_test functions
+        # print(source_data)
+        # input('Check source data')
+        #(input('Check that the above is a list of all gdfs')
+        # use global source data from pre-test section
+        for mapname, gdf in final_dict_gdfs.items():
+            # say mapname = asia gas tracker
+            # then that is the final, we want to compare to source
+            # mapname = source-global dict_holding_sdfs_orig
+            list_of_map_trackers = list(set(gdf['tracker-acro'].to_list()))
+            for map_acro in list_of_map_trackers:
+                #MAP DATA
+                sel_map_df = gdf[gdf['tracker-acro']==map_acro]
+                for gdf in source_data.values:
+                    print(gdf['tracker-acro'].iloc[0])
+                    source_acro = gdf['tracker-acro'].iloc[0]
+                    if source_acro == map_acro:
+                        source_df = gdf.copy()
+                        # apply same filtering for each dataset
+                        # filter by country
+                        if mapname == 'asia':
+                            needed_geo = asia_countries
+                        elif mapname == 'latam':
+                            needed_geo = latam_countries
+                        elif mapname == 'europe':
+                            needed_geo = europe_countries
+                        elif mapname == 'africa':
+                            needed_geo = africa_countries
+                        else:
+                            print(f'This is mapname: {mapname}') 
+                        
+                        # handle countries in creating the source... TODO
+
+                        reg_name_to_delete, col_country_name = find_region_country_colname(source_df)
+                        
+                        # filter by fuel
+
+                        source_df = create_filtered_df_list_by_map(source_df, col_country_name, reg_name_to_delete, mapname, needed_geo )
+                        
+                        # now rename so can do analysis easily
+                        renaming_dict_sel = renaming_cols_dict[map_acro]
+                        source_df = source_df.rename(columns=renaming_dict_sel) 
+                        # NOW we compare map data to source data
+                        print(f'Source Data {source_acro}: {len(source_df)}')
+                        print(f'Map Data {map_acro}: {len(sel_map_df)}')
+                        df_missing = source_df[~source_df['id'].isin(sel_map_df['id'])]
+                        df_missing_reverse = sel_map_df[~sel_map_df['id'].isin(source_df['id'])]                 
+                    if len(df_missing) > 0:
+                        discrepancies[map_acro] = df_missing
+                        print(df_missing) 
+                        
+                    if len(df_missing_reverse) > 0:
+                        discrepancies[f'{map_acro}_r'] = df_missing_reverse
+                        print(df_missing_reverse)           
+                # if discrepancy test if it is same amount as missing/misformatted for that tracker
+                    # that would require tallying unique problem rows by tracker for all tabs which are on the col 
+                    # TODO maybe update missing to be similar to misformatted where just one error message and one tab per tracker
+                
+                # if still discrepant, look at what is in the source but not in the map file
+                
+                # go through final gdf noting mapname
+                # go through source dict
+                # print tracker name
+                # filter based on mapname in source df
+                # first handle mutliple countries in source df
+                
+                # use something like the below to find what rows are missing
+                # print(f'Source Data {tracker}: {len(df)}')
+                # print(f'Map Data {tracker}: {len(map_df)}')
+                # df_missing = df[~df['id'].isin(map_df['id'])]
+                # df_missing_reverse = map_df[~map_df['id'].isin(df['id'])]
+                
+                
+                print('Testing DD Files')
+                # should be the same amount unless missing crucial data like a name
+                # if discrepant, look at what is in the source but not in the dd file
+
+                
+                
+                print('Testing refined DD Files')
+                # should be the same amount unless missing crucial data like a name
+                # if discrepant, look at what is in the source but not in the dd file
+
+
+                # run the tests from external notebook
+                
+                
+                
+                # run the tests any capacity scaling higher than total world energy in joules
+                
+                # run tests comparing old and new dataset version of final
+                print('to do')
+                
+        
+    if run_post_tests:
+        # post_tests(final_dict_gdfs)
+        robust_tests_map()
+        # robust_tests_dd()
+        
