@@ -350,9 +350,11 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                         
                     #     print(f'These are coordinate issues FIX THEM: {issues_coords}')
                     #     ##(input('please')
+                    for col in df.columns:
+                        print(col)
                     
-                    if 'Latitude' in df_map.columns:
-                        print('Latitude in cols')
+                    if 'latitude' in df_map.columns:
+                        print('latitude in cols')
                         gdf = convert_coords_to_point(df_map) 
                         print(f'len of gdf after convert coords: {len(gdf)}')
                         # append gdf to list of gdfs for map - though now we can have it as a csv for faster AET non tile load
@@ -367,29 +369,39 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                         # if gdf['tracker-acro'].iloc[0] == 'GCTT':
                         #     print(gdf)
                         #     input('This is gctt gdf ... ')
-                    else:
+                    elif 'WKTFormat' in df.columns:
                         # print('Latitude not in cols')
-                        # print(tracker)
+                        print(tracker)
                         # input('check if eu pipelines eventually come up here - if so check the next inputs that they are not empty until "GeoDataFrames have been saved to"')
     
-                        df_map = insert_incomplete_WKTformat_ggit_eu(df_map)
+                        # df_map = insert_incomplete_WKTformat_ggit_eu(df_map)
+                        # if 'WKTFormat' in df.columns:
+
                         gdf = convert_google_to_gdf(df_map) # this drops all empty WKTformat cols
                         
                         print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
 
                         list_gdfs_by_map.append(gdf)
-                        # print(list_gdfs_by_map)
-                        # gdf_to_geojson(gdf, f'{path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson')        
-                    
-                        # # printf'Added gdf {tracker} for map {mapname} to list of gdfs for map and saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson.')
+                    # print(list_gdfs_by_map)
+                    # gdf_to_geojson(gdf, f'{path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson')        
+                
+                    # # printf'Added gdf {tracker} for map {mapname} to list of gdfs for map and saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.geojson.')
                         with open(f'local_pkl/{mapname}_{tracker}_gdf_{iso_today_date}.pkl', 'wb') as f:
                             pickle.dump(gdf, f)
                             print(f'File is: {f}')
                             count_of_files += 1
 
                         print(f"GeoDataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.pkl")         
-                                            
+                    else:
+                        print(tracker)
+                        for col in df.columns:
+                            print(col)
+                        
+                        
+                        input('Figure out how to turn this into a gdf')
+                ## do we want to handle gogpt eu the same as oil and gas extraction? no because we don't know the future of it.           
                 else:
+                    
                     count_of_files = 0
 
                     try:
@@ -397,10 +409,24 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                         # print(prep_dict[tracker]['gspread_key'])
                         # print(prep_dict[tracker]['gspread_tabs'])
                         # print(df.columns)
-                        print(f'Shape of df: {df.shape}')
-                        # ##(input('check shape!')
+                    except HttpError as e:
+                        # Handle rate limit error (HTTP status 429)
+                        if e.resp.status == 429:
+                            print(f"Rate limit exceeded. Retrying in {delay} seconds...")
+                            time.sleep(delay)
+                            delay *= 2  # Exponential backoff
+                        else:
+                            raise e  # Re-raise other errors
+
+                    except Exception as e:
+                        print(f"An error occurred: {e}")
+                        input('Check why error occurred in pull_gsheet_data function')
+                        break
+
                     
-                        
+                    finally:
+                        print(f'Shape of df: {df.shape}')
+                        # input('check shape!')
                         # df.to_excel(f'{path_for_test_results}{mapname}_{tracker}_df_{iso_today_date}.xlsx', index=False)
                         # save df as pickle file
 
@@ -439,7 +465,7 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                         print(f"DataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_df_{iso_today_date}.pkl")         
                         # df_dd has all units even with missing coords
                         # df_map only has units with coords
-                        df_map, issues_coords = coordinate_qc(df, col_country_name) 
+                        df_map, issues_coords = coordinate_qc(df) 
                         print(f'len of df after coordinate qc: {len(df_map)}') 
                         # df.to_excel(f'{path_for_test_results}{mapname}_{tracker}_df-altered-coords_{iso_today_date}.xlsx', index=False)
                         # if len(issues_coords) > 0:
@@ -447,8 +473,8 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                         #     print(f'These are coordinate issues FIX THEM: {issues_coords}')
                         #     ##(input('please')
                         
-                        if 'Latitude' in df_map.columns:
-                            print('Latitude in cols')
+                        if 'latitude' in df_map.columns:
+                            print('latitude in cols')
                             gdf = convert_coords_to_point(df_map) 
                             print(f'len of gdf after convert coords: {len(gdf)}')
                             # append gdf to list of gdfs for map - though now we can have it as a csv for faster AET non tile load
@@ -463,12 +489,24 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                             # if gdf['tracker-acro'].iloc[0] == 'GCTT':
                             #     print(gdf)
                             #     input('This is gctt gdf ... ')
-                        else:
+                        elif 'WKTFormat' in df.columns:
+                            # print('Latitude not in cols')
+                            print(tracker)
+                            # input('check if eu pipelines eventually come up here - if so check the next inputs that they are not empty until "GeoDataFrames have been saved to"')
+        
+                            # df_map = insert_incomplete_WKTformat_ggit_eu(df_map)
+                            # if 'WKTFormat' in df.columns:
+
+                            gdf = convert_google_to_gdf(df_map) # this drops all empty WKTformat cols
+                            
+                            print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
+
+                            list_gdfs_by_map.append(gdf)
                             # print('Latitude not in cols')
                             # print(tracker)
                             # input('check if eu pipelines eventually come up here - if so check the next inputs that they are not empty until "GeoDataFrames have been saved to"')
-     
-                            df_map = insert_incomplete_WKTformat_ggit_eu(df_map)
+                            
+                            # df_map = insert_incomplete_WKTformat_ggit_eu(df_map) # this was a temporary thing before the ggit pipeline release
                             gdf = convert_google_to_gdf(df_map) # this drops all empty WKTformat cols
                             
                             print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
@@ -484,20 +522,11 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                                 count_of_files += 1
 
                             # print(f"GeoDataFrames have been saved to {path_for_test_results}{mapname}_{tracker}_gdf_{iso_today_date}.pkl")         
-                                                
-                    except HttpError as e:
-                        # Handle rate limit error (HTTP status 429)
-                        if e.resp.status == 429:
-                            print(f"Rate limit exceeded. Retrying in {delay} seconds...")
-                            time.sleep(delay)
-                            delay *= 2  # Exponential backoff
                         else:
-                            raise e  # Re-raise other errors
-
-                    except Exception as e:
-                        print(f"An error occurred: {e}")
-                        input('Check why error occurred in pull_gsheet_data function')
-                        break
+                            print(tracker)
+                            for col in df.columns:
+                                print(col)
+                            input('Figure out how to turn this into a gdf')                                                
                     
         dict_list_gdfs_by_map[mapname] = list_gdfs_by_map
         dict_list_dfs_by_map[mapname] = list_dfs_by_map
@@ -967,17 +996,17 @@ def capacity_conversions(cleaned_dict_map_by_one_gdf):
         else:
             # first let's get GHPT cap added 
             # # printmapname) # africa
-            # # printset(gdf_converted['tracker-acro'].to_list())) # only pipeline 
+            # # printset(gdf_converted['tracker-acro'].to_list())) # only pipeline
+             
             ghpt_only = gdf_converted[gdf_converted['tracker-acro']=='GHPT'] # for GGPT we need to re run it to get it 
-            print(len(ghpt_only))
             print(mapname)
             # ##(input('check')
             gdf_converted = gdf_converted[gdf_converted['tracker-acro']!='GHPT']
-            # # printlen(ghpt_only['capacity']))
-            # # printlen(ghpt_only['capacity1']))
-            # # printlen(ghpt_only['capacity2']))
-            # # # ##(input('Check that they are all equal GHPT')
-            ghpt_only['capacity'] = ghpt_only.apply(lambda row: row['capacity'] + row['capacity2'], axis=1)
+            for col in ghpt_only.columns:
+                print(col)
+            print(ghpt_only['tracker_custom'])
+            print(ghpt_only['capacity'])
+            ghpt_only['capacity'] = ghpt_only.apply(lambda row: row['capacity'] + row['capacity2'], axis=1) 
             gdf_converted = pd.concat([gdf_converted, ghpt_only],sort=False).reset_index(drop=True)
         # # # printlen(gdf_converted))
     
@@ -1359,37 +1388,37 @@ def add_goit_boedcap_from_baird(gdf):
     return gdf
   
     
-def add_ggit_routes_from_baird(gdf):
-    # pull in capacity boed from new goit file on projectID
-    # pull in routes from new ggit file on projectID
+# def add_ggit_routes_from_baird(gdf):
+#     # pull in capacity boed from new goit file on projectID
+#     # pull in routes from new ggit file on projectID
 
-    print('BEFORE')
-    print(len(gdf))
-    print(gdf.info())
+#     print('BEFORE')
+#     print(len(gdf))
+#     print(gdf.info())
   
-    # set up fixed ggit file pd
-    ggit_routes = gpd.read_file(ggit_routes_updated)
+#     # set up fixed ggit file pd
+#     ggit_routes = gpd.read_file(ggit_routes_updated)
     
-    # ggit_routes = ggit_routes.rename(columns={'ProjectID':'id'})
+#     # ggit_routes = ggit_routes.rename(columns={'ProjectID':'id'})
 
-    # Merge ggit_routes with the main gdf on 'id'
-    gdf = gdf.merge(ggit_routes[['ProjectID', 'geometry']], on='ProjectID', how='left', suffixes=('', '_new'))
+#     # Merge ggit_routes with the main gdf on 'id'
+#     gdf = gdf.merge(ggit_routes[['ProjectID', 'geometry']], on='ProjectID', how='left', suffixes=('', '_new'))
 
-    # Update the 'route' column in gdf with the new values where there is a match
-    gdf['geometry'] = gdf['geometry_new'].combine_first(gdf['geometry'])
+#     # Update the 'route' column in gdf with the new values where there is a match
+#     gdf['geometry'] = gdf['geometry_new'].combine_first(gdf['geometry'])
     
-    # Drop the temporary 'route_new' column
-    gdf.drop(columns=['geometry_new'], inplace=True)
+#     # Drop the temporary 'route_new' column
+#     gdf.drop(columns=['geometry_new'], inplace=True)
     
-    print('AFTER')
+#     print('AFTER')
     
-    print(len(gdf))
+#     print(len(gdf))
 
-    # for col in gdf.columns:
-    #     print(col)
-    print(gdf.info())
-    # input('Check the above...')
-    return gdf
+#     # for col in gdf.columns:
+#     #     print(col)
+#     print(gdf.info())
+#     # input('Check the above...')
+#     return gdf
 
 # TODO
 def manual_lng_pci_eu_temp_fix(gdf):
@@ -1443,6 +1472,7 @@ def last_min_fixes(one_gdf_by_maptype):
         # # # ##(input('Handle missing countries')
         # handle situation where Guinea-Bissau IS official and ok not to be split into separate countries 
         gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Guinea,Bissau','Guinea-Bissau')) 
+        gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Timor,Leste','Timor-Leste')) 
         
         # something is happening when we concat, we lose goget's name ... 
         # gdf_empty_name = gdf[gdf['name']=='']
@@ -1507,15 +1537,29 @@ def last_min_fixes(one_gdf_by_maptype):
         # gdf['capacity'] = gdf['capacity'].fillna('')
         # gdf['capacity'] = gdf['capacity'].apply(lambda x: x.replace('', pd.NA))
         # gdf['capacity'] = gdf['capacity'].astype(float) # Stuck with concatting like strings for now? ValueError: could not convert string to float: ''
+                # remove units-of-m if no capacity value ... goget in particular
+        for row in gdf.index:
+          if gdf.loc[row, 'capacity'] == '':
+              gdf.loc[row, 'units-of-m'] = ''
+          elif gdf.loc[row, 'capacity-details'] == '':
+              gdf.loc[row, 'units-of-m'] = ''
+          elif gdf.loc[row, 'capacity-table'] == np.nan:
+              gdf.loc[row, 'units-of-m'] = ''
+
+        year_cols = ['start-year', 'prod-year-gas', 'prod-year-oil']
+
+        for col in year_cols:
+            gdf[col] = gdf[col].apply(lambda x: str(x).split('.')[0])
+            gdf[col].replace('-1', 'not stated')
+        # TODO add check that year isn't a -1 ... goget.. for egt
         
-        
-        # if mapname == 'europe':
-        #     print(mapname)
-        #     gdf = pci_eu_map_read(gdf)
-        #     gdf = assign_eu_hydrogen_legend(gdf)
-        #     gdf = gdf[gdf['tracker-acro']!='GGIT']
-        #     gdf = manual_lng_pci_eu_temp_fix(gdf)
-        #     gdf = swap_gas_methane(gdf)
+        if mapname == 'europe':
+            print(mapname)
+            gdf = pci_eu_map_read(gdf)
+            # gdf = assign_eu_hydrogen_legend(gdf)
+            # gdf = gdf[gdf['tracker-acro']!='GGIT']
+            # gdf = manual_lng_pci_eu_temp_fix(gdf)
+            # gdf = swap_gas_methane(gdf)
         
         one_gdf_by_maptype_fixed[mapname] = gdf
     # # printone_gdf_by_maptype_fixed.keys())
@@ -1555,6 +1599,10 @@ def create_map_file(one_gdf_by_maptype_fixed):
             gdf.to_excel(f'{path_for_download_and_map_files_af}{mapname}_{iso_today_date}.xlsx', index=False)
             gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
             gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.xlsx', index=False)
+            
+            newcountriesjs = set(gdf['areas'].to_list())
+            rebuild_countriesjs(mapname, newcountriesjs)
+            
 
         else:
             gdf.to_file(f'{path_for_download_and_map_files}{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
@@ -1566,6 +1614,9 @@ def create_map_file(one_gdf_by_maptype_fixed):
 
             gdf.to_excel(f'{path_for_download_and_map_files}{mapname}_{iso_today_date}.xlsx', index=False)
             gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.xlsx', index=False)
+            newcountriesjs = set(gdf['areas'].to_list())
+            rebuild_countriesjs(mapname, newcountriesjs)
+            
         # if mapname == 'africa':
         #     gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_output/{mapname}_{iso_today_date}.xlsx', index=False)
         # # printf'Saved xlsx version just in case to {path_for_download_and_map_files}{mapname}_{iso_today_date}.xlsx')
@@ -1751,7 +1802,12 @@ def gather_all_about_pages(prev_key_dict, prep_df, needed_tracker_geo_by_map):
                 # using the same as gas pipelines because about page was identical from last release dec 2023
                 elif tracker == 'Gas Pipelines EU': 
                     tracker_key = about_page_ggit_goit['Gas Pipelines']
-                    
+                elif tracker == 'LNG Terminals EU':
+                    tracker_key = about_page_ggit_goit['LNG Terminals']
+                elif tracker == 'Oil & Gas Plants EU':
+                    tracker_key = prep_df[prep_df['official name'] == 'Oil & Gas Plants']['gspread_key'].values[0]
+
+                                        
                 else:
                     tracker_key = prep_df[prep_df['official name'] == tracker]['gspread_key'].values[0]
                     print(tracker_key)
@@ -2071,7 +2127,7 @@ def reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map):
                                     dd_df_dict[file_trackername].to_excel(writer, sheet_name=f'{tracker_official}', index=False)         
                             
         else:
-            for mapname in ['africa', 'asia', 'europe', 'LATAM']:
+            for mapname in ['africa', 'asia', 'LATAM', 'europe']:
                 path_for_download_and_map_files_reordered = gem_path + mapname + '/compilation_output/' + f'{new_release_date}_reordered/'
                 path_for_download_and_map_files = gem_path + mapname + '/compilation_output/'    
                 os.makedirs(path_for_download_and_map_files_reordered, exist_ok=True)

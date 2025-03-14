@@ -59,6 +59,7 @@
     "Uganda",
     "Western Sahara",
     "Zambia",
-    "Zimbabwe"
+    "Zimbabwe",
+    "Angola-Republic of the Congo"
   ]
 }

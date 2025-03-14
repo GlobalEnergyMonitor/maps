@@ -85,8 +85,8 @@ for df in gdf_to_be_merged:
 
 
 for df in gdf_to_be_merged:
-    df = split_goget_ggit(df)
-    print(df['tracker'].iloc[0])
+    df = split_goget_ggit_eu(df)
+    # print(df['tracker'].iloc[0])
     # print(df.columns)
 
 
@@ -106,9 +106,12 @@ for df in gdf_to_be_merged:
     final_list.append(df)
     print(df['tracker'].iloc[0])
     print(df.columns)
-    
+    tracker_sel = df['tracker-acro'].iloc[0]
+    if tracker_sel == 'GOGET':
+        print(df['areas'])
+        input('check goget areas after rename_gdfs')
 
-#merge_all_gdfs_eu
+    
 
 one_gdf = merge_all_gdfs_eu(final_list)
 # one_gdf['areas']
@@ -126,16 +129,28 @@ one_gdf.reset_index(drop=True, inplace=True)
 # filter down one_gdf to just id
 print(one_gdf[['id', 'tracker']].groupby('tracker').count())
 
+# print(set(one_gdf['areas'].to_list()))
+# input('Check areas after one_gdf to test this') # worked
 
 renamed_one_gdf_by_map = {'europe': one_gdf}
-
+# print(set(one_gdf['areas'].to_list()))
+tracker_sel = one_gdf['tracker-acro'].iloc[0]
+if tracker_sel == 'GOGET':
+    print(one_gdf['areas'])
+    input('check goget areas after renamed_one_gdf_by_map')
+# input('Check areas after renamed_one_gdf_by_map_with_search') # worked
 
 renamed_one_gdf_by_map_with_search = create_search_column(renamed_one_gdf_by_map)
 
+# input('Check areas in create search col for one_gdf')#worked
+
 cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions_eu(renamed_one_gdf_by_map_with_search)
+# input('Check areas in create capacity_conversions_eu for one_gdf') # worked
 
 cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
+# input('Check areas in create map_ready_statuses for one_gdf') #worked
+
 cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
 one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt_eu(cleaned_dict_by_map_one_gdf_with_better_countries)
-one_gdf_by_maptype_fixed = last_min_fixes_eu(one_gdf_by_maptype)
+one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype)
 final_dict_gdfs = create_map_file_eu(one_gdf_by_maptype_fixed)

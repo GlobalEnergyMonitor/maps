@@ -1,12 +1,16 @@
 
 
 #########
-# STEP 1: Pull all data into a huge df (including about pages)
-# STEP 2: Do all adjustments on renamed data
-# STEP 3: Filter based on tracker, geo, and fuel
-# STEP 4: Make map and dd for each combination
-# STEP 5: Format dd
+# STEP 1: Pull all data into a huge df (including about pages) (have local copies of ggit, ggitlng, goit, ggiteu, ggitlngeu)
+# STEP 2: Filter based on tracker, geo, and fuel (use what we use for tests)
+# STEP 3: Save all data downloads and send to April (for goget use two tabs, for egt pull in last egt tabs for GOGPT)
+# STEP 4: Do all adjustments on renamed data
+# STEP 5: Make map file by running script for all regions and fuels
 
+# do all data downloads africa, latam, asia, europe
+# technically ggit, and ggit lng got updated when egt was updated for egt 
+# so those about pages should reflect that egt release date not the global release date
+# is that also true for gogpt eu tho? i mean no... 
 ########
 
 # print date
@@ -20,4 +24,7 @@
 # also save original plants by region, and by rough country
 # also save capacity by rough country
 # also save capacity by region
-# 
+
+
+
+
