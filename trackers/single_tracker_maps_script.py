@@ -133,6 +133,7 @@ def process_steel_iron_parent(tuple_gist, test_results_folder):
     df = unit_df.merge(right=plant_df, left_on='GEM Plant ID', right_on='Plant ID', how='inner') # 7783 rows x 27 columns
     print(len(df))
     # df = df.merge(right=plant_cap_df, on='Plant ID',how='inner') # 14494 when both outer merges and now 14451 with merged those two earlier
+    df = df.drop_duplicates(subset='GEM Unit ID')
     print(len(df))
 
     input('compare before after second merge')
