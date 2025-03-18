@@ -6,9 +6,9 @@ from numpy import true_divide
 from creds import client_secret
 
 
-trackers_to_update = ['Iron & Steel']
+trackers_to_update = ['Geothermal'] #['Iron & Steel']
 new_release_date = 'March 2025' 
-priority = [''] # europe
+priority = [] # europe
 
 augmented = True
 data_filtering = True

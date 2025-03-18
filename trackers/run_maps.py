@@ -10,8 +10,36 @@ from tqdm import tqdm # can adapt more, special tweaking for dataframe!
 
 for tracker in tqdm(trackers_to_update, desc='Baking'):
     # print(tracker)
-    
-    if tracker == 'Iron & Steel':
+    if tracker == 'Geothermal':
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/geothermal/test_results/'
+
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/geothermal/compilation_output/'
+
+        # creates single map file
+        key, tabs = get_key_tabs_prep_file(tracker)
+
+        df = create_df(key, tabs)
+        # df = split_coords(df)
+
+        df = rename_cols(df)
+        df = fix_status_inferred(df)
+        print(df.info())
+        df = filter_cols(df,final_cols=['country/area', 'project-name','unit-name', 'project-name-in-local-language-/-script',
+                                        'unit-capacity-(mw)', 'status', 'start-year', 'retired-year',
+                                        'operator', 'owner', 'lat', 'lng', 'location-accuracy', 'city', 'state/province',
+                                        'region', 'gem-unit-id', 'gem-location-id', 'url', 'technology'         
+                                        ])
+        df = input_to_output(df, f'{output_folder}{tracker}-map-file-{iso_today_date}.csv')
+        # creates multi-map files 
+        print('DONE MAKING GGPT SINGLE MAP onto MULTI MAPS')
+        input('continue?')
+        # creates multi-tracker maps
+        # if tracker to update is coal terminals then look at sheet and create all regional and of course single
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+          
+        
+        
+    elif tracker == 'Iron & Steel':
         test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gist/test_results/'
         output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gist/compilation_output/'
         
