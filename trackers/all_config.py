@@ -5,38 +5,40 @@ import gspread
 from numpy import true_divide
 from creds import client_secret
 
-# trackers_to_update = ['Plumes']
-# trackers_to_update = ['Bioenergy']
-# trackers_to_update = ['Oil & Gas Plants'] # egt and agt and latam and then oct aet too 
+
 trackers_to_update = ['Oil & Gas Extraction']
-# trackers_to_update = ['Coal Terminals']
-tracker_folder_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
-goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
-goget_orig_tab = ['Main data','Production and reserves']
+new_release_date = 'February 2025' 
+priority = [''] # europe
 
 augmented = True
 data_filtering = True
 
 #### CREATE ####
-map_create = True # work on subnat
-dwlnd_create = False
-about_create = False # read api error
+map_create = False # work on subnat
+dwlnd_create = True
+about_create = True 
 # summary_create = False
 
 #### TEST #####
-run_pre_tests = True # TODO need to add so that there is utility here
+run_pre_tests = False # TODO need to add so that there is utility here
 run_post_tests = True
 map_to_test = '' # change if testing a single map not a regional one
 
 #### REFINE ####
 refine = False 
-local_copy = False  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
+local_copy = True  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
 final_formatting = False
 
-# CAN CHANGE IN MULTI SCRIPT IF PRI EXISTS GOOD IF ONLY REFINING 
-priority = ['']
-# Get today's date
-today_date = datetime.today()
+
+tracker_folder_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
+# goget_orig_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Global Oil and Gas Extraction Tracker - 2024-03-08_1205 DATA TEAM COPY.xlsx'
+# goget_orig_tab = ['Main data','Production and reserves']
+
+egt_dd_key = '1h8Nr8lJJiUIsSIzEmwnici4Js9Brxt7GChDo_DBQF2s' 
+goget_global_key = '1wI11cMqhqZXTK7MVD2semkZIqlF4DSpfsNTaSPBWWO0'
+
+egt_ggit_pipes = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-EGT-Gas-Hydrogen-Pipelines-2025-02 DATA TEAM COPY.geojson'
+egt_ggit_terminals = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-EGT-Terminals-2025-02 DATA TEAM COPY.geojson'
 
 region_key = '1yaKdLauJ2n1FLSeqPsYNxZiuF5jBngIrQOIi9fXysAw'
 region_tab = ['mapping']
@@ -44,26 +46,28 @@ region_tab = ['mapping']
 centroid_key = '1ETg632Bkwnr96YQbtmDwyWDpSHqmg5He0GQwJjJz8IU'
 centroid_tab = ['centroids']
 # Format the date in ISO format
+# Get today's date
+today_date = datetime.today()
+
 iso_today_date = today_date.isoformat().split('T')[0]
 iso_today_date_folder = f'{iso_today_date}/'
 # client_secret = "/GEM_INFO/client_secret.json"
 client_secret_full_path = os.path.expanduser("~/") + client_secret
 gem_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
 path_for_pkl = gem_path + '/local_pkl/'
-pkl_file = f'about_df_dict_by_map_{iso_today_date}.pkl'
 gspread_creds = gspread.oauth(
         scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
         credentials_filename=client_secret_full_path,
         # authorized_user_filename=json_token_name,
     )
-region_cols = 'Region'
 dtype_spec = {} #{'Latitude': float, 'Longitude': float}
-numeric_cols = [] #TODO 
+numeric_cols = ['capacity', 'start_year', 'capacity2', 'prod_start_year', 'prod_gas', 'prod_year_gas', 'prod_oil', 'prod_year_oil', 'prod-coal', ] #STOPPED AT GCMT March 3rd 2025
 list_official_tracker_names = ['Oil & Gas Plants', 'Coal Plants', 'Solar', 'Wind', 'Hydropower', 'Geothermal', 'Bioenergy', 'Nuclear', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Extraction', 'Oil Pipelines', 'Gas Pipelines', 'LNG Terminals']
 
 maps_with_needed_conversion = ['asia', 'europe', 'africa', 'latam', 'ggit']
 gas_only_maps = ['AGT', 'EGT', 'asia', 'europe', 'ggit'] 
 non_gsheet_data = ['Gas Pipelines', 'LNG Terminals', 'Oil Pipelines']
+
 conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']
 gcmt_closed_tab = 'Global Coal Mine Tracker (Close'
@@ -125,18 +129,40 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                                    'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat',
                                    'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2',
                                    },
-                      'GGIT-hy': {'ProjectID':'id','Countries': 'areas','Wiki': 'url',
-                                   'PipelineName':'name', 'SegmentName':'unit_name', 'Status':'status', 'Owner':'owner', 'Parent': 'parent',
-                                   'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat',
-                                   'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2'
-                                   }, 
+                      
+                      # gogpt-eu fuel, h2%, h2-usage-proposed-%, pci5, pci6
+                      'GOGPT-eu': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wiki URL': 'url','Country/Area': 'areas', 'Plant name': 'name', 'Unit name': 'unit_name', 
+                                'Capacity (MW)': 'capacity', 'Status': 'status', 'Fuel': 'fuel', 'Owner(s)': 'owner', 'Parent(s)': 'parent',
+                                'Start year': 'start_year', 'Subnational unit (province, state)': 'subnat', 'Region': 'region', 'Owner':'owner', 'Parent': 'parent'},
+                      'plants': {'gem-location-id':'pid', 'gem-unit-id': 'id','wiki-url': 'url','country/area': 'areas', 'plant-name': 'name', 'unit-name': 'unit_name',
+                                'capacity-(mw)': 'capacity', 'owner(s)': 'owner', 'parent(s)': 'parent', 'plant-name-in-local-language-/-script': 'other-local', 'other-name(s)': 'other-name',
+                                'start-year': 'start_year', 'state/province': 'subnat'},
+
+                      'plants_hy': {'gem-location-id':'pid', 'gem-unit-id': 'id','wiki-url': 'url','country/area': 'areas', 'plant-name': 'name', 'unit-name': 'unit_name',
+                                'capacity-(mw)': 'capacity', 'owner(s)': 'owner', 'parent(s)': 'parent', 'plant-name-in-local-language-/-script': 'other-local', 'other-name(s)': 'other-name',
+                                'start-year': 'start_year', 'state/province': 'subnat'},
+
+                      'extraction': {'unit-id':'id', 'wiki-name': 'name', 'country': 'areas', 'subnational-unit-(province,-state)': 'subnat', 'discovery-year': 'start_year', 'production-start-year': 'prod_start_year',
+                                'gem-region': 'region', 'wiki-url': 'url', 'production---oil-(million-bbl/y)': 'prod_oil', 'production---gas-(million-m³/y)': 'prod_gas',
+                                'production---total-(oil,-gas-and-hydrocarbons)-(million-boe/y)': 'capacity','production-year---oil': 'prod_year_oil', 'production-year---gas': 'prod_year_gas',
+                                'country-list':'mult_countries', 'fuel-type': 'fuel'},
+
+                      'pipes': {'projectid':'id','countries': 'areas','wiki': 'url',
+                                   'pipelinename':'name', 'segmentname':'unit_name',
+                                   'startyear1': 'start_year', 'capacity': 'given_capacity','capacitybcm/y': 'capacity', 'startstate/province': 'subnat',
+                                   'startregion': 'region', 'endstate/province': 'subnat2', 'endregion': 'region2', 'otherenglishnames': 'other-name',
+                                    'otherlanguageprimarypipelinename': 'other-local',
+                                   },
+                      'term': {'comboid':'id','wiki': 'url', 'terminalname': 'name',
+                                   'unitname': 'unit_name', 'country': 'areas', 'capacity': 'given_capacity','capacityinmtpa': 'capacity', 'startyear1': 'start_year', 'Region': 'region',
+                                   'State/Province': 'subnat', 'otherlanguagename': 'other-name'},
                         }
 
 # which trackers do have meaningful project ids
 
 
 final_order_datadownload = ['Oil & Gas Plants', 'Coal Plants', 'Solar', 'Wind', 'Nuclear', 'Hydropower', 'Bioenergy', 'Geothermal', 'Coal Terminals', 'Oil & Gas Extraction', 'Coal Mines', 'Oil Pipelines', 'Gas Pipelines', 'LNG Terminals']
-tracker_mult_countries = ['GGIT', 'GOIT'] # mult_countries Country List, Countries need this so don't filter on region and miss ones where region start or end is asia not africa bi continental GGIT 8 missing africa GOGET is different because only one region and its created by Scott for the map file so go by region
+tracker_mult_countries = ['GGIT', 'GOIT'] # mult_countries Country List, Countries do not span multiple columns for goget 
 
 tracker_to_fullname = {
                     "GCPT": "coal power station",
@@ -150,7 +176,7 @@ tracker_to_fullname = {
                     "GOGET-oil": "oil & gas extraction area",
                     # "GOGET - gas": "gas extraction area",
                     "GOIT": "oil pipeline",
-                    "GGIT-eu": "gas pipeline",
+                    # "GGIT-eu": "gas pipeline",
                     "GGIT": "gas pipeline",
                     "GGIT-import": "LNG import terminal",
                     "GGIT-export": "LNG export terminal",
@@ -181,11 +207,10 @@ tracker_to_legendname = {
 # TODO ideally get this from map log gsheet
 # DO THIS NOW TODO so that aet and gipt look done and latam still needs to do
 # trackers_to_update = ['Coal Plants', 'Nuclear', 'Oil & Gas Plants'] # ['Coal Plants', 'Nuclear', 'Oil & Gas Plants']
-new_release_date = 'February 2025' # get from spreadsheet I manage 15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8
-previous_release_date = 'January 2024'
+# new_release_date = 'February 2025' # get from spreadsheet I manage 15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8
 # previous_release = 'data/Africa-Energy-Tracker-data-July-2024.xlsx' # key 1B8fwCQZ3ZMCf7ZjQPqETKNeyFN0uNFZMFWw532jv480
 # previous_map = 'data/africa_energy_tracker_2024-07-10.geojson' 
-prev_key_dict = {'africa': '128rAsbENoUzzKJAv1V0Z3AuCc6kNanCclKJVGkSOmhM', 'latam': '1ZKY-jSs2vxXSq5dLkp6-qGbhaxhz9Sh9Xo50ZG3LG7Q', 'asia': '1q_Zwn_FlLulFvyJPi2pAjJOR7inDvo5nvIlQuZKAwrs', 'europe': '1IYM9SPoq2xSu4dr3H2sXXwuKKvb505FHG6vZKRAV_DE', 'GIPT': '1SZVpnXQ1iE5kJJfmAZQ64q9LaG4wfq4urVX7jdBmIlk'} # ideally pull this from the results tabs in the map log sheet
+prev_key_dict = {'africa': '128rAsbENoUzzKJAv1V0Z3AuCc6kNanCclKJVGkSOmhM', 'latam': '1ZKY-jSs2vxXSq5dLkp6-qGbhaxhz9Sh9Xo50ZG3LG7Q', 'asia': '1x-n4YLSRA3RIz80Jm5yfyWiMtbVfYHhOtHXsWhg3d-k', 'europe': '1h8Nr8lJJiUIsSIzEmwnici4Js9Brxt7GChDo_DBQF2s', 'GIPT': '1SZVpnXQ1iE5kJJfmAZQ64q9LaG4wfq4urVX7jdBmIlk'} # ideally pull this from the results tabs in the map log sheet
 # also TODO ideally save new release data file of map to gsheets and put htat link in the results tab
 # if in colab could save to tracker release and update this dict automatically
 # print('Handle multi tracker map creation for more than just AET')
@@ -195,19 +220,13 @@ source_data_tab = ['source']
 map_tab = ['map']
 multi_tracker_log_sheet_tab = ['regional_multi_map'] # regional 
 
-all_multi_tracker_log_sheet_tab = ['all_multi_map']
-# MOVE TO JUST USE THIS ONE FILE FOR SINGLE, MULTI, REGIONAL MAPS! TODO 
-maps_guide = ['maps_guide']
-
-prep_file_tab = ['prep_file']
-
 multi_tracker_countries_sheet = '1UUTNERZYT1kHNMo_bKpwSGrUax9WZ8eyGPOyaokgggk'
 # will be commenting all this out soon! get to map file
 # tracker_folder = 'africa-energy'
 # path_for_test_results = gem_path + tracker_folder + '/test_results/'
 # path_for_data_dwnld = gem_path + tracker_folder + '/dt_dwnld/'
 
-geojson_file_of_all_africa = f'africa_energy_tracker_{iso_today_date}.geojson'
+# geojson_file_of_all_africa = f'africa_energy_tracker_{iso_today_date}.geojson'
 # path_for_download_and_map_files = gem_path + tracker_folder + '/compilation_output/' + iso_today_date_folder
 
 # os.makedirs(path_for_download_and_map_files, exist_ok=True) not needed can likely delet
@@ -215,11 +234,10 @@ geojson_file_of_all_africa = f'africa_energy_tracker_{iso_today_date}.geojson'
 
 testing_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/'
 
-# TODO Maisie likes the spreadsheet so we can all see what's going on
-# TODO create a better spreadsheet
+# use about page from global releases
 
 about_page_ggit_goit = {
-    "LNG Terminals": "1siAA_1pf9rkK7Ytx3bT-diRkDgJ0TN-bCDSX4NJQXg8",
+    "LNG Terminals": "1nyhaAHdIG7ds5ypC8QNPD6HODNo0hh6VYKL9CjG2WnE",
     "Gas Pipelines": "1llzDMAXX7xJn3j4d6JQ2UjebgVpRFDBkZ4QTtUPmSHg",
     "Oil Pipelines": "12bhnTJ5kaia187ZvX9qWshfs4btmZuTpzPj2Jz7ct6Y", 
 }
@@ -228,12 +246,17 @@ goit_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/G
 ggit_lng_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-LNG-Terminals-2024-09 DATA TEAM COPY.geojson'
 ggit_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2024-12.geojson' #'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2023-12 copy.geojson'
 
+ggit_lng_eu_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-EGT-Terminals-2025-02 DATA TEAM COPY.geojson'
+ggit_eu_geojson = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-EGT-Gas-Hydrogen-Pipelines-2025-02 DATA TEAM COPY.geojson'
+
 
 # fixed routes and capacity conversions goit (capacity boed) and ggit (route) Oct 23rd 2024
 # merge on projectID only specific columns so as to keep rest of data consistent with public release 
+# temporary until next release
 goit_cap_updated = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GOIT-Oil-NGL-Pipelines-2024-10-29.geojson'
-ggit_routes_updated = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Hydrogen-Pipelines-2024-11-05.geojson'
-ggit_eu_temp = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Europe-Gas-Tracker-2024-05 DATA TEAM COPY.xlsx' # convert to geojson and add in missing coords from global json file 
+# shouldn't need these anymore FEB 24th
+# ggit_routes_updated = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2024-12 DATA TEAM COPY.geojson'
+# ggit_eu_temp = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Europe-Gas-Tracker-2024-05 DATA TEAM COPY.xlsx' # convert to geojson and add in missing coords from global json file 
 
 tracker_summary_pages = {
     "Oil and Gas Plants": [
@@ -380,113 +403,54 @@ full_country_list = [
 ]
 
 africa_countries = [
-    "Algeria",
-    "Angola",
-    "Benin",
-    "Botswana",
-    "British Indian Ocean Territory",
-    "Burkina Faso",
-    "Burundi",
-    "Cabo Verde",
-    "Cameroon",
-    "Central African Republic",
-    "Chad",
-    "Comoros",
-    "DR Congo",
-    "Republic of the Congo",
-    "Côte d'Ivoire",
-    "Djibouti",
-    "Egypt",
-    "Equatorial Guinea",
-    "Eritrea",
-    "Eswatini",
-    "Ethiopia",
-    "French Southern Territories",
-    "Gabon",
-    "The Gambia",
-    "Ghana",
-    "Guinea",
-    "Guinea-Bissau",
-    "Kenya",
-    "Lesotho",
-    "Liberia",
-    "Libya",
-    "Madagascar",
-    "Malawi",
-    "Mali",
-    "Mauritania",
-    "Mauritius",
-    "Mayotte",
-    "Morocco",
-    "Mozambique",
-    "Namibia",
-    "Niger",
-    "Nigeria",
-    "Réunion",
-    "Rwanda",
-    "Saint Helena, Ascension, and Tristan da Cunha",
-    "Sao Tome and Principe",
-    "Senegal",
-    "Seychelles",
-    "Sierra Leone",
-    "Somalia",
-    "South Africa",
-    "South Sudan",
-    "Sudan",
-    "Tanzania",
-    "Togo",
-    "Tunisia",
-    "Uganda",
-    "Western Sahara",
-    "Zambia",
-    "Zimbabwe"
-  ]
-
-
-asia_countries = [ 
-        "China",
-        "Hong Kong",
-        "Japan",
-        "Macao",
-        "Mongolia",
-        "North Korea",
-        "South Korea",
-        "Taiwan",
-        "Brunei",
-        "Cambodia",
-        "Indonesia",
-        "Laos",
-        "Malaysia",
-        "Myanmar",
-        "Philippines",
-        "Singapore",
-        "Thailand",
-        "Timor-Leste",
-        "Vietnam",
-        "Afghanistan",
-        "Iran",
-        "Bangladesh",
-        "Bhutan",
-        "India",
-        "Maldives",
-        "Nepal",
-        "Pakistan",
-        "Sri Lanka"]
-
-european_union_countries = [
-    'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus',
-    'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France', 
-    'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 
-    'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands', 
-    'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 
-    'Spain', 'Sweden',
+    "Algeria", "Angola", "Angola-Republic of the Congo", "Benin", "Botswana",
+    "British Indian Ocean Territory", "Burkina Faso", "Burundi", "Cabo Verde",
+    "Cameroon", "Central African Republic", "Chad", "Comoros", "Côte d'Ivoire",
+    "Djibouti", "DR Congo", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini",
+    "Ethiopia", "French Southern Territories", "Gabon", "Ghana", "Guinea",
+    "Guinea-Bissau", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar",
+    "Malawi", "Mali", "Mauritania", "Mauritius", "Mayotte", "Morocco",
+    "Mozambique", "Namibia", "Niger", "Nigeria", "Republic of the Congo",
+    "Réunion", "Rwanda", "Saint Helena, Ascension, and Tristan da Cunha",
+    "Sao Tome and Principe", "Senegal", "Senegal-Mauritania", "Seychelles",
+    "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan",
+    "Tanzania", "The Gambia", "Togo", "Tunisia", "Uganda", "Western Sahara",
+    "Zambia", "Zimbabwe"
 ]
-other_europe_countries = [
-    'Albania', 'Andorra', 'Belarus', 'Bosnia and Herzegovina', 'Holy See', 'Iceland',
-    'Liechtenstein', 'Moldova', 'Monaco', 'Montenegro', 'North Macedonia', 
-    'Norway', 'San Marino', 'Serbia', 'Switzerland', 'Türkiye', 'Ukraine', 
-    'United Kingdom', 'Israel',
+
+
+asia_countries = [
+    # South Asia
+    "Afghanistan", "Bangladesh", "Bhutan", "India", "Iran",
+    "Maldives", "Nepal", "Pakistan", "Sri Lanka",
+
+    # Southeast Asia
+    "Brunei", "Cambodia", "Indonesia", "Laos", "Malaysia",
+    "Myanmar", "Philippines", "Singapore", "Thailand",
+    "Timor-Leste", "Vietnam", "Thailand-Malaysia",  "Vietnam-Malaysia",
+
+    # East Asia
+    "China", "China-Japan", "Hong Kong", "Japan", "Macao",
+    "Mongolia", "North Korea", "South Korea", "Taiwan",
+
+    # Multinational or Maritime Areas
+    "South China Sea"
 ]
+
+# european_union_countries = [
+#     'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus',
+#     'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France', 
+#     'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 
+#     'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands', 
+#     'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 
+#     'Spain', 'Sweden',
+# ]
+# other_europe_countries = [
+#     'Albania', 'Andorra', 'Belarus', 'Bosnia and Herzegovina', 'Holy See', 'Iceland',
+#     'Liechtenstein', 'Moldova', 'Monaco', 'Montenegro', 'North Macedonia', 
+#     'Norway', 'San Marino', 'Serbia', 'Switzerland', 'Türkiye', 'Ukraine', 
+#     'United Kingdom', 'Israel',
+# ]
 
 europe_countries = [
     'Åland Islands', 'Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 
@@ -503,55 +467,28 @@ europe_countries = [
 
 
 
-
 latam_countries = [
-    "Anguilla",
-    "Antigua and Barbuda",
-    "Argentina",
-    "Aruba",
-    "Bahamas",
-    "Barbados",
-    "Belize",
-    "Bolivia",
-    "Bonaire, Sint Eustatius, and Saba",
-    "Bouvet Island",
-    "Brazil",
-    "Cayman Islands",
-    "Chile",
-    "Colombia",
-    "Costa Rica",
-    "Cuba",
-    "Curaçao",
-    "Dominica",
-    "Dominican Republic",
-    "Ecuador",
-    "El Salvador",
-    "Falkland Islands",
-    "French Guiana",
-    "Grenada",
-    "Guadeloupe",
-    "Guatemala",
-    "Guyana",
-    "Haiti",
-    "Honduras",
-    "Jamaica",
-    "Martinique",
-    "Mexico",
-    "Montserrat",
-    "Nicaragua",
-    "Panama",
-    "Paraguay",
-    "Peru",
-    "Saint Barthélemy",
-    "Saint Kitts and Nevis",
-    "Saint Lucia",
-    "Saint Martin (French part)",
-    "Saint Vincent and the Grenadines",
-    "Sint Maarten (Dutch part)",
-    "South Georgia and the South Sandwich Islands",
-    "Suriname",
-    "Trinidad and Tobago",
-    "Turks and Caicos Islands",
-    "Uruguay",
-    "Venezuela",
-    "Virgin Islands (British)"]
+    # Caribbean
+    "Anguilla", "Antigua and Barbuda", "Aruba", "Bahamas", "Barbados",
+    "Belize", "Cayman Islands", "Cuba", "Curaçao", "Dominica",
+    "Dominican Republic", "Grenada", "Guadeloupe", "Haiti", "Jamaica",
+    "Martinique", "Montserrat",  "Saint Barthélemy",
+    "Saint Kitts and Nevis", "Saint Lucia", "Saint Martin (French part)",
+    "Saint Vincent and the Grenadines", "Sint Maarten (Dutch part)",
+    "Trinidad and Tobago", "Turks and Caicos Islands", "Virgin Islands (British)",
+   # "Virgin Islands (U.S.)", "Puerto Rico", -  gregor excludes
+
+    # Central America
+    "Costa Rica", "El Salvador", "Guatemala", "Honduras", "Mexico",
+    "Nicaragua", "Panama",
+
+    # South America
+    "Argentina", "Bolivia", "Brazil", "Chile", "Colombia", "Ecuador",
+    "French Guiana", "Guyana", "Paraguay", "Peru", "Suriname",
+    "Uruguay", "Venezuela",
+
+    # Special Cases
+    "Bonaire, Sint Eustatius, and Saba", "Bouvet Island",
+    "Falkland Islands", "South Georgia and the South Sandwich Islands",
+    "Venezuela-Trinidad and Tobago"
+]
