@@ -11,7 +11,33 @@ from tqdm import tqdm # can adapt more, special tweaking for dataframe!
 for tracker in tqdm(trackers_to_update, desc='Baking'):
     # print(tracker)
     
-    if tracker == 'Oil & Gas Extraction':
+    if tracker == 'Iron & Steel':
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gist/test_results/'
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gist/compilation_output/'
+        
+        keytab = get_key_tabs_prep_file(tracker)
+        df_tuple = create_df(keytab) # steel_df, iron_df, plant_df
+
+
+        # drop cols don't need # filter_cols
+        df = process_steel_iron_parent(df_tuple, test_results_folder)
+        df = split_coords(df)
+        # rename_cols
+        df = df.rename(columns={'Unit Status':'status', 'GEM Wiki Page': 'url', 'tab-type_x': 'tab-type'})
+
+        df = rename_cols(df)
+        
+        # df = make_numerical(df, ['current-capacity-(ttpa)', 'plant-age-(years)'])
+
+        # fix_status_space because filters
+        df = fix_status_space(df)
+        df = fix_prod_type_space(df)
+        
+        df = input_to_output(df, f'{output_folder}{tracker}-map-file-{iso_today_date}.csv')
+        # creates multi-map files 
+        print('DONE MAKING GIST SINGLE MAP')        
+    
+    elif tracker == 'Oil & Gas Extraction':
         test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/goget/test_results/'
 
         output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/goget/compilation_output/'
