@@ -1,5 +1,5 @@
 var config = {
-    csv: 'compilation_output/Iron & Steel-map-file-2025-03-17.csv',
+    csv: 'compilation_output/Iron & Steel-map-file-2025-03-18.csv',
 
     colors: {
         'red': '#c74a48',
@@ -84,8 +84,8 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['plant-name-(english)','owner', 'parent', 'current-capacity-(ttpa)', 'status_display', 'start-date','tab-type-display','main-production-equipment', 'subnational-unit-(province/state)','country/area'],
-        labels: ['Plant','Owner','Parent','Current Capacity (ttpa)', 'Status', 'Start date', 'Production Method','Main Production Equipment', 'Subnational Unit','Country/Area'],
+        values: ['plant-name-(english)','unit-name','owner', 'parent', 'current-capacity-(ttpa)', 'status_display', 'start-date','tab-type-display','main-production-equipment', 'subnational-unit-(province/state)','country/area'],
+        labels: ['Plant','Unit','Owner','Parent','Current Capacity (ttpa)', 'Status', 'Start date', 'Production Method','Main Production Equipment', 'Subnational Unit','Country/Area'],
         clickColumns: ['plant-name-(english)'],
         rightAlign: ['current-capacity-(ttpa)',]
     },
@@ -110,15 +110,25 @@ var config = {
         'parent': {'label': 'Parent'},
         'start-date': {'label': 'Start date'},
         'main-production-equipment': {'label': 'Main Production Equipment'},
-        'plant-age-(years)': {'label': 'Plant Age'},
         'steel-products': {'label': 'Steel Products'},
-        'scrap-based': {'label': 'Scrap Based'},
         'most-recent-relining': {'label': 'Most Recent Relining'},
-        'responsiblesteel-certification': {'label': 'Responsible Steel Certification'},
         'coordinate-accuracy': {'label': 'Coordinate Accuracy'},
         'subnational-unit-(province/state)':{'display': 'location'},
         'country/area': {'display': 'location'}
     }, 
+
+    /* Mapbox styling applied to all trackers */
+    pointPaint: {
+        'circle-opacity':.85
+    },
+    
+    /* radius associated with minimum/maximum value on map */
+    minRadius: 3,
+    maxRadius: 7,
+
+    /* radius to increase min/max to under high zoom */
+    highZoomMinRadius: 5,
+    highZoomMaxRadius: 22,
 
     showMaxCapacity: true,
     

@@ -109,24 +109,36 @@ def process_steel_iron_parent(tuple_gist, test_results_folder):
     # concat steel and iron unit
     # merge with plant for parent
     steel_df = tuple_gist[0]
-    steel_df = steel_df[['tab-type', 'GEM Plant ID', 'GEM Unit ID', 'Unit Name', 'Unit Status', 'Current Capacity (ttpa)', 'Scrap-based']]
+    steel_df = steel_df[['tab-type', 'GEM Plant ID', 'GEM Unit ID', 'Unit Name', 'Unit Status', 'Current Capacity (ttpa)']]
     iron_df = tuple_gist[1]
     iron_df = iron_df[['tab-type', 'GEM Plant ID', 'GEM Unit ID', 'Unit Name','Unit Status', 'Current Capacity (ttpa)', 'Most Recent Relining']]
     plant_df = tuple_gist[2]
     plant_cap_df = plant_df[plant_df['tab-type']=='Plant capacities and status'] # for if I need to deal with the 38 unmatched and if we want to show nominal summed capacity
+    plant_cap_df = plant_cap_df[['Plant ID', ]]
+    
     plant_df = plant_df[plant_df['tab-type']=='Plant data']
 
     plant_df = plant_df[['tab-type', 'Plant ID', 'Plant name (English)', 'Plant name (other language)', 'Other plant names (English)',
                          'Other plant names (other language)', 'Owner', 'Owner (other language)', 'Owner GEM ID', 'Parent', 'Parent GEM ID',
                          'Subnational unit (province/state)', 'Country/Area', 'Coordinates', 'Coordinate accuracy', 'GEM wiki page',
-                         'Plant age (years)', 'Steel products', 'ResponsibleSteel Certification', 'Main production equipment', 'Start date']]
+                          'Steel products', 'Main production equipment', 'Start date']]
 
+    print(len(plant_df)) # 1204
+    plant_df = plant_df.merge(right=plant_cap_df, on='Plant ID', how='inner')
+    print(len(plant_df)) # 1732 which to use? oh the second has a lot more rows because each prod method 
+    input('before after plant_df merge with cap stat')
 
     unit_df = pd.concat([steel_df, iron_df])
 
     df = unit_df.merge(right=plant_df, left_on='GEM Plant ID', right_on='Plant ID', how='inner') # 7783 rows x 27 columns
-    df = df.dropna(subset='Plant ID')
-    df = df.dropna(how='all')
+    print(len(df))
+    # df = df.merge(right=plant_cap_df, on='Plant ID',how='inner') # 14494 when both outer merges and now 14451 with merged those two earlier
+    df = df.drop_duplicates(subset='GEM Unit ID')
+    print(len(df))
+
+    input('compare before after second merge')
+    # df = df.dropna(subset='Plant ID')
+    # df = df.dropna(how='all')
     # find situation where the unit id is empty
     unmatched_rows = df[df['Plant ID'].isna() | df['GEM Plant ID'].isna()]
     # df = df.fillna('')
