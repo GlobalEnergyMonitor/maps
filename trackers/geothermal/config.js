@@ -42,7 +42,7 @@ var config = {
     ],
 
 
-    linkField: 'gem-location-id ',
+    linkField: 'gem-location-id',
 
     countryField: 'country/area',
     /* define the field for calculating and showing capacity along with label.
@@ -62,15 +62,15 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['project-name', 'unit-capacity-(mw)', 'technology', 'status', 'start-year', 'owner', 'operator',  'country/area'],
-        labels: ['Project name','Capacity (MW)','Technology','Status','Start year', 'Owner', 'Operator', 'Country/Area(s)'],
+        values: ['project-name', 'unit-name','unit-capacity-(mw)', 'technology', 'status', 'start-year', 'owner', 'operator',  'country/area'],
+        labels: ['Plant', 'Unit','Capacity (MW)','Technology','Status','Start year', 'Owner', 'Operator', 'Country/Area(s)'],
         clickColumns: ['project-name'],
         rightAlign: ['unit-capacity-(mw)','start-year']
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Project': ['project-name', 'project-name-in-local-language-/-script', 'other-name(s)'], 
+    searchFields: { 'Plant': ['project-name', 'project-name-in-local-language-/-script', 'other-name(s)'], 
         'Companies': ['owner', 'operator', 'operator-name-in-local-language-/-script', 'owner-name-in-local-language-/-script'],
         'Start Year': ['start-year']
     },
@@ -91,5 +91,21 @@ var config = {
         'country/area': {'display': 'location'},
 
     },
+
+
+    /* Mapbox styling applied to all trackers */
+    pointPaint: {
+        'circle-opacity':.85
+    },
+    
+    /* radius associated with minimum/maximum value on map */
+    minRadius: 4,
+    maxRadius: 14,
+
+    /* radius to increase min/max to under high zoom */
+    highZoomMinRadius: 8,
+    highZoomMaxRadius: 32,
+
+
     showCapacityTable: true, 
 }
