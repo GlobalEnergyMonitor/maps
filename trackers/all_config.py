@@ -6,27 +6,27 @@ from numpy import true_divide
 from creds import client_secret
 
 
-trackers_to_update = ['Oil & Gas Extraction']
-new_release_date = 'February 2025' 
+trackers_to_update = ['Iron & Steel']
+new_release_date = 'March 2025' 
 priority = [''] # europe
 
 augmented = True
 data_filtering = True
 
 #### CREATE ####
-map_create = False # work on subnat
+map_create = True # work on subnat
 dwlnd_create = True
 about_create = True 
 # summary_create = False
 
 #### TEST #####
 run_pre_tests = False # TODO need to add so that there is utility here
-run_post_tests = True
+run_post_tests = False
 map_to_test = '' # change if testing a single map not a regional one
 
 #### REFINE ####
 refine = False 
-local_copy = True  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
+local_copy = False  # TODO issue when not local for refining! # no local_pkl/europe_Oil & Gas Plants_gdf_2024-12-12.pkl' file!
 final_formatting = False
 
 

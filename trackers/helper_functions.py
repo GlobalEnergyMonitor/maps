@@ -2729,6 +2729,42 @@ def fix_status_space(df):
 
     return df
 
+def fix_prod_type_space(df):
+    import logging
+
+    # input('check all status options')
+    df['tab-type-display'] = df['tab-type']
+    df['tab-type'] = df['tab-type'].apply(lambda x: x.replace(' ', '_'))
+    print(set(df['tab-type'].to_list()))
+    # input('inspect status with _')
+    logging.basicConfig(level=logging.INFO)
+    logging.info(set(df['tab-type'].to_list()))
+    print(set(df['tab-type-display'].to_list()))
+    # input('inspect status_display without _')
+
+    return df
+    
+def split_coords(df):
+    
+    df['lat'] = df['Coordinates'].apply(lambda x: x.split(',')[0])
+    df['lng'] = df['Coordinates'].apply(lambda x: x.split(',')[1])
+
+    return df
+
+def make_numerical(df, list_cols):
+    df = df.copy()
+    for col in list_cols:
+        # Replace blank spaces, '>0', and 'unknown' with NaN
+        df[col] = df[col].replace(['', '>0', 'unknown'], np.nan)
+        
+        # Fill NaN values with a default 
+        df[col] = df[col].fillna(0)
+        
+        # Convert the column to integers
+        df[col] = df[col].astype(int)
+
+    print(df[list_cols].info())
+    return df
 
 def check_countries_official(df,col_country_name, col_wiki, mapname, tracker):
     df = df.copy()
