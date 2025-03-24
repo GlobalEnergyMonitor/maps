@@ -2713,19 +2713,23 @@ def fix_status_inferred(df):
 
 def fix_status_space(df):
     import logging
-
     # input('check all status options')
     # df['status'] = df['status'].replace('in development', 'in_development')
     # df['status'] = df['status'].replace('shut in','shut_in')
-    df['status_display'] = df['status']
-    df['status_display'] = df['status_display'].replace('', 'not found')
-    df['status'] = df['status'].apply(lambda x: x.replace(' ', '_'))
-    print(set(df['status'].to_list()))
-    # input('inspect status with _')
-    logging.basicConfig(level=logging.INFO)
-    logging.info(set(df['status'].to_list()))
-    print(set(df['status_display'].to_list()))
-    # input('inspect status_display without _')
+    if 'plant-status' in df.columns:
+        df['status_display'] = df['plant-status']
+        df['status_display'] = df['status_display'].replace('', 'not found')
+        df['plant-status'] = df['plant-status'].apply(lambda x: x.replace(' ', '-'))
+    else:
+        df['status_display'] = df['status']
+        df['status_display'] = df['status_display'].replace('', 'not found')
+        df['status'] = df['status'].apply(lambda x: x.replace(' ', '-'))
+        print(set(df['status'].to_list()))
+        # input('inspect status with _')
+        logging.basicConfig(level=logging.INFO)
+        logging.info(set(df['status'].to_list()))
+        print(set(df['status_display'].to_list()))
+        # input('inspect status_display without _')
 
     return df
 
@@ -2733,13 +2737,16 @@ def fix_prod_type_space(df):
     import logging
 
     # input('check all status options')
-    df['tab-type-display'] = df['tab-type']
-    df['tab-type'] = df['tab-type'].apply(lambda x: x.replace(' ', '_'))
-    print(set(df['tab-type'].to_list()))
+    df['prod-method-tier-display'] = df['prod-method-tier']
+    df['prod-method-tier'] = df['prod-method-tier'].apply(lambda x: x.replace(' ', '-'))
+    # strip out all punctuation with regex
+    df['prod-method-tier'] = df['prod-method-tier'].apply(lambda x: re.sub(r'[^\w\s]', '', x))
+
+    print(set(df['prod-method-tier'].to_list()))
     # input('inspect status with _')
     logging.basicConfig(level=logging.INFO)
-    logging.info(set(df['tab-type'].to_list()))
-    print(set(df['tab-type-display'].to_list()))
+    logging.info(set(df['prod-method-tier'].to_list()))
+    print(set(df['prod-method-tier-display'].to_list()))
     # input('inspect status_display without _')
 
     return df
@@ -2765,6 +2772,103 @@ def make_numerical(df, list_cols):
 
     print(df[list_cols].info())
     return df
+
+
+def make_plant_level_status(unit_status_list, plant_id):
+    qa_status_combos_list = []
+    # row from plant level cap and status tab
+    unit_status_list = unit_status_list.copy()
+    set_list = set(unit_status_list)
+    # If only 1 status:	That status is assigned to entire plant
+
+    if len(set_list) == 1:
+        plant_status = unit_status_list[0]
+        # print(f'length of set list should be 1:\n{set_list}')
+        # input('check above') # works! 
+    # If any of the statuses for the plant ID are "operating"	Entire plant listed as "operating"
+    elif 'operating' in unit_status_list:
+        plant_status = 'operating'
+    # cancelled, operating pre-retirement	operating pre-retirement
+    # retired, operating pre-retirement	operating pre-retirement
+    elif len(set_list) == 2 and 'operating pre-retirement' in set_list and ('cancelled' in set_list or 'retired' in set_list):
+        plant_status = 'operating pre-retirement'
+
+    # announced, cancelled, operating pre-retirement	operating
+    # announced, construction, operating pre-retirement	operating
+    # announced, construction, retired, operating pre-retirement	operating
+    # announced, mothballed, operating pre-retirement	operating
+    # announced, operating pre-retirement	operating
+    # announced, operating pre-retirement, mothballed pre-retirement	operating
+    # announced, retired, operating pre-retirement, mothballed pre-retirement	operating
+    # construction, mothballed, operating pre-retirement	operating
+    # construction, mothballed, retired, operating pre-retirement	operating
+    # construction, operating pre-retirement	operating
+    
+    elif 'operating pre-retirement' in set_list:
+        plant_status = 'operating'
+        
+    # announced, construction	construction
+    # construction, retired	construction
+    elif len(set_list) == 2 and 'construction' in set_list:
+        plant_status = 'construction'
+
+    # construction, mothballed	mothballed
+    # mothballed, retired	mothballed
+    # announced, mothballed
+    elif len(set_list) == 2 and 'mothballed' in set_list:
+        plant_status = 'mothballed'
+    # announced, cancelled	announced
+    # announced, retired	announced
+    elif len(set_list) == 2 and 'announced' in set_list:
+        plant_status = 'announced'
+    else:
+        print('This condition should not happen, check out status set list and logic from PM:')
+        print(f'Status set list: \n{set_list}')
+        print(f'This is the plant id to check:\n{plant_id}')
+        plant_status = ''
+        input('Check above')
+
+    return plant_status
+
+def make_prod_method_tier(mpe, plant_id):
+    mpe_list = mpe.split(';')
+    mpe_list = [item.strip() for item in mpe_list]
+    replace_dict = {'EAF': 'Electric', 'BOF': 'Oxygen', 'BF': 'Ironmaking (BF)', 'DRI': 'Ironmaking (DRI)'}
+    steel_list = ['EAF', 'BOF', 'Steel other/unspecified']
+    # electric =  EAF
+    # Oxygen = BOF
+    # ironmaking (BF) = BF
+    # ironmaking (DRI) = DRI
+    if len(set(mpe_list)) == 1:
+        mpe_list = [replace_dict[item] if item in replace_dict else item for item in mpe_list]
+        pmt = mpe_list[0]
+        # print(pmt)
+        # input('Check replace of dict went well') # works
+    # electric, oxygen = EAF, BOF
+    elif len(set(mpe_list)) == 2 and 'EAF' in mpe_list and 'BOF' in mpe_list:
+        pmt = 'Electric, Oxygen'
+    # integrated (BF and DRI)= BF + DRI + any steel unit
+    elif 'BF' in mpe_list and 'DRI' in mpe_list and any(steel in mpe_list for steel in steel_list):
+        pmt = 'Integrated (BF and DRI)'
+    # integrated (BF) = BF + any steel unit (EAF, BOF, OHF, other/unspecified)
+    elif 'BF' in mpe_list and any(steel in mpe_list for steel in steel_list):
+        pmt ='Integrated (BF)'
+    # integrated (DRI)= DRI +any steel unit (EAF, BOF, OHF, other/unspecified)
+    elif 'DRI' in mpe_list and any(steel in mpe_list for steel in steel_list):
+        pmt = 'Integrated (DRI)'
+    # integrated (unknown) = any iron unit + any steel unit
+    elif 'Iron other/unspecified' in mpe_list and any(steel in mpe_list for steel in steel_list):
+        pmt = 'Integrated (unknown)'
+        
+    # other/ unspecified = other/unspecified steel 
+    # example 'EAF', 'Steel other/unspecified' TODO double check this logic with PM
+    elif 'Steel other/unspecified' in mpe_list:
+        pmt =  'Steel other/unspecified'
+    else:
+        print(mpe_list)  
+        input('Check mpe list unsure what this should be, possibly other unspecified?')     
+        
+    return pmt
 
 def check_countries_official(df,col_country_name, col_wiki, mapname, tracker):
     df = df.copy()

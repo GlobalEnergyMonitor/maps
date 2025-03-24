@@ -1,5 +1,5 @@
 var config = {
-    csv: 'compilation_output/Iron & Steel-map-file-2025-03-18.csv',
+    csv: 'compilation_output/Iron & Steel-map-file-2025-03-24.csv', // Saying can't be found? TODO march 24th
 
     colors: {
         'red': '#c74a48',
@@ -11,44 +11,52 @@ var config = {
         'black': '#000000'
     },
     // {'cancelled', 'operating', 'mothballed', 'announced', 'retired', 'mothballed pre-retirement', 'construction', 'operating pre-retirement'}
-    // {'Electric_arc_furnaces', 'DRI_furnaces', 'Open_hearth_furnaces', 'Basic_oxygen_furnaces', 'Blast_furnaces'}
+    // {'Electric-arc-furnaces', 'DRI-furnaces', 'Open-hearth-furnaces', 'Basic-oxygen-furnaces', 'Blast-furnaces'}
     color: { 
-        field: 'tab-type', // prod type
+        field: 'prod-method-tier', // prod type
         values: {
-            // 'BOF': 'red',
-            // 'EAF': 'blue',
-            // 'BOF; EAF': 'green',
-            // 'BF': 'orange',
-            // 'DRI': 'dark grey',
-            // 'integrated (bf)': 'grey',
-            // 'integrated (dri)': 'grey',
-            // 'integrated (bf and dri)': 'grey',
-            // 'Steel other/unspecified': 'grey',
-            // 'Iron other/unspecified': 'grey'
-            'Electric_arc_furnaces': 'red',
-            'Basic_oxygen_furnaces': 'blue',
-            'Open_hearth_furnaces': 'green',
-            'Blast_furnaces': 'orange',
-            'DRI_furnaces': 'yellow',
-            // 'Unknown': 'grey',
-
+            'Electric': 'blue',
+            'Electricoxygen': 'green',
+            'Oxygen': 'orange',
+            'IronmakingBF': 'red',
+            'IronmakingDRI': 'blue',
+            'IntegratedBF': 'red',
+            'IntegratedBFandDRI':  'blue',//'purple',
+            'IntegratedDRI': 'green',
+            'Steelotherunspecified': 'grey',
+            'Ironotherunspecified': 'grey'
+            // "electric - light green
+            // electric, oxygen - dark blue
+            // oxygen - orange
+            // ironmaking (BF) - light red
+            // ironmaking (DRI) - light blue
+            // integrated (BF) - dark red
+            // integrated (BF and DRI) - purple
+            // integrated (DRI) - dark green
+            // integrated (unknown) - dark gray
+            // Steel other/ unspecified - light gray
+            // Iron other/ unspecified - light gray"
         }
     },
     filters: [
         {
-            field: 'tab-type',
+            field: 'prod-method-tier',
             /* values need to be specified for ordering */
             // values: ['BOF','EAF','BOF; EAF','BF','DRI','integrated (bf)', 'integrated (dri)', 'integrated (bf and dri)',
-            //     'Steel other/unspecified','Iron other/unspecified',],
-            // values_labels: ['Oxygen','Electric','Electric, Oxygen','Blast Furnace','Ironmaking (BF)', 'Ironmaking (DRI)', 
-            //     'Integrated (BF)',  'Integrated (DRI)', 'Integrated (BF and DRI)','Steelmaking (other)', 'Ironmaking (other)',]
-            values: ['Electric_arc_furnaces', 'Basic_oxygen_furnaces', 'Open_hearth_furnaces', 'Blast_furnaces', 'DRI_furnaces',],
-            values_labels: ['Electric arc furnaces', 'Basic oxygen furnaces', 'Open hearth furnaces', 'Blast furnaces', 'DRI furnaces'],
+            //     'Steel other/unspecified','Iron other/unspecified',]
+            values: ['Electric', 'ElectricOxygen','Oxygen', 'IronmakingBF', 'IntegratedBFandDRI', 
+                    'IronmakingDRI', 'IntegratedDRI', 'IntegratedBF','Steelotherunspecified','Ironotherunspecified', 'Integratedunknown'],
+
+
+            values_labels: ['Electric','Electric, oxygen','Oxygen','Ironmaking (BF)', 'Integrated (BF and DRI)', 'Ironmaking (DRI)',
+                    'Integrated (DRI)', 'Integrated (BF)', 'Steel other/unspecified', 'Iron other/unspecified', 'Integrated unknown']
+            // values: ['Electric-arc-furnaces', 'Basic-oxygen-furnaces', 'Open-hearth-furnaces', 'Blast-furnaces', 'DRI-furnaces',],
+            // values-labels: ['Electric arc furnaces', 'Basic oxygen furnaces', 'Open hearth furnaces', 'Blast furnaces', 'DRI furnaces'],
         },
         {
-            field: 'status',
+            field: 'plant-status',
             label: 'Status',
-            values: ['operating','announced', 'construction','operating_pre-retirement','cancelled', 'retired','mothballed_pre-retirement','mothballed'],
+            values: ['operating','announced', 'construction','operating-pre-retirement','cancelled', 'retired','mothballed-pre-retirement','mothballed'],
             values_labels: ['Operating','Announced', 'Construction','Operating Pre-Retirement', 'Cancelled', 'Retired', 'Mothballed Pre-Retirement', 'Mothballed',]
 
         }
@@ -57,13 +65,13 @@ var config = {
     linkField: 'plant-id',
 
     urlField: 'gem-wiki-page',
-
+    statusField: 'status_display',
     countryField: 'country/area',
-    capacityField: 'current-capacity-(ttpa)', // For steel this will need to be at unit level for steel and iron according to prod_type
-    capacityDisplayField: 'current-capacity-(ttpa)',
+    capacityField: 'scaling-cap', // change to scaling col once added
+    // capacityDisplayField: 'current-capacity-(ttpa)',
 
-    capacityLabel: 'ttpa', //'TTPA', 
-    // context_layers: [
+    capacityLabel: '', //'TTPA', 
+    // context-layers: [
     //     {
     //         field: 'coalfield',
     //         'label': 'Coal Fields',
@@ -84,7 +92,7 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['plant-name-(english)','unit-name','owner', 'parent', 'current-capacity-(ttpa)', 'status_display', 'start-date','tab-type-display','main-production-equipment', 'subnational-unit-(province/state)','country/area'],
+        values: ['plant-name-(english)','unit-name','owner', 'parent', 'current-capacity-(ttpa)', 'status-display', 'start-date','tab-type-display','main-production-equipment', 'subnational-unit-(province/state)','country/area'],
         labels: ['Plant','Unit','Owner','Parent','Current Capacity (ttpa)', 'Status', 'Start date', 'Production Method','Main Production Equipment', 'Subnational Unit','Country/Area'],
         clickColumns: ['plant-name-(english)'],
         rightAlign: ['current-capacity-(ttpa)',]
@@ -106,12 +114,12 @@ var config = {
     */
     detailView: {
         'plant-name-(english)': {'display': 'heading'},
+        'prod-method-tier-display': {'label': 'Production Method'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'start-date': {'label': 'Start date'},
         'main-production-equipment': {'label': 'Main Production Equipment'},
         'steel-products': {'label': 'Steel Products'},
-        'most-recent-relining': {'label': 'Most Recent Relining'},
         'coordinate-accuracy': {'label': 'Coordinate Accuracy'},
         'subnational-unit-(province/state)':{'display': 'location'},
         'country/area': {'display': 'location'}
