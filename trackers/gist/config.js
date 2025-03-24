@@ -2,29 +2,35 @@ var config = {
     csv: 'compilation_output/Iron & Steel-map-file-2025-03-24.csv', // Saying can't be found? TODO march 24th
 
     colors: {
+        'light red': '#f28b82',
         'red': '#c74a48',
+        'light blue': '#5dade2',
         'blue': '#5c62cf',
         'green': '#4c9d4f',
+        'light green': '#66c26e',
+        'light grey': '#e0e0e0',
         'grey': '#8f8f8e',
         'orange': '#FF8C00',
         'yellow': '#f3ff00',
-        'black': '#000000'
+        'black': '#000000',
+        'purple': '#9370db'
     },
     // {'cancelled', 'operating', 'mothballed', 'announced', 'retired', 'mothballed pre-retirement', 'construction', 'operating pre-retirement'}
     // {'Electric-arc-furnaces', 'DRI-furnaces', 'Open-hearth-furnaces', 'Basic-oxygen-furnaces', 'Blast-furnaces'}
     color: { 
         field: 'prod-method-tier', // prod type
         values: {
-            'Electric': 'blue',
-            'Electricoxygen': 'green',
+            'Electric': 'light green',
+            'ElectricOxygen': 'blue',
             'Oxygen': 'orange',
-            'IronmakingBF': 'red',
-            'IronmakingDRI': 'blue',
+            'IronmakingBF': 'light red',
+            'IronmakingDRI': 'light blue',
             'IntegratedBF': 'red',
-            'IntegratedBFandDRI':  'blue',//'purple',
+            'IntegratedBFandDRI':  'purple',
             'IntegratedDRI': 'green',
-            'Steelotherunspecified': 'grey',
-            'Ironotherunspecified': 'grey'
+            'Integratedunknown': 'grey',
+            'Steelotherunspecified': 'light grey',
+            'Ironotherunspecified': 'light grey'
             // "electric - light green
             // electric, oxygen - dark blue
             // oxygen - orange
@@ -45,11 +51,11 @@ var config = {
             // values: ['BOF','EAF','BOF; EAF','BF','DRI','integrated (bf)', 'integrated (dri)', 'integrated (bf and dri)',
             //     'Steel other/unspecified','Iron other/unspecified',]
             values: ['Electric', 'ElectricOxygen','Oxygen', 'IronmakingBF', 'IntegratedBFandDRI', 
-                    'IronmakingDRI', 'IntegratedDRI', 'IntegratedBF','Steelotherunspecified','Ironotherunspecified', 'Integratedunknown'],
+                    'IronmakingDRI', 'IntegratedDRI', 'IntegratedBF','Integratedunknown','Steelotherunspecified','Ironotherunspecified'],
 
 
             values_labels: ['Electric','Electric, oxygen','Oxygen','Ironmaking (BF)', 'Integrated (BF and DRI)', 'Ironmaking (DRI)',
-                    'Integrated (DRI)', 'Integrated (BF)', 'Steel other/unspecified', 'Iron other/unspecified', 'Integrated unknown']
+                    'Integrated (DRI)', 'Integrated (BF)', 'Integrated unknown', 'Steel other/unspecified', 'Iron other/unspecified']
             // values: ['Electric-arc-furnaces', 'Basic-oxygen-furnaces', 'Open-hearth-furnaces', 'Blast-furnaces', 'DRI-furnaces',],
             // values-labels: ['Electric arc furnaces', 'Basic oxygen furnaces', 'Open hearth furnaces', 'Blast furnaces', 'DRI furnaces'],
         },
@@ -67,7 +73,7 @@ var config = {
     urlField: 'gem-wiki-page',
     statusField: 'status_display',
     countryField: 'country/area',
-    capacityField: 'scaling-cap', // change to scaling col once added
+    capacityField: 'scaling-cap_plant', // change to scaling col once added
     // capacityDisplayField: 'current-capacity-(ttpa)',
 
     capacityLabel: '', //'TTPA', 
@@ -92,17 +98,17 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['plant-name-(english)','unit-name','owner', 'parent', 'current-capacity-(ttpa)', 'status-display', 'start-date','tab-type-display','main-production-equipment', 'subnational-unit-(province/state)','country/area'],
-        labels: ['Plant','Unit','Owner','Parent','Current Capacity (ttpa)', 'Status', 'Start date', 'Production Method','Main Production Equipment', 'Subnational Unit','Country/Area'],
+        values: ['plant-name-(english)','owner', 'parent', 'nominal-crude-steel-capacity-(ttpa)_plant','nominal-iron-capacity-(ttpa)_plant','status_display', 'start-date','prod-method-tier-display','main-production-equipment', 'subnational-unit-(province/state)','country/area'],
+        labels: ['Plant','Owner','Parent', 'Nominal Crude Steel Capacity (ttpa)','Nominal Iron Capacity (ttpa)', 'Status', 'Start date', 'Production Method','Main Production Equipment', 'Subnational Unit','Country/Area'],
         clickColumns: ['plant-name-(english)'],
-        rightAlign: ['current-capacity-(ttpa)',]
+        rightAlign: ['nominal-crude-steel-capacity-(ttpa)_plant','nominal-iron-capacity-(ttpa)_plant',]
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: { 'Plant': ['plant-name-(english)', 'plant-name-(other-language)', 'other-plant-names-(english)', 'other-plant-names-(other-language)'], 
         'Companies': ['owner', 'parent', 'owner-(other-language) '],
-        'Production Method': ['tab-type-display', 'main-production-equipment']
+        'Production Method': ['prod-method-tier-display', 'prod-method-tier','main-production-equipment']
     },
 
     /* define fields and how they are displayed. 
@@ -121,6 +127,15 @@ var config = {
         'main-production-equipment': {'label': 'Main Production Equipment'},
         'steel-products': {'label': 'Steel Products'},
         'coordinate-accuracy': {'label': 'Coordinate Accuracy'},
+        'nominal-crude-steel-capacity-(ttpa)_plant': {'label': 'Nominal crude steel capacity (ttpa)'},
+        'nominal-bof-steel-capacity-(ttpa)_plant': {'label': 'Nominal BOF steel capacity (ttpa)'},
+        'nominal-eaf-steel-capacity-(ttpa)_plant': {'label': 'Nominal EAF steel capacity (ttpa)'},
+        'nominal-ohf-steel-capacity-(ttpa)_plant': {'label': 'Nominal OHF steel capacity (ttpa)'},
+        'other/unspecified-steel-capacity-(ttpa)_plant': {'label': 'Other/unspecified steel capacity (ttpa)'},
+        'nominal-iron-capacity-(ttpa)_plant': {'label': 'Nominal iron capacity (ttpa)'},
+        'nominal-bf-capacity-(ttpa)_plant': {'label': 'Nominal BF capacity (ttpa)'},
+        'nominal-dri-capacity-(ttpa)_plant': {'label': 'Nominal DRI capacity (ttpa)'},
+        'other/unspecified-iron-capacity-(ttpa)_plant': {'label': 'Other/unspecified iron capacity (ttpa)'},
         'subnational-unit-(province/state)':{'display': 'location'},
         'country/area': {'display': 'location'}
     }, 

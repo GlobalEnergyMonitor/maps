@@ -84,13 +84,7 @@ def create_df(key, tabs=['']):
 
 
 def process_steel_iron_parent(df, test_results_folder):
-    # concat steel and iron unit
-    # merge with plant for parent
-    # steel_df = tuple_gist[0]
-    # steel_df = steel_df[['tab-type', 'GEM Plant ID', 'GEM Unit ID', 'Unit Name', 'Unit Status', 'Current Capacity (ttpa)']]
-    # iron_df = tuple_gist[1]
-    # iron_df = iron_df[['tab-type', 'GEM Plant ID', 'GEM Unit ID', 'Unit Name','Unit Status', 'Current Capacity (ttpa)', 'Most Recent Relining']]
-    # plant_df = tuple_gist[2]
+
     plant_df = df.copy()
     plant_cap_df = plant_df[plant_df['tab-type']=='Plant capacities and status'] # for if I need to deal with the 38 unmatched and if we want to show nominal summed capacity
     plant_cap_df = plant_cap_df[['Plant ID', 'Status', 'Nominal crude steel capacity (ttpa)', 'Nominal BOF steel capacity (ttpa)', 'Nominal EAF steel capacity (ttpa)', 
@@ -121,10 +115,9 @@ def process_steel_iron_parent(df, test_results_folder):
     plant_df_grouped = plant_df_grouped.rename(columns={'Status': 'status-list'})
     plant_df = plant_df.merge(plant_df_grouped, on='Plant ID', how='left')
     plant_df['plant-status'] = plant_df.apply(lambda row: make_plant_level_status(row['status-list'], row['Plant ID']),axis=1)
-
-    # qc_list_combos = plant_df[plant_df['plant-status']=='']['status-list']
     
     list_unit_cap = [
+        'Nominal crude steel capacity (ttpa)',
         'Nominal BOF steel capacity (ttpa)', 
         'Nominal EAF steel capacity (ttpa)', 
         'Nominal OHF steel capacity (ttpa)', 
@@ -141,18 +134,19 @@ def process_steel_iron_parent(df, test_results_folder):
     
     for col in list_unit_cap:
         plant_df_grouped_col = plant_df.groupby('Plant ID').agg({col: list}).reset_index()
-        print(plant_df_grouped_col)
+        # print(plant_df_grouped_col)
         plant_df_grouped_col = plant_df_grouped_col.rename(columns={col: f'{col}_list'})
-        # input(f'check grouped by col {col}')
+        # remove all nans from list so can sum entire list of values
+        plant_df_grouped_col[f'{col}_list'] = plant_df_grouped_col[f'{col}_list'].apply(lambda caplist: [x if pd.notna(x) else 0 for x in caplist if isinstance(x, (int, float)) and not isinstance(x, bool)])
+        # sum the list and return the value as the actual plant-level value
+        
+        plant_df_grouped_col[f'{col}_plant'] = plant_df_grouped_col[f'{col}_list'].apply(lambda caplist: sum(x for x in caplist))
         plant_df = plant_df.merge(plant_df_grouped_col, on='Plant ID', how='left')
 
-    print(plant_df[plant_df['Plant ID']=='P100000120620'][['Nominal iron capacity (ttpa)', 'Nominal iron capacity (ttpa)_list']])
-    input('Check above') # works!  [4000, 2500, 5500] for all three
+    # print(plant_df[plant_df['Plant ID']=='P100000120679'][['Nominal crude steel capacity (ttpa)', 'Nominal crude steel capacity (ttpa)_list', 'Nominal crude steel capacity (ttpa)_plant']])
+    # print(plant_df[plant_df['Plant ID']=='P100000120620'][['Nominal iron capacity (ttpa)', 'Nominal iron capacity (ttpa)_list', 'Nominal iron capacity (ttpa)_plant']])
+    # input('Check above') # works!  [4000, 2500, 5500] for all three
     # plant_df_pivot = plant_df.groupby('Plant ID')[list_unit_cap].apply(lambda x: x.apply(pd.to_numeric, errors='coerce')).sum().reset_index()
-    
-    # print(plant_df_pivot)
-    # input('check pivot results') # TODO FIX this groupby sum so it's only applied on plant level not entire 
-    # plant_df = plant_df.drop(columns=list_unit_cap).merge(plant_df_pivot, on='Plant ID', how='left')
 
     # then deduplicate on Plant ID keep first which is plant_data tab
     print(len(plant_df))
