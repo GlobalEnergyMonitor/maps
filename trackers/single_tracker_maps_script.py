@@ -10,19 +10,19 @@ def get_key_tabs_prep_file(tracker):
 
     if tracker in non_gsheet_data:
         print('Needs to be local')
-    elif 'Iron & Steel' == tracker:
-        keytab = {}
-        gist_pages = ['steel', 'iron', 'plant']
-        for page in gist_pages:
-            tracker_n = f'{tracker}: {page}'
-            key = prep_dict[tracker_n]['gspread_key']
-            key = ''.join(key) # convert string into item in list
-            tabs = prep_dict[tracker_n]['gspread_tabs'] 
-            keytab[page] = (key, tabs)
-            tracker_n = '' 
+    # elif 'Iron & Steel' == tracker:
+    #     keytab = {}
+    #     # gist_pages = ['steel', 'iron', 'plant']
+    #     for page in gist_pages:
+    #         tracker_n = f'{tracker}: {page}'
+    #         key = prep_dict[tracker_n]['gspread_key']
+    #         key = ''.join(key) # convert string into item in list
+    #         tabs = prep_dict[tracker_n]['gspread_tabs'] 
+    #         keytab[page] = (key, tabs)
+    #         tracker_n = '' 
                  
-        # print(f'Returning keytab: {keytab} for GIST')
-        return keytab
+    #     # print(f'Returning keytab: {keytab} for GIST')
+    #     return keytab
      
     else:
         key = prep_dict[tracker]['gspread_key']
@@ -50,46 +50,25 @@ def create_df(key, tabs=['']):
         return main_df, prod_df
     
     elif trackers_to_update[0] == 'Iron & Steel':
-        keytab = key
-        print(keytab)
-        for k,v in keytab.items(): # dict of tuples the tuple being key and tabs 
-            # print(f'this is key: {k}')
-            # print(f'this is v: {v}')
-            tabtype = k
-            key = v[0]
-            tabs = v[1]
-            if 'Electric arc furnaces' in tabs:
-                # Iron & Steel: steel
-                for tab in tabs:
-                    gsheets = gspread_creds.open_by_key(key)
-                    spreadsheet = gsheets.worksheet(tab)
-                    df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                    df['tab-type'] = tab
-                    dfs += [df]
-                steel_df = pd.concat(dfs).reset_index(drop=True)
-            elif 'Blast furnaces' in tabs:
-                # Iron & Steel: iron
-                for tab in tabs:
-                    gsheets = gspread_creds.open_by_key(key)
-                    spreadsheet = gsheets.worksheet(tab)
-                    df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                    df['tab-type'] = tab
-                    dfs += [df]
-                iron_df = pd.concat(dfs).reset_index(drop=True)
-            else:
-                # Iron & Steel: plant
-                for tab in tabs:
-                    gsheets = gspread_creds.open_by_key(key)
-                    spreadsheet = gsheets.worksheet(tab)
-                    df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                    df['tab-type'] = tab
-                    dfs += [df]
-                # df1 = dfs[0]
-                # df2 = dfs[1]
-                # plant_df = df1.merge(right=df2, on='Plant ID', how='inner')
-                # print(len(plant_df))
-                plant_df = pd.concat(dfs).reset_index(drop=True)
-        return steel_df, iron_df, plant_df
+        # keytab = key
+        # print(keytab)
+        # for k,v in keytab.items(): # dict of tuples the tuple being key and tabs 
+        #     # print(f'this is key: {k}')
+        #     # print(f'this is v: {v}')
+        #     tabtype = k
+        #     key = v[0]
+        #     tabs = v[1]
+        #     # Iron & Steel: plant (unit-level not needed anymore)
+        for tab in tabs:
+            gsheets = gspread_creds.open_by_key(key)
+            spreadsheet = gsheets.worksheet(tab)
+            df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            df['tab-type'] = tab
+            dfs += [df]
+
+        df = pd.concat(dfs).reset_index(drop=True)
+        print(df.info())
+
     else:
         for tab in tabs:
             gsheets = gspread_creds.open_by_key(key)
@@ -104,17 +83,19 @@ def create_df(key, tabs=['']):
     return df
 
 
-def process_steel_iron_parent(tuple_gist, test_results_folder):
-    
+def process_steel_iron_parent(df, test_results_folder):
     # concat steel and iron unit
     # merge with plant for parent
-    steel_df = tuple_gist[0]
-    steel_df = steel_df[['tab-type', 'GEM Plant ID', 'GEM Unit ID', 'Unit Name', 'Unit Status', 'Current Capacity (ttpa)']]
-    iron_df = tuple_gist[1]
-    iron_df = iron_df[['tab-type', 'GEM Plant ID', 'GEM Unit ID', 'Unit Name','Unit Status', 'Current Capacity (ttpa)', 'Most Recent Relining']]
-    plant_df = tuple_gist[2]
+    # steel_df = tuple_gist[0]
+    # steel_df = steel_df[['tab-type', 'GEM Plant ID', 'GEM Unit ID', 'Unit Name', 'Unit Status', 'Current Capacity (ttpa)']]
+    # iron_df = tuple_gist[1]
+    # iron_df = iron_df[['tab-type', 'GEM Plant ID', 'GEM Unit ID', 'Unit Name','Unit Status', 'Current Capacity (ttpa)', 'Most Recent Relining']]
+    # plant_df = tuple_gist[2]
+    plant_df = df.copy()
     plant_cap_df = plant_df[plant_df['tab-type']=='Plant capacities and status'] # for if I need to deal with the 38 unmatched and if we want to show nominal summed capacity
-    plant_cap_df = plant_cap_df[['Plant ID', ]]
+    plant_cap_df = plant_cap_df[['Plant ID', 'Status', 'Nominal crude steel capacity (ttpa)', 'Nominal BOF steel capacity (ttpa)', 'Nominal EAF steel capacity (ttpa)', 
+                                 'Nominal OHF steel capacity (ttpa)', 'Other/unspecified steel capacity (ttpa)', 'Nominal iron capacity (ttpa)', 'Nominal BF capacity (ttpa)',
+                                 'Nominal DRI capacity (ttpa)', 'Other/unspecified iron capacity (ttpa)']] # rename Status to unit status 
     
     plant_df = plant_df[plant_df['tab-type']=='Plant data']
 
@@ -124,33 +105,88 @@ def process_steel_iron_parent(tuple_gist, test_results_folder):
                           'Steel products', 'Main production equipment', 'Start date']]
 
     print(len(plant_df)) # 1204
-    plant_df = plant_df.merge(right=plant_cap_df, on='Plant ID', how='inner')
-    print(len(plant_df)) # 1732 which to use? oh the second has a lot more rows because each prod method 
-    input('before after plant_df merge with cap stat')
+    plant_df = plant_df.merge(right=plant_cap_df, on='Plant ID', how='outer')
+    print(len(plant_df)) # 1732 looks correct because multiple rows for each unit 
+    
+    # unmatched plant prod method is determined by nominal capacity 
 
-    unit_df = pd.concat([steel_df, iron_df])
+    # now that plant level only let's create capacity for scaling using nominal steel when there iron as backfill
+    # TODO change column to be prior to rename lowercase
+    plant_df['scaling-cap'] = plant_df.apply(lambda row: row['Nominal crude steel capacity (ttpa)'] if pd.notna(row['Nominal crude steel capacity (ttpa)']) else row['Nominal iron capacity (ttpa)'], axis=1)
+        
+    # status is plant level and indivual in plant status capacity tab
+    # first group together all rows with same plant id, and get a new column of all status options in a list
+    # then apply make plant level status 
+    plant_df_grouped = plant_df.groupby('Plant ID').agg({'Status': list}).reset_index()
+    plant_df_grouped = plant_df_grouped.rename(columns={'Status': 'status-list'})
+    plant_df = plant_df.merge(plant_df_grouped, on='Plant ID', how='left')
+    plant_df['plant-status'] = plant_df.apply(lambda row: make_plant_level_status(row['status-list'], row['Plant ID']),axis=1)
 
-    df = unit_df.merge(right=plant_df, left_on='GEM Plant ID', right_on='Plant ID', how='inner') # 7783 rows x 27 columns
-    print(len(df))
+    # qc_list_combos = plant_df[plant_df['plant-status']=='']['status-list']
+    
+    list_unit_cap = [
+        'Nominal BOF steel capacity (ttpa)', 
+        'Nominal EAF steel capacity (ttpa)', 
+        'Nominal OHF steel capacity (ttpa)', 
+        'Other/unspecified steel capacity (ttpa)', 
+        'Nominal iron capacity (ttpa)', 
+        'Nominal BF capacity (ttpa)', 
+        'Nominal DRI capacity (ttpa)', 
+        'Other/unspecified iron capacity (ttpa)',
+        'scaling-cap'
+    ]
+    # replace '' with nan for all instances in the list_unit_cap cols
+    plant_df[list_unit_cap] = plant_df[list_unit_cap].replace('>0', np.nan)
+    # I want to pivot or groupby plant ID and sum all the values in the list_unit_cap columns so that I can retain the information but         
+    
+    for col in list_unit_cap:
+        plant_df_grouped_col = plant_df.groupby('Plant ID').agg({col: list}).reset_index()
+        print(plant_df_grouped_col)
+        plant_df_grouped_col = plant_df_grouped_col.rename(columns={col: f'{col}_list'})
+        # input(f'check grouped by col {col}')
+        plant_df = plant_df.merge(plant_df_grouped_col, on='Plant ID', how='left')
+
+    print(plant_df[plant_df['Plant ID']=='P100000120620'][['Nominal iron capacity (ttpa)', 'Nominal iron capacity (ttpa)_list']])
+    input('Check above') # works!  [4000, 2500, 5500] for all three
+    # plant_df_pivot = plant_df.groupby('Plant ID')[list_unit_cap].apply(lambda x: x.apply(pd.to_numeric, errors='coerce')).sum().reset_index()
+    
+    # print(plant_df_pivot)
+    # input('check pivot results') # TODO FIX this groupby sum so it's only applied on plant level not entire 
+    # plant_df = plant_df.drop(columns=list_unit_cap).merge(plant_df_pivot, on='Plant ID', how='left')
+
+    # then deduplicate on Plant ID keep first which is plant_data tab
+    print(len(plant_df))
+    plant_df = plant_df.drop_duplicates(subset='Plant ID')
+    print(len(plant_df))
+
+    
+    # set up prod method tiers with equipment and logic from summary tables
+
+    plant_df['prod-method-tier'] = plant_df.apply(lambda row: make_prod_method_tier(row['Main production equipment'], row['Plant ID']), axis=1)
+    
+    # unit stuff when we did it unit-level
+    # unit_df = pd.concat([steel_df, iron_df])
+
+    # df = unit_df.merge(right=plant_df, left_on='GEM Plant ID', right_on='Plant ID', how='inner') # 7783 rows x 27 columns
     # df = df.merge(right=plant_cap_df, on='Plant ID',how='inner') # 14494 when both outer merges and now 14451 with merged those two earlier
-    df = df.drop_duplicates(subset='GEM Unit ID')
-    print(len(df))
-
-    input('compare before after second merge')
+    # df = df.drop_duplicates(subset='GEM Unit ID')
+    # print(len(df))
     # df = df.dropna(subset='Plant ID')
     # df = df.dropna(how='all')
     # find situation where the unit id is empty
-    unmatched_rows = df[df['Plant ID'].isna() | df['GEM Plant ID'].isna()]
-    # df = df.fillna('')
-    # unmatched = df[df['Plant ID'] == '']
-    print(f"Unmatched rows {len(unmatched_rows)}:")
-    print(unmatched_rows)
+    # unmatched_rows = df[df['Plant ID'].isna() | df['GEM Plant ID'].isna()]
+    # # df = df.fillna('')
+    # # unmatched = df[df['Plant ID'] == '']
+    # print(f"Unmatched rows {len(unmatched_rows)}:")
+    # print(unmatched_rows)
     # unmatched_rows.to_csv(f'{test_results_folder}/unmatched_plants_units{iso_today_date}.csv')
     # average_ttpa = 1000
     # unmatched_rows['GEM Unit ID'] = unmatched_rows['Plant ID']
     # unmatched_rows['Current Capacity (ttpa)'] = average_ttpa
     # no status so can't and no production method
-    return df
+    
+    print(plant_df.info())
+    return plant_df
 
 def rename_cols(df):
     df = df.copy()
