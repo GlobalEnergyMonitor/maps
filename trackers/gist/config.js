@@ -1,5 +1,5 @@
 var config = {
-    csv: 'compilation_output/Iron & Steel-map-file-2025-03-24.csv', // Saying can't be found? TODO march 24th
+    csv: 'compilation_output/Iron & Steel-map-file-2025-03-25.csv', // Saying can't be found? TODO march 24th
 
     colors: {
         'light red': '#f28b82',
@@ -55,9 +55,10 @@ var config = {
 
 
             values_labels: ['Electric','Electric, oxygen','Oxygen','Ironmaking (BF)', 'Integrated (BF and DRI)', 'Ironmaking (DRI)',
-                    'Integrated (DRI)', 'Integrated (BF)', 'Integrated unknown', 'Steel other/unspecified', 'Iron other/unspecified']
+                    'Integrated (DRI)', 'Integrated (BF)', 'Integrated unknown', 'Steel other/unspecified', 'Iron other/unspecified'],
             // values: ['Electric-arc-furnaces', 'Basic-oxygen-furnaces', 'Open-hearth-furnaces', 'Blast-furnaces', 'DRI-furnaces',],
             // values-labels: ['Electric arc furnaces', 'Basic oxygen furnaces', 'Open hearth furnaces', 'Blast furnaces', 'DRI furnaces'],
+            primary: true
         },
         {
             field: 'plant-status',
@@ -71,9 +72,10 @@ var config = {
     linkField: 'plant-id',
 
     urlField: 'gem-wiki-page',
-    statusField: 'status_display',
+    statusField: 'plant-status',
+    statusDisplayField: 'status_display',
     countryField: 'country/area',
-    capacityField: 'scaling-cap_plant', // change to scaling col once added
+    capacityField: 'scaling-cap', // change to scaling col once added
     // capacityDisplayField: 'current-capacity-(ttpa)',
 
     capacityLabel: '', //'TTPA', 
@@ -89,7 +91,7 @@ var config = {
 
     /* Labels for describing the assets */
     assetFullLabel: "Iron and Steel Plants",
-    assetLabel: 'units',
+    assetLabel: 'plants',
 
     /* the column that contains the asset name. this varies between trackers */
     nameField: 'plant-name-(english)',
@@ -98,16 +100,16 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['plant-name-(english)','owner', 'parent', 'nominal-crude-steel-capacity-(ttpa)_plant','nominal-iron-capacity-(ttpa)_plant','status_display', 'start-date','prod-method-tier-display','main-production-equipment', 'subnational-unit-(province/state)','country/area'],
-        labels: ['Plant','Owner','Parent', 'Nominal Crude Steel Capacity (ttpa)','Nominal Iron Capacity (ttpa)', 'Status', 'Start date', 'Production Method','Main Production Equipment', 'Subnational Unit','Country/Area'],
+        values: ['plant-name-(english)','owner', 'parent', 'status_display', 'start-date','prod-method-tier-display','main-production-equipment', 'subnational-unit-(province/state)','country/area'],
+        labels: ['Plant','Owner','Parent', 'Plant Status', 'Start date', 'Production Method','Main Production Equipment','Subnational Unit','Country/Area'],
         clickColumns: ['plant-name-(english)'],
-        rightAlign: ['nominal-crude-steel-capacity-(ttpa)_plant','nominal-iron-capacity-(ttpa)_plant',]
+        rightAlign: []
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: { 'Plant': ['plant-name-(english)', 'plant-name-(other-language)', 'other-plant-names-(english)', 'other-plant-names-(other-language)'], 
-        'Companies': ['owner', 'parent', 'owner-(other-language) '],
+        'Companies': ['owner', 'parent', 'owner-(other-language)'],
         'Production Method': ['prod-method-tier-display', 'prod-method-tier','main-production-equipment']
     },
 
@@ -124,22 +126,68 @@ var config = {
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'start-date': {'label': 'Start date'},
-        'main-production-equipment': {'label': 'Main Production Equipment'},
-        'steel-products': {'label': 'Steel Products'},
         'coordinate-accuracy': {'label': 'Coordinate Accuracy'},
-        'nominal-crude-steel-capacity-(ttpa)_plant': {'label': 'Nominal crude steel capacity (ttpa)'},
-        'nominal-bof-steel-capacity-(ttpa)_plant': {'label': 'Nominal BOF steel capacity (ttpa)'},
-        'nominal-eaf-steel-capacity-(ttpa)_plant': {'label': 'Nominal EAF steel capacity (ttpa)'},
-        'nominal-ohf-steel-capacity-(ttpa)_plant': {'label': 'Nominal OHF steel capacity (ttpa)'},
-        'other/unspecified-steel-capacity-(ttpa)_plant': {'label': 'Other/unspecified steel capacity (ttpa)'},
-        'nominal-iron-capacity-(ttpa)_plant': {'label': 'Nominal iron capacity (ttpa)'},
-        'nominal-bf-capacity-(ttpa)_plant': {'label': 'Nominal BF capacity (ttpa)'},
-        'nominal-dri-capacity-(ttpa)_plant': {'label': 'Nominal DRI capacity (ttpa)'},
-        'other/unspecified-iron-capacity-(ttpa)_plant': {'label': 'Other/unspecified iron capacity (ttpa)'},
-        'subnational-unit-(province/state)':{'display': 'location'},
+        'operating-nominal-crude-steel-capacity-(ttpa)': {'label': 'Operating nominal crude steel capacity (ttpa)'},
+        'operating-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Operating nominal EAF steel capacity (ttpa)'},
+        'construction-nominal-crude-steel-capacity-(ttpa)': {'label': 'Construction nominal crude steel capacity (ttpa)'},
+        'construction-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Construction nominal EAF steel capacity (ttpa)'},
+        'operating-nominal-bof-steel-capacity-(ttpa)': {'label': 'Operating nominal BOF steel capacity (ttpa)'},
+        'operating-nominal-iron-capacity-(ttpa)': {'label': 'Operating nominal iron capacity (ttpa)'},
+        'operating-nominal-bf-capacity-(ttpa)': {'label': 'Operating nominal BF capacity (ttpa)'},
+        'announced-nominal-crude-steel-capacity-(ttpa)': {'label': 'Announced nominal crude steel capacity (ttpa)'},
+        'announced-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Announced nominal EAF steel capacity (ttpa)'},
+        'announced-nominal-iron-capacity-(ttpa)': {'label': 'Announced nominal iron capacity (ttpa)'},
+        'announced-nominal-dri-capacity-(ttpa)': {'label': 'Announced nominal DRI capacity (ttpa)'},
+        'mothballed-nominal-iron-capacity-(ttpa)': {'label': 'Mothballed nominal iron capacity (ttpa)'},
+        'mothballed-nominal-bf-capacity-(ttpa)': {'label': 'Mothballed nominal BF capacity (ttpa)'},
+        'operating-other-unspecified-steel-capacity-(ttpa)': {'label': 'Operating other/unspecified steel capacity (ttpa)'},
+        'mothballed-nominal-crude-steel-capacity-(ttpa)': {'label': 'Mothballed nominal crude steel capacity (ttpa)'},
+        'mothballed-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Mothballed nominal EAF steel capacity (ttpa)'},
+        'mothballed-nominal-dri-capacity-(ttpa)': {'label': 'Mothballed nominal DRI capacity (ttpa)'},
+        'operating-nominal-dri-capacity-(ttpa)': {'label': 'Operating nominal DRI capacity (ttpa)'},
+        'announced-other-unspecified-steel-capacity-(ttpa)': {'label': 'Announced other/unspecified steel capacity (ttpa)'},
+        'construction-other-unspecified-steel-capacity-(ttpa)': {'label': 'Construction other/unspecified steel capacity (ttpa)'},
+        'construction-nominal-iron-capacity-(ttpa)': {'label': 'Construction nominal iron capacity (ttpa)'},
+        'construction-nominal-dri-capacity-(ttpa)': {'label': 'Construction nominal DRI capacity (ttpa)'},
+        'operating-pre-retirement-nominal-crude-steel-capacity-(ttpa)': {'label': 'Operating pre-retirement nominal crude steel capacity (ttpa)'},
+        'operating-pre-retirement-nominal-bof-steel-capacity-(ttpa)': {'label': 'Operating pre-retirement nominal BOF steel capacity (ttpa)'},
+        'operating-pre-retirement-nominal-iron-capacity-(ttpa)': {'label': 'Operating pre-retirement nominal iron capacity (ttpa)'},
+        'operating-pre-retirement-nominal-bf-capacity-(ttpa)': {'label': 'Operating pre-retirement nominal BF capacity (ttpa)'},
+        'announced-nominal-bf-capacity-(ttpa)': {'label': 'Announced nominal BF capacity (ttpa)'},
+        'construction-nominal-bof-steel-capacity-(ttpa)': {'label': 'Construction nominal BOF steel capacity (ttpa)'},
+        'construction-nominal-bf-capacity-(ttpa)': {'label': 'Construction nominal BF capacity (ttpa)'},
+        'announced-nominal-bof-steel-capacity-(ttpa)': {'label': 'Announced nominal BOF steel capacity (ttpa)'},
+        'cancelled-nominal-crude-steel-capacity-(ttpa)': {'label': 'Cancelled nominal crude steel capacity (ttpa)'},
+        'cancelled-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Cancelled nominal EAF steel capacity (ttpa)'},
+        'retired-nominal-iron-capacity-(ttpa)': {'label': 'Retired nominal iron capacity (ttpa)'},
+        'retired-nominal-bf-capacity-(ttpa)': {'label': 'Retired nominal BF capacity (ttpa)'},
+        'announced-other-unspecified-iron-capacity-(ttpa)': {'label': 'Announced other/unspecified iron capacity (ttpa)'},
+        'mothballed-nominal-bof-steel-capacity-(ttpa)': {'label': 'Mothballed nominal BOF steel capacity (ttpa)'},
+        'cancelled-nominal-iron-capacity-(ttpa)': {'label': 'Cancelled nominal iron capacity (ttpa)'},
+        'cancelled-nominal-dri-capacity-(ttpa)': {'label': 'Cancelled nominal DRI capacity (ttpa)'},
+        'retired-nominal-crude-steel-capacity-(ttpa)': {'label': 'Retired nominal crude steel capacity (ttpa)'},
+        'retired-nominal-bof-steel-capacity-(ttpa)': {'label': 'Retired nominal BOF steel capacity (ttpa)'},
+        'operating-pre-retirement-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Operating pre-retirement nominal EAF steel capacity (ttpa)'},
+        'retired-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Retired nominal EAF steel capacity (ttpa)'},
+        'cancelled-other-unspecified-steel-capacity-(ttpa)': {'label': 'Cancelled other/unspecified steel capacity (ttpa)'},
+        'cancelled-other-unspecified-iron-capacity-(ttpa)': {'label': 'Cancelled other/unspecified iron capacity (ttpa)'},
+        'retired-nominal-ohf-steel-capacity-(ttpa)': {'label': 'Retired nominal OHF steel capacity (ttpa)'},
+        'operating-other-unspecified-iron-capacity-(ttpa)': {'label': 'Operating other/unspecified iron capacity (ttpa)'},
+        'mothballed-other-unspecified-iron-capacity-(ttpa)': {'label': 'Mothballed other/unspecified iron capacity (ttpa)'},
+        'cancelled-nominal-bof-steel-capacity-(ttpa)': {'label': 'Cancelled nominal BOF steel capacity (ttpa)'},
+        'cancelled-nominal-bf-capacity-(ttpa)': {'label': 'Cancelled nominal BF capacity (ttpa)'},
+        'operating-pre-retirement-nominal-dri-capacity-(ttpa)': {'label': 'Operating pre-retirement nominal DRI capacity (ttpa)'},
+        'construction-other-unspecified-iron-capacity-(ttpa)': {'label': 'Construction other/unspecified iron capacity (ttpa)'},
+        'mothballed-other-unspecified-steel-capacity-(ttpa)': {'label': 'Mothballed other/unspecified steel capacity (ttpa)'},
+        'operating-pre-retirement-other-unspecified-steel-capacity-(ttpa)': {'label': 'Operating pre-retirement other/unspecified steel capacity (ttpa)'},
+        'mothballed-pre-retirement-nominal-iron-capacity-(ttpa)': {'label': 'Mothballed pre-retirement nominal iron capacity (ttpa)'},
+        'mothballed-pre-retirement-nominal-bf-capacity-(ttpa)': {'label': 'Mothballed pre-retirement nominal BF capacity (ttpa)'},
+        'operating-pre-retirement-other-unspecified-iron-capacity-(ttpa)': {'label': 'Operating pre-retirement other/unspecified iron capacity (ttpa)'},
+        'operating-nominal-ohf-steel-capacity-(ttpa)': {'label': 'Operating nominal OHF steel capacity (ttpa)'},
+        'mothballed-nominal-ohf-steel-capacity-(ttpa)': {'label': 'Mothballed nominal OHF steel capacity (ttpa)'},
+        'subnational-unit-(province/state)': {'display': 'location'},
         'country/area': {'display': 'location'}
-    }, 
-
+    },
     /* Mapbox styling applied to all trackers */
     pointPaint: {
         'circle-opacity':.85
