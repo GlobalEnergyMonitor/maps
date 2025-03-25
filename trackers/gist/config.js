@@ -31,17 +31,6 @@ var config = {
             'Integratedunknown': 'grey',
             'Steelotherunspecified': 'light grey',
             'Ironotherunspecified': 'light grey'
-            // "electric - light green
-            // electric, oxygen - dark blue
-            // oxygen - orange
-            // ironmaking (BF) - light red
-            // ironmaking (DRI) - light blue
-            // integrated (BF) - dark red
-            // integrated (BF and DRI) - purple
-            // integrated (DRI) - dark green
-            // integrated (unknown) - dark gray
-            // Steel other/ unspecified - light gray
-            // Iron other/ unspecified - light gray"
         }
     },
     filters: [
@@ -63,9 +52,8 @@ var config = {
         {
             field: 'plant-status',
             label: 'Status',
-            values: ['operating','announced', 'construction','operating-pre-retirement','cancelled', 'retired','mothballed-pre-retirement','mothballed'],
-            values_labels: ['Operating','Announced', 'Construction','Operating Pre-Retirement', 'Cancelled', 'Retired', 'Mothballed Pre-Retirement', 'Mothballed',]
-
+            values: ['announced', 'cancelled', 'construction', 'mothballed', 'mothballed-pre-retirement', 'operating', 'operating-pre-retirement', 'retired'],
+            values_labels: ['Announced', 'Cancelled', 'Construction', 'Mothballed', 'Mothballed Pre-Retirement', 'Operating', 'Operating Pre-Retirement', 'Retired']
         }
     ],
 
