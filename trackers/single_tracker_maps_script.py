@@ -134,9 +134,13 @@ def process_steel_iron_parent(df, test_results_folder):
         'Other/unspecified iron capacity (ttpa)',
         'scaling-cap'
     ]
+    pd.options.display.float_format = '{:.0f}'.format
     # replace '' with nan for all instances in the list_unit_cap cols
     plant_df[list_unit_cap] = plant_df[list_unit_cap].replace('>0', np.nan)
     plant_df[list_unit_cap] = plant_df[list_unit_cap].replace('N/A', np.nan)
+    # make all in list_unit_cap rounded to be without decimal places
+    plant_df[list_unit_cap] = plant_df[list_unit_cap].applymap(lambda x: round(x) if pd.notna(x) and isinstance(x, (int, float)) else x)
+    
 
     # I want to pivot or groupby plant ID and sum all the values in the list_unit_cap columns so that I can retain the information but         
     
@@ -167,11 +171,13 @@ def process_steel_iron_parent(df, test_results_folder):
                 # print(plant_df.loc[row,col])
                 print('skip creating new column for this one')
     # print(set(all_suffixes_check)) # passed! 
+    print(plant_df[plant_df['Plant ID']=='P100000120823'][['Nominal iron capacity (ttpa)', 'Status']])
+
     # print(plant_df[plant_df['Plant ID']=='P100000120679'][['Nominal crude steel capacity (ttpa)', 'Status']])
     # print(plant_df[plant_df['Plant ID']=='P100000120620'][['Nominal iron capacity (ttpa)', 'Status']])
     # print(plant_df[plant_df['Plant ID']=='P100000120679'][['Operating Nominal crude steel capacity (ttpa)', 'Nominal crude steel capacity (ttpa)', 'Announced Nominal crude steel capacity (ttpa)']])
     # print(plant_df[plant_df['Plant ID']=='P100000120620'][['Operating Nominal iron capacity (ttpa)', 'Nominal iron capacity (ttpa)', 'Announced Nominal iron capacity (ttpa)', 'Mothballed Nominal iron capacity (ttpa)']])
-    # input('Check above') # works!  [4000, 2500, 5500] for all three
+    input('Check above') # works!  [4000, 2500, 5500] for all three
     print(plant_df.columns)
     input('add cols') #'Main Production Equipment', 'Steel Products',
     # filter out some cols 
@@ -334,7 +340,13 @@ def process_steel_iron_parent(df, test_results_folder):
         'Mothballed Nominal OHF steel capacity (ttpa)': 'sum'
     }).reset_index()
     
-    
+
+    # print(plant_df_grouped[plant_df_grouped['Plant ID']=='P100000120823']) # worked after removing rouding logic
+    # remove decimal point in all capacity values
+    for col in plant_df_grouped.columns:
+        if 'capacity (ttpa)' in col:
+            plant_df_grouped[col] = plant_df_grouped[col].apply(lambda x: str(x).split('.')[0])
+
     
     print(len(plant_df_grouped))
     plant_df_grouped = plant_df_grouped.drop_duplicates(subset='Plant ID')
