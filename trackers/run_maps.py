@@ -20,21 +20,31 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
 
 
         # drop cols don't need # filter_cols
+        # TODO MARCH 24: CREATE NEW COLUMNS WITH STATUS NAME AND PROD METHOD FOR CAPACITY SO ALL CAN BE AT PLANT LEVEL
         df = process_steel_iron_parent(df, test_results_folder)
+        print(len(df))
         df = split_coords(df)
         # rename_cols
+        # print(len(df))
+
         df = df.rename(columns={'Unit Status':'status', 'GEM Wiki Page': 'url', 'tab-type_x': 'tab-type'})
+        # print(len(df))
 
         df = rename_cols(df)
-        
+        # print(len(df))
+
         # df = make_numerical(df, ['current-capacity-(ttpa)', 'plant-age-(years)'])
 
         # fix_status_space because filters
         df = fix_status_space(df)
+        # print(len(df))
+
         df = fix_prod_type_space(df) 
+        # print(len(df))
 
         df = input_to_output(df, f'{output_folder}{tracker}-map-file-{iso_today_date}.csv')
         print('DONE MAKING GIST SINGLE MAP') 
+        input('Check length 1204')
        
     
     elif tracker == 'Oil & Gas Extraction':
