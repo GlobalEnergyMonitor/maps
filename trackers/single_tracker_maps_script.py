@@ -79,6 +79,11 @@ def create_df(key, tabs=['']):
         # df = pd.read_excel(input_file_xls, sheet_name=None)
         # print(df)
         print(df.info())
+        input('Check df info plz')
+
+
+    df = df.replace('*', pd.NA).replace('--', pd.NA)
+    df.columns = df.columns.str.strip()
     
     return df
 
@@ -349,13 +354,6 @@ def process_steel_iron_parent(df, test_results_folder):
     print(plant_df_grouped.info())
     return plant_df_grouped
 
-def rename_cols(df):
-    df = df.copy()
-    df = df.rename(columns=str.lower)
-    df.columns = df.columns.str.replace(' ', '-')
-    df = df.rename(columns={'latitude': 'lat', 'longitude':'lng', 'wiki-url': 'url'})
-    print(df.info())
-    return df
 
 def filter_cols(df, final_cols):
     df = df.copy()

@@ -10,7 +10,29 @@ from tqdm import tqdm # can adapt more, special tweaking for dataframe!
 
 for tracker in tqdm(trackers_to_update, desc='Baking'):
     # print(tracker)
-    if tracker == 'Geothermal':
+    if tracker == 'Integrated':
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/integrated/test_results/'
+
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/integrated/compilation_output/'
+        
+        output_file = f'{output_folder}gipt-data-{iso_today_date}.csv'
+
+        # creates single map file
+        key, tabs = get_key_tabs_prep_file(tracker)
+
+        df = create_df(key, tabs)
+        df = clean_capacity(df)
+        df = semicolon_for_mult_countries_gipt(df)
+        df = fix_status_inferred(df)        
+        # harmonize_countries(df, countries_dict, test_results_folder) # find countries_dict
+        df= rename_cols(df)
+        df = remove_missing_coord_rows(df)
+
+        input_to_output(df, output_file)
+
+
+
+    elif tracker == 'Geothermal':
         test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/geothermal/test_results/'
 
         output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/geothermal/compilation_output/'
