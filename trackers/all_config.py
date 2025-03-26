@@ -6,7 +6,7 @@ from numpy import true_divide
 from creds import client_secret
 
 
-trackers_to_update = ['Geothermal'] #['Iron & Steel']
+trackers_to_update = ['Integrated'] #['Iron & Steel']
 new_release_date = 'March 2025' 
 priority = [] # europe
 
@@ -66,7 +66,7 @@ list_official_tracker_names = ['Oil & Gas Plants', 'Coal Plants', 'Solar', 'Wind
 
 maps_with_needed_conversion = ['asia', 'europe', 'africa', 'latam', 'ggit']
 gas_only_maps = ['AGT', 'EGT', 'asia', 'europe', 'ggit'] 
-non_gsheet_data = ['Gas Pipelines', 'LNG Terminals', 'Oil Pipelines']
+non_gsheet_data = ['Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Gas Pipelines EU', 'LNG Terminals EU']
 
 conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']

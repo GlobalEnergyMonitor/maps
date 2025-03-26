@@ -68,7 +68,7 @@ def set_up_df(df, t_name, acro, release):
     df['tracker-official'] = df['tracker-official'].fillna('')
     df = df[df['tracker-official'] != '']
     # drop empty rows
-    df = df.replace('*', pd.NA).replace('Unknown', pd.NA).replace('--', pd.NA)
+    df = df.replace('*', pd.NA).replace('--', pd.NA) # replace('Unknown', pd.NA)
     print(df)
     print(len(df))
     # input('Check df length, ggit-lng turns into a string?')
@@ -246,6 +246,39 @@ def clean_dfs(df):
                 
     # print(f'length of df at end of cleand_dfs removed lat and long empty which is good because all point data:{len(cleaned_df)}')
     return cleaned_df
+
+def clean_capacity(df):
+    # clean df
+    if 'Capacity (MW)' in df.columns:
+        df['Capacity (MW)'] = df['Capacity (MW)'].apply(lambda x: check_and_convert_float(x))
+        df = df.fillna('')
+        
+        # round all capacity cols to 2 decimal places
+        df['Capacity (MW)'] = df['Capacity (MW)'].apply(lambda x: round(x, 4) if x != '' else x)    
+    else:
+        print(df.info())
+        input('Check df.info for capacity name, Capacity (MW) not it!')
+    
+    return df
+
+def semicolon_for_mult_countries_gipt(df):
+    
+    cols_to_consider = ['Country/area 1 (hydropower only)',  'Country/area 2 (hydropower only)']
+    
+    # end goal is we want the hydro cols to fit into country cols
+    # only need to do that when there is a second country, in those cases cap2 is not 0
+    # the country and cap cols (main) is the first country and combined cap
+    # multiple countries separated by ;
+    df = df.fillna('')
+    for row in df.index:
+        if df.loc[row, 'Country/area 2 (hydropower only)'] != '':
+            print(f"Country 1: {df.loc[row, 'Country/area 1 (hydropower only)']}")
+            df.loc[row,'Country/area'] = f"{df.loc[row, 'Country/area 1 (hydropower only)']}; {df.loc[row, 'Country/area 2 (hydropower only)']};"
+            
+        else:
+            df.loc[row,'Country/area'] = f"{df.loc[row, 'Country/area']};"
+
+    return df
 
 def df_to_gdf(df, geometry_col, crs='EPSG:4326'):
     # Ensure the geometry column contains valid geometries
@@ -695,16 +728,16 @@ diacritic_map = {
 
 
 def remove_diacritics(name_value):
-    # name_value = name_value.fillna('')
-    no_diacritics_name_value = ''
-    if type(name_value) != float:
-        no_diacritics_name_value = name_value[:]
-        for char in no_diacritics_name_value:
+    
+    if pd.isnull(name_value):
+        name_value = ''
+    elif type(name_value) != float:
+        for char in name_value:
             for k, v in diacritic_map.items():
                 if char in v:
-                    no_diacritics_name_value = no_diacritics_name_value.replace(char, k)
+                    name_value = name_value.replace(char, k)
 
-    return no_diacritics_name_value
+    return name_value
 
 def split_goget_ggit_eu(df):
 
@@ -1307,12 +1340,6 @@ def capacity_conversions_eu(cleaned_dict_map_by_one_gdf):
     # # printcleaned_dict_map_by_one_gdf_with_conversions.keys())
     # # # ##(input('check that there are enough maps')
     return cleaned_dict_map_by_one_gdf_with_conversions
-
-
-    
-    
-    
-     
 
 
 def create_search_column(dict_of_gdfs):
@@ -2206,7 +2233,32 @@ def replace_old_date_about_page_reg(df):
                         
     return df
 
-def harmonize_countries(df, countries_dict):
+def rename_cols(df):
+    print(f'Cols before: {df.columns}')
+
+    df = df.copy()
+    df = df.rename(columns=str.lower)
+    df.columns = df.columns.str.replace(' ', '-')
+    df.columns = df.columns.str.replace('.', '')
+    df = df.rename(columns={'latitude': 'lat', 'longitude':'lng', 'gem-wiki-url': 'url'})
+    print(f'Cols after: {df.columns}')
+    return df
+
+def remove_missing_coord_rows(df):
+    df['lng'] = df['lng'].fillna('')
+    df['lat'] = df['lat'].fillna('')
+    print(len(df))
+    issue_df = df[df['lng']== '']
+    df = df[df['lng']!= '']
+    df = df[df['lat']!= '']
+    print(len(df))
+    print('This is issues missing coord so removed:')
+    print(issue_df)
+    issue_df.to_csv(f'missing_coords_{iso_today_date}.csv')
+
+    return df
+
+def harmonize_countries(df, countries_dict, test_results_folder):
     df = df.copy()
 
     region_col = set(df['region'].to_list())
@@ -2217,8 +2269,27 @@ def harmonize_countries(df, countries_dict):
         results_len = df_mask[df_mask['country-harmonize-pass'] == 'false']
         results.append((region, len(results_len)))
         print(f'\nWe want this to be 0: {results}\n')
+        results_df = pd.DataFrame(results)
+        results_df.to_csv(f'{test_results_folder}results.csv')
         
     # df['areas-subnat-sat-display'] = df.apply(lambda row: f"{row['country']}" if row['state/province'] == '' else f"{row['state/province']}, {row['country']}", axis=1)   
+
+def remove_100(owner):
+    if ';' in owner:
+        print('owner not relevant')
+        print(owner)
+    else:
+        if '[100%]' in owner:
+            print(owner)
+            owner = owner.replace(' [100.0%]', '')
+            print(owner)
+            input('check owner strip 100')
+    return owner
+
+def remove_100_owner(df):
+    # [100%]
+    col = ['Owner']
+    df[col] = df[col].apply(lambda x: remove_100(x))
     return df
 
 def remove_implied_owner(df):
@@ -2695,20 +2766,24 @@ def workaround_table_units(row):
     
     
 def fix_status_inferred(df):
-    # print(f"Statuses before: {set(df['status'].to_list())}")
-    inferred_statuses_cancelled = df['status'].str.contains('cancelled - inferred')
-    inferred_statuses_shelved = df['status'].str.contains('shelved - inferred')
-    
-    # # print(inferred_statuses_cancelled['status']!=False)
-    # # print(len(inferred_statuses_shelved))
-    df.loc[inferred_statuses_cancelled, 'status'] = 'cancelled'
-    df.loc[inferred_statuses_shelved,'status'] = 'shelved'
-    # for row in df.index:
-    #     if 'shelved - inferred' in df.loc[row, 'status']:
-    #         df.loc[row, 'status'] = 'shelved'
-    
-    # print(f"Statuses after: {set(df['status'].to_list())}")
+    if 'status' in df.columns:
+        inferred_statuses_cancelled = df['status'].str.contains('cancelled - inferred')
+        inferred_statuses_shelved = df['status'].str.contains('shelved - inferred')
 
+        df.loc[inferred_statuses_cancelled, 'status'] = 'cancelled'
+        df.loc[inferred_statuses_shelved,'status'] = 'shelved'
+
+    elif 'Status' in df.columns:
+        print(f"Statuses before: {set(df['Status'].to_list())}")
+
+        inferred_statuses_cancelled = df['Status'].str.contains('cancelled - inferred')
+        inferred_statuses_shelved = df['Status'].str.contains('shelved - inferred')
+
+        df.loc[inferred_statuses_cancelled, 'Status'] = 'cancelled'
+        df.loc[inferred_statuses_shelved,'Status'] = 'shelved'
+
+        print(f"Statuses before: {set(df['Status'].to_list())}")
+        
     return df
 
 def fix_status_space(df):
