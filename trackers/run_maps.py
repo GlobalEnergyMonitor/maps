@@ -48,7 +48,6 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
 
 
         # drop cols don't need # filter_cols
-        # TODO MARCH 24: CREATE NEW COLUMNS WITH STATUS NAME AND PROD METHOD FOR CAPACITY SO ALL CAN BE AT PLANT LEVEL
         df = process_steel_iron_parent(df, test_results_folder)
         print(len(df))
         df = split_coords(df)
