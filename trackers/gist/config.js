@@ -51,9 +51,9 @@ var config = {
         },
         {
             field: 'plant-status',
-            label: 'Status',
-            values: ['announced', 'cancelled', 'construction', 'mothballed', 'mothballed-pre-retirement', 'operating', 'operating-pre-retirement', 'retired'],
-            values_labels: ['Announced', 'Cancelled', 'Construction', 'Mothballed', 'Mothballed Pre-Retirement', 'Operating', 'Operating Pre-Retirement', 'Retired']
+            label: 'Plant Status',
+            values: ['announced', 'cancelled', 'construction', 'mothballed', 'operating', 'operating-pre-retirement', 'retired'], //'mothballed-pre-retirement',
+            values_labels: ['Announced', 'Cancelled', 'Construction', 'Mothballed', 'Operating', 'Operating Pre-Retirement', 'Retired'] // 'Mothballed Pre-Retirement', 
         }
     ],
 
