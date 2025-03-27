@@ -308,7 +308,15 @@ def geojson_to_gdf(geojson_file):
 
     return gdf, crs
 
-
+def save_as_parquet(df):
+    # DataFrame.to_parquet(path=None, engine='auto', compression='snappy', index=None, partition_cols=None, storage_options=None, **kwargs)
+    # partition_colslist, optional, default None
+    # Column names by which to partition the dataset. Columns are partitioned in the order they are given. Must be None if path is not a string.
+    # partition by country into data lakes
+    # explore storage storage_options dict, optional
+        
+    df.to_parquet("test.parquet", partition_cols=["country/area"], index=False)
+    print('Parquet file is saved!')
 
 def get_standard_country_names():
     
