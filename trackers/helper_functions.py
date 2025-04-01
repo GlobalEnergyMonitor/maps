@@ -18,7 +18,8 @@ import os
 from datetime import date
 import openpyxl
 import xlsxwriter
-from all_config import *
+from trackers.all_config import *
+# from all_config import *
 import re
 from openpyxl import Workbook
 from openpyxl import load_workbook
@@ -115,6 +116,7 @@ def gspread_access_file_read_only(key, tab_list):
     title = name of the sheet you want to read
     returns a df of the sheet
     """
+    print(f'this is key and tab list in gspread access file read only function:\n{key}{tab_list}')
     gspread_creds = gspread.oauth(
         scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
         credentials_filename=client_secret_full_path,
@@ -177,26 +179,26 @@ def gspread_access_file_read_only(key, tab_list):
  
 def create_prep_file(multi_tracker_log_sheet_key, prep_file_tab): # needed_map_list
     
-    if local_copy:
+    # if local_copy:
 
-        with open(f'local_pkl/prep_df{iso_today_date}.pkl', 'rb') as f:
-            prep_df = pickle.load(f)
-    else:
-        prep_df = gspread_access_file_read_only(multi_tracker_log_sheet_key, prep_file_tab)
-        # Add pickle format for prep_df
-        prep_df = prep_df[prep_df['official release tab name'] != ''] # skips rows at bottom
-        # Convert 'gspread_tabs' and 'sample_cols' to lists
-        prep_df['gspread_tabs'] = prep_df['gspread_tabs'].apply(lambda x: x.split(';'))
-        # df['sample_cols'] = df['sample_cols'].apply(lambda x: x.split(';'))
-        prep_df['gspread_tabs'] = prep_df['gspread_tabs'].apply(lambda lst: [s.strip() for s in lst])
-        # df['sample_cols'] = df['sample_cols'].apply(lambda lst: [s.strip() for s in lst])
-        prep_df['official name'] = prep_df['official release tab name']
+    #     with open(f'local_pkl/prep_df{iso_today_date}.pkl', 'rb') as f:
+    #         prep_df = pickle.load(f)
+    # else:
+    prep_df = gspread_access_file_read_only(multi_tracker_log_sheet_key, prep_file_tab)
+    # Add pickle format for prep_df
+    prep_df = prep_df[prep_df['official release tab name'] != ''] # skips rows at bottom
+    # Convert 'gspread_tabs' and 'sample_cols' to lists
+    prep_df['gspread_tabs'] = prep_df['gspread_tabs'].apply(lambda x: x.split(';'))
+    # df['sample_cols'] = df['sample_cols'].apply(lambda x: x.split(';'))
+    prep_df['gspread_tabs'] = prep_df['gspread_tabs'].apply(lambda lst: [s.strip() for s in lst])
+    # df['sample_cols'] = df['sample_cols'].apply(lambda lst: [s.strip() for s in lst])
+    prep_df['official name'] = prep_df['official release tab name']
 
-        prep_df.set_index('official release tab name', inplace=True) # sets index on offical name
-        # prep_df['tracker-acro'] = prep_df['tracker-acro']
-        
-        with open(f'local_pkl/prep_df{iso_today_date}.pkl', 'wb') as f:
-            pickle.dump(prep_df, f)
+    prep_df.set_index('official release tab name', inplace=True) # sets index on offical name
+    # prep_df['tracker-acro'] = prep_df['tracker-acro']
+    
+        # with open(f'local_pkl/prep_df{iso_today_date}.pkl', 'wb') as f:
+        #     pickle.dump(prep_df, f)
     return prep_df
 
 # # #### useful geo functions ####
@@ -312,7 +314,7 @@ def save_as_parquet(df):
     # DataFrame.to_parquet(path=None, engine='auto', compression='snappy', index=None, partition_cols=None, storage_options=None, **kwargs)
     # partition_colslist, optional, default None
     # Column names by which to partition the dataset. Columns are partitioned in the order they are given. Must be None if path is not a string.
-    # partition by country into data lakes
+    # partition by country into data lakes, and status
     # explore storage storage_options dict, optional
         
     df.to_parquet("test.parquet", partition_cols=["country/area"], index=False)
@@ -1730,6 +1732,7 @@ def convert_WKT_to_geo(df):
     return gdf
 
 def find_about_page(tracker,key):
+        # print(f'this is key and tab list in def find_about_page(tracker,key):function:\n{tracker}{key}')
 
         gspread_creds = gspread.oauth(
             scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
@@ -1757,7 +1760,7 @@ def find_about_page(tracker,key):
             if 'About' not in last_sheet.title:
                 if 'Copyright' not in last_sheet.title:
                     print('Checked first and last tab, no about page found not even for copyright. Pausing.')
-                    # input("Press Enter to continue...")
+                    input("Press Enter to continue...")
                 else:
                     # print(f'Found about page in last tab: {last_tab}')
                     sheet = last_sheet
@@ -1810,6 +1813,113 @@ def find_region_country_colname(df):
                     continue
     return col_reg_name, col_country_name    
 
+
+def what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab):
+    needed_map_and_tracker_dict = {} # map: (trackers, geo, fuel)
+    # TODO un comment after it passes tests
+    # if local_copy:
+    #     with open('local_pkl/map_tab_df.pkl', 'rb') as f:
+    #         map_tab_df = pickle.load(f)
+    #     print("DataFrame have been loaded from map_tab_df.pkl")
+    # else: 
+    map_tab_df = gspread_access_file_read_only(multi_tracker_log_sheet_key, map_tab)
+    # # printf'Trackers with updates to be incorporated: {trackers_to_update}')
+
+    # print("DataFrame have been saved to map_tab_df.pkl")
+
+    # print("Now go through and create the needed tracker dict based on new data in trackers to update.")
+    for tracker in trackers_to_update:
+        for row in map_tab_df.index:
+            # use the tracker to filter the map_tab_df df for only rows that contain the tracker in source column
+            # print(map_tab_df)
+            # print(map_tab_df.info())
+
+            # input('This is map_tab_df df')
+            sources = map_tab_df.loc[row, 'source'].split(',')
+            geo = map_tab_df.loc[row, 'geo'].split(',')
+            fuel = map_tab_df.loc[row, 'fuel'].split(',')
+            mapname = map_tab_df.loc[row, 'mapname']
+            # print(sources)
+            # input('this is sources column split on comma')
+            if tracker in sources:
+                needed_map_and_tracker_dict[mapname] = (sources, geo, fuel)
+
+            else:
+                map_tab_df.drop(row, inplace=True)
+    # print(map_tab_df)
+    # input('This is map_tab_df_copy after dropping irrelevant rows')
+    # # print(needed_map_and_tracker_dict)
+    # input('this is dict')
+        # for row in map_tab_df.index:
+        #     if tracker in row['source'].to_list():
+            # needed_map_and_tracker_dict[row['mapname']] = (row['source'],row['geo'],row['fuel'])
+                
+                
+        # filter out the map tracker tab df 
+        # so that we only have the row that matches the tracker to be updated
+        # and also find the tracker names for the map to be updated beyond the new tracker data but existing tracker data as well
+        # map_log_df_sel = map_depend_df[map_depend_df['official release tab name'] == tracker]
+        # for col in map_log_df_sel.columns:
+        #     if 'yes' in map_log_df_sel[col].values:
+        #         map_log_df_map_sel = map_log_df[map_log_df[col] == 'yes']
+        #         tracker_col_index = map_log_df.columns.get_loc('official release tab name')
+        #         tracker_name_col_map_sel = map_log_df.columns[tracker_col_index]
+        #         list_of_trackers_relevant_to_map = map_log_df_map_sel[tracker_name_col_map_sel].to_list()
+        #         needed_map_and_tracker_dict[col] = list_of_trackers_relevant_to_map
+        #         print(f'Map {col} needs to be updated with the new data for {tracker}, and existing data for {list_of_trackers_relevant_to_map} minus {tracker}.')
+        #         # ##(input('Check this with ggit-hy')
+            
+    return needed_map_and_tracker_dict
+
+def what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab):
+    needed_map_and_tracker_dict = {} # map: [trackers]
+    
+    if local_copy:
+        with open('local_pkl/map_log_df.pkl', 'rb') as f:
+            map_log_df = pickle.load(f)
+        # print("DataFrame have been loaded from map_log_df.pkl")
+    else: 
+        map_log_df = gspread_access_file_read_only(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab)
+        # # printf'Trackers with updates to be incorporated: {trackers_to_update}')
+
+        with open('local_pkl/map_log_df.pkl', 'wb') as f:
+            pickle.dump(map_log_df, f)
+        # print("DataFrame have been saved to map_log_df.pkl")
+    
+    # print("Now go through and create the needed tracker dict based on new data in trackers to update.")
+    for tracker in trackers_to_update:
+        # print(map_log_df)
+        # filter out the map tracker tab df 
+        # so that we only have the row that matches the tracker to be updated
+        # and also find the tracker names for the map to be updated beyond the new tracker data but existing tracker data as well
+        map_log_df_sel = map_log_df[map_log_df['official release tab name'] == tracker]
+        # print(map_log_df_sel)
+        # input('check that it is gogets offiical name')
+        for col in map_log_df_sel.columns:
+            if 'yes' in map_log_df_sel[col].values:
+                map_log_df_map_sel = map_log_df[map_log_df[col] == 'yes']
+                tracker_col_index = map_log_df.columns.get_loc('official release tab name')
+                tracker_name_col_map_sel = map_log_df.columns[tracker_col_index]
+                list_of_trackers_relevant_to_map = map_log_df_map_sel[tracker_name_col_map_sel].to_list()
+                needed_map_and_tracker_dict[col] = list_of_trackers_relevant_to_map
+                # print(f'Map {col} needs to be updated with the new data for {tracker}, and existing data for {list_of_trackers_relevant_to_map} minus {tracker}.')
+                # ##(input('Check this with ggit-hy')
+            
+    return needed_map_and_tracker_dict
+
+def get_key_tabs_prep_file(tracker):
+    prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)
+
+    prep_dict = prep_df.to_dict(orient='index')
+
+    if tracker in non_gsheet_data:
+        print('Needs to be local')
+
+    else:
+        key = prep_dict[tracker]['gspread_key']
+        tabs = prep_dict[tracker]['gspread_tabs']
+    return key, tabs
+
 # Define a function to check for valid values
 # def is_valid_goget(x):
 
@@ -1828,7 +1938,68 @@ def create_df_goget(key, tabs):
                 prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
                 print(prod_df.info())
         return main_df, prod_df    
+    
 
+def create_df(key, tabs=['']):
+    # print(tabs)
+    dfs = []
+    # other logic for goget 
+    if trackers_to_update[0] == 'Oil & Gas Extraction':
+        for tab in tabs:
+            # print(tab)
+            if tab == 'Main data':
+                gsheets = gspread_creds.open_by_key(key)
+                spreadsheet = gsheets.worksheet(tab)
+                main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                print(main_df.info())
+            elif tab == 'Production & reserves':
+                gsheets = gspread_creds.open_by_key(key)
+                spreadsheet = gsheets.worksheet(tab)
+                prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                print(prod_df.info())
+        return main_df, prod_df
+    
+    elif trackers_to_update[0] == 'Iron & Steel':
+        # keytab = key
+        # print(keytab)
+        # for k,v in keytab.items(): # dict of tuples the tuple being key and tabs 
+        #     # print(f'this is key: {k}')
+        #     # print(f'this is v: {v}')
+        #     tabtype = k
+        #     key = v[0]
+        #     tabs = v[1]
+        #     # Iron & Steel: plant (unit-level not needed anymore)
+        for tab in tabs:
+            gsheets = gspread_creds.open_by_key(key)
+            spreadsheet = gsheets.worksheet(tab)
+            df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            df['tab-type'] = tab
+            dfs += [df]
+
+        df = pd.concat(dfs).reset_index(drop=True)
+        print(df.info())
+
+    else:
+        for tab in tabs:
+            gsheets = gspread_creds.open_by_key(key)
+            spreadsheet = gsheets.worksheet(tab)
+            df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            dfs += [df]
+        df = pd.concat(dfs).reset_index(drop=True)
+        # df = pd.read_excel(input_file_xls, sheet_name=None)
+        # print(df)
+        print(df.info())
+        # input('Check df info plz')
+
+
+    # df = df.replace('*', pd.NA).replace('--', pd.NA)
+    # df.columns = df.columns.str.strip()
+    
+    return df
+
+def create_df_for_dd(key, tabs=['']):
+    # TODO
+    return 
 
 #     return isinstance(x, (int, float)) and not pd.isna(x) and x != '' and x != 0 and x != 0.0
 def handle_goget_gas_only_workaround(goget_orig_file):
@@ -1859,7 +2030,31 @@ def save_goget_datafile_eu(goget):
 
     # input('check file')
 
+def add_goit_boedcap_from_baird(gdf):
+    # set up fixed goit file pd
+    goit_cap_boed = gpd.read_file(goit_cap_updated)
+    print(goit_cap_boed.info())
+    # goit_cap_boed.drop(columns=['Capacity'], inplace=True) # there is already a capacity that exists
+
+    # goit_cap_boed = goit_cap_boed.rename(columns={'ProjectID':'id', 'CapacityBOEd': 'capacity'})
+
+    # Merge goit_cap_boed with the main gdf on 'id'
+    gdf = gdf.merge(goit_cap_boed[['ProjectID', 'CapacityBOEd']], on='ProjectID', how='left', suffixes=('', '_new'))
     
+    # Update the 'capacity_boed' column in gdf with the new values where there is a match
+    gdf['CapacityBOEd'] = gdf['CapacityBOEd_new'].combine_first(gdf['CapacityBOEd'])
+    
+    # Drop the temporary 'capacity_boed_new' column
+    gdf.drop(columns=['CapacityBOEd_new'], inplace=True)
+    print('AFTER')
+    
+    print(len(gdf))
+
+    # for col in gdf.columns:
+    #     print(col)
+    print(gdf.info())
+    # input('Check the above...')
+    return gdf    
 
 def process_goget_reserve_prod_data(main, prod):
     # output is to return df with scott's code adjustments
@@ -2231,13 +2426,13 @@ def replace_old_date_about_page_reg(df):
                     pass
                 else:
                     end = index + year_chars
-                    input(f'Found a month! at index: {index}')
+                    # input(f'Found a month! at index: {index}')
                     startbit = df.iloc[row,0][:(index)]
                     endbit = df.iloc[row,0][end:]
-                    df.iloc[row,0] = startbit + new_release_date + endbit
+                    df.iloc[row,0] = startbit + new_release_date.replace('_', ' ') + endbit
                     # df.iloc[row,0] = df.iloc[row,0].replace(sub, new_release_date)
                     print(df.iloc[row,0])
-                    input('Check find replace did the right thing')
+                    # input('Check find replace did the right thing')
                         
     return df
 
@@ -2248,7 +2443,13 @@ def rename_cols(df):
     df = df.rename(columns=str.lower)
     df.columns = df.columns.str.replace(' ', '-')
     df.columns = df.columns.str.replace('.', '')
-    df = df.rename(columns={'latitude': 'lat', 'longitude':'lng', 'gem-wiki-url': 'url'})
+    if 'gem-wiki-url' in df.columns:
+        df = df.rename(columns={'latitude': 'lat', 'longitude':'lng', 'gem-wiki-url': 'url'})
+    elif 'wiki-url' in df.columns:
+        df = df.rename(columns={'latitude': 'lat', 'longitude':'lng', 'wiki-url': 'url'})
+    else:
+        print(f'Not sure about wiki url column name.')
+        input('check above to adjust rename_cols')
     print(f'Cols after: {df.columns}')
     return df
 
@@ -2346,6 +2547,8 @@ def formatting_checks(df): # gogpt
 def check_list(row_list, needed_geo):
     return any(item in needed_geo for item in row_list)
 
+    
+    
 def create_filtered_df_list_by_map(trackerdf, col_country_name, col_reg_name, maptype, needed_geo):
     # this function takesa df and filters on appropriate geo for the regional map
     

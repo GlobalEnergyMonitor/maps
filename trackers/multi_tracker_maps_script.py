@@ -38,101 +38,101 @@ start_time = time.time()  # Record the start time
 ################
 # ADAPT AET FUNCTIONS FOR ALL MULTI TRACKER MAPS #
 ################
+# moving to helper can delete soon!
+# def what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab):
+#     needed_map_and_tracker_dict = {} # map: (trackers, geo, fuel)
+#     # TODO un comment after it passes tests
+#     # if local_copy:
+#     #     with open('local_pkl/map_tab_df.pkl', 'rb') as f:
+#     #         map_tab_df = pickle.load(f)
+#     #     print("DataFrame have been loaded from map_tab_df.pkl")
+#     # else: 
+#     map_tab_df = gspread_access_file_read_only(multi_tracker_log_sheet_key, map_tab)
+#     # # printf'Trackers with updates to be incorporated: {trackers_to_update}')
 
-def what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab):
-    needed_map_and_tracker_dict = {} # map: (trackers, geo, fuel)
-    # TODO un comment after it passes tests
-    # if local_copy:
-    #     with open('local_pkl/map_tab_df.pkl', 'rb') as f:
-    #         map_tab_df = pickle.load(f)
-    #     print("DataFrame have been loaded from map_tab_df.pkl")
-    # else: 
-    map_tab_df = gspread_access_file_read_only(multi_tracker_log_sheet_key, map_tab)
-    # # printf'Trackers with updates to be incorporated: {trackers_to_update}')
+#     with open('local_pkl/map_tab_df.pkl', 'wb') as f:
+#         pickle.dump(map_tab_df, f)
+#     # print("DataFrame have been saved to map_tab_df.pkl")
 
-    with open('local_pkl/map_tab_df.pkl', 'wb') as f:
-        pickle.dump(map_tab_df, f)
-    # print("DataFrame have been saved to map_tab_df.pkl")
+#     # print("Now go through and create the needed tracker dict based on new data in trackers to update.")
+#     for tracker in trackers_to_update:
+#         for row in map_tab_df.index:
+#             # use the tracker to filter the map_tab_df df for only rows that contain the tracker in source column
+#             # print(map_tab_df)
+#             # print(map_tab_df.info())
 
-    # print("Now go through and create the needed tracker dict based on new data in trackers to update.")
-    for tracker in trackers_to_update:
-        for row in map_tab_df.index:
-            # use the tracker to filter the map_tab_df df for only rows that contain the tracker in source column
-            # print(map_tab_df)
-            # print(map_tab_df.info())
+#             # input('This is map_tab_df df')
+#             sources = map_tab_df.loc[row, 'source'].split(',')
+#             geo = map_tab_df.loc[row, 'geo'].split(',')
+#             fuel = map_tab_df.loc[row, 'fuel'].split(',')
+#             mapname = map_tab_df.loc[row, 'mapname']
+#             # print(sources)
+#             # input('this is sources column split on comma')
+#             if tracker in sources:
+#                 needed_map_and_tracker_dict[mapname] = (sources, geo, fuel)
 
-            # input('This is map_tab_df df')
-            sources = map_tab_df.loc[row, 'source'].split(',')
-            geo = map_tab_df.loc[row, 'geo'].split(',')
-            fuel = map_tab_df.loc[row, 'fuel'].split(',')
-            mapname = map_tab_df.loc[row, 'mapname']
-            # print(sources)
-            # input('this is sources column split on comma')
-            if tracker in sources:
-                needed_map_and_tracker_dict[mapname] = (sources, geo, fuel)
-
-            else:
-                map_tab_df.drop(row, inplace=True)
-    # print(map_tab_df)
-    # input('This is map_tab_df_copy after dropping irrelevant rows')
-    # # print(needed_map_and_tracker_dict)
-    # input('this is dict')
-        # for row in map_tab_df.index:
-        #     if tracker in row['source'].to_list():
-            # needed_map_and_tracker_dict[row['mapname']] = (row['source'],row['geo'],row['fuel'])
+#             else:
+#                 map_tab_df.drop(row, inplace=True)
+#     # print(map_tab_df)
+#     # input('This is map_tab_df_copy after dropping irrelevant rows')
+#     # # print(needed_map_and_tracker_dict)
+#     # input('this is dict')
+#         # for row in map_tab_df.index:
+#         #     if tracker in row['source'].to_list():
+#             # needed_map_and_tracker_dict[row['mapname']] = (row['source'],row['geo'],row['fuel'])
                 
                 
-        # filter out the map tracker tab df 
-        # so that we only have the row that matches the tracker to be updated
-        # and also find the tracker names for the map to be updated beyond the new tracker data but existing tracker data as well
-        # map_log_df_sel = map_depend_df[map_depend_df['official release tab name'] == tracker]
-        # for col in map_log_df_sel.columns:
-        #     if 'yes' in map_log_df_sel[col].values:
-        #         map_log_df_map_sel = map_log_df[map_log_df[col] == 'yes']
-        #         tracker_col_index = map_log_df.columns.get_loc('official release tab name')
-        #         tracker_name_col_map_sel = map_log_df.columns[tracker_col_index]
-        #         list_of_trackers_relevant_to_map = map_log_df_map_sel[tracker_name_col_map_sel].to_list()
-        #         needed_map_and_tracker_dict[col] = list_of_trackers_relevant_to_map
-        #         print(f'Map {col} needs to be updated with the new data for {tracker}, and existing data for {list_of_trackers_relevant_to_map} minus {tracker}.')
-        #         # ##(input('Check this with ggit-hy')
+#         # filter out the map tracker tab df 
+#         # so that we only have the row that matches the tracker to be updated
+#         # and also find the tracker names for the map to be updated beyond the new tracker data but existing tracker data as well
+#         # map_log_df_sel = map_depend_df[map_depend_df['official release tab name'] == tracker]
+#         # for col in map_log_df_sel.columns:
+#         #     if 'yes' in map_log_df_sel[col].values:
+#         #         map_log_df_map_sel = map_log_df[map_log_df[col] == 'yes']
+#         #         tracker_col_index = map_log_df.columns.get_loc('official release tab name')
+#         #         tracker_name_col_map_sel = map_log_df.columns[tracker_col_index]
+#         #         list_of_trackers_relevant_to_map = map_log_df_map_sel[tracker_name_col_map_sel].to_list()
+#         #         needed_map_and_tracker_dict[col] = list_of_trackers_relevant_to_map
+#         #         print(f'Map {col} needs to be updated with the new data for {tracker}, and existing data for {list_of_trackers_relevant_to_map} minus {tracker}.')
+#         #         # ##(input('Check this with ggit-hy')
             
-    return needed_map_and_tracker_dict
+#     return needed_map_and_tracker_dict
 
-def what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab):
-    needed_map_and_tracker_dict = {} # map: [trackers]
+# def what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab):
+#     needed_map_and_tracker_dict = {} # map: [trackers]
     
-    if local_copy:
-        with open('local_pkl/map_log_df.pkl', 'rb') as f:
-            map_log_df = pickle.load(f)
-        # print("DataFrame have been loaded from map_log_df.pkl")
-    else: 
-        map_log_df = gspread_access_file_read_only(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab)
-        # # printf'Trackers with updates to be incorporated: {trackers_to_update}')
+#     if local_copy:
+#         with open('local_pkl/map_log_df.pkl', 'rb') as f:
+#             map_log_df = pickle.load(f)
+#         # print("DataFrame have been loaded from map_log_df.pkl")
+#     else: 
+#         map_log_df = gspread_access_file_read_only(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab)
+#         # # printf'Trackers with updates to be incorporated: {trackers_to_update}')
 
-        with open('local_pkl/map_log_df.pkl', 'wb') as f:
-            pickle.dump(map_log_df, f)
-        # print("DataFrame have been saved to map_log_df.pkl")
+#         with open('local_pkl/map_log_df.pkl', 'wb') as f:
+#             pickle.dump(map_log_df, f)
+#         # print("DataFrame have been saved to map_log_df.pkl")
     
-    # print("Now go through and create the needed tracker dict based on new data in trackers to update.")
-    for tracker in trackers_to_update:
-        # print(map_log_df)
-        # filter out the map tracker tab df 
-        # so that we only have the row that matches the tracker to be updated
-        # and also find the tracker names for the map to be updated beyond the new tracker data but existing tracker data as well
-        map_log_df_sel = map_log_df[map_log_df['official release tab name'] == tracker]
-        # print(map_log_df_sel)
-        # input('check that it is gogets offiical name')
-        for col in map_log_df_sel.columns:
-            if 'yes' in map_log_df_sel[col].values:
-                map_log_df_map_sel = map_log_df[map_log_df[col] == 'yes']
-                tracker_col_index = map_log_df.columns.get_loc('official release tab name')
-                tracker_name_col_map_sel = map_log_df.columns[tracker_col_index]
-                list_of_trackers_relevant_to_map = map_log_df_map_sel[tracker_name_col_map_sel].to_list()
-                needed_map_and_tracker_dict[col] = list_of_trackers_relevant_to_map
-                # print(f'Map {col} needs to be updated with the new data for {tracker}, and existing data for {list_of_trackers_relevant_to_map} minus {tracker}.')
-                # ##(input('Check this with ggit-hy')
+#     # print("Now go through and create the needed tracker dict based on new data in trackers to update.")
+#     for tracker in trackers_to_update:
+#         # print(map_log_df)
+#         # filter out the map tracker tab df 
+#         # so that we only have the row that matches the tracker to be updated
+#         # and also find the tracker names for the map to be updated beyond the new tracker data but existing tracker data as well
+#         map_log_df_sel = map_log_df[map_log_df['official release tab name'] == tracker]
+#         # print(map_log_df_sel)
+#         # input('check that it is gogets offiical name')
+#         for col in map_log_df_sel.columns:
+#             if 'yes' in map_log_df_sel[col].values:
+#                 map_log_df_map_sel = map_log_df[map_log_df[col] == 'yes']
+#                 tracker_col_index = map_log_df.columns.get_loc('official release tab name')
+#                 tracker_name_col_map_sel = map_log_df.columns[tracker_col_index]
+#                 list_of_trackers_relevant_to_map = map_log_df_map_sel[tracker_name_col_map_sel].to_list()
+#                 needed_map_and_tracker_dict[col] = list_of_trackers_relevant_to_map
+#                 # print(f'Map {col} needs to be updated with the new data for {tracker}, and existing data for {list_of_trackers_relevant_to_map} minus {tracker}.')
+#                 # ##(input('Check this with ggit-hy')
             
-    return needed_map_and_tracker_dict
+#     return needed_map_and_tracker_dict
 
 def what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, needed_map_and_tracker_dict):
     needed_tracker_geo_by_map = {} # {map: [[trackers],[countries]]}
@@ -436,7 +436,7 @@ def pull_gsheet_data(prep_df, needed_tracker_geo_by_map):
                    
                         # df['tracker-acro'] = prep_dict[tracker]['tracker-acro']
                         # df['official_name'] = tracker
-                        df = df.replace('*', pd.NA).replace('Unknown', pd.NA).replace('--', pd.NA)
+                        df = df.replace('*', pd.NA).replace('--', pd.NA) #.replace('Unknown', pd.NA)
                         df = df.fillna('')
                         col_reg_name, col_country_name = find_region_country_colname(df)
                         # check countries in df against list of official map countries and report issues]
@@ -2740,156 +2740,156 @@ if priority == ['europe']:
     subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/eu_script.py"])                 
 
 else:
-        
+    print('europe not a priority, moving this to run_maps.py')  
 
-    if run_pre_tests:
-        dict_holding_sdfs = pre_tests() 
-        # print(dict_holding_sdfs) 
-        # print(dict_holding_sdfs_orig)  
-        prior_count(dict_holding_sdfs)
+    # if run_pre_tests:
+    #     dict_holding_sdfs = pre_tests() 
+    #     # print(dict_holding_sdfs) 
+    #     # print(dict_holding_sdfs_orig)  
+    #     prior_count(dict_holding_sdfs)
         
-        # check capacity of one project is never more than the total capacity of entire country
-        # also check if more than all of USA
-        capacity_conversion_check(dict_holding_sdfs)
+    #     # check capacity of one project is never more than the total capacity of entire country
+    #     # also check if more than all of USA
+    #     capacity_conversion_check(dict_holding_sdfs)
         
-        # check_stats_prior(dict_holding_sdfs)
-        # mis_cols(dict_holding_sdfs)
-        # validate_data_version(dict_holding_sdfs)    
-        # DONE ish. see if that matches the latest research date in the data
+    #     # check_stats_prior(dict_holding_sdfs)
+    #     # mis_cols(dict_holding_sdfs)
+    #     # validate_data_version(dict_holding_sdfs)    
+    #     # DONE ish. see if that matches the latest research date in the data
                 
                 
-        # DONE run tests from external notebook that checks source file for missing data
+    #     # DONE run tests from external notebook that checks source file for missing data
         
-        # DONE create global pkl for all trackers unfiltered 
+    #     # DONE create global pkl for all trackers unfiltered 
         
-        # DONE get sum, max, min and mean of capacity/production (so be sure to rename)
+    #     # DONE get sum, max, min and mean of capacity/production (so be sure to rename)
         
-        # TODO ideally pull out the tests on geography and other cleaning steps 
-            # from following sections so removed and file still runs to set up preview for PM while they fix data
+    #     # TODO ideally pull out the tests on geography and other cleaning steps 
+    #         # from following sections so removed and file still runs to set up preview for PM while they fix data
         
-        # TODO run tests comparing old and new dataset version of source
+    #     # TODO run tests comparing old and new dataset version of source
 
         
-    if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
-        print('Start augmented')
-        # print('TESTING what_maps_are_needed_new')
-        # result of new is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
-        # needed_map_and_tracker_dict_new = what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab) # result is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
-        needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, multi_tracker_log_sheet_tab) # map_tab
-        # map_country_region has the list of needed maps to be created and their countries/regions
-        print(needed_map_and_tracker_dict)
-        # ##(input('inspect')
-        needed_tracker_geo_by_map = what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, needed_map_and_tracker_dict)
-        # print(path_for_download_and_map_files)
-        folder_setup(needed_tracker_geo_by_map)
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'Ended augmented {elapsed_time}')
+    # if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
+    #     print('Start augmented')
+    #     # print('TESTING what_maps_are_needed_new')
+    #     # result of new is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
+    #     # needed_map_and_tracker_dict_new = what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab) # result is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
+    #     needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, regional_multi_map_tab) # map_tab
+    #     # map_country_region has the list of needed maps to be created and their countries/regions
+    #     print(needed_map_and_tracker_dict)
+    #     # ##(input('inspect')
+    #     needed_tracker_geo_by_map = what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, needed_map_and_tracker_dict)
+    #     # print(path_for_download_and_map_files)
+    #     folder_setup(needed_tracker_geo_by_map)
+    #     end_time = time.time()  # Record the end time
+    #     elapsed_time = end_time - start_time  # Calculate the elapsed time
+    #     print(f'Ended augmented {elapsed_time}')
         
-    if data_filtering: # this creates gdfs and dfs for all filtered datasets per map, lots of repetition here
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print('Start data filtering')
-        prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)  # so we are using source, so can delete prep file
-        conversion_df = create_conversion_df(conversion_key, conversion_tab)
+    # if data_filtering: # this creates gdfs and dfs for all filtered datasets per map, lots of repetition here
+    #     end_time = time.time()  # Record the end time
+    #     elapsed_time = end_time - start_time  # Calculate the elapsed time
+    #     print('Start data filtering')
+    #     prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)  # so we are using source, so can delete prep file
+    #     conversion_df = create_conversion_df(conversion_key, conversion_tab)
         
-        to_pass = []
-        if priority != ['']:
-            for key, value in needed_tracker_geo_by_map.items():
-                if key not in priority:
-                    to_pass.append(key)
-                else:
-                    print(f'Prioritizing {key}')
+    #     to_pass = []
+    #     if priority != ['']:
+    #         for key, value in needed_tracker_geo_by_map.items():
+    #             if key not in priority:
+    #                 to_pass.append(key)
+    #             else:
+    #                 print(f'Prioritizing {key}')
 
             
-            for key in to_pass:
-                del needed_tracker_geo_by_map[key]
+    #         for key in to_pass:
+    #             del needed_tracker_geo_by_map[key]
             
         
-        dict_list_dfs_by_map, dict_list_gdfs_by_map = pull_gsheet_data(prep_df, needed_tracker_geo_by_map) # map_country_region
-        incorporated_dict_list_gdfs_by_map, incorporated_dict_list_dfs_by_map = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, dict_list_dfs_by_map, dict_list_gdfs_by_map) 
-        # print(incorporated_dict_list_gdfs_by_map)
-        # print(len(incorporated_dict_list_gdfs_by_map))
-        # for map in incorporated_dict_list_dfs_by_map.items:
-        #     df = 
-        # (input(f'Check the above, should not be empty! were in filtering. that is the length of local geojson file dfs.')
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'Ended data filtering {elapsed_time}')  
+    #     dict_list_dfs_by_map, dict_list_gdfs_by_map = pull_gsheet_data(prep_df, needed_tracker_geo_by_map) # map_country_region
+    #     incorporated_dict_list_gdfs_by_map, incorporated_dict_list_dfs_by_map = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, dict_list_dfs_by_map, dict_list_gdfs_by_map) 
+    #     # print(incorporated_dict_list_gdfs_by_map)
+    #     # print(len(incorporated_dict_list_gdfs_by_map))
+    #     # for map in incorporated_dict_list_dfs_by_map.items:
+    #     #     df = 
+    #     # (input(f'Check the above, should not be empty! were in filtering. that is the length of local geojson file dfs.')
+    #     end_time = time.time()  # Record the end time
+    #     elapsed_time = end_time - start_time  # Calculate the elapsed time
+    #     print(f'Ended data filtering {elapsed_time}')  
 
         
-    if map_create:
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'Start map file creation {elapsed_time}')
-        custom_dict_list_gdfs_by_map = split_goget_ggit(incorporated_dict_list_gdfs_by_map)  #incorporated_dict_list_gdfs_by_map
-        custom_dict_list_gdfs_by_map_with_conversion = assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df)
-        renamed_one_gdf_by_map = rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion)
-        renamed_one_gdf_by_map_with_search = create_search_column(renamed_one_gdf_by_map)
-        input('done with create_search_column')
-        # renamed_one_gdf_by_map = add_boed_routes_from_baird(renamed_one_gdf_by_map)
-        # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
+    # if map_create:
+    #     end_time = time.time()  # Record the end time
+    #     elapsed_time = end_time - start_time  # Calculate the elapsed time
+    #     print(f'Start map file creation {elapsed_time}')
+    #     custom_dict_list_gdfs_by_map = split_goget_ggit(incorporated_dict_list_gdfs_by_map)  #incorporated_dict_list_gdfs_by_map
+    #     custom_dict_list_gdfs_by_map_with_conversion = assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df)
+    #     renamed_one_gdf_by_map = rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion)
+    #     renamed_one_gdf_by_map_with_search = create_search_column(renamed_one_gdf_by_map)
+    #     input('done with create_search_column')
+    #     # renamed_one_gdf_by_map = add_boed_routes_from_baird(renamed_one_gdf_by_map)
+    #     # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
         
-        cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map_with_search)
-        cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
+    #     cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map_with_search)
+    #     cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
         
-        cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
-        one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
-        one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
-        # print(f'This is final gdf keys for: {one_gdf_by_maptype}')
-        final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
+    #     cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
+    #     one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
+    #     one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
+    #     # print(f'This is final gdf keys for: {one_gdf_by_maptype}')
+    #     final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
         
-        final_count(final_dict_gdfs)
+    #     final_count(final_dict_gdfs)
 
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'End map file creation {elapsed_time}')     
+    #     end_time = time.time()  # Record the end time
+    #     elapsed_time = end_time - start_time  # Calculate the elapsed time
+    #     print(f'End map file creation {elapsed_time}')     
 
-    if dwlnd_create: # this creates and saves the tabular data sheets for the data download from the filtered dfs
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'Start dwlnd creation {elapsed_time}')
-        create_data_dwnld_file(incorporated_dict_list_dfs_by_map) 
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'End dwlnd creation {elapsed_time}')
+    # if dwlnd_create: # this creates and saves the tabular data sheets for the data download from the filtered dfs
+    #     end_time = time.time()  # Record the end time
+    #     elapsed_time = end_time - start_time  # Calculate the elapsed time
+    #     print(f'Start dwlnd creation {elapsed_time}')
+    #     create_data_dwnld_file(incorporated_dict_list_dfs_by_map) 
+    #     end_time = time.time()  # Record the end time
+    #     elapsed_time = end_time - start_time  # Calculate the elapsed time
+    #     print(f'End dwlnd creation {elapsed_time}')
     
 
-    if about_create: # this creates and saves a preliminary file with all about pages no adjustments made
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time 
-        print('Start about creation')
-        about_df_dict_by_map = gather_all_about_pages(prev_key_dict, prep_df, needed_tracker_geo_by_map)
-        create_about_page_file(about_df_dict_by_map)
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  
-        print(f'End about creation {elapsed_time}')
+    # if about_create: # this creates and saves a preliminary file with all about pages no adjustments made
+    #     end_time = time.time()  # Record the end time
+    #     elapsed_time = end_time - start_time 
+    #     print('Start about creation')
+    #     about_df_dict_by_map = gather_all_about_pages(prev_key_dict, prep_df, needed_tracker_geo_by_map)
+    #     create_about_page_file(about_df_dict_by_map)
+    #     end_time = time.time()  # Record the end time
+    #     elapsed_time = end_time - start_time  
+    #     print(f'End about creation {elapsed_time}')
 
     
-    if refine: # this reorders the data download file
-        end_time = time.time()  
-        elapsed_time = end_time - start_time  
-        print('Start refining')
-        if local_copy:
-            about_df_dict_by_map = ''
-            incorporated_dict_list_dfs_by_map = ''
-        print(incorporated_dict_list_dfs_by_map)
-        # for map, gdfs in incorporated_dict_list_dfs_by_map.items():
-        #     print(map)
-        #     print(gdfs)
-        #     if map == 'latam':
-        #         input('pause for latam')
-        # for map, aboutdfs in about_df_dict_by_map.items():
-        #     print(map)
-        #     print(aboutdfs)
-        #     if map == 'latam':
-        #         input('pause for latam')
+    # if refine: # this reorders the data download file
+    #     end_time = time.time()  
+    #     elapsed_time = end_time - start_time  
+    #     print('Start refining')
+    #     if local_copy:
+    #         about_df_dict_by_map = ''
+    #         incorporated_dict_list_dfs_by_map = ''
+    #     print(incorporated_dict_list_dfs_by_map)
+    #     # for map, gdfs in incorporated_dict_list_dfs_by_map.items():
+    #     #     print(map)
+    #     #     print(gdfs)
+    #     #     if map == 'latam':
+    #     #         input('pause for latam')
+    #     # for map, aboutdfs in about_df_dict_by_map.items():
+    #     #     print(map)
+    #     #     print(aboutdfs)
+    #     #     if map == 'latam':
+    #     #         input('pause for latam')
 
 
-        reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map) 
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print('End refining')  
+    #     reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map) 
+    #     end_time = time.time()  # Record the end time
+    #     elapsed_time = end_time - start_time  # Calculate the elapsed time
+    #     print('End refining')  
 
     def from_orig_pkl_to_tuple_list():
         orig_tup_list_map = []
@@ -3755,8 +3755,8 @@ else:
                 print('to do')
                 
         
-    if run_post_tests:
-        # post_tests(final_dict_gdfs)
-        robust_tests_map()
-        # robust_tests_dd()
+    # if run_post_tests:
+    #     # post_tests(final_dict_gdfs)
+    #     robust_tests_map()
+    #     # robust_tests_dd()
         

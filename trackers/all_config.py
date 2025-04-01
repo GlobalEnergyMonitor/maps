@@ -3,11 +3,11 @@ from datetime import datetime, timedelta
 import os
 import gspread
 from numpy import true_divide
-from creds import client_secret
+# from creds import client_secret
+from trackers.creds import client_secret
 
-
-trackers_to_update = ['Integrated'] #['Iron & Steel']
-new_release_date = 'March 2025' 
+trackers_to_update = ['Geothermal'] #['Iron & Steel']
+new_release_date = 'March_2025' 
 priority = [] # europe
 
 augmented = True
@@ -54,6 +54,7 @@ iso_today_date_folder = f'{iso_today_date}/'
 # client_secret = "/GEM_INFO/client_secret.json"
 client_secret_full_path = os.path.expanduser("~/") + client_secret
 gem_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
+gem_path_tst = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/testing/'
 path_for_pkl = gem_path + '/local_pkl/'
 gspread_creds = gspread.oauth(
         scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
@@ -210,7 +211,7 @@ tracker_to_legendname = {
 # new_release_date = 'February 2025' # get from spreadsheet I manage 15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8
 # previous_release = 'data/Africa-Energy-Tracker-data-July-2024.xlsx' # key 1B8fwCQZ3ZMCf7ZjQPqETKNeyFN0uNFZMFWw532jv480
 # previous_map = 'data/africa_energy_tracker_2024-07-10.geojson' 
-prev_key_dict = {'africa': '128rAsbENoUzzKJAv1V0Z3AuCc6kNanCclKJVGkSOmhM', 'latam': '1ZKY-jSs2vxXSq5dLkp6-qGbhaxhz9Sh9Xo50ZG3LG7Q', 'asia': '1x-n4YLSRA3RIz80Jm5yfyWiMtbVfYHhOtHXsWhg3d-k', 'europe': '1h8Nr8lJJiUIsSIzEmwnici4Js9Brxt7GChDo_DBQF2s', 'GIPT': '1SZVpnXQ1iE5kJJfmAZQ64q9LaG4wfq4urVX7jdBmIlk'} # ideally pull this from the results tabs in the map log sheet
+prev_key_dict = {'africa': '128rAsbENoUzzKJAv1V0Z3AuCc6kNanCclKJVGkSOmhM', 'latam': '1ZKY-jSs2vxXSq5dLkp6-qGbhaxhz9Sh9Xo50ZG3LG7Q', 'asia': '1x-n4YLSRA3RIz80Jm5yfyWiMtbVfYHhOtHXsWhg3d-k', 'europe': '1h8Nr8lJJiUIsSIzEmwnici4Js9Brxt7GChDo_DBQF2s', 'integrated': '1SZVpnXQ1iE5kJJfmAZQ64q9LaG4wfq4urVX7jdBmIlk'} # ideally pull this from the results tabs in the map log sheet
 # also TODO ideally save new release data file of map to gsheets and put htat link in the results tab
 # if in colab could save to tracker release and update this dict automatically
 # print('Handle multi tracker map creation for more than just AET')
@@ -218,7 +219,7 @@ prev_key_dict = {'africa': '128rAsbENoUzzKJAv1V0Z3AuCc6kNanCclKJVGkSOmhM', 'lata
 multi_tracker_log_sheet_key = '15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8'
 source_data_tab = ['source']
 map_tab = ['map']
-multi_tracker_log_sheet_tab = ['regional_multi_map'] # regional 
+regional_multi_map_tab = ['regional_multi_map'] # regional 
 
 multi_tracker_countries_sheet = '1UUTNERZYT1kHNMo_bKpwSGrUax9WZ8eyGPOyaokgggk'
 # will be commenting all this out soon! get to map file
@@ -257,105 +258,6 @@ goit_cap_updated = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/sour
 # shouldn't need these anymore FEB 24th
 # ggit_routes_updated = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2024-12 DATA TEAM COPY.geojson'
 # ggit_eu_temp = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/Europe-Gas-Tracker-2024-05 DATA TEAM COPY.xlsx' # convert to geojson and add in missing coords from global json file 
-
-tracker_summary_pages = {
-    "Oil and Gas Plants": [
-        "Oil and Gas Plants by Country/Area (MW)",
-        "Oil and Gas Plants by Country/Area (Power Stations)",
-        "Oil and Gas Plants by Country/Area (Units)",
-        "Oil and Gas Plants by Region (MW)",
-        "Ownership of Oil and Gas Plants in Africa (MW)",
-        "Oil and Gas Plants by Technology by Country/Area (MW)"
-    ],
-    "Coal Plants": [
-        "Coal Plants by Country/Area (MW)",
-        "Coal Plants by Country/Area (Power Stations)",
-        "Coal Plants by Country/Area (Units)",
-        "Coal Plants by Region (MW)"
-    ],
-    "Geothermal": [
-        "Geothermal Power Capacity by Country/Area (MW)",
-        "Geothermal Unit Count by Country/Area",
-        "Geothermal Power Capacity by Installation Type and Region (MW)",
-        "Geothermal Operational Capacity Installed by Country/Area and Year (MW)",
-        "Geothermal Prospective Capacity by Country/Area and Year (MW)"
-    ],
-    "Bioenergy": [
-        "Bioenergy Capacity by Country/Area (MW)",
-        "Bioenergy Unit Count by Country/Area",
-        "Bioenergy Fuel Types by Country/Area",
-        "Bioenergy Capacity by Region (MW)",
-        "Bioenergy Unit Count by Region",
-        "Bioenergy Fuel Types by Region",
-        "Bioenergy Operational Capacity Added by Country/Area and Year (MW)"
-    ],
-    "Wind": [
-        "Wind Farm Capacity by Country/Area (MW)",
-        "Wind Farm Phase Count by Country/Area",
-        "Wind Farm Capacity by Region (MW)",
-        "Wind Farm Phase Count by Region",
-        "Wind Farm Capacity by Installation Type and Region (MW)",
-        "Wind Farm Operational Capacity by Country/Area and Year (MW)",
-        "Wind Farm Prospective Capacity by Country/Area and Year (MW)"
-    ],
-    "Solar": [
-        "Solar Farm Capacity by Country/Area (MW)",
-        "Solar Farm Phase Count by Country/Area",
-        "Solar Farm Capacity by Region (MW)",
-        "Solar Farm Phase Count by Region",
-        "Solar Farm Operational Capacity by Country/Area and Year (MW)",
-        "Solar Farm Prospective Capacity by Country/Area and Year (MW)"
-    ],
-    "Hydropower": [
-        "Hydropower Capacity by Country/Area (MW)",
-        "Hydropower Project Count by Country/Area",
-        "Hydropower Capacity by Region and Subregion (MW)",
-        "Hydropower Project Count by Region and Subregion",
-        "Hydropower Capacity by Region and Type (MW)"
-    ],
-    "Nuclear": [
-        "Nuclear Power Capacity by Country/Area (MW)",
-        "Nuclear power Unit Count by Country/Area",
-        "Nuclear Power Capacity by Region and Subregion (MW)",
-        "Nuclear Power Unit Count by Region and Subregion",
-        "Nuclear Power Capacity by Reactor Type and Region (MW)"
-    ],
-    "Oil & Gas Pipelines": [
-        "Gas Pipeline Length by Country/Area (km)",
-        "Gas Pipeline Length by Region (km)",
-        "Oil Pipeline Length by Country/Area (km)",
-        "Oil Pipeline Length by Region (km)"
-    ],
-    "LNG Terminals": [
-        "LNG Export Projects by Region",
-        "LNG Export Projects by Country/Area",
-        "LNG Import Projects by Region",
-        "LNG Import Projects by Country/Area",
-        "LNG Export Capacity by Region (mtpa)",
-        "LNG Export Capacity by Country/Area (mtpa)",
-        "LNG Import Capacity by Region (mtpa)",
-        "LNG Import Capacity by Country/Area (mtpa)",
-        "LNG Terminals by Start Year",
-        "LNG Capacity by Start Year (mtpa)"
-    ],
-    "Coal Terminals": [
-        "Number of Coal Terminals by Country/Area",
-        "Coal Terminal Capacity by Country/Area",
-        "Coal Terminal Capacity by Region",
-        "Coal Terminal Capacity by Type (Import/Export)"
-    ],
-    "Oil & Gas Extraction": [
-        "Oil & Gas Extraction Sites by Region",
-        "Oil & Gas Extraction Sites by Country/Area",
-        "Oil Production by Sub Region",
-        "Oil Production by Country/Area",
-        "Gas Production by Region",
-        "Gas Production by Country/Area"
-    ],
-    "Coal Mines": [
-        "Number of Coal Mines by Country/Area"
-    ]
-}
 
 
 full_country_list = [
@@ -437,20 +339,6 @@ asia_countries = [
     "South China Sea"
 ]
 
-# european_union_countries = [
-#     'Austria', 'Belgium', 'Bulgaria', 'Croatia', 'Cyprus',
-#     'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France', 
-#     'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 
-#     'Latvia', 'Lithuania', 'Luxembourg', 'Malta', 'Netherlands', 
-#     'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 
-#     'Spain', 'Sweden',
-# ]
-# other_europe_countries = [
-#     'Albania', 'Andorra', 'Belarus', 'Bosnia and Herzegovina', 'Holy See', 'Iceland',
-#     'Liechtenstein', 'Moldova', 'Monaco', 'Montenegro', 'North Macedonia', 
-#     'Norway', 'San Marino', 'Serbia', 'Switzerland', 'Türkiye', 'Ukraine', 
-#     'United Kingdom', 'Israel',
-# ]
 
 europe_countries = [
     'Åland Islands', 'Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 
@@ -492,3 +380,11 @@ latam_countries = [
     "Falkland Islands", "South Georgia and the South Sandwich Islands",
     "Venezuela-Trinidad and Tobago"
 ]
+
+
+geo_mapping = {'africa': africa_countries,
+               'asia': asia_countries,
+               'europe': europe_countries,
+               'latam': latam_countries,
+               'global': full_country_list
+               }
