@@ -2,7 +2,7 @@
 .~lock*
 node_modules/
 npm-debug.log
-
+creds.py
 .env
 *.zip
 

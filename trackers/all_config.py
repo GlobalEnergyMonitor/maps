@@ -6,8 +6,9 @@ from numpy import true_divide
 # from creds import client_secret
 from trackers.creds import client_secret
 
-trackers_to_update = ['Geothermal'] #['Iron & Steel']
-new_release_date = 'March_2025' 
+trackers_to_update = ['Oil Pipelines'] #['Iron & Steel']
+new_release_date = 'March_2025' # for within about page
+releaseiso = '2025-03'
 priority = [] # europe
 
 augmented = True
@@ -72,7 +73,13 @@ non_gsheet_data = ['Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Gas Pipel
 conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']
 gcmt_closed_tab = 'Global Coal Mine Tracker (Close'
+
+
 # TODO make it so that each map has it's only set of final cols, so smallest csv possible, helpful for regional gas mostly ...
+
+
+
+
 final_cols = ['unit_id', 'ea_scaling_capacity', 'units-of-m','mapname','tracker-acro','official_name','url', 'areas','name', 'unit_name', 'capacity', 'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
        'original_units', 'conversion_factor', 'geometry', 'river', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
        'prod-coal', 'Latitude', 'Longitude', 'pid','id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas', 'fuel', 'PCI5', 'PCI6', 'WKTFormat']
@@ -381,10 +388,3 @@ latam_countries = [
     "Venezuela-Trinidad and Tobago"
 ]
 
-
-geo_mapping = {'africa': africa_countries,
-               'asia': asia_countries,
-               'europe': europe_countries,
-               'latam': latam_countries,
-               'global': full_country_list
-               }

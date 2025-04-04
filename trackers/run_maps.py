@@ -1,6 +1,7 @@
 from trackers.single_tracker_maps_script import *
 # from single_tracker_maps_script import *'
 from trackers.make_data_dwnlds import *
+from trackers.make_map_file import *
 # from make_data_dwnlds import *
 # from multi_tracker_maps_script import *
 import subprocess
@@ -12,7 +13,25 @@ from tqdm import tqdm # can adapt more, special tweaking for dataframe!
 
 for tracker in tqdm(trackers_to_update, desc='Baking'):
     # print(tracker)
-    if tracker == 'Integrated':
+    
+    if tracker == 'Oil Pipelines':
+        # test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/GOIT/test_results/'
+
+        # output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/GOIT/compilation_output/'
+        
+        # output_file = f'{output_folder}goit-data-{iso_today_date}.csv'
+        
+        # make data downloads 
+        map_obj_list = make_data_dwnlds(tracker)
+        # creates single map file
+        print(f'{len(map_obj_list)} maps to be updated with new {tracker} data!')
+        input('Check if the above statement makes sense ^')
+        make_map(map_obj_list)
+        
+        
+
+                
+    elif tracker == 'Integrated':
         test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/integrated/test_results/'
 
         output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/integrated/compilation_output/'
@@ -22,8 +41,9 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         # creates single map file
         key, tabs = get_key_tabs_prep_file(tracker)
 
+    
         df = create_df(key, tabs)
-        df = clean_capacity(df)
+        df = clean_capacity(df) 
         df = semicolon_for_mult_countries_gipt(df)
         df = fix_status_inferred(df)        
         # harmonize_countries(df, countries_dict, test_results_folder) # find countries_dict
