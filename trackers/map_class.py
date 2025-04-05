@@ -6,7 +6,7 @@ import json
 import subprocess
 import boto3
 from trackers.creds import ACCESS_KEY, SECRET_KEY
-from .all_config import ggit_geojson, ggit_lng_geojson, new_release_date, gspread_creds, africa_countries, asia_countries, europe_countries, latam_countries, full_country_list
+from .all_config import final_cols, renaming_cols_dict, ggit_geojson, ggit_lng_geojson, new_release_date, gspread_creds, africa_countries, asia_countries, europe_countries, latam_countries, full_country_list
 from numpy import absolute
 import geopandas as gpd
 
@@ -21,6 +21,7 @@ class MapObject:
                  trackers=[], # TODO april 1st 3:13 Make this become a list of objects not just data but all tracker info like acro
                  aboutkey = "",
                  about=pd.DataFrame(),
+                 # TODO 4/5/2025 make a data object to store the concatted one gdf but for now using trackers 
                  ):
         self.name = name
         self.source = source.split(", ")
@@ -191,6 +192,45 @@ class MapObject:
     #         pass
     #     else:
     #         print(f'filter by geo: {self.geo}')
+
+
+    def rename_and_concat_gdfs(self):
+        # This function takes a dictionary and renames columns for all dataframes within
+        # then it concats by map type all the dataframes
+        # so you're left with a dictionary by maptype that holds one concatted dataframe filterd on geo and tracker type needed
+        
+        renamed_gdfs = []     
+        for tracker_obj in self.trackers:
+            
+            gdf = tracker_obj.data
+            tracker_sel = tracker_obj.acro # GOGPT, GGIT, GGIT-lng, GOGET
+                    
+            # if tracker_sel == 'GCTT':
+            #     print(gdf)
+            #     input('GCTT gdf here')
+            print(f'renaming on tracker: {tracker_sel}')
+            # all_trackers.append(tracker_sel)
+            # select the correct renaming dict from config.py based on tracker name
+            renaming_dict_sel = renaming_cols_dict[tracker_sel]
+            # rename the columns!
+            gdf = gdf.rename(columns=renaming_dict_sel) 
+            
+            # print(gdf['areas'].value_counts())
+            # ##(input('check value counts for area after rename')
+            gdf.reset_index(drop=True, inplace=True)  # Reset index in place
+            renamed_gdfs.append(gdf)
+            
+        one_gdf = pd.concat(renamed_gdfs, sort=False, verify_integrity=True, ignore_index=True) 
+        # one_gdf = one_gdf.drop_duplicates('id').reset_index(drop=True)
+        print(one_gdf.index)
+        input('check one gdf')
+
+        cols_to_be_dropped = set(one_gdf.columns) - set(final_cols)
+        # # if slowmo:
+            # # ##(input('Pause to check cols before filtering out all cols in our gdf that are not in final cols, there will be a problem if our gdf does not have a col in final_cols.')
+        final_gdf = one_gdf.drop(columns=cols_to_be_dropped)
+        self.trackers = final_gdf
+        input('check that that works ... ')
             
  
     def get_about(self):

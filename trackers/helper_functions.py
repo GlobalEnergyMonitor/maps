@@ -776,25 +776,25 @@ def split_goget_ggit_eu(df):
 
 
 def create_conversion_df(conversion_key, conversion_tab):
-    if local_copy:
+    # if local_copy:
 
-        # Load the list of GeoDataFrames from the pickle file
-        with open('local_pkl/conversion_df.pkl', 'rb') as f:
-            df = pickle.load(f)
+    #     # Load the list of GeoDataFrames from the pickle file
+    #     with open('local_pkl/conversion_df.pkl', 'rb') as f:
+    #         df = pickle.load(f)
 
-        print("DataFrames have been loaded from conversion_df.pkl")        
+    #     print("DataFrames have been loaded from conversion_df.pkl")        
                 
-    else:
-        df = gspread_access_file_read_only(conversion_key, conversion_tab)
-        # # # printf'this is conversion df: {df}')
-        
-        df = df[['tracker', 'type', 'original units', 'conversion factor (capacity/production to common energy equivalents, TJ/y)']]
-        df = df.rename(columns={'conversion factor (capacity/production to common energy equivalents, TJ/y)': 'conversion_factor', 'original units': 'original_units'})
-        df['tracker'] = df['tracker'].apply(lambda x: x.strip())
-        
-        with open('local_pkl/conversion_df.pkl', 'wb') as f:
-            pickle.dump(df, f)
-        print("DataFrames have been saved to conversion_df.pkl")
+    # else:
+    df = gspread_access_file_read_only(conversion_key, conversion_tab)
+    # # # printf'this is conversion df: {df}')
+    
+    df = df[['tracker', 'type', 'original units', 'conversion factor (capacity/production to common energy equivalents, TJ/y)']]
+    df = df.rename(columns={'conversion factor (capacity/production to common energy equivalents, TJ/y)': 'conversion_factor', 'original units': 'original_units'})
+    df['tracker'] = df['tracker'].apply(lambda x: x.strip())
+    
+    with open('trackers/local_pkl/conversion_df.pkl', 'wb') as f:
+        pickle.dump(df, f)
+    print("DataFrames have been saved to conversion_df.pkl")
 
     return df  
 
@@ -935,7 +935,7 @@ def check_in_range(value, min_val, max_val):
         return value
 
     else:
-        print('problem with coords:')
+        print('value not in range:')
         print(f'value:{value}, min_val:{min_val}, max_val:{max_val}')
         return np.nan
 
@@ -1625,9 +1625,9 @@ def convert_coords_to_point(df):
     crs = 'EPSG: 4326'
     geometry_col = 'geometry'
     df = df.reset_index(drop=True)
-    df.columns = df.columns.str.lower()
+    # df.columns = df.columns.str.lower()
     for row in df.index:
-        df.loc[row,'geometry'] = Point(df.loc[row,'longitude'], df.loc[row,'latitude'])
+        df.loc[row,'geometry'] = Point(df.loc[row,'Longitude'], df.loc[row,'Latitude'])
     gdf = gpd.GeoDataFrame(df, geometry=geometry_col, crs=crs)
     
     return gdf

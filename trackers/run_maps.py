@@ -25,9 +25,10 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         map_obj_list = make_data_dwnlds(tracker)
         # creates single map file
         print(f'{len(map_obj_list)} maps to be updated with new {tracker} data!')
-        input('Check if the above statement makes sense ^')
-        make_map(map_obj_list)
-        
+        # input('Check if the above statement makes sense ^')
+        list_of_map_objs_mapversion = make_map(map_obj_list) # this returns map obj list map version that can be run thru tests
+        print('Great, now lets run those map objs map version thru tests on source!')
+        input('Confirm above')
         
 
                 
