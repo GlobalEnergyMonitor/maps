@@ -132,16 +132,7 @@ def make_data_dwnlds(tracker):
         for filename in [xlsfile, xlsfile_testing]:
             df = pd.read_excel(filename)
             # save parquet file locally
-            parquet = save_as_parquet(df, map_obj.name, path_dwn)
-            
-          
-            do_command_s3 = (
-                f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
-                f'aws s3 cp {parquet} s3://$BUCKETEER_BUCKET_NAME/latest/ '
-                f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read')
-
-            # Execute the terminal command to pull down file from digital ocean
-            process = subprocess.run(do_command_s3, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = save_to_s3(map_obj, df, path_dwn)
             # save parquet file in DO in latest folder
             # Print the output and errors (if any)
             print(process.stdout.decode('utf-8'))
@@ -152,4 +143,18 @@ def make_data_dwnlds(tracker):
         
     test_make_data_dwnlds()
     return map_obj_list
+
+# moved to helper functions cuz need it in make map file too
+# def save_to_s3(map_obj, path_dwn, df):
+#     parquet = save_as_parquet(df, map_obj.name, path_dwn)
+            
+          
+#     do_command_s3 = (
+#                 f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
+#                 f'aws s3 cp {parquet} s3://$BUCKETEER_BUCKET_NAME/latest/ '
+#                 f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read')
+
+#             # Execute the terminal command to pull down file from digital ocean
+#     process = subprocess.run(do_command_s3, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+#     return process
 

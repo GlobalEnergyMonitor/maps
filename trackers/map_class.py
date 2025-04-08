@@ -5,7 +5,7 @@ import pandas as pd
 import json
 import subprocess
 import boto3
-from .helper_functions import replace_old_date_about_page_reg, check_for_lists, rebuild_countriesjs, pci_eu_map_read, check_and_convert_float, remove_diacritics, check_rename_keys, fix_status_inferred, conversion_multiply, workaround_table_float_cap, workaround_table_units
+from .helper_functions import save_to_s3, replace_old_date_about_page_reg, check_for_lists, rebuild_countriesjs, pci_eu_map_read, check_and_convert_float, remove_diacritics, check_rename_keys, fix_status_inferred, conversion_multiply, workaround_table_float_cap, workaround_table_units
 from .all_config import gem_path, tracker_to_fullname, tracker_to_legendname, iso_today_date, gas_only_maps, final_cols, renaming_cols_dict, ggit_geojson, ggit_lng_geojson, new_release_date, gspread_creds, africa_countries, asia_countries, europe_countries, latam_countries, full_country_list
 import geopandas as gpd
 import numpy as np
@@ -183,8 +183,17 @@ class MapObject:
         # save the file to unique path for africa-energy if africa, else save to map name
         # also saving to testing folder 
         # TODO save to map folder in digital ocean
-        # 
+
+        
+        
         if self.name == 'africa':
+            
+            process = save_to_s3(self, gdf, path_for_download_and_map_files_af)
+
+            print(process.stdout.decode('utf-8'))
+            if process.stderr:
+                print(process.stderr.decode('utf-8'))
+                        
             gdf.to_file(f'{path_for_download_and_map_files_af}{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
             gdf.to_excel(f'{path_for_download_and_map_files_af}{self.name}_{iso_today_date}.xlsx', index=False)
             gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
@@ -195,6 +204,13 @@ class MapObject:
             
 
         else:
+            process = save_to_s3(self, gdf, path_for_download_and_map_files)
+
+            print(process.stdout.decode('utf-8'))
+            if process.stderr:
+                print(process.stderr.decode('utf-8'))
+                        
+
             gdf.to_file(f'{path_for_download_and_map_files}{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
             gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
 
@@ -203,7 +219,7 @@ class MapObject:
             gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.xlsx', index=False)
             newcountriesjs = list(set(gdf['areas'].to_list()))
             rebuild_countriesjs(self.name, newcountriesjs)
-            
+
 
 
     

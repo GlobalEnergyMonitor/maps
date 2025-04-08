@@ -27,6 +27,7 @@ from openpyxl.styles import Font
 from openpyxl.styles import Alignment
 import pickle
 from collections import Counter
+import subprocess
 
 
 DATABASE_URL = 'postgresql://readonly:pc1d65885e80e7709675a2e635adcd9cb71bf91a375e5276f8ee143c623e2fb34@ec2-44-222-6-135.compute-1.amazonaws.com:5432/d8ik14rsae6026'
@@ -51,6 +52,19 @@ SQL = '''
 #                     # print(len(df[df['tracker-acro']==acro]))
 #                     # input('Check that this number aligns with the number of units in the map')
 #     return 
+
+def save_to_s3(obj, df, path_dwn=''):
+    parquet = save_as_parquet(df, obj.name, path_dwn)
+            
+          
+    do_command_s3 = (
+                f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
+                f'aws s3 cp {parquet} s3://$BUCKETEER_BUCKET_NAME/latest/ '
+                f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read')
+
+            # Execute the terminal command to pull down file from digital ocean
+    process = subprocess.run(do_command_s3, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return process
 
 
 def remove_illegal_characters(value):
