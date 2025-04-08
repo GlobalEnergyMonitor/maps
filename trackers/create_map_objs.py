@@ -18,7 +18,7 @@ def create_map_objs(map_tab_df,row, prep_dict):
         about=pd.DataFrame(),
     )
     # call all object methods here
-    map_obj.get_needed_geo()
+    # map_obj.get_needed_geo()
     map_obj.get_about()
     # create tracker objs
     # create a tracker obj for each item in map source
@@ -64,10 +64,10 @@ def create_map_objs(map_tab_df,row, prep_dict):
             print(f"DataFrame {i}: {tracker.data.shape}")
             # filter by geo and fuel and check result
 
-            tracker.create_filtered_geo_fuel_df(map_obj.needed_geo, map_obj.fuel)
+            tracker.create_filtered_geo_fuel_df(map_obj.geo, map_obj.fuel)
             print(f"DataFrame {i}: {tracker.data.shape}")
 
-            input('Check after geo filter')
+            # input('Check after geo filter')
             
         except AttributeError:
 
@@ -76,7 +76,7 @@ def create_map_objs(map_tab_df,row, prep_dict):
             print(f"DataFrame {i}main: {main.shape}")
             print(f"DataFrame {i}prod: {prod.shape}")
 
-            tracker.create_filtered_geo_fuel_df(map_obj.needed_geo, map_obj.fuel)
+            tracker.create_filtered_geo_fuel_df(map_obj.geo, map_obj.fuel)
             main = tracker.data[0]
             prod = tracker.data[1]
             print(f"DataFrame {i}main geo filt: {main.shape}")
@@ -87,14 +87,5 @@ def create_map_objs(map_tab_df,row, prep_dict):
         except TypeError as e:
             print(f'Fix error for {map_obj.name}: \n{e}')
             input('Check')
-
-    # First get all source data DONE 
-    # Second filter by geo
-    # Third filter by fuel 
-    # Fourth abouts DONE 
-    # Fifth dependent abouts DONE
-    # my method example
-    # geocol = prep_dict[map_obj.source]['geocol'] # source should also inclue oil pipelines for GOIT
-    # map_obj.filter_by_geo(geocol)
     
     return map_obj

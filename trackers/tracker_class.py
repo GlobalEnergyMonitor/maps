@@ -1,6 +1,6 @@
 from requests import HTTPError
-from .all_config import releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
-from .helper_functions import convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
+from .all_config import trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
+from .helper_functions import replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
 import pandas as pd
 from numpy import absolute
 import json
@@ -22,7 +22,8 @@ class TrackerObject:
                  fuelcol = "",
                  about_key = "",
                  about = pd.DataFrame(),
-                 data = pd.DataFrame()
+                 data = pd.DataFrame(), # will be used for map creation 
+                 data_official = pd.DataFrame() # should be for final data downloads removed new columns!
                  ):
         self.name = name
         self.acro = acro
@@ -34,6 +35,28 @@ class TrackerObject:
         self.about_key = about_key
         self.about = about
         self.data = data
+        self.data_official = data_official
+
+
+
+    def set_data_official(self):
+        
+  
+        if isinstance(self.data, pd.DataFrame):
+            df_official = self.data.copy()
+        else:
+            # raise TypeError("Expected 'df' to be a DataFrame, but got a tuple or other type.")
+            main, prod = self.data
+            # drop do what ever
+            main_official, prod_official = main.copy(), prod.copy()
+            df_official = (main_official, prod_official)
+        # drop country_to_check columns
+        # come back to this TODO saying this column is not in there
+        # internal_cols = 'country_to_check'
+        # df_official.drop(internal_cols, inplace=True)
+        
+        self.data_official = df_official
+    
 
     def set_df(self):
         # this creates the dataframe for the tracker
@@ -77,7 +100,6 @@ class TrackerObject:
             #assign df to data 
 
             df = self.create_df()
-            print(df)
             # input('Check df') # works! didn't call the method correctly..
             self.data = df
 
@@ -155,6 +177,9 @@ class TrackerObject:
 
         # Execute the terminal command to pull down file from digital ocean
         process = subprocess.run(terminal_cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+# todo can read file without downloading pd.parquet
+# can set up public notebook if can read w/o local access 
 
         # Print the output and errors (if any)
         print(process.stdout.decode('utf-8'))
@@ -263,7 +288,12 @@ class TrackerObject:
                         sheet = first_sheet
                         
                     
-                    data = pd.DataFrame(sheet.get_all_records(expected_headers=[]))
+                    data = pd.DataFrame(sheet.get_all_values(combine_merged_cells=True))
+                    
+                    # for those situations where tracker to be updated is out of date with about file
+                    if self.name in trackers_to_update:
+                        data = replace_old_date_about_page_reg(data)
+
                     about_df = data.copy()
                     break
                 except HTTPError as e:
@@ -273,24 +303,26 @@ class TrackerObject:
         
             return about_df
 
-    def create_filtered_geo_fuel_df(self, needed_geo, fuel):
+    def create_filtered_geo_fuel_df(self, geo, fuel):
+        needed_geo = geo_mapping[geo]
         print(f'length of self.data: {len(self.data)}')
         if self.acro != 'GOGET':
             geocollist = self.geocol.split(';')
-            if len(geocollist) > 1:
-                self.data.columns = self.data.columns.str.strip()
-                print(geocollist)
-                input('check what geocol list is')
-                print('do multi-column search')
-                # print(self.data)
-                self.data['country_to_check'] = [[] for _ in range(len(self.data))]
-                for row in self.data.index:
-                    for col in geocollist:
-                        self.data.at[row, 'country_to_check'] += [self.data.at[row, col]] # issue
-                filtered_df = self.data[self.data['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
-            else:
-                self.data['country_to_check'] = self.data[self.geocol].apply(lambda x: split_countries(x) if isinstance(x, str) else [])
-                filtered_df = self.data[self.data['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
+            if geo != ['global'] or geo != ['']:
+                if len(geocollist) > 1:
+                    self.data.columns = self.data.columns.str.strip()
+                    print(geocollist)
+                    input('check what geocol list is')
+                    print('do multi-column search')
+                    # print(self.data)
+                    self.data['country_to_check'] = [[] for _ in range(len(self.data))]
+                    for row in self.data.index:
+                        for col in geocollist:
+                            self.data.at[row, 'country_to_check'] += [self.data.at[row, col]] # issue
+                    filtered_df = self.data[self.data['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
+                else:
+                    self.data['country_to_check'] = self.data[self.geocol].apply(lambda x: split_countries(x) if isinstance(x, str) else [])
+                    filtered_df = self.data[self.data['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
             
             if fuel != ['none']:
                 filtered_df = create_filtered_fuel_df(filtered_df, self)
@@ -303,7 +335,10 @@ class TrackerObject:
             for df in [main, prod]:
                 df.columns = df.columns.str.strip()
                 df['country_to_check'] = df[self.geocol].apply(lambda x: split_countries(x) if isinstance(x, str) else [])
-                df = df[df['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
+                
+                if geo != ['global'] or geo != ['']:
+                    print('Skipping geo filter for internal map')
+                    df = df[df['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
                 if fuel != ['none']:
                     if self.fuelcol in df.columns:
                         fueldf = create_filtered_fuel_df(df, self)

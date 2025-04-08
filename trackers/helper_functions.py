@@ -2344,6 +2344,52 @@ def apply_representative_point(df):
     
     return df
 
+
+
+def rebuild_countriesjs(mapname, newcountriesjs):
+
+        prev_countriesjs = f'{tracker_folder_path}{mapname}/countries.js'
+        default = f"{'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/src/countries.js'}"
+        print(prev_countriesjs)
+        # prev_countriesjs = pd.read_csv(prev_countriesjs)
+        # print(prev_countriesjs)
+        
+        # or try except FileNotFoundError 
+        if os.path.exists(prev_countriesjs):
+            if prev_countriesjs.endswith('.js'):
+                with open(prev_countriesjs, 'r') as js_file:
+                    prev_countriesjs = js_file.read()
+                    print("JavaScript content:")
+                    print(prev_countriesjs)
+            else:
+                print("The file is not a JavaScript file.")
+        else:
+            print(f"File not found. Using default countries.js from {default}")
+            with open(default, 'r') as js_file:
+                prev_countriesjs = js_file.read()
+                print("Default JavaScript content:")
+                print(prev_countriesjs)
+        
+        # cycle through folder to find new countries.js file and do a comparison
+        
+        # from map file, create new countries.js based on sorted countries
+        missing_countries_areas = set(newcountriesjs) - set(prev_countriesjs)
+        
+        if len(missing_countries_areas) > 0 and missing_countries_areas != None:
+            print(f'paste in this sorted list of new countries into {mapname} countries.js file')
+            print(f'These are the net new countries:')
+            print(missing_countries_areas)
+            # save the sorted file
+            newcountriesjs = newcountriesjs.sort()
+            print(f'This is the sorted countries file with net new: \n {newcountriesjs}')
+            input('Paste this in')
+            # cjs = {'countries': newcountriesjs}
+            # cjs_df = pd.DataFrame(data=cjs)
+            # cjs_df.to_csv(f'{tracker_folder_path}{mapname}/countriesjsnew{iso_today_date}.js')
+            # input('check file in tracker folder countriesjsnew DATE.js')
+    
+
+
 def pci_eu_map_read(gdf):
     # take columns PCI5 and pci6 
     # create one column, both, 5, 6, none, all as strings
@@ -2434,7 +2480,7 @@ def replace_old_date_about_page_reg(df):
                     df.iloc[row,0] = startbit + new_release_date.replace('_', ' ') + endbit
                     # df.iloc[row,0] = df.iloc[row,0].replace(sub, new_release_date)
                     print(df.iloc[row,0])
-                    # input('Check find replace did the right thing')
+                    # input('Check find replace did the right thing') # works on main and dependents
                         
     return df
 
@@ -2998,6 +3044,23 @@ def fix_status_inferred(df):
         print(f"Statuses before: {set(df['Status'].to_list())}")
         
     return df
+
+def check_rename_keys(renaming_dict_sel, gdf):
+    # gdf cols
+    
+    gdf_cols = gdf.columns.to_list()
+    # this has already happned             renaming_dict_sel = renaming_cols_dict[tracker_sel]
+    # so it's just the key value pair
+    for k, v in renaming_dict_sel.items():
+        # print(f"Key: {k}, Value: {v}")
+        if k not in gdf_cols:
+            print(f'Missing {k}')
+    
+    # input('Pause to go check source file and see what changes in col name!') TODO april 7the 6:42 this is where I left off, 
+    # issue with renaming, no subnat for GOIT and GOGPT, but now with Capacity for nuclear?
+    
+    
+    
 
 def fix_status_space(df):
     import logging

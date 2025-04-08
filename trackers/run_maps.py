@@ -50,7 +50,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         # harmonize_countries(df, countries_dict, test_results_folder) # find countries_dict
         df= rename_cols(df)
         df = remove_missing_coord_rows(df)
-
+        
         input_to_output(df, output_file)
 
 

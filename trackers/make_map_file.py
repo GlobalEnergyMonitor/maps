@@ -28,7 +28,8 @@ def make_map(list_of_map_objs):
             # this gets to each df within each map
             # first I should combine goget so we can stop filtering by tuple
             if isinstance(tracker_obj.data, tuple):
-                print(tracker_obj.name)
+                # print(tracker_obj.name)
+                # input('check') # passed, only on goget
                 print(isinstance(tracker_obj.data, tuple))
                 tracker_obj.process_goget_reserve_prod_data()
                 print(isinstance(tracker_obj.data, tuple))
@@ -45,6 +46,13 @@ def make_map(list_of_map_objs):
             tracker_obj.assign_conversion_factors(conversion_df)
         
         map_obj.rename_and_concat_gdfs()
+        map_obj.set_capacity_conversions()
+        map_obj.map_ready_statuses_and_countries()
+        map_obj.create_search_column()
+        map_obj.capacity_hide_goget_gcmt()
+        map_obj.last_min_fixes()
+        map_obj.save_file()
+        
     list_of_map_objs_mapversion.append(map_obj) # this will be the map obj with the filtered cleaned concatted one gdf
             
     return list_of_map_objs_mapversion
@@ -318,10 +326,10 @@ def make_map(list_of_map_objs):
 #     return renamed_one_gdf_by_map
 
 
-# TODO left off here on april 5th 12:09 am
 # # do capacity conversions 
 
 
+# DONE
 # def capacity_conversions(cleaned_dict_map_by_one_gdf): 
 
 # # you could multiply all the capacity/production values in each tracker by the values in column C, 
@@ -411,19 +419,20 @@ def make_map(list_of_map_objs):
 #     # # # ##(input('check that there are enough maps')
 #     return cleaned_dict_map_by_one_gdf_with_conversions
 
-
+# DONE
 # # map ready statuses
-
+# DONE
 # # map ready areas
 
 # # filter legend cols check
 
-# # create owner search col if possible
+# DONE
+# # create owner search col if possible DONE
 
 
 # # workaround for capacity production edge case
 
-
+#DONE 
 # def workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries):
 #     # this function mostly creates a new col for correctly formatted info when there is multiple countries, especially for the details card 
 #     # it also handles oil and gas for goget, TODO should add removal of oil for gas only map maybe? 
@@ -503,7 +512,7 @@ def make_map(list_of_map_objs):
 #     return one_gdf_by_maptype
 
 
-# # make owner search col 
+# # make owner search col  DONE
 # def create_search_column(dict_of_gdfs):
 #     # this can be one string with or without spaces 
 #     # this creates a new column for project and project in local language
@@ -528,57 +537,11 @@ def make_map(list_of_map_objs):
 #         # print('above are keys in dict_of_gdfs_with_search')
 #     return dict_of_gdfs_with_search
 
-
-# def check_pipeline_capacity_conversions(d):
-#     # from maisie 100 million barrels of oil per day
-#     # from baird https://docs.google.com/spreadsheets/d/1foPLE6K-uqFlaYgLPAUxzeXfDO5wOOqE7tibNHeqTek/edit?gid=893060859#gid=893060859
-#     filename = f'issues/check_pipeline_capacity_conversions-{iso_today_date}.xlsx'
-#     with pd.ExcelWriter(filename, engine='openpyxl') as writer:
-#         for value_list in d.values():
-#             for df in value_list:
-#                 df['error messages'] = ''
-
-#                 tracker = df['tracker-acro'].iloc[0]
-#                 print(tracker)
-#                 if tracker in ['GOIT', 'GGIT', 'GGIT-eu']:
-#                     print('This is a pipelines dataset! Let us check the capacity columns:')
-#                     if tracker == 'GOIT':
-#                         for row in df.index:
-#                             # find value of capacity col and check if more than 100m
-#                             capacityboed = df.loc[row, 'capacity']
-#                             if capacityboed > 100_000_000:
-#                                 print(f"Capacity {capacityboed:.1e} exceeds 100 million more than overall oil production")
-#                                 input('ISSUE on capacityboed')
-#                                 df.at[row, 'error messages'] += "Error!" + f" Capacity {capacityboed:.1e} exceeds 100 million more than overall oil production; "         
-                            
-#                     elif tracker in ['GGIT', 'GGIT-eu']:
-#                     # 549 bcm Billion cubic meters (bcm)
-#                         for row in df.index:
-#                             capacitybcmy = df.loc[row, 'capacity']
-#                             if capacitybcmy > 549:
-#                                 print(f"Capacity {capacitybcmy:.1e} exceeds 549 bcm/y more than overall lng production")
-#                                 input('ISSUE on capacitybcmy')                            
-#                                 df.at[row, 'error messages'] += "Error!" + f" Capacity {capacitybcmy:.1e} exceeds 549 bcm/y more than overall lng production; "         
-#                     elif tracker == 'GGIT-lng':
-#                         # 474 mtpa in 2024
-#                         for row in df.index:
-#                             capacitymtpa = df.loc[row, 'capacity']
-#                             if capacitymtpa > 474:
-#                                 print(f"Capacity {capacitymtpa:.1e} exceeds 474 mtpa more than overall lng terminal capacity")
-#                                 input('ISSUE on capacitymtpa')                            
-            
-#                                 df.at[row, 'error messages'] += "Error!" + f" Capacity {capacitymtpa:.1e} exceeds 474 mtpa more than overall lng terminal capacity; "                                         
-                    
-#             df_issues = df[df['error messages'] != '']
-#             df_issues.to_excel(writer, index=False)
-         
-    
-    
     
 
 # # last min fixes.. 
 
-
+# DONE
 # def last_min_fixes(one_gdf_by_maptype):
 #     one_gdf_by_maptype_fixed = {}
 #     # # printone_gdf_by_maptype.keys())
