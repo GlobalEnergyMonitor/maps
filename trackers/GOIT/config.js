@@ -4,7 +4,8 @@ var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'GOGET_Earthgenome_file2024-04-01.csv',
     // can this be a s3 link but not tiles? 
-    // 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/gempublicdata/latest/goit-2025-04-08
+    // json: 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/gempublicdata/latest/goit_2025-04-08.geojson',
+    // json: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/latest/goit_2025-04-08.geojson',
     json: 'compilation_output/goit_2025-04-08.geojson', 
     
     /* Define labels for sitewide colors, referenced in tracker config */
