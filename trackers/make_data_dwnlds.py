@@ -92,16 +92,26 @@ def make_data_dwnlds(tracker):
             with pd.ExcelWriter(filename, engine='openpyxl') as writer: 
                 # df_list = map_obj.data
                 # df_list = map_obj.trackers.data # maybe?
-                map_obj.about.to_excel(writer, sheet_name=f'About {map_obj.name}', index=False)
+                # THIS is where we can remap for the actual tab
+                if map_obj.source in trackers_to_update:
+                    about_tab_name = map_obj.source
+                
+                else:
+                    
+                    about_tab_name = dd_tab_mapping[map_obj.name]
+                
+                # print(map_obj.about)
+                map_obj.about.to_excel(writer, sheet_name=f'About {about_tab_name}', index=False)
                 for tracker_obj in map_obj.trackers:
                     print(f"Writing source to filename: {tracker_obj.name}")
-                    df = tracker_obj.data
+                    # df = tracker_obj.data
                     about = tracker_obj.about
                     tracker_name = tracker_obj.name
                     acro = tracker_obj.acro
                     about.to_excel(writer, sheet_name=f'About {tracker_name}', index=False)
-                    if isinstance(df, tuple):
-                        main, prod = df
+                    if isinstance(tracker_obj.data, tuple):
+                        tracker_obj.set_data_official() # so have data for map and for datadownload
+                        main, prod = tracker_obj.data_official                        
                         print(f"Main DataFrame shape: {main.shape}")
                         print(f"Prod DataFrame shape: {prod.shape}")
                         main = main.map(remove_illegal_characters)
@@ -111,6 +121,8 @@ def make_data_dwnlds(tracker):
                         print(f'Wrote {tracker_name} to file {filename} successfully!')
                     
                     else:
+                        tracker_obj.set_data_official() # so have data for map and for datadownload
+                        df = tracker_obj.data_official
                         df = df.map(remove_illegal_characters)
                         df.to_excel(writer, sheet_name=f'{tracker_name}', index=False)
                         print(f'Wrote {tracker_name} to file {filename} successfully!')
