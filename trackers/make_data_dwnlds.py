@@ -1,8 +1,8 @@
 import pandas as pd
 # from all_config import *
-from trackers.all_config import *
+from .all_config import *
 # from helper_functions import *
-from trackers.helper_functions import *
+from .helper_functions import *
 from .create_map_objs import create_map_objs
 from collections import OrderedDict
 from tqdm import tqdm
@@ -40,7 +40,7 @@ def make_data_dwnlds(tracker):
             # create a variable that is a week from iso_today_date
             buffer_date = (pd.to_datetime(iso_today_date) - pd.Timedelta(days=bufferday)).strftime('%Y-%m-%d')
             print(buffer_date)
-            with open(f'trackers/local_pkl/map_objs_list{buffer_date}.pkl', 'rb') as f:
+            with open(f'local_pkl/map_objs_list{buffer_date}.pkl', 'rb') as f:
                 map_obj_list = pickle.load(f)
                 break  # Exit loop if file is successfully loaded
 

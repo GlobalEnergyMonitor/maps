@@ -18,8 +18,7 @@ import os
 from datetime import date
 import openpyxl
 import xlsxwriter
-from trackers.all_config import *
-# from all_config import *
+from .all_config import *
 import re
 from openpyxl import Workbook
 from openpyxl import load_workbook

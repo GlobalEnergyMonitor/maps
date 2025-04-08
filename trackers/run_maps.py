@@ -1,7 +1,7 @@
-from trackers.single_tracker_maps_script import *
+# from trackers.single_tracker_maps_script import *
 # from single_tracker_maps_script import *'
-from trackers.make_data_dwnlds import *
-from trackers.make_map_file import *
+from .make_data_dwnlds import *
+from .make_map_file import *
 # from make_data_dwnlds import *
 # from multi_tracker_maps_script import *
 import subprocess
