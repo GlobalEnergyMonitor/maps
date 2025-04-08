@@ -5,7 +5,7 @@ npm-debug.log
 **/creds.py
 .env
 *.zip
-
+*.parquet
 *.dir
 *.pkl
 *.xls
