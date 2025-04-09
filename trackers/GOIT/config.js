@@ -44,7 +44,7 @@ var config = {
             values_labels: ['Operating','Proposed','Construction','Mothballed','Cancelled','Retired','Shelved']
         },
         {
-            field: 'fuel',
+            field: 'Fuel',
             values: ['Oil', 'NGL'],
             values_labels: ['Oil', 'NGL'],
             filterFunction: (value, selectedValue) => {
