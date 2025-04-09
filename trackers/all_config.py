@@ -3,8 +3,10 @@ from datetime import datetime, timedelta
 import os
 import gspread
 from numpy import true_divide
-# from creds import client_secret
-from trackers.creds import client_secret
+import sys
+from gem_tracker_maps.creds import *
+
+
 
 trackers_to_update = ['Oil Pipelines'] #['Iron & Steel']
 new_release_date = 'March_2025' # for within about page

@@ -7,7 +7,7 @@ import json
 import subprocess
 import geopandas as gpd
 import boto3
-from trackers.creds import ACCESS_KEY, SECRET_KEY
+from gem_tracker_maps.trackers.creds import *
 import time
 import numpy as np
 

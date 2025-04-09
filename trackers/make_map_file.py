@@ -1,8 +1,8 @@
 import pandas as pd
 # from all_config import *
-from trackers.all_config import *
+from .all_config import *
 # from helper_functions import *
-from trackers.helper_functions import *
+from .helper_functions import *
 from .create_map_objs import create_map_objs
 from collections import OrderedDict
 from tqdm import tqdm
