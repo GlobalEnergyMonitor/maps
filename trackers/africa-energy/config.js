@@ -1,5 +1,5 @@
 var config = {
-    json: 'compilation_output/africa_2025-02-24.geojson',
+    json: 'compilation_output/africa_2025-04-09.geojson',
 
     geometries: ['Point','LineString'],
     center: [30, 0],

@@ -56,9 +56,6 @@
 }
 
 
-// 'Antigua and Barbuda;', 'French Guiana;', 'Bolivia; Paraguay;', 'Trinidad and Tobago;', 'Uruguay; Brazil;', 'Guyana;', 'Brazil;', 'Argentina;', 'Colombia; Ecuador;', 'Colombia;', 'El Salvador;', 'Suriname;', 'Dominica;', 'Trinidad and Tobago; Barbados; Martinique; Guadeloupe;', 'Venezuela; Colombia;', 'Venezuela-Trinidad and Tobago;', 'Grenada;', 'United States; Mexico;', 'Paraguay;', 'Argentina; Chile;', 'Argentina; Brazil;', 'Haiti;', 'Bolivia; Brazil;', 'Saint Kitts and Nevis;', 'Guadeloupe;', 'Trinidad and Tobago; Venezuela;', 'Peru;', 'Belize;', 'Saint Lucia;', 'Saint Vincent and the Grenadines;', 'Mexico;', 'Jamaica;', 'Panama;', 'Bolivia; Argentina;', 'Aruba;', 'Dominican Republic;', 'Cayman Islands;', 'Costa Rica;', 'Nicaragua;', 'Martinique;', 'Cuba;', 'Montserrat;', 'Bahamas;', 'Bolivia; Chile;', 'Bolivia; Peru;', 'Bonaire; Sint Eustatius; and Saba;', 'Guatemala;', 'Curaçao;', 'Bolivia;', 'Argentina; Uruguay;', 'Barbados;', 'United States;', 'Honduras;', 'Uruguay;', 'Chile;', 'Venezuela;', 'Mexico; Guatemala; El Salvador; Honduras;', 'Ecuador;', 'Grenada; Trinidad and Tobago;'
-
-
 
 
 
