@@ -35,18 +35,22 @@ def make_data_dwnlds(tracker):
     map_obj_list = []  # Initialize map_obj_list outside the loop
     
         ### * FOR SPEEDING IT UP * ####
-    while bufferday <= 7:
-        try: 
-            # create a variable that is a week from iso_today_date
-            buffer_date = (pd.to_datetime(iso_today_date) - pd.Timedelta(days=bufferday)).strftime('%Y-%m-%d')
-            print(buffer_date)
-            with open(f'local_pkl/map_objs_list{buffer_date}.pkl', 'rb') as f:
-                map_obj_list = pickle.load(f)
-                break  # Exit loop if file is successfully loaded
+    # while bufferday <= 7:
+    #     try: 
+    #         # create a variable that is a week from iso_today_date
+    #         buffer_date = (pd.to_datetime(iso_today_date) - pd.Timedelta(days=bufferday)).strftime('%Y-%m-%d')
+    #         print(buffer_date)
+            
+    #         with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/map_objs_list{buffer_date}.pkl', 'rb') as f:
+    #             map_obj_list = pickle.load(f)
+    #             print(map_obj_list)
+    #             input('here?')
+    #             break  # Exit loop if file is successfully loaded
 
-        except:
-            bufferday += 1
-    
+    #     except:
+    #         bufferday += 1
+
+# TODO left off here on april 8th 6:03 pm some sort of issue with oduelnot found error trackers... how i moved around the creds thing for security? :()     
     
     if not map_obj_list:
         print('Have not created files recently')
@@ -67,7 +71,8 @@ def make_data_dwnlds(tracker):
                 #     print(f'length of item: {len(item)}')
                 map_obj_list.append(map_obj)
         
-        with open(f'trackers/local_pkl/map_objs_list{iso_today_date}.pkl', 'wb') as f:
+        print(iso_today_date)
+        with open(f'gem_tracker_maps/local_pkl/map_objs_list{iso_today_date}.pkl', 'wb') as f:
             print(f'saved to {f}')
             pickle.dump(map_obj_list, f)
     

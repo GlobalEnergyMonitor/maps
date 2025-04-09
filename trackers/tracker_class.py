@@ -7,7 +7,7 @@ import json
 import subprocess
 import geopandas as gpd
 import boto3
-from gem_tracker_maps.creds import *
+from gem_tracker_maps.trackers.creds import *
 import time
 import numpy as np
 
