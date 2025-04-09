@@ -5,7 +5,7 @@ import pandas as pd
 ### make list of all areas
 ### compare to previous file
 ### add new ones and then sort
-# tracker_folder_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
+# tracker_folder_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/'
 
 
 def rebuild_countriesjs(mapname, newcountriesjs):

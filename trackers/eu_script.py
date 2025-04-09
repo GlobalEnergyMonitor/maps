@@ -3,8 +3,8 @@ from all_config import *
 import os
 import io
 import gspread
-from creds import client_secret
-import creds
+from trackers.creds import client_secret
+import trackers.creds as creds
 import pandas as pd
 import geopandas as gpd
 import numpy as np

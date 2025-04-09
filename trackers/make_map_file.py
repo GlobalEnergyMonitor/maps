@@ -50,6 +50,7 @@ def make_map(list_of_map_objs):
         map_obj.map_ready_statuses_and_countries()
         map_obj.create_search_column()
         map_obj.capacity_hide_goget_gcmt()
+        map_obj.set_fuel_goit()
         map_obj.last_min_fixes()
         map_obj.save_file()
         
@@ -702,7 +703,7 @@ def make_map(list_of_map_objs):
 #             gdf.to_file(f'{path_for_download_and_map_files}{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
 #             gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
 #             # if mapname == 'africa':
-#             #     gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/c/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+#             #     gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/africa-energy/c/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
 #             # gdf_to_geojson(gdf, f'{path_for_download_and_map_files}{geojson_file_of_all_africa}')
 #             # # printf'Saved map geojson file to {path_for_download_and_map_files}{mapname}_{iso_today_date}.geojson')
 
@@ -712,7 +713,7 @@ def make_map(list_of_map_objs):
 #             rebuild_countriesjs(mapname, newcountriesjs)
             
 #         # if mapname == 'africa':
-#         #     gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_output/{mapname}_{iso_today_date}.xlsx', index=False)
+#         #     gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/africa-energy/compilation_output/{mapname}_{iso_today_date}.xlsx', index=False)
 #         # # printf'Saved xlsx version just in case to {path_for_download_and_map_files}{mapname}_{iso_today_date}.xlsx')
 #         final_dict_gdfs[mapname] = gdf
 #     # print(final_dict_gdfs.keys())

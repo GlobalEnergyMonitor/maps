@@ -1608,7 +1608,7 @@ def create_map_file(one_gdf_by_maptype_fixed):
             gdf.to_file(f'{path_for_download_and_map_files}{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
             gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
             # if mapname == 'africa':
-            #     gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/c/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+            #     gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/africa-energy/c/{mapname}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
             # gdf_to_geojson(gdf, f'{path_for_download_and_map_files}{geojson_file_of_all_africa}')
             # # printf'Saved map geojson file to {path_for_download_and_map_files}{mapname}_{iso_today_date}.geojson')
 
@@ -1618,7 +1618,7 @@ def create_map_file(one_gdf_by_maptype_fixed):
             rebuild_countriesjs(mapname, newcountriesjs)
             
         # if mapname == 'africa':
-        #     gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_output/{mapname}_{iso_today_date}.xlsx', index=False)
+        #     gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/africa-energy/compilation_output/{mapname}_{iso_today_date}.xlsx', index=False)
         # # printf'Saved xlsx version just in case to {path_for_download_and_map_files}{mapname}_{iso_today_date}.xlsx')
         final_dict_gdfs[mapname] = gdf
     # print(final_dict_gdfs.keys())
@@ -2061,7 +2061,7 @@ def pull_existing_summary_files(prep_df):
 #######################
 
 def reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map):
-    # use this file as order for tabs /Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_output/2024-08-15/africa_energy_tracker_2024-08-15.xlsx 
+    # use this file as order for tabs /Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/africa-energy/compilation_output/2024-08-15/africa_energy_tracker_2024-08-15.xlsx 
     # about page dict jhold all tracker about page data
     # incorporated dict list dfs holds tabular data as well as overarching map about page
     # about_df_dict_by_map {mapname: {tab_name: tab_data_df}, mapname2: {tab_name: tab_data_df}}
@@ -2737,7 +2737,7 @@ def pre_tests():
     return dict_holding_sdfs # dict_holding_sdfs_orig
 
 if priority == ['europe']:
-    subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/eu_script.py"])                 
+    subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/eu_script.py"])                 
 
 else:
     print('europe not a priority, moving this to run_maps.py')  
@@ -2991,7 +2991,7 @@ else:
         final_tup_list_map, final_tup_list_dd = from_final_file_to_tuple_list() # final map and dd files from this iteration of the script     
         orig_tup_list_map = from_orig_pkl_to_tuple_list() # source files from this iteration of the script, cols adjusted for map, and not
         # orig_tup_list should be equivalent to list_of_trackers below. with df to left, and tracker acro to right. 
-        discrepancies_file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/issues/output_discrepancies_for_dd_{new_release_date}_{iso_today_date}.xlsx'
+        discrepancies_file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/issues/output_discrepancies_for_dd_{new_release_date}_{iso_today_date}.xlsx'
 
         discrepancies = {}            
         for final_tuple_dd_to_test in final_tup_list_dd: # [(dict of sheet dfs, europe), (dict of sheet dfs, africa), (dict of sheet dfs, asia), (dict of sheet dfs, latam)]. 
@@ -3293,7 +3293,7 @@ else:
         final_tup_list_map, final_tup_list_dd = from_final_file_to_tuple_list() # final map and dd files from this iteration of the script     
         orig_tup_list_map = from_orig_pkl_to_tuple_list() # source files from this iteration of the script, cols adjusted for map, and not
         # orig_tup_list should be equivalent to list_of_trackers below. with df to left, and tracker acro to right. 
-        discrepancies_file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/issues/output_discrepancies_for_map_{new_release_date}_{iso_today_date}.xlsx'
+        discrepancies_file_name = f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/issues/output_discrepancies_for_map_{new_release_date}_{iso_today_date}.xlsx'
 
         discrepancies = {}
 
@@ -3659,7 +3659,7 @@ else:
         # load un renamed dict source dfs from pickl
         # this should always exist since it happens with local_copy or not
 
-        with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/local_pkl/source_data_dict_{iso_today_date}.pkl', 'rb') as f:
+        with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/local_pkl/source_data_dict_{iso_today_date}.pkl', 'rb') as f:
             dict_holding_sdfs = pickle.load(f) 
         source_data = dict_holding_sdfs # from pre_test functions
         # print(source_data)

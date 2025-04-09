@@ -5,10 +5,10 @@ from shapely.geometry import Point, LineString
 from shapely import wkt
 
 
-eupath = '/Users/gem-tah//GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/europe/'
-file = '/Users/gem-tah//GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/europe/ggit-pipeline-pci-hydrogen-dec-2023.csv'
-mapfile = '/Users/gem-tah//GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/europe/compilation_output/europe_2024-10-02.geojson'
-hyfile = '/Users/gem-tah//GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/europe/Copy of Pipelines (Gas_Oil_NGL) - main - for EGT briefing in Feb 2024 - Gas pipelines.csv'
+eupath = '/Users/gem-tah//GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/europe/'
+file = '/Users/gem-tah//GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/europe/ggit-pipeline-pci-hydrogen-dec-2023.csv'
+mapfile = '/Users/gem-tah//GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/europe/compilation_output/europe_2024-10-02.geojson'
+hyfile = '/Users/gem-tah//GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/europe/Copy of Pipelines (Gas_Oil_NGL) - main - for EGT briefing in Feb 2024 - Gas pipelines.csv'
 release_file = '/Users/gem-tah//GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-Gas-Pipelines-2023-12 copy.geojson'
 
 

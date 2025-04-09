@@ -21,10 +21,10 @@ today_date = date.today()
 iso_today_date = today_date.isoformat()
 iso_today_date_folder = f'{iso_today_date}/'
 
-test_results_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/nuclear/test_results/'
+test_results_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/nuclear/test_results/'
 tracker_folder = 'hydro'
 
-output_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/nuclear/compilation_output/'
+output_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/nuclear/compilation_output/'
 
 # input_file_csv = ''
 input_key = 

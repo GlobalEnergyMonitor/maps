@@ -329,6 +329,7 @@ def save_as_parquet(df, mapname, path_dwn):
     # Column names by which to partition the dataset. Columns are partitioned in the order they are given. Must be None if path is not a string.
     # partition by country into data lakes, and status
     # explore storage storage_options dict, optional
+    df.fillna('', inplace=True)
         
     df.to_parquet(f"{path_dwn}{mapname}{releaseiso}.parquet", index=False)  # partition_cols=["country/area"],
     print('Parquet file is saved!')
@@ -339,7 +340,7 @@ def get_standard_country_names():
     
     if local_copy:
 
-        with open(f'local_pkl/gem_standard_country_names_{iso_today_date}.pkl', 'rb') as f:
+        with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/gem_standard_country_names_{iso_today_date}.pkl', 'rb') as f:
             gem_standard_country_names = pickle.load(f)
     
     else:
@@ -349,7 +350,7 @@ def get_standard_country_names():
         )
         gem_standard_country_names = df['GEM Standard Country Name'].tolist()
         
-        with open(f'local_pkl/gem_standard_country_names_{iso_today_date}.pkl', 'wb') as f:
+        with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/gem_standard_country_names_{iso_today_date}.pkl', 'wb') as f:
             pickle.dump(gem_standard_country_names, f)
         
     
@@ -805,7 +806,7 @@ def create_conversion_df(conversion_key, conversion_tab):
     df = df.rename(columns={'conversion factor (capacity/production to common energy equivalents, TJ/y)': 'conversion_factor', 'original units': 'original_units'})
     df['tracker'] = df['tracker'].apply(lambda x: x.strip())
     
-    with open('trackers/local_pkl/conversion_df.pkl', 'wb') as f:
+    with open('/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/conversion_df.pkl', 'wb') as f:
         pickle.dump(df, f)
     print("DataFrames have been saved to conversion_df.pkl")
 
@@ -2362,7 +2363,8 @@ def apply_representative_point(df):
 def rebuild_countriesjs(mapname, newcountriesjs):
 
         prev_countriesjs = f'{tracker_folder_path}{mapname}/countries.js'
-        default = f"{'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/src/countries.js'}"
+        default = f"{'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/src/countries.js'}"
+     
         print(prev_countriesjs)
         # prev_countriesjs = pd.read_csv(prev_countriesjs)
         # print(prev_countriesjs)

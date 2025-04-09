@@ -7,7 +7,7 @@ import json
 import subprocess
 import geopandas as gpd
 import boto3
-from gem_tracker_maps.trackers.creds import *
+from trackers.creds import *
 import time
 import numpy as np
 
@@ -466,6 +466,9 @@ class TrackerObject:
                     print(f"Skipping non-numeric column: {col}")
 
             print("Error: 'self.data' is not a DataFrame.")
+
+    
+
 
     def process_goget_reserve_prod_data(self):
         # output is to return df with scott's code adjustments
