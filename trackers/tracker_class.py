@@ -40,20 +40,36 @@ class TrackerObject:
 
 
     def set_data_official(self):
-        
-  
+        # drop country_to_check columns
+
+        internal_cols = ['country_to_check']  # Ensure this is a list
+        print(self.name)
         if isinstance(self.data, pd.DataFrame):
             df_official = self.data.copy()
+            for col in self.data:
+                print(col)
+            try:
+                df_official.drop(columns=internal_cols, inplace=True)  # Specify columns explicitly
+            except KeyError:
+                print('key error')
+
+
         else:
             # raise TypeError("Expected 'df' to be a DataFrame, but got a tuple or other type.")
             main, prod = self.data
-            # drop do what ever
-            main_official, prod_official = main.copy(), prod.copy()
-            df_official = (main_official, prod_official)
-        # drop country_to_check columns
-        # come back to this TODO saying this column is not in there
-        # internal_cols = 'country_to_check'
-        # df_official.drop(internal_cols, inplace=True)
+            for df in [main, prod]:
+                if internal_cols[0] in df.columns:
+                    df.drop(columns=internal_cols, inplace=True)
+            df_official = (main, prod)
+            # drop internal
+            # try:
+            # for df in [main, prod]:
+                
+                
+            # except KeyError:
+            #     print('key error')
+            # finally:
+            #     df_official = (main, prod)
         
         self.data_official = df_official
     
