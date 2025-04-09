@@ -4,10 +4,7 @@ var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'GOGET_Earthgenome_file2024-04-01.csv',
     // can this be a s3 link but not tiles? 
-    // json: 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/gempublicdata/latest/goit_2025-04-08.geojson',
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/latest/goit_2025-04-08.geojson',
-
-
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/latest/goit_2025-04-09.geojson',
     
     /* Define labels for sitewide colors, referenced in tracker config */
     colors: {
@@ -46,11 +43,15 @@ var config = {
             values: ['operating', 'proposed-plus', 'construction-plus', 'mothballed-plus', 'cancelled', 'retired-plus', 'shelved' ],
             values_labels: ['Operating','Proposed','Construction','Mothballed','Cancelled','Retired','Shelved']
         },
-        // {
-        //     field: 'fuel',
-        //     values: [],
-        //     values_labels: []
-        // }
+        {
+            field: 'fuel',
+            values: ['Oil', 'NGL'],
+            values_labels: ['Oil', 'NGL'],
+            filterFunction: (value, selectedValue) => {
+            // Check if the value contains the selectedValue (Oil or NGL)
+            return value.includes(selectedValue);
+            }
+        }
     ],
 
     

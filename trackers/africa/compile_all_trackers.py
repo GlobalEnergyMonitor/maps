@@ -1284,7 +1284,7 @@ final_count(africa_gdf_country_update)
 
 # concatted_gdf = concat_exisiting_geojson(goit_geojson, ggit_geojson, ggit_pipes_geojson, africa_gdf)
 
-# # africa_gdf = analyze_geojson('/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_output/2024-06-20/africa_energy_tracker_2024-06-20.geojson')
+# # africa_gdf = analyze_geojson('/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/africa-energy/compilation_output/2024-06-20/africa_energy_tracker_2024-06-20.geojson')
 
 # africa_gdf_converted = capacity_conversions(africa_gdf) 
 

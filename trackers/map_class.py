@@ -32,8 +32,20 @@ class MapObject:
         self.trackers = trackers
         self.aboutkey = aboutkey
         self.about = about
-    
-    
+        
+
+    def set_fuel_goit(self):
+        # Oil, NGL should show up under both type options, Oil and NGL
+        # LPG should be renamed to NGL 
+        if self.name == 'goit':
+            # Update all values in the 'Fuel' column from 'LPG' to 'NGL'
+            print('Creating fuel legend for goit')
+            print(set(self.trackers['Fuel'].to_list()))
+            self.trackers['Fuel'] = self.trackers['Fuel'].replace('LPG', 'NGL')  
+        else:
+            pass
+        
+        
     
     def capacity_hide_goget_gcmt(self):
 
@@ -63,6 +75,8 @@ class MapObject:
                 else:
                     gdf.loc[row, 'capacity-table'] = gdf.loc[row, 'capacity']
                     gdf.loc[row, 'capacity-details'] = gdf.loc[row, 'capacity']
+        # TODO test if this removes BOED from empty goit capacity details 
+        gdf['capacity-details'].fillna('',inplace=True)
         self.trackers = gdf
 
         
@@ -188,11 +202,11 @@ class MapObject:
         
         if self.name == 'africa':
             
-            process = save_to_s3(self, gdf, path_for_download_and_map_files_af)
+            # process = save_to_s3(self, gdf, path_for_download_and_map_files_af)
 
-            print(process.stdout.decode('utf-8'))
-            if process.stderr:
-                print(process.stderr.decode('utf-8'))
+            # print(process.stdout.decode('utf-8'))
+            # if process.stderr:
+            #     print(process.stderr.decode('utf-8'))
                         
             gdf.to_file(f'{path_for_download_and_map_files_af}{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
             gdf.to_excel(f'{path_for_download_and_map_files_af}{self.name}_{iso_today_date}.xlsx', index=False)
@@ -204,11 +218,11 @@ class MapObject:
             
 
         else:
-            process = save_to_s3(self, gdf, path_for_download_and_map_files)
+            # process = save_to_s3(self, gdf, path_for_download_and_map_files)
 
-            print(process.stdout.decode('utf-8'))
-            if process.stderr:
-                print(process.stderr.decode('utf-8'))
+            # print(process.stdout.decode('utf-8'))
+            # if process.stderr:
+            #     print(process.stderr.decode('utf-8'))
                         
 
             gdf.to_file(f'{path_for_download_and_map_files}{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')

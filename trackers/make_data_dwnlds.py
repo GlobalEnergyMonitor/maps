@@ -35,22 +35,22 @@ def make_data_dwnlds(tracker):
     map_obj_list = []  # Initialize map_obj_list outside the loop
     
         ### * FOR SPEEDING IT UP * ####
-    # while bufferday <= 7:
-    #     try: 
-    #         # create a variable that is a week from iso_today_date
-    #         buffer_date = (pd.to_datetime(iso_today_date) - pd.Timedelta(days=bufferday)).strftime('%Y-%m-%d')
-    #         print(buffer_date)
+    while bufferday <= 7:
+        try: 
+            # create a variable that is a week from iso_today_date
+            buffer_date = (pd.to_datetime(iso_today_date) - pd.Timedelta(days=bufferday)).strftime('%Y-%m-%d')
+            print(buffer_date)
             
-    #         with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/map_objs_list{buffer_date}.pkl', 'rb') as f:
-    #             map_obj_list = pickle.load(f)
-    #             print(map_obj_list)
-    #             input('here?')
-    #             break  # Exit loop if file is successfully loaded
+            with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/map_objs_list{buffer_date}.pkl', 'rb') as f:
+                map_obj_list = pickle.load(f)
+                print(map_obj_list)
+                input('here?')
+                break  # Exit loop if file is successfully loaded
 
-    #     except:
-    #         bufferday += 1
+        except:
+            bufferday += 1
 
-# TODO left off here on april 8th 6:03 pm some sort of issue with oduelnot found error trackers... how i moved around the creds thing for security? :()     
+# TODO left off here on april 8th 6:03 pm some sort of issue with oduelnot found error trackers... how i moved around the creds thing for security? :(     
     
     if not map_obj_list:
         print('Have not created files recently')
@@ -71,8 +71,8 @@ def make_data_dwnlds(tracker):
                 #     print(f'length of item: {len(item)}')
                 map_obj_list.append(map_obj)
         
-        print(iso_today_date)
-        with open(f'gem_tracker_maps/local_pkl/map_objs_list{iso_today_date}.pkl', 'wb') as f:
+        print(iso_today_date) # /Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl
+        with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/map_objs_list{iso_today_date}.pkl', 'wb') as f:
             print(f'saved to {f}')
             pickle.dump(map_obj_list, f)
     
@@ -81,8 +81,6 @@ def make_data_dwnlds(tracker):
         input('Check if the above statement makes sense ^')
     
     for map_obj in map_obj_list:
-
-
         # write to xls
         # THEN turn that xls into a df and then parquet for multi-tracker dd to parquet and s3
         path_dwn = gem_path + map_obj.name + '/compilation_output/'
@@ -98,11 +96,11 @@ def make_data_dwnlds(tracker):
                 # df_list = map_obj.data
                 # df_list = map_obj.trackers.data # maybe?
                 # THIS is where we can remap for the actual tab
-                if map_obj.source in trackers_to_update:
-                    about_tab_name = map_obj.source
+                if map_obj.source[0] in trackers_to_update:
+                    about_tab_name = map_obj.source[0]
                 
                 else:
-                    
+                    print(map_obj.source[0])
                     about_tab_name = dd_tab_mapping[map_obj.name]
                 
                 # print(map_obj.about)
@@ -116,7 +114,12 @@ def make_data_dwnlds(tracker):
                     about.to_excel(writer, sheet_name=f'About {tracker_name}', index=False)
                     if isinstance(tracker_obj.data, tuple):
                         tracker_obj.set_data_official() # so have data for map and for datadownload
-                        main, prod = tracker_obj.data_official                        
+                        main, prod = tracker_obj.data_official 
+                        # check if set data official works
+                        for df in [main, prod]: 
+                            if 'country_to_check' in df.columns.to_list():
+                                print(f'it is still there')
+                                input('data official not working')                      
                         print(f"Main DataFrame shape: {main.shape}")
                         print(f"Prod DataFrame shape: {prod.shape}")
                         main = main.map(remove_illegal_characters)
@@ -128,6 +131,10 @@ def make_data_dwnlds(tracker):
                     else:
                         tracker_obj.set_data_official() # so have data for map and for datadownload
                         df = tracker_obj.data_official
+                        # check if set data official works
+                        if 'country_to_check' in df.columns.to_list():
+                            print(f'it is still there')
+                            input('data official not working')
                         df = df.map(remove_illegal_characters)
                         df.to_excel(writer, sheet_name=f'{tracker_name}', index=False)
                         print(f'Wrote {tracker_name} to file {filename} successfully!')

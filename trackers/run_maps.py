@@ -15,9 +15,9 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
     # print(tracker)
     
     if tracker == 'Oil Pipelines':
-        # test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/GOIT/test_results/'
+        # test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/GOIT/test_results/'
 
-        # output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/GOIT/compilation_output/'
+        # output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/GOIT/compilation_output/'
         
         # output_file = f'{output_folder}goit-data-{iso_today_date}.csv'
         
@@ -33,9 +33,9 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
 
                 
     elif tracker == 'Integrated':
-        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/integrated/test_results/'
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/integrated/test_results/'
 
-        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/integrated/compilation_output/'
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/integrated/compilation_output/'
         
         output_file = f'{output_folder}gipt-data-{iso_today_date}.csv'
 
@@ -56,9 +56,9 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
 
 
     elif tracker == 'Geothermal':
-        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/geothermal/test_results/'
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/geothermal/test_results/'
 
-        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/geothermal/compilation_output/'
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/geothermal/compilation_output/'
 
         make_data_dwnlds(tracker)
         input('check progress on dd') # TODO march 28th getting issue with nonetype for df.info should have filtering done, now focus on GOGET so can be filtered but also two tabs
@@ -82,14 +82,14 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         input('continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
-        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
         # update so that instead of running above, we just run each function and move it to helper instead of multi or tracker specific which can be held in tracker folder
         
         
         
     elif tracker == 'Iron & Steel':
-        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gist/test_results/'
-        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gist/compilation_output/'
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/gist/test_results/'
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/gist/compilation_output/'
         
         key, tabs = get_key_tabs_prep_file(tracker)
         df = create_df(key, tabs) # steel_df, iron_df, plant_df
@@ -123,9 +123,9 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
        
     
     elif tracker == 'Oil & Gas Extraction':
-        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/goget/test_results/'
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/goget/test_results/'
 
-        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/goget/compilation_output/'
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/goget/compilation_output/'
 
         # creates single map file
         # handle production data
@@ -155,13 +155,13 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         print('DONE MAKING GOGET SINGLE MAP onto MULTI MAPS')
         input('continue?')
         # creates multi-tracker maps
-        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
                   
     elif tracker == 'Bioenergy':
 
-        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/test_results/'
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/bioenergy/test_results/'
 
-        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/compilation_output/'
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/bioenergy/compilation_output/'
 
         # creates single map file
         key, tabs = get_key_tabs_prep_file(tracker)
@@ -181,7 +181,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         input('continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
-        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
           
         # if test:
         #     check_expected_number(incorporated_dict_list_gdfs_by_map) # TODO HANDLE THIS ONE for dict or use the one thats been concatenated
@@ -222,7 +222,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         input('Continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
-        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
 
     elif tracker == 'Plumes':
         print(f'Starting GMET for release {tracker}')
@@ -288,9 +288,9 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         
         
     #     # local non gspread so 
-    #     test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/ggit/test_results/'
+    #     test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/ggit/test_results/'
 
-    #     output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/ggit/compilation_output/'
+    #     output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/ggit/compilation_output/'
 
     #     input_file_json = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-LNG-Terminals-2024-09 DATA TEAM COPY.geojson'
     #     # incorporate gas pipeline data as well
@@ -437,7 +437,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         input('continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
-        # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
 
 
     elif tracker == 'Solar':
@@ -469,7 +469,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         input('continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
-        # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
     
     elif tracker == 'Coal Plants':
         # continue for all of them that are in or not in multi tracker maps
@@ -499,7 +499,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         print('DONE MAKING Coal SINGLE MAP onto MULTI MAPS')
         input('continue?')
     
-    subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+    subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
     
     
     

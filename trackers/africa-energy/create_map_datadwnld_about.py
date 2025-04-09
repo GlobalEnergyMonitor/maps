@@ -1306,7 +1306,7 @@ def pull_existing_summary_files(prep_df):
 #######################
 
 def reorder_dwld_file_tabs(about_df_dict_by_map, incorporated_dict_list_dfs_by_map):
-    # use this file as order for tabs /Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/africa-energy/compilation_output/2024-08-15/africa_energy_tracker_2024-08-15.xlsx 
+    # use this file as order for tabs /Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/africa-energy/compilation_output/2024-08-15/africa_energy_tracker_2024-08-15.xlsx 
     # about page dict jhold all tracker about page data
     # incorporated dict list dfs holds tabular data as well as overarching map about page
     # about_df_dict_by_map {mapname: {tab_name: tab_data_df}, mapname2: {tab_name: tab_data_df}}
