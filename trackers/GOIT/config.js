@@ -6,7 +6,8 @@ var config = {
     // can this be a s3 link but not tiles? 
     // json: 'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/gempublicdata/latest/goit_2025-04-08.geojson',
     geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/latest/goit_2025-04-08.geojson',
-    // json: 'goit_2025-04-08.geojson', 
+
+
     
     /* Define labels for sitewide colors, referenced in tracker config */
     colors: {
