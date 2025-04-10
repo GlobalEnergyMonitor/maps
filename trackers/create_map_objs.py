@@ -82,7 +82,7 @@ def create_map_objs(map_tab_df,row, prep_dict):
             print(f"DataFrame {i}main geo filt: {main.shape}")
             print(f"DataFrame {i}prod geo filt: {prod.shape}")
 
-            input('Check after geo filter')
+            # input('Check after geo filter')
 
         except TypeError as e:
             print(f'Fix error for {map_obj.name}: \n{e}')

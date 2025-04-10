@@ -54,7 +54,6 @@ today_date = datetime.today()
 
 iso_today_date = today_date.isoformat().split('T')[0]
 iso_today_date_folder = f'{iso_today_date}/'
-# client_secret = "/GEM_INFO/client_secret.json"
 client_secret_full_path = os.path.expanduser("~/") + client_secret
 gem_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/'
 gem_path_tst = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/testing/'

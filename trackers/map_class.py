@@ -6,9 +6,10 @@ import json
 import subprocess
 import boto3
 from .helper_functions import save_to_s3, replace_old_date_about_page_reg, check_for_lists, rebuild_countriesjs, pci_eu_map_read, check_and_convert_float, remove_diacritics, check_rename_keys, fix_status_inferred, conversion_multiply, workaround_table_float_cap, workaround_table_units
-from .all_config import gem_path, tracker_to_fullname, tracker_to_legendname, iso_today_date, gas_only_maps, final_cols, renaming_cols_dict, ggit_geojson, ggit_lng_geojson, new_release_date, gspread_creds, africa_countries, asia_countries, europe_countries, latam_countries, full_country_list
+from .all_config import client_secret_full_path, gem_path, tracker_to_fullname, tracker_to_legendname, iso_today_date, gas_only_maps, final_cols, renaming_cols_dict, ggit_geojson, ggit_lng_geojson, new_release_date, gspread_creds, africa_countries, asia_countries, europe_countries, latam_countries, full_country_list
 import geopandas as gpd
 import numpy as np
+import gspread
 
 class MapObject:
     def __init__(self,
@@ -133,7 +134,7 @@ class MapObject:
         print(f'Check all columns:')
         for col in gdf.columns:
             print(col)
-        input('Is prod gas year there?')
+        # input('Is prod gas year there?')
 
         # translate acronyms to full names for legend and table 
         gdf['tracker-display'] = gdf['tracker-custom'].map(tracker_to_fullname)
@@ -544,7 +545,7 @@ class MapObject:
         # input('check above')
         if tracker_sel == 'GOGET':
             print(gdf_map_ready['areas'])
-            input('check goget areas in map ready countries')
+            # input('check goget areas in map ready countries')
         gdf_map_ready['areas'] = gdf_map_ready['areas'].fillna('')
 
         empty_areas = gdf_map_ready[gdf_map_ready['areas']=='']
@@ -589,7 +590,7 @@ class MapObject:
             gdf_map_ready['areas'] = gdf_map_ready['areas'].apply(lambda x: x.replace(',', ';')) # try this to fix geojson multiple country issue
             gdf_map_ready['areas'] = gdf_map_ready['areas'].apply(lambda x: f"{x.strip()};")
             print(gdf_map_ready['areas'])
-            input('check above has semicolon')
+            # input('check above has semicolon')
         
         else: 
             
@@ -714,6 +715,11 @@ class MapObject:
         if self.aboutkey != '':
             if self.name in ['africa', 'integrated', 'europe', 'asia', 'latam']:
                 # proceed with gspread thing
+                gspread_creds = gspread.oauth(
+                        scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
+                        credentials_filename=client_secret_full_path,
+                        # authorized_user_filename=json_token_name,
+                    )
                 gsheets = gspread_creds.open_by_key(self.aboutkey)  
                 sheet_names = [sheet.title for sheet in gsheets.worksheets()]
                 multi_tracker_about_page = sheet_names[0]  

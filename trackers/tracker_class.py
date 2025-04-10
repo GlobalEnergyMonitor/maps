@@ -1,6 +1,6 @@
 from requests import HTTPError
 from .all_config import trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
-from .helper_functions import replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
+from .helper_functions import clean_about_df, replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
 import pandas as pd
 from numpy import absolute
 import json
@@ -138,6 +138,7 @@ class TrackerObject:
             # trying this new function instead of below, messing up for GOGET
         about_df = self.find_about_page(tracker_key)
         print(about_df)
+        about_df = clean_about_df(about_df) 
         
         self.about = about_df
 
@@ -328,7 +329,7 @@ class TrackerObject:
                 if len(geocollist) > 1:
                     self.data.columns = self.data.columns.str.strip()
                     print(geocollist)
-                    input('check what geocol list is')
+                    # input('check what geocol list is')
                     print('do multi-column search')
                     # print(self.data)
                     self.data['country_to_check'] = [[] for _ in range(len(self.data))]
@@ -376,7 +377,7 @@ class TrackerObject:
                 print(f'Yes {fueldf} == {filtered_main}')
                 print(len(filtered_main))
                 print(len(fueldf))
-                input('check if length the same for fueldf and filtered main in yes fuel option')
+                # input('check if length the same for fueldf and filtered main in yes fuel option')
                 filtered_prod = filtered_prod[filtered_prod['Unit ID'].isin(gas_goget_ids)]
                 # main would already be filtered above because it has fuel col so this is filtering prod
                 # filtered_main = filtered_main[filtered_main['Unit ID'].isin(gas_goget_ids)]

@@ -27,6 +27,8 @@ from openpyxl.styles import Alignment
 import pickle
 from collections import Counter
 import subprocess
+import logging
+
 
 
 DATABASE_URL = 'postgresql://readonly:pc1d65885e80e7709675a2e635adcd9cb71bf91a375e5276f8ee143c623e2fb34@ec2-44-222-6-135.compute-1.amazonaws.com:5432/d8ik14rsae6026'
@@ -2358,6 +2360,48 @@ def apply_representative_point(df):
     
     return df
 
+def bold_first_row(writer, sheet_name):
+    workbook = writer.book
+    worksheet = writer.sheets[sheet_name]
+    for cell in worksheet[1]:  # First row
+        cell.font = Font(bold=True)
+    
+    return writer
+
+
+def clean_about_df(df):
+    df = df.copy()
+    df = df.apply(lambda row: row.where(~row.duplicated(), ''), axis=1)
+    # if first row is blank, remove it
+    if df.iloc[0].isnull().all() or (df.iloc[0] == '').all():
+        df = df.drop(0).reset_index(drop=True)
+
+
+    # Example usage:
+    # with pd.ExcelWriter('output.xlsx', engine='openpyxl') as writer:
+    #     df.to_excel(writer, sheet_name='Sheet1', index=False)
+    #     bold_first_row(writer, 'Sheet1')
+
+    # see if there are duplicate data on row or index or column? 
+
+    # for col in df.columns: # worked
+    #     print(f'This is col name: {col}')
+    #     for row in df.index:
+    #         print(f'This is row:')
+    #         print(row)
+    #         print(f'This is value for row and col: ')
+    #         print(df.loc[row, col])
+    
+    # input('Inspect if that fixed it!!')
+    # how can I print it to a file without includig the column names of the df?
+    # remove first row if blank (for coal!)
+    # bold About row or first row
+    
+    # the same row number but diff cols are duplicated at times 
+    # Drop duplicate cells in the same row, keeping the first occurrence
+    
+    
+    return df
 
 
 def rebuild_countriesjs(mapname, newcountriesjs):
@@ -3078,7 +3122,6 @@ def check_rename_keys(renaming_dict_sel, gdf):
     
 
 def fix_status_space(df):
-    import logging
     # input('check all status options')
     # df['status'] = df['status'].replace('in development', 'in_development')
     # df['status'] = df['status'].replace('shut in','shut_in')
@@ -3100,7 +3143,6 @@ def fix_status_space(df):
     return df
 
 def fix_prod_type_space(df):
-    import logging
 
     # input('check all status options')
     df['prod-method-tier-display'] = df['prod-method-tier']
