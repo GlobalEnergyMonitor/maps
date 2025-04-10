@@ -747,6 +747,7 @@ def make_map(list_of_map_objs):
 #                 # Create a dictionary to store the total capacity per country
 #                 country_cap_tot_dict = df.groupby('areas')['capacity'].sum().to_dict()
 #                 # print(f'This is coutnry cap tot for this tracker: {tracker}: {country_cap_tot_dict}')
+
 #                 # Save the country_cap_tot_dict to a CSV file
 #                 country_cap_tot_df = pd.DataFrame(list(country_cap_tot_dict.items()), columns=['Country', 'Total Capacity'])
 #                 country_cap_tot_df.to_csv(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/country_cap_tot {tracker} {iso_today_date}.csv', index=False)

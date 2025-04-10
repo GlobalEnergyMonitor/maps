@@ -104,7 +104,12 @@ def make_data_dwnlds(tracker):
                     about_tab_name = dd_tab_mapping[map_obj.name]
                 
                 # print(map_obj.about)
-                map_obj.about.to_excel(writer, sheet_name=f'About {about_tab_name}', index=False)
+                # # Ensure the column names are not treated as a header row
+                # # Use header=False when writing to the xls file
+                # df.to_excel(writer, sheet_name='Sheet1', index=False, header=False)
+                map_obj.about.to_excel(writer, sheet_name=f'About {about_tab_name}', index=False, header=False) # TODO using header false id not work
+                writer = bold_first_row(writer, sheet_name=f'About {about_tab_name}') # TODO this did not work 
+
                 for tracker_obj in map_obj.trackers:
                     print(f"Writing source to filename: {tracker_obj.name}")
                     # df = tracker_obj.data
@@ -112,6 +117,7 @@ def make_data_dwnlds(tracker):
                     tracker_name = tracker_obj.name
                     acro = tracker_obj.acro
                     about.to_excel(writer, sheet_name=f'About {tracker_name}', index=False)
+                    writer = bold_first_row(writer, sheet_name=f'About {tracker_name}')
                     if isinstance(tracker_obj.data, tuple):
                         tracker_obj.set_data_official() # so have data for map and for datadownload
                         main, prod = tracker_obj.data_official 
@@ -124,8 +130,12 @@ def make_data_dwnlds(tracker):
                         print(f"Prod DataFrame shape: {prod.shape}")
                         main = main.map(remove_illegal_characters)
                         prod = prod.map(remove_illegal_characters)
-                        main.to_excel(writer, sheet_name=f'{acro} Main data', index=False)
-                        prod.to_excel(writer, sheet_name=f'{acro} Production & reserves', index=False)
+                        main.to_excel(writer, sheet_name=f'Extraction Main data', index=False)
+                        writer = bold_first_row(writer, sheet_name=f'Extraction Main data')
+
+                        prod.to_excel(writer, sheet_name=f'Extraction Production & reserves', index=False)
+                        writer = bold_first_row(writer, sheet_name=f'Extraction Production & reserves')
+
                         print(f'Wrote {tracker_name} to file {filename} successfully!')
                     
                     else:
@@ -137,6 +147,8 @@ def make_data_dwnlds(tracker):
                             input('data official not working')
                         df = df.map(remove_illegal_characters)
                         df.to_excel(writer, sheet_name=f'{tracker_name}', index=False)
+                        writer = bold_first_row(writer, sheet_name=f'{tracker_name}')
+
                         print(f'Wrote {tracker_name} to file {filename} successfully!')
                     
 

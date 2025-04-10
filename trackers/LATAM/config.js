@@ -1,8 +1,8 @@
 var config = {
     json: 'compilation_output/latam_2025-04-09.geojson',
     geometries: ['Point','LineString'],
-    center: [-90, -14],
-    zoomFactor: 1.7,
+    center: [-60, 0], //previously was -90, -14
+    zoomFactor: 1.4,
     img_detail_zoom: 10,
     statusField: 'status-legend',
     statusDisplayField: 'status',
