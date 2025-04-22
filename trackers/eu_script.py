@@ -3,8 +3,8 @@ from all_config import *
 import os
 import io
 import gspread
-from creds import client_secret
-import creds
+from trackers.creds import client_secret
+import trackers.creds as creds
 import pandas as pd
 import geopandas as gpd
 import numpy as np
@@ -14,11 +14,11 @@ from shapely.geometry import Point, LineString
 import pickle
 from collections import Counter
 
-
+### CREATE CONVERSION FILE ###
 conversion_df = create_conversion_df(conversion_key, conversion_tab)
 
 # maybe add tracker-acro or figure out why failing but didn't have it in egt colab. FEB 25th 
-
+### GET THE DATA ###
 term = gpd.read_file(egt_ggit_terminals)
 term['tracker'] = 'term'
 term['tracker-acro'] = 'GGIT-lng'
@@ -34,7 +34,7 @@ gogpt = gspread_access_file_read_only(egt_dd_key, ['Oil & Gas Plants'])
 gogpt['tracker'] = 'plants'
 gogpt['tracker-acro'] = 'GOGPT'
 goget_global = gspread_access_file_read_only(goget_global_key, ['Main data','Production & reserves'])
-goget = filter_goget_for_europe(goget_global)
+goget = filter_goget_for_europe(goget_global) # DONE in map_class
 # save goget
 save_goget_datafile_eu(goget)
 
@@ -45,18 +45,18 @@ goget['tracker-acro'] = 'GOGET'
 pipes = gpd.GeoDataFrame(pipes, geometry='geometry', crs="EPSG:4326")
 term = gpd.GeoDataFrame(term, geometry='geometry', crs="EPSG:4326")
 
-
+### LOOP THROUGH ALL DATAFRAMES AND PROCESS ###
 list_to_be_merged = [term, pipes, gogpt, goget, gogpt_hy]
-
+### GEOMETRY PROCESS ###
 gdf_to_be_merged = []
 for df in list_to_be_merged:
-    df = adjusting_geometry(df)
+    df = adjusting_geometry(df) # DONE
     print(df['geometry'])
     # how can I make sure this updated gdf is now
     gdf_to_be_merged.append(df)
     
 
-
+### FUEL FILTER PROCESS ###
 for df in gdf_to_be_merged:
     df = fuel_filter(df)
     print(df['tracker'].iloc[0])
@@ -73,7 +73,7 @@ for df in gdf_to_be_merged:
         print(len(test))
         
     
-
+### MATURITY FILTER PROCESS ###
 for df in gdf_to_be_merged:
     df = maturity(df)
     print(df['tracker'].iloc[0])
@@ -83,13 +83,13 @@ for df in gdf_to_be_merged:
     # count of maturity equal y by tracker
     # print(df[['maturity', 'tracker']].groupby('tracker').count())
 
-
+### CONVERSION ACRO ASSIGNMENT PROCESS ###
 for df in gdf_to_be_merged:
     df = split_goget_ggit_eu(df)
     # print(df['tracker'].iloc[0])
     # print(df.columns)
 
-
+### ASSIGNING CONVERSION FACTORS ###
 for df in gdf_to_be_merged:
     df = assign_conversion_factors(df, conversion_df)
     print(df['tracker'].iloc[0])
@@ -99,7 +99,7 @@ for df in gdf_to_be_merged:
     elif 'geometry' not in df.columns:
         input('issue here')
 
-
+### RENAMING ###
 final_list = []
 for df in gdf_to_be_merged:
     df = rename_gdfs(df)
@@ -112,7 +112,7 @@ for df in gdf_to_be_merged:
         input('check goget areas after rename_gdfs')
 
     
-
+### MERGE INTO ONE DF ###
 one_gdf = merge_all_gdfs_eu(final_list)
 # one_gdf['areas']
 

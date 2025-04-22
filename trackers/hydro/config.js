@@ -1,7 +1,7 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
-    csv: 'Global-Hydropower-Tracker-May-2024_2024-05-15.csv',
+    geojson: 'gem_tracker_maps/trackers/ghpt/compilation_output/ghpt_2025-04-21.geojson',
 
     colors: {
         'red greeninfo': '#c00',

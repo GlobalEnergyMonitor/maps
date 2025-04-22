@@ -1,86 +1,95 @@
 import pandas as pd
-from all_config import *
-from helper_functions import *
+# from all_config import *
+from trackers.all_config import *
+# from helper_functions import *
+from trackers.helper_functions import *
 
+
+# putting in helper, can remove soon TODO
 # creates the file for the single map
-def get_key_tabs_prep_file(tracker):
-    prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)
+# def get_key_tabs_prep_file(tracker):
+#     prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)
 
-    prep_dict = prep_df.to_dict(orient='index')
+#     prep_dict = prep_df.to_dict(orient='index')
 
-    if tracker in non_gsheet_data:
-        print('Needs to be local')
-    # elif 'Iron & Steel' == tracker:
-    #     keytab = {}
-    #     # gist_pages = ['steel', 'iron', 'plant']
-    #     for page in gist_pages:
-    #         tracker_n = f'{tracker}: {page}'
-    #         key = prep_dict[tracker_n]['gspread_key']
-    #         key = ''.join(key) # convert string into item in list
-    #         tabs = prep_dict[tracker_n]['gspread_tabs'] 
-    #         keytab[page] = (key, tabs)
-    #         tracker_n = '' 
+#     if tracker in non_gsheet_data:
+#         print('Needs to be local')
+#     # elif 'Iron & Steel' == tracker:
+#     #     keytab = {}
+#     #     # gist_pages = ['steel', 'iron', 'plant']
+#     #     for page in gist_pages:
+#     #         tracker_n = f'{tracker}: {page}'
+#     #         key = prep_dict[tracker_n]['gspread_key']
+#     #         key = ''.join(key) # convert string into item in list
+#     #         tabs = prep_dict[tracker_n]['gspread_tabs'] 
+#     #         keytab[page] = (key, tabs)
+#     #         tracker_n = '' 
                  
-    #     # print(f'Returning keytab: {keytab} for GIST')
-    #     return keytab
+#     #     # print(f'Returning keytab: {keytab} for GIST')
+#     #     return keytab
      
-    else:
-        key = prep_dict[tracker]['gspread_key']
-        tabs = prep_dict[tracker]['gspread_tabs']
-    return key, tabs
+#     else:
+#         key = prep_dict[tracker]['gspread_key']
+#         tabs = prep_dict[tracker]['gspread_tabs']
+#     return key, tabs
 
 
-def create_df(key, tabs=['']):
-    # print(tabs)
-    dfs = []
-    # other logic for goget 
-    if trackers_to_update[0] == 'Oil & Gas Extraction':
-        for tab in tabs:
-            # print(tab)
-            if tab == 'Main data':
-                gsheets = gspread_creds.open_by_key(key)
-                spreadsheet = gsheets.worksheet(tab)
-                main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                print(main_df.info())
-            elif tab == 'Production & reserves':
-                gsheets = gspread_creds.open_by_key(key)
-                spreadsheet = gsheets.worksheet(tab)
-                prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                print(prod_df.info())
-        return main_df, prod_df
+# def create_df(key, tabs=['']):
+#     # print(tabs)
+#     dfs = []
+#     # other logic for goget 
+#     if trackers_to_update[0] == 'Oil & Gas Extraction':
+#         for tab in tabs:
+#             # print(tab)
+#             if tab == 'Main data':
+#                 gsheets = gspread_creds.open_by_key(key)
+#                 spreadsheet = gsheets.worksheet(tab)
+#                 main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+#                 print(main_df.info())
+#             elif tab == 'Production & reserves':
+#                 gsheets = gspread_creds.open_by_key(key)
+#                 spreadsheet = gsheets.worksheet(tab)
+#                 prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+#                 print(prod_df.info())
+#         return main_df, prod_df
     
-    elif trackers_to_update[0] == 'Iron & Steel':
-        # keytab = key
-        # print(keytab)
-        # for k,v in keytab.items(): # dict of tuples the tuple being key and tabs 
-        #     # print(f'this is key: {k}')
-        #     # print(f'this is v: {v}')
-        #     tabtype = k
-        #     key = v[0]
-        #     tabs = v[1]
-        #     # Iron & Steel: plant (unit-level not needed anymore)
-        for tab in tabs:
-            gsheets = gspread_creds.open_by_key(key)
-            spreadsheet = gsheets.worksheet(tab)
-            df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-            df['tab-type'] = tab
-            dfs += [df]
+#     elif trackers_to_update[0] == 'Iron & Steel':
+#         # keytab = key
+#         # print(keytab)
+#         # for k,v in keytab.items(): # dict of tuples the tuple being key and tabs 
+#         #     # print(f'this is key: {k}')
+#         #     # print(f'this is v: {v}')
+#         #     tabtype = k
+#         #     key = v[0]
+#         #     tabs = v[1]
+#         #     # Iron & Steel: plant (unit-level not needed anymore)
+#         for tab in tabs:
+#             gsheets = gspread_creds.open_by_key(key)
+#             spreadsheet = gsheets.worksheet(tab)
+#             df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+#             df['tab-type'] = tab
+#             dfs += [df]
 
-        df = pd.concat(dfs).reset_index(drop=True)
-        print(df.info())
+#         df = pd.concat(dfs).reset_index(drop=True)
+#         print(df.info())
 
-    else:
-        for tab in tabs:
-            gsheets = gspread_creds.open_by_key(key)
-            spreadsheet = gsheets.worksheet(tab)
-            df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-            dfs += [df]
-        df = pd.concat(dfs).reset_index(drop=True)
-        # df = pd.read_excel(input_file_xls, sheet_name=None)
-        # print(df)
-        print(df.info())
+#     else:
+#         for tab in tabs:
+#             gsheets = gspread_creds.open_by_key(key)
+#             spreadsheet = gsheets.worksheet(tab)
+#             df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+#             dfs += [df]
+#         df = pd.concat(dfs).reset_index(drop=True)
+#         # df = pd.read_excel(input_file_xls, sheet_name=None)
+#         # print(df)
+#         print(df.info())
+#         input('Check df info plz')
+
+
+#     df = df.replace('*', pd.NA).replace('--', pd.NA)
+#     df.columns = df.columns.str.strip()
     
-    return df
+#     return df
 
 
 def process_steel_iron_parent(df, test_results_folder):
@@ -273,69 +282,41 @@ def process_steel_iron_parent(df, test_results_folder):
         'plant-status': 'first',
         'prod-method-tier': 'first',
         'scaling-cap': 'sum',
-        'Operating Nominal crude steel capacity (ttpa)': 'sum',
         'Operating Nominal EAF steel capacity (ttpa)': 'sum',
-        'Operating scaling-cap': 'sum',
-        'Construction Nominal crude steel capacity (ttpa)': 'sum',
         'Construction Nominal EAF steel capacity (ttpa)': 'sum',
-        'Construction scaling-cap': 'sum',
         'Operating Nominal BOF steel capacity (ttpa)': 'sum',
-        'Operating Nominal iron capacity (ttpa)': 'sum',
         'Operating Nominal BF capacity (ttpa)': 'sum',
-        'Announced Nominal crude steel capacity (ttpa)': 'sum',
         'Announced Nominal EAF steel capacity (ttpa)': 'sum',
-        'Announced Nominal iron capacity (ttpa)': 'sum',
         'Announced Nominal DRI capacity (ttpa)': 'sum',
-        'Announced scaling-cap': 'sum',
-        'Mothballed Nominal iron capacity (ttpa)': 'sum',
         'Mothballed Nominal BF capacity (ttpa)': 'sum',
         'Operating Other/unspecified steel capacity (ttpa)': 'sum',
-        'Mothballed Nominal crude steel capacity (ttpa)': 'sum',
         'Mothballed Nominal EAF steel capacity (ttpa)': 'sum',
         'Mothballed Nominal DRI capacity (ttpa)': 'sum',
-        'Mothballed scaling-cap': 'sum',
         'Operating Nominal DRI capacity (ttpa)': 'sum',
         'Announced Other/unspecified steel capacity (ttpa)': 'sum',
         'Construction Other/unspecified steel capacity (ttpa)': 'sum',
-        'Construction Nominal iron capacity (ttpa)': 'sum',
         'Construction Nominal DRI capacity (ttpa)': 'sum',
-        'Operating pre-retirement Nominal crude steel capacity (ttpa)': 'sum',
         'Operating pre-retirement Nominal BOF steel capacity (ttpa)': 'sum',
-        'Operating pre-retirement Nominal iron capacity (ttpa)': 'sum',
         'Operating pre-retirement Nominal BF capacity (ttpa)': 'sum',
-        'Operating pre-retirement scaling-cap': 'sum',
         'Announced Nominal BF capacity (ttpa)': 'sum',
         'Construction Nominal BOF steel capacity (ttpa)': 'sum',
         'Construction Nominal BF capacity (ttpa)': 'sum',
         'Announced Nominal BOF steel capacity (ttpa)': 'sum',
-        'Cancelled Nominal crude steel capacity (ttpa)': 'sum',
         'Cancelled Nominal EAF steel capacity (ttpa)': 'sum',
-        'Cancelled scaling-cap': 'sum',
-        'Retired Nominal iron capacity (ttpa)': 'sum',
         'Retired Nominal BF capacity (ttpa)': 'sum',
-        'Announced Other/unspecified iron capacity (ttpa)': 'sum',
         'Mothballed Nominal BOF steel capacity (ttpa)': 'sum',
-        'Cancelled Nominal iron capacity (ttpa)': 'sum',
         'Cancelled Nominal DRI capacity (ttpa)': 'sum',
-        'Retired Nominal crude steel capacity (ttpa)': 'sum',
         'Retired Nominal BOF steel capacity (ttpa)': 'sum',
-        'Retired scaling-cap': 'sum',
         'Operating pre-retirement Nominal EAF steel capacity (ttpa)': 'sum',
         'Retired Nominal EAF steel capacity (ttpa)': 'sum',
         'Cancelled Other/unspecified steel capacity (ttpa)': 'sum',
-        'Cancelled Other/unspecified iron capacity (ttpa)': 'sum',
         'Retired Nominal OHF steel capacity (ttpa)': 'sum',
-        'Operating Other/unspecified iron capacity (ttpa)': 'sum',
-        'Mothballed Other/unspecified iron capacity (ttpa)': 'sum',
         'Cancelled Nominal BOF steel capacity (ttpa)': 'sum',
         'Cancelled Nominal BF capacity (ttpa)': 'sum',
         'Operating pre-retirement Nominal DRI capacity (ttpa)': 'sum',
-        'Construction Other/unspecified iron capacity (ttpa)': 'sum',
         'Mothballed Other/unspecified steel capacity (ttpa)': 'sum',
         'Operating pre-retirement Other/unspecified steel capacity (ttpa)': 'sum',
-        'Mothballed pre-retirement Nominal iron capacity (ttpa)': 'sum',
         'Mothballed pre-retirement Nominal BF capacity (ttpa)': 'sum',
-        'Operating pre-retirement Other/unspecified iron capacity (ttpa)': 'sum',
         'Operating Nominal OHF steel capacity (ttpa)': 'sum',
         'Mothballed Nominal OHF steel capacity (ttpa)': 'sum'
     }).reset_index()
@@ -377,13 +358,6 @@ def process_steel_iron_parent(df, test_results_folder):
     print(plant_df_grouped.info())
     return plant_df_grouped
 
-def rename_cols(df):
-    df = df.copy()
-    df = df.rename(columns=str.lower)
-    df.columns = df.columns.str.replace(' ', '-')
-    df = df.rename(columns={'latitude': 'lat', 'longitude':'lng', 'wiki-url': 'url'})
-    print(df.info())
-    return df
 
 def filter_cols(df, final_cols):
     df = df.copy()

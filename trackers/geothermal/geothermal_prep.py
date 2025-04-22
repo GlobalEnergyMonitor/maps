@@ -12,8 +12,8 @@ today_date = date.today()
 iso_today_date = today_date.isoformat()
 iso_today_date_folder = f'{iso_today_date[:7]}/'
 
-geo_map_input_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/geothermal/'
-file = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/geothermal/data.csv'
+geo_map_input_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/geothermal/'
+file = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/geothermal/data.csv'
 
 # take csv file to df
 df = pd.read_csv(file, encoding="utf-16")

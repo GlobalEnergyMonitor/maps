@@ -43,7 +43,7 @@ var config = {
                     'IronmakingDRI', 'IntegratedDRI', 'IntegratedBF','Integratedunknown','Steelotherunspecified','Ironotherunspecified'],
 
 
-            values_labels: ['Electric','Electric, oxygen','Oxygen','Ironmaking (BF)', 'Integrated (BF and DRI)', 'Ironmaking (DRI)',
+            values_labels: ['Electric','Electric, oxygen','Oxygen','Ironmaking (BF)', 'Integrated (BF & DRI)', 'Ironmaking (DRI)',
                     'Integrated (DRI)', 'Integrated (BF)', 'Integrated unknown', 'Steel other/unspecified', 'Iron other/unspecified'],
             // values: ['Electric-arc-furnaces', 'Basic-oxygen-furnaces', 'Open-hearth-furnaces', 'Blast-furnaces', 'DRI-furnaces',],
             // values-labels: ['Electric arc furnaces', 'Basic oxygen furnaces', 'Open hearth furnaces', 'Blast furnaces', 'DRI furnaces'],
@@ -51,9 +51,9 @@ var config = {
         },
         {
             field: 'plant-status',
-            label: 'Status',
-            values: ['announced', 'cancelled', 'construction', 'mothballed', 'mothballed-pre-retirement', 'operating', 'operating-pre-retirement', 'retired'],
-            values_labels: ['Announced', 'Cancelled', 'Construction', 'Mothballed', 'Mothballed Pre-Retirement', 'Operating', 'Operating Pre-Retirement', 'Retired']
+            label: 'Plant Status',
+            values: ['announced', 'cancelled', 'construction', 'mothballed', 'operating', 'operating-pre-retirement', 'retired'], //'mothballed-pre-retirement',
+            values_labels: ['Announced', 'Cancelled', 'Construction', 'Mothballed', 'Operating', 'Operating Pre-Retirement', 'Retired'] // 'Mothballed Pre-Retirement', 
         }
     ],
 
@@ -111,42 +111,56 @@ var config = {
     detailView: {
         'plant-name-(english)': {'display': 'heading'},
         'prod-method-tier-display': {'label': 'Production Method'},
-        'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
+        'owner': {'label': 'Owner'},
         'start-date': {'label': 'Start date'},
         'coordinate-accuracy': {'label': 'Coordinate Accuracy'},
-        'operating-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Operating nominal EAF steel capacity (ttpa)'},
-        'construction-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Construction nominal EAF steel capacity (ttpa)'},
-        'operating-nominal-bof-steel-capacity-(ttpa)': {'label': 'Operating nominal BOF steel capacity (ttpa)'},
-        'operating-nominal-bf-capacity-(ttpa)': {'label': 'Operating nominal BF capacity (ttpa)'},
-        'announced-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Announced nominal EAF steel capacity (ttpa)'},
-        'announced-nominal-dri-capacity-(ttpa)': {'label': 'Announced nominal DRI capacity (ttpa)'},
-        'mothballed-nominal-bf-capacity-(ttpa)': {'label': 'Mothballed nominal BF capacity (ttpa)'},
-        'operating-other-unspecified-steel-capacity-(ttpa)': {'label': 'Operating other/unspecified steel capacity (ttpa)'},
-        'mothballed-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Mothballed nominal EAF steel capacity (ttpa)'},
-        'mothballed-nominal-dri-capacity-(ttpa)': {'label': 'Mothballed nominal DRI capacity (ttpa)'},
-        'operating-nominal-dri-capacity-(ttpa)': {'label': 'Operating nominal DRI capacity (ttpa)'},
-        'announced-other-unspecified-steel-capacity-(ttpa)': {'label': 'Announced other/unspecified steel capacity (ttpa)'},
-        'construction-other-unspecified-steel-capacity-(ttpa)': {'label': 'Construction other/unspecified steel capacity (ttpa)'},
-        'construction-nominal-dri-capacity-(ttpa)': {'label': 'Construction nominal DRI capacity (ttpa)'},
-        'operating-pre-retirement-nominal-bof-steel-capacity-(ttpa)': {'label': 'Operating pre-retirement nominal BOF steel capacity (ttpa)'},
-        'announced-nominal-bf-capacity-(ttpa)': {'label': 'Announced nominal BF capacity (ttpa)'},
-        'construction-nominal-bof-steel-capacity-(ttpa)': {'label': 'Construction nominal BOF steel capacity (ttpa)'},
-        'construction-nominal-bf-capacity-(ttpa)': {'label': 'Construction nominal BF capacity (ttpa)'},
-        'announced-nominal-bof-steel-capacity-(ttpa)': {'label': 'Announced nominal BOF steel capacity (ttpa)'},
-        'cancelled-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Cancelled nominal EAF steel capacity (ttpa)'},
-        'retired-nominal-bf-capacity-(ttpa)': {'label': 'Retired nominal BF capacity (ttpa)'},
-        'mothballed-nominal-bof-steel-capacity-(ttpa)': {'label': 'Mothballed nominal BOF steel capacity (ttpa)'},
-        'cancelled-nominal-dri-capacity-(ttpa)': {'label': 'Cancelled nominal DRI capacity (ttpa)'},
-        'retired-nominal-bof-steel-capacity-(ttpa)': {'label': 'Retired nominal BOF steel capacity (ttpa)'},
-        'operating-pre-retirement-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Operating pre-retirement nominal EAF steel capacity (ttpa)'},
-        'retired-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Retired nominal EAF steel capacity (ttpa)'},
-        'cancelled-other-unspecified-steel-capacity-(ttpa)': {'label': 'Cancelled other/unspecified steel capacity (ttpa)'},
-        'retired-nominal-ohf-steel-capacity-(ttpa)': {'label': 'Retired nominal OHF steel capacity (ttpa)'},
-        'mothballed-other-unspecified-steel-capacity-(ttpa)': {'label': 'Mothballed other/unspecified steel capacity (ttpa)'},
-        'operating-pre-retirement-other-unspecified-steel-capacity-(ttpa)': {'label': 'Operating pre-retirement other/unspecified steel capacity (ttpa)'},
-        'operating-nominal-ohf-steel-capacity-(ttpa)': {'label': 'Operating nominal OHF steel capacity (ttpa)'},
-        'mothballed-nominal-ohf-steel-capacity-(ttpa)': {'label': 'Mothballed nominal OHF steel capacity (ttpa)'},
+        // 5 announced 
+        'announced-nominal-bf-capacity-(ttpa)': {'label': 'Announced BF capacity (ttpa)'},
+        'announced-nominal-bof-steel-capacity-(ttpa)': {'label': 'Announced BOF steel capacity (ttpa)'},
+        'announced-nominal-dri-capacity-(ttpa)': {'label': 'Announced DRI capacity (ttpa)'},
+        'announced-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Announced EAF steel capacity (ttpa)'},
+        'announced-other/unspecified-steel-capacity-(ttpa)': {'label': 'Announced other/unspecified steel capacity (ttpa)'},
+        // 5 cancelled 
+        'cancelled-nominal-bf-capacity-(ttpa)': {'label': 'Cancelled BF capacity (ttpa)'},
+        'cancelled-nominal-bof-steel-capacity-(ttpa)': {'label': 'Cancelled BOF steel capacity (ttpa)'},
+        'cancelled-nominal-dri-capacity-(ttpa)': {'label': 'Cancelled DRI capacity (ttpa)'},
+        'cancelled-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Cancelled EAF steel capacity (ttpa)'},
+        'cancelled-other/unspecified-steel-capacity-(ttpa)': {'label': 'Cancelled other/unspecified steel capacity (ttpa)'},
+        // 5 construction
+        'construction-nominal-bf-capacity-(ttpa)': {'label': 'Construction BF capacity (ttpa)'},
+        'construction-nominal-bof-steel-capacity-(ttpa)': {'label': 'Construction BOF steel capacity (ttpa)'},
+        'construction-nominal-dri-capacity-(ttpa)': {'label': 'Construction DRI capacity (ttpa)'},
+        'construction-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Construction EAF steel capacity (ttpa)'},
+        'construction-other/unspecified-steel-capacity-(ttpa)': {'label': 'Construction other/unspecified steel capacity (ttpa)'},
+        // 6 moth 
+        'mothballed-nominal-bf-capacity-(ttpa)': {'label': 'Mothballed BF capacity (ttpa)'},
+        'mothballed-nominal-bof-steel-capacity-(ttpa)': {'label': 'Mothballed BOF steel capacity (ttpa)'},
+        'mothballed-nominal-dri-capacity-(ttpa)': {'label': 'Mothballed DRI capacity (ttpa)'},
+        'mothballed-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Mothballed EAF steel capacity (ttpa)'},
+        'mothballed-nominal-ohf-steel-capacity-(ttpa)': {'label': 'Mothballed OHF steel capacity (ttpa)'},
+        'mothballed-other/unspecified-steel-capacity-(ttpa)': {'label': 'Mothballed other/unspecified steel capacity (ttpa)'},
+        //1  Mothballed pre-retirement
+        'mothballed-pre-retirement-nominal-bf-capacity-(ttpa)':{'label': 'Mothballed pre-retirement BF capacity (ttpa)'},
+        // 6 oper
+        'operating-nominal-bf-capacity-(ttpa)': {'label': 'Operating BF capacity (ttpa)'},
+        'operating-nominal-bof-steel-capacity-(ttpa)': {'label': 'Operating BOF steel capacity (ttpa)'},
+        'operating-nominal-dri-capacity-(ttpa)': {'label': 'Operating DRI capacity (ttpa)'},
+        'operating-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Operating EAF steel capacity (ttpa)'},
+        'operating-nominal-ohf-steel-capacity-(ttpa)': {'label': 'Operating OHF steel capacity (ttpa)'},
+        'operating-other/unspecified-steel-capacity-(ttpa)': {'label': 'Operating other/unspecified steel capacity (ttpa)'},
+        // 5 pre ret 
+        'operating-pre-retirement-nominal-bf-capacity-(ttpa)': {'label':'Operating pre-retirement BF capacity (ttpa)'},
+        'operating-pre-retirement-nominal-bof-steel-capacity-(ttpa)': {'label': 'Operating pre-retirement BOF steel capacity (ttpa)'},
+        'operating-pre-retirement-nominal-dri-capacity-(ttpa)' :{'label':'Operating pre-retirement DRI capacity (ttpa)'},
+        'operating-pre-retirement-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Operating pre-retirement EAF steel capacity (ttpa)'},
+        'operating-pre-retirement-other/unspecified-steel-capacity-(ttpa)': {'label': 'Operating pre-retirement other/unspecified steel capacity (ttpa)'},
+        // 4 retired
+        'retired-nominal-bf-capacity-(ttpa)': {'label': 'Retired BF capacity (ttpa)'},
+        'retired-nominal-bof-steel-capacity-(ttpa)': {'label': 'Retired BOF steel capacity (ttpa)'},
+        'retired-nominal-eaf-steel-capacity-(ttpa)': {'label': 'Retired EAF steel capacity (ttpa)'},
+        'retired-nominal-ohf-steel-capacity-(ttpa)': {'label': 'Retired OHF steel capacity (ttpa)'},
+
         'subnational-unit-(province/state)': {'display': 'location'},
         'country/area': {'display': 'location'}
     },
@@ -163,6 +177,6 @@ var config = {
     highZoomMinRadius: 5,
     highZoomMaxRadius: 22,
 
-    showMaxCapacity: true,
+    // showMaxCapacity: true,
     
 }

@@ -26,18 +26,18 @@ iso_today_date_folder = f'{iso_today_date}/'
 client_secret = "Desktop/GEM_INFO/client_secret.json"
 
 client_secret_full_path = os.path.expanduser("~/") + client_secret
-gem_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
+gem_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/'
 
 tracker_folder = 'gas-plant'
 
-test_results_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gas-plant/test_results/'
+test_results_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/gas-plant/test_results/'
 
-output_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gas-plant/compilation_output/'
+output_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/gas-plant/compilation_output/'
 
 os.makedirs(test_results_folder, exist_ok=True)
 os.makedirs(output_folder, exist_ok=True)
 
-# input_file_csv = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/nuclear/compilation_input/all-fields-2024-07-11T012203-nuclear.csv'
+# input_file_csv = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/nuclear/compilation_input/all-fields-2024-07-11T012203-nuclear.csv'
 
 input_file_key = '19fwJMVF-8fWD4x2Awyebj86mi8lrdv52e7Ww1wXHyrk'
 
@@ -272,7 +272,7 @@ def input_to_output(df, output_file):
 ### CALL ALL
 
 df = gspread_access_file_read_only(input_file_key, ['Gas & Oil units'])
-# old_df = open_csv_no_error('/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gas-plant/data.csv')
+# old_df = open_csv_no_error('/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/gas-plant/data.csv')
 cols = df_info(df, 'gogpt_current')
 # cols_old = df_info(old_df, 'gogpt_old')
 renamed_df = rename(df)

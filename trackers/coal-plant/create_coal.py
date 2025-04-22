@@ -22,12 +22,12 @@ today_date = date.today()
 iso_today_date = today_date.isoformat()
 iso_today_date_folder = f'{iso_today_date}/'
 
-test_results_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/coal-plant/test_results/'
+test_results_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/coal-plant/test_results/'
 tracker_folder = 'coal-plant'
 
-output_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/coal-plant/compilation_output/'
+output_folder = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/coal-plant/compilation_output/'
 
-input_file_csv = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/coal-plant/compilation_input/Global-Coal-Plant-Tracker-July-2024 DATA TEAM COPY.xlsx'
+input_file_csv = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/coal-plant/compilation_input/Global-Coal-Plant-Tracker-July-2024 DATA TEAM COPY.xlsx'
 
 def set_up_df(input, sheetname):
     # df = pd.read_csv(input)

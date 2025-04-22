@@ -23,11 +23,11 @@ today_date = date.today()
 # Format the date in ISO format
 iso_today_date = today_date.isoformat()
 
-test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/issues'
+test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/issues'
 
-output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/giomt/output/'
+output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/giomt/output/'
 
-input_file_csv = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/giomt/input/Global Iron Ore Mines Tracker - November 2024 - Standard Copy (V1) DATA TEAM COPY.xlsx'
+input_file_csv = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/giomt/input/Global Iron Ore Mines Tracker - November 2024 - Standard Copy (V1) DATA TEAM COPY.xlsx'
 
 def set_up_df(input):
     df = pd.read_excel(input, sheet_name = 'Main Data')

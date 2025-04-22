@@ -1,5 +1,8 @@
-
-from single_tracker_maps_script import *
+# from trackers.single_tracker_maps_script import *
+# from single_tracker_maps_script import *'
+from .make_data_dwnlds import *
+from .make_map_file import *
+# from make_data_dwnlds import *
 # from multi_tracker_maps_script import *
 import subprocess
 from tqdm import tqdm # can adapt more, special tweaking for dataframe!
@@ -10,14 +13,95 @@ from tqdm import tqdm # can adapt more, special tweaking for dataframe!
 
 for tracker in tqdm(trackers_to_update, desc='Baking'):
     # print(tracker)
-    if tracker == 'Geothermal':
-        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/geothermal/test_results/'
+    
+    if tracker == 'Hydropower':
+        # make data downloads 
+        map_obj_list, problem_map_objs = make_data_dwnlds(tracker)
+        # creates single map file
+        print(f'{len(map_obj_list)} maps to be updated with new {tracker} data!')
+        # input('Check if the above statement makes sense ^')
+        list_of_map_objs_mapversion = make_map(map_obj_list) # this returns map obj list map version that can be run thru tests
+        
+        if len(problem_map_objs) > 1:
+            print(f'Now that all map and dd files that can work have completed, here are the issue map objs:')
+            print(f'Problem Map Name: {problem_map_objs[0]}')
+            print(f'Error: {problem_map_objs[1]}')
+        
+        print('Great, now lets run those map objs map version thru tests on source!')
+        input('Confirm above')        
+    
+    elif tracker == 'Gas Pipelines':
+        
+        # make data downloads 
+        map_obj_list, problem_map_objs = make_data_dwnlds(tracker)
+        # creates single map file
+        print(f'{len(map_obj_list)} maps to be updated with new {tracker} data!')
+        # input('Check if the above statement makes sense ^')
+        list_of_map_objs_mapversion = make_map(map_obj_list) # this returns map obj list map version that can be run thru tests
+        
+        print(f'Now that all map and dd files that can work have completed, here are the issue map objs:')
+        print(f'Problem Map Name: {problem_map_objs[0]}')
+        print(f'Error: {problem_map_objs[1]}')
+        
+        print('Great, now lets run those map objs map version thru tests on source!')
+        input('Confirm above')
+    
+    elif tracker == 'Oil Pipelines':
+        # test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/GOIT/test_results/'
 
-        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/geothermal/compilation_output/'
+        # output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/GOIT/compilation_output/'
+        
+        # output_file = f'{output_folder}goit-data-{iso_today_date}.csv'
+        
+        # make data downloads 
+        map_obj_list, problem_map_objs = make_data_dwnlds(tracker)
+        # creates single map file
+        print(f'{len(map_obj_list)} maps to be updated with new {tracker} data!')
+        # input('Check if the above statement makes sense ^')
+        list_of_map_objs_mapversion = make_map(map_obj_list) # this returns map obj list map version that can be run thru tests
+        
+        print(f'Now that all map and dd files that can work have completed, here are the issue map objs:')
+        print(f'Problem Map Name: {problem_map_objs[0]}')
+        print(f'Error: {problem_map_objs[1]}')
+        
+        print('Great, now lets run those map objs map version thru tests on source!')
+        input('Confirm above')
+        
+
+                
+    elif tracker == 'Integrated':
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/integrated/test_results/'
+
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/integrated/compilation_output/'
+        
+        output_file = f'{output_folder}gipt-data-{iso_today_date}.csv'
 
         # creates single map file
         key, tabs = get_key_tabs_prep_file(tracker)
 
+    
+        df = create_df(key, tabs)
+        df = clean_capacity(df) 
+        df = semicolon_for_mult_countries_gipt(df)
+        df = fix_status_inferred(df)        
+        # harmonize_countries(df, countries_dict, test_results_folder) # find countries_dict
+        df= rename_cols(df)
+        df = remove_missing_coord_rows(df)
+        
+        input_to_output(df, output_file)
+
+
+
+    elif tracker == 'Geothermal':
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/geothermal/test_results/'
+
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/geothermal/compilation_output/'
+
+        map_obj_list, problem_map_objs = make_data_dwnlds(tracker)
+        input('check progress on dd') # TODO march 28th getting issue with nonetype for df.info should have filtering done, now focus on GOGET so can be filtered but also two tabs
+        # creates single map file
+        key, tabs = get_key_tabs_prep_file(tracker)
+        
         df = create_df(key, tabs)
         # df = split_coords(df)
 
@@ -35,20 +119,20 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         input('continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
-        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
-          
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
+        # update so that instead of running above, we just run each function and move it to helper instead of multi or tracker specific which can be held in tracker folder
+        
         
         
     elif tracker == 'Iron & Steel':
-        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gist/test_results/'
-        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gist/compilation_output/'
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/gist/test_results/'
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/gist/compilation_output/'
         
         key, tabs = get_key_tabs_prep_file(tracker)
         df = create_df(key, tabs) # steel_df, iron_df, plant_df
 
 
         # drop cols don't need # filter_cols
-        # TODO MARCH 24: CREATE NEW COLUMNS WITH STATUS NAME AND PROD METHOD FOR CAPACITY SO ALL CAN BE AT PLANT LEVEL
         df = process_steel_iron_parent(df, test_results_folder)
         print(len(df))
         df = split_coords(df)
@@ -76,45 +160,62 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
        
     
     elif tracker == 'Oil & Gas Extraction':
-        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/goget/test_results/'
+        
 
-        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/goget/compilation_output/'
-
+        # make data downloads 
+        map_obj_list, problem_map_objs = make_data_dwnlds(tracker)
         # creates single map file
-        # handle production data
-        key, tabs = get_key_tabs_prep_file(tracker)
+        print(f'{len(map_obj_list)} maps to be updated with new {tracker} data!')
+        # input('Check if the above statement makes sense ^')
+        list_of_map_objs_mapversion = make_map(map_obj_list) # this returns map obj list map version that can be run thru tests
+        
+        print(f'Now that all map and dd files that can work have completed, here are the issue map objs:')
+        print(f'Problem Map Name: {problem_map_objs[0]}')
+        print(f'Error: {problem_map_objs[1]}')
+        
+        
+        print('Great, now lets run those map objs map version thru tests on source!')
+        input('Confirm above')
 
-        df_tuple = create_df(key, tabs)
-        main = df_tuple[0]
-        prod = df_tuple[1]
-        # df has df['other'] column to distinguish between main and prod/res
-        # result will be data ready for map, after scott's code
-        df = process_goget_reserve_prod_data(main, prod)
-        df = rename_cols(df) # will need to adjust for goget's columns
-        df = fix_status_space(df)   
-        # df = format_values(df)
-        df = fix_status_inferred(df)         
-        df = filter_cols(df,final_cols=['country/area', 'wiki-name',
-                                        'status', 'status_display','production-start-year',  
-                                        'operator', 'owner', 'parent','lat', 'lng', 'location-accuracy', 'subnational-unit-(province,-state)',
-                                        'gem-region', 'unit-id', 'url', 'country-list', 'discovery-year', 'fid-year', 'production---oil-(million-bbl/y)',
-                                        'production-year---oil', 'production---gas-(million-m³/y)', 'production-year---gas', 'production---total-(oil,-gas-and-hydrocarbons)-(million-boe/y)'             
-                                        ])
+        # test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/goget/test_results/'
+
+        # output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/goget/compilation_output/'
+
+        # # creates single map file
+        # # handle production data
+        # key, tabs = get_key_tabs_prep_file(tracker)
+
+        # df_tuple = create_df(key, tabs)
+        # main = df_tuple[0]
+        # prod = df_tuple[1]
+        # # df has df['other'] column to distinguish between main and prod/res
+        # # result will be data ready for map, after scott's code
+        # df = process_goget_reserve_prod_data(main, prod)
+        # df = rename_cols(df) # will need to adjust for goget's columns
+        # df = fix_status_space(df)   
+        # # df = format_values(df)
+        # df = fix_status_inferred(df)         
+        # df = filter_cols(df,final_cols=['country/area', 'wiki-name',
+        #                                 'status', 'status_display','production-start-year',  
+        #                                 'operator', 'owner', 'parent','lat', 'lng', 'location-accuracy', 'subnational-unit-(province,-state)',
+        #                                 'gem-region', 'unit-id', 'url', 'country-list', 'discovery-year', 'fid-year', 'production---oil-(million-bbl/y)',
+        #                                 'production-year---oil', 'production---gas-(million-m³/y)', 'production-year---gas', 'production---total-(oil,-gas-and-hydrocarbons)-(million-boe/y)'             
+        #                                 ])
         
-        # adjust statuses 'operating', 'in_development', 'discovered', 'shut_in', 'decommissioned', 'cancelled', 'abandoned', 'UGS', ""
+        # # adjust statuses 'operating', 'in_development', 'discovered', 'shut_in', 'decommissioned', 'cancelled', 'abandoned', 'UGS', ""
         
-        df = input_to_output(df, f'{output_folder}{tracker}-map-file-{iso_today_date}.csv')
-        # creates multi-map files 
-        print('DONE MAKING GOGET SINGLE MAP onto MULTI MAPS')
-        input('continue?')
-        # creates multi-tracker maps
-        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        # df = input_to_output(df, f'{output_folder}{tracker}-map-file-{iso_today_date}.csv')
+        # # creates multi-map files 
+        # print('DONE MAKING GOGET SINGLE MAP onto MULTI MAPS')
+        # input('continue?')
+        # # creates multi-tracker maps
+        # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
                   
     elif tracker == 'Bioenergy':
 
-        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/test_results/'
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/bioenergy/test_results/'
 
-        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/bioenergy/compilation_output/'
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/bioenergy/compilation_output/'
 
         # creates single map file
         key, tabs = get_key_tabs_prep_file(tracker)
@@ -134,7 +235,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         input('continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
-        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
           
         # if test:
         #     check_expected_number(incorporated_dict_list_gdfs_by_map) # TODO HANDLE THIS ONE for dict or use the one thats been concatenated
@@ -175,7 +276,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         input('Continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
-        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
 
     elif tracker == 'Plumes':
         print(f'Starting GMET for release {tracker}')
@@ -241,9 +342,9 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         
         
     #     # local non gspread so 
-    #     test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/ggit/test_results/'
+    #     test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/ggit/test_results/'
 
-    #     output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/ggit/compilation_output/'
+    #     output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/ggit/compilation_output/'
 
     #     input_file_json = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/GEM-GGIT-LNG-Terminals-2024-09 DATA TEAM COPY.geojson'
     #     # incorporate gas pipeline data as well
@@ -390,7 +491,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         input('continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
-        # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
 
 
     elif tracker == 'Solar':
@@ -422,7 +523,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         input('continue?')
         # creates multi-tracker maps
         # if tracker to update is coal terminals then look at sheet and create all regional and of course single
-        # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+        # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
     
     elif tracker == 'Coal Plants':
         # continue for all of them that are in or not in multi tracker maps
@@ -452,8 +553,138 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         print('DONE MAKING Coal SINGLE MAP onto MULTI MAPS')
         input('continue?')
     
-    subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
-          
+    subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
+    
+    
+    
+else:
+    # all calls in multi_tracker_maps_script
+    if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
+        print('Start augmented')
+        # print('TESTING what_maps_are_needed_new')
+        # result of new is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
+        # needed_map_and_tracker_dict_new = what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab) # result is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
+        needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, regional_multi_map_tab) # map_tab
+        # map_country_region has the list of needed maps to be created and their countries/regions
+        print(needed_map_and_tracker_dict)
+        # ##(input('inspect')
+        needed_tracker_geo_by_map = what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, needed_map_and_tracker_dict)
+        # print(path_for_download_and_map_files)
+        folder_setup(needed_tracker_geo_by_map)
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'Ended augmented {elapsed_time}')
+        
+    if data_filtering: # this creates gdfs and dfs for all filtered datasets per map, lots of repetition here
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print('Start data filtering')
+        prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)  # so we are using source, so can delete prep file
+        conversion_df = create_conversion_df(conversion_key, conversion_tab)
+        
+        to_pass = []
+        if priority != ['']:
+            for key, value in needed_tracker_geo_by_map.items():
+                if key not in priority:
+                    to_pass.append(key)
+                else:
+                    print(f'Prioritizing {key}')
+
+            
+            for key in to_pass:
+                del needed_tracker_geo_by_map[key]
+            
+        
+        dict_list_dfs_by_map, dict_list_gdfs_by_map = pull_gsheet_data(prep_df, needed_tracker_geo_by_map) # map_country_region
+        incorporated_dict_list_gdfs_by_map, incorporated_dict_list_dfs_by_map = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, dict_list_dfs_by_map, dict_list_gdfs_by_map) 
+        # print(incorporated_dict_list_gdfs_by_map)
+        # print(len(incorporated_dict_list_gdfs_by_map))
+        # for map in incorporated_dict_list_dfs_by_map.items:
+        #     df = 
+        # (input(f'Check the above, should not be empty! were in filtering. that is the length of local geojson file dfs.')
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'Ended data filtering {elapsed_time}')  
+
+        
+    if map_create:
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'Start map file creation {elapsed_time}')
+        custom_dict_list_gdfs_by_map = split_goget_ggit(incorporated_dict_list_gdfs_by_map)  #incorporated_dict_list_gdfs_by_map
+        custom_dict_list_gdfs_by_map_with_conversion = assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df)
+        renamed_one_gdf_by_map = rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion)
+        renamed_one_gdf_by_map_with_search = create_search_column(renamed_one_gdf_by_map)
+        input('done with create_search_column')
+        # renamed_one_gdf_by_map = add_boed_routes_from_baird(renamed_one_gdf_by_map)
+        # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
+        
+        cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map_with_search)
+        cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
+        
+        cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
+        one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
+        one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
+        # print(f'This is final gdf keys for: {one_gdf_by_maptype}')
+        final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
+        
+        final_count(final_dict_gdfs)
+
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'End map file creation {elapsed_time}')     
+
+    if dwlnd_create: # this creates and saves the tabular data sheets for the data download from the filtered dfs
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'Start dwlnd creation {elapsed_time}')
+        create_data_dwnld_file(incorporated_dict_list_dfs_by_map) 
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print(f'End dwlnd creation {elapsed_time}')
+    
+
+    if about_create: # this creates and saves a preliminary file with all about pages no adjustments made
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time 
+        print('Start about creation')
+        about_df_dict_by_map = gather_all_about_pages(prev_key_dict, prep_df, needed_tracker_geo_by_map)
+        create_about_page_file(about_df_dict_by_map)
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  
+        print(f'End about creation {elapsed_time}')
+
+    
+    if refine: # this reorders the data download file
+        end_time = time.time()  
+        elapsed_time = end_time - start_time  
+        print('Start refining')
+        if local_copy:
+            about_df_dict_by_map = ''
+            incorporated_dict_list_dfs_by_map = ''
+        print(incorporated_dict_list_dfs_by_map)
+        # for map, gdfs in incorporated_dict_list_dfs_by_map.items():
+        #     print(map)
+        #     print(gdfs)
+        #     if map == 'latam':
+        #         input('pause for latam')
+        # for map, aboutdfs in about_df_dict_by_map.items():
+        #     print(map)
+        #     print(aboutdfs)
+        #     if map == 'latam':
+        #         input('pause for latam')
+
+
+        reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map) 
+        end_time = time.time()  # Record the end time
+        elapsed_time = end_time - start_time  # Calculate the elapsed time
+        print('End refining')  
+
+    if run_post_tests:
+        # post_tests(final_dict_gdfs)
+        robust_tests_map()
+        # robust_tests_dd()
+        
 # if tracker in tracker to update is part of a multi tracker map then run that script in addition
 # individual script
 
