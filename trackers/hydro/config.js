@@ -1,11 +1,7 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
-<<<<<<< HEAD
-    geojson: 'testing-gem-tracker-maps/trackers/ghpt/compilation_output/ghpt_2025-04-22.geojson',
-=======
     geojson: 'ghpt_2025-04-22.geojson',
->>>>>>> c178e352b60520d76f4c5079f0371dc61a428724
 
     colors: {
         'red greeninfo': '#c00',
