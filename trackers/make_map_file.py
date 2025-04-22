@@ -66,6 +66,7 @@ def make_map(list_of_map_objs):
             # this should happen to ALL
             # clean_capacity and coordinate qc
             tracker_obj.clean_num_data()
+
             tracker_obj.transform_to_gdf()
             tracker_obj.split_goget_ggit()
             tracker_obj.assign_conversion_factors(conversion_df)

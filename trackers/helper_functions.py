@@ -56,6 +56,7 @@ SQL = '''
 
 def save_to_s3(obj, df, filetype='', path_dwn=''):
     print('in save_to_s3')
+    geojsonpath = ''
     # print(type(df))
     
     # Ensure geometry is properly handled before saving
@@ -90,7 +91,7 @@ def save_to_s3(obj, df, filetype='', path_dwn=''):
         s3folder = 'uncategorized'
     
     # Prepare and execute S3 upload command
-    if geojsonpath:
+    if geojsonpath != '':
         
         do_command_s3 = (
             f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
@@ -915,7 +916,7 @@ def rename_gdfs(df):
     # df.columns = df.columns.str.replace(' ', '-')
     
     # TODO April 21st check that tracker is a column not just a attribute?!
-    tracker_sel = df['tracker'].iloc[0] # plants, term, pipes, extraction
+    tracker_sel = df['tracker-acro'].iloc[0] # plants, term, pipes, extraction
 
     renaming_dict_sel = renaming_cols_dict[tracker_sel]
     # rename the columns!
@@ -1711,11 +1712,18 @@ def convert_coords_to_point(df):
     geometry_col = 'geometry'
     df = df.reset_index(drop=True)
     # df.columns = df.columns.str.lower()
-    for row in df.index:
-        if 'Longitude' in df.columns:
-            df.loc[row,'geometry'] = Point(df.loc[row,'Longitude'], df.loc[row,'Latitude'])
-        elif 'longitude'in df.columns:
-            df.loc[row,'geometry'] = Point(df.loc[row,'longitude'], df.loc[row,'latitude'])
+    df['geometry'] = None  # Initialize the geometry column
+    if 'Longitude' in df.columns and 'Latitude' in df.columns:
+        print('Long in there')
+        df['geometry'] = df.apply(lambda row: Point(row['Longitude'], row['Latitude']), axis=1)
+    elif 'longitude' in df.columns and 'latitude' in df.columns:
+        print('long in there')
+        df['geometry'] = df.apply(lambda row: Point(row['longitude'], row['latitude']), axis=1)
+    else:
+        print('issues with finding lat lng to convert to gdf!!')
+        print(df.columns)
+            
+            
     gdf = gpd.GeoDataFrame(df, geometry=geometry_col, crs=crs)
     
     return gdf
