@@ -41,6 +41,7 @@ def create_map_objs(map_tab_df,row, prep_dict):
         
         tracker_source_obj.set_df()
         tracker_source_obj.get_about()
+            
         # set data and about attributes for each tracker
         print("TrackerObject Attributes:")
         print(f"Key: {tracker_source_obj.key}")
@@ -61,26 +62,26 @@ def create_map_objs(map_tab_df,row, prep_dict):
     for i, tracker in enumerate(map_obj.trackers):  # Iterate through tracker objects
         # df = tracker.data # TODO check if this is right
         try:
-            print(f"DataFrame {i}: {tracker.data.shape}")
+            print(f"DataFrame BEFORE {i}: {tracker.data.shape}")
             # filter by geo and fuel and check result
 
             tracker.create_filtered_geo_fuel_df(map_obj.geo, map_obj.fuel)
-            print(f"DataFrame {i}: {tracker.data.shape}")
+            print(f"DataFrame AFTER {i}: {tracker.data.shape}")
 
             # input('Check after geo filter')
             
         except AttributeError:
 
-            main = tracker.data[0]
-            prod = tracker.data[1]
-            print(f"DataFrame {i}main: {main.shape}")
-            print(f"DataFrame {i}prod: {prod.shape}")
+            main_or_h2 = tracker.data[0]
+            prod_or_og = tracker.data[1]
+            print(f"DataFrame {i}main: {main_or_h2.shape}")
+            print(f"DataFrame {i}prod: {prod_or_og.shape}")
 
             tracker.create_filtered_geo_fuel_df(map_obj.geo, map_obj.fuel)
-            main = tracker.data[0]
-            prod = tracker.data[1]
-            print(f"DataFrame {i}main geo filt: {main.shape}")
-            print(f"DataFrame {i}prod geo filt: {prod.shape}")
+            main_or_h2 = tracker.data[0]
+            prod_or_og = tracker.data[1]
+            print(f"DataFrame {i}main geo filt: {main_or_h2.shape}")
+            print(f"DataFrame {i}prod geo filt: {prod_or_og.shape}")
 
             # input('Check after geo filter')
 

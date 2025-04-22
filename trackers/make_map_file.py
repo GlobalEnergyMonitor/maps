@@ -28,24 +28,49 @@ def make_map(list_of_map_objs):
             # this gets to each df within each map
             # first I should combine goget so we can stop filtering by tuple
             if isinstance(tracker_obj.data, tuple):
+                # for goget and gogpt EU
                 # print(tracker_obj.name)
                 # input('check') # passed, only on goget
                 print(isinstance(tracker_obj.data, tuple))
-                tracker_obj.process_goget_reserve_prod_data()
+                if tracker_obj.name == 'GOGPT EU':
+                    # TODO april 19th left off here, we need to make sure gogpt eu is handled correctly
+                    # it cannot be concatted, needs to be kept separate as two dfs
+                    # if map_obj.geo in ['europe']:
+                    # TODO make sure these methods work correctly using GOGPT EU as a tuple now 
+                    
+                    tracker_obj.set_fuel_filter_eu() # this fuel filter needs to happen for gogpt eu before they get merged into one
+                    tracker_obj.set_maturity_eu()
+                    # this one should create one gdf for the map
+                    tracker_obj.deduplicate_gogpt_eu() 
+                    
+                elif tracker_obj.name == 'Oil & Gas Extraction':
+                    tracker_obj.process_goget_reserve_prod_data()
+                    if map_obj.geo in ['europe']:
+                        # TODO look into why this isn't hit
+                        input('europe hit for map adjustments goget') 
+                        tracker_obj.set_fuel_filter_eu() # this fuel filter should happen after goget is put into one and only if its for a europe map
+                        tracker_obj.set_maturity_eu()                       
                 print(isinstance(tracker_obj.data, tuple))
-                # input('Check if there was a change')
+                # input('Check if there was a change') # TODO checek if filtering is correct
                 # clean_capacity and coordinate qc
                 # tracker_obj.clean_num_data()
                 # tracker_obj.transform_to_gdf()
-                    
-                            
+            
+            # this should happen if not tuple so not gogpt eu or goget but IS in europe
+            else:       
+                if tracker_obj.name in ['LNG Terminals EU', 'Gas Pipelines EU']:
+                    input('europe hit for map adjustments') 
+                    tracker_obj.set_fuel_filter_eu() # this fuel filter should happen when we are at this point of non tuple ville and just needs to happen to these other eu specific tracker dfs
+                    tracker_obj.set_maturity_eu()               
+            
+            # this should happen to ALL
             # clean_capacity and coordinate qc
             tracker_obj.clean_num_data()
             tracker_obj.transform_to_gdf()
             tracker_obj.split_goget_ggit()
             tracker_obj.assign_conversion_factors(conversion_df)
         
-        map_obj.rename_and_concat_gdfs()
+        map_obj.rename_and_concat_gdfs() # we account for GOGPT eu that already aritficially set tracker-acro according to differences in columns of hy and plants in gogpt eu
         map_obj.set_capacity_conversions()
         map_obj.map_ready_statuses_and_countries()
         map_obj.create_search_column()

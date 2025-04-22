@@ -8,10 +8,10 @@ from trackers.creds import *
 
 
 
-trackers_to_update = ['Oil Pipelines'] #['Iron & Steel']
+trackers_to_update = ['Gas Pipelines']# ['Gas Pipelines'] #['Iron & Steel']
 new_release_date = 'March_2025' # for within about page
 releaseiso = '2025-03'
-priority = [] # europe
+# priority = ['europe', 'asia'] # europe
 
 augmented = True
 data_filtering = True
@@ -69,7 +69,7 @@ list_official_tracker_names = ['Oil & Gas Plants', 'Coal Plants', 'Solar', 'Wind
 
 maps_with_needed_conversion = ['asia', 'europe', 'africa', 'latam', 'ggit']
 gas_only_maps = ['AGT', 'EGT', 'asia', 'europe', 'ggit'] 
-non_gsheet_data = ['Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Gas Pipelines EU', 'LNG Terminals EU']
+non_gsheet_data = ['Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Gas Pipelines EU', 'LNG Terminals EU', 'GOGPT EU']
 
 conversion_key = '1fOPwhKsFVU5TnmkbEyPOylHl3XKZzDCVJ29dtTngkew'
 conversion_tab = ['data']
@@ -80,7 +80,8 @@ gcmt_closed_tab = 'Global Coal Mine Tracker (Close'
 
 
 
-
+# TODO maybe keep all location data in there, and keep a preserved country and subnat col
+# TODO keep in retired year or closed year for longitudinal, and make sure start year is there too
 final_cols = ['unit_id', 'ea_scaling_capacity', 'units-of-m','mapname','tracker-acro','official_name','url', 'areas','name', 'unit_name', 'capacity',
               'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
        'original_units', 'conversion_factor', 'geometry', 'river', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
@@ -134,16 +135,20 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                                    'UnitName': 'unit_name', 'Status': 'status', 'Country': 'areas', 'Owner': 'owner', 
                                    'Parent': 'parent', 'CapacityInMtpa': 'capacity', 'StartYearEarliest': 'start_year', 'Region': 'region', 
                                    'State/Province': 'subnat'},
-                      'GGIT-eu': {'ProjectID':'id','Countries': 'areas','Wiki': 'url', 'Fuel': 'fuel',
-                                   'PipelineName':'name', 'SegmentName':'unit_name', 'Status':'status', 'Owner':'owner', 'Parent': 'parent',
-                                   'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat',
-                                   'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2',
-                                   },
+                    #   'GGIT-eu': {'ProjectID':'id','Countries': 'areas','Wiki': 'url', 'Fuel': 'fuel',
+                    #                'PipelineName':'name', 'SegmentName':'unit_name', 'Status':'status', 'Owner':'owner', 'Parent': 'parent',
+                    #                'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat',
+                    #                'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2',
+                    #                },
                       
+                      # TODO fix this today april 14th
+                        # Gas Pipelines EU	GGIT-eu
+                        # LNG Terminals EU	GGIT-lng-eu
+                        # GOGPT EU	GOGPT-eu
                       # gogpt-eu fuel, h2%, h2-usage-proposed-%, pci5, pci6
-                      'GOGPT-eu': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wiki URL': 'url','Country/Area': 'areas', 'Plant name': 'name', 'Unit name': 'unit_name', 
-                                'Capacity (MW)': 'capacity', 'Status': 'status', 'Fuel': 'fuel', 'Owner(s)': 'owner', 'Parent(s)': 'parent',
-                                'Start year': 'start_year', 'Subnational unit (province, state)': 'subnat', 'Region': 'region', 'Owner':'owner', 'Parent': 'parent'},
+                    #   'GOGPT-eu': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wiki URL': 'url','Country/Area': 'areas', 'Plant name': 'name', 'Unit name': 'unit_name', 
+                    #             'Capacity (MW)': 'capacity', 'Status': 'status', 'Fuel': 'fuel', 'Owner(s)': 'owner', 'Parent(s)': 'parent',
+                    #             'Start year': 'start_year', 'Subnational unit (province, state)': 'subnat', 'Region': 'region', 'Owner':'owner', 'Parent': 'parent'},
                       'plants': {'gem-location-id':'pid', 'gem-unit-id': 'id','wiki-url': 'url','country/area': 'areas', 'plant-name': 'name', 'unit-name': 'unit_name',
                                 'capacity-(mw)': 'capacity', 'owner(s)': 'owner', 'parent(s)': 'parent', 'plant-name-in-local-language-/-script': 'other-local', 'other-name(s)': 'other-name',
                                 'start-year': 'start_year', 'state/province': 'subnat'},
@@ -152,18 +157,18 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                                 'capacity-(mw)': 'capacity', 'owner(s)': 'owner', 'parent(s)': 'parent', 'plant-name-in-local-language-/-script': 'other-local', 'other-name(s)': 'other-name',
                                 'start-year': 'start_year', 'state/province': 'subnat'},
 
-                      'extraction': {'unit-id':'id', 'wiki-name': 'name', 'country': 'areas', 'subnational-unit-(province,-state)': 'subnat', 'discovery-year': 'start_year', 'production-start-year': 'prod_start_year',
-                                'gem-region': 'region', 'wiki-url': 'url', 'production---oil-(million-bbl/y)': 'prod_oil', 'production---gas-(million-m³/y)': 'prod_gas',
-                                'production---total-(oil,-gas-and-hydrocarbons)-(million-boe/y)': 'capacity','production-year---oil': 'prod_year_oil', 'production-year---gas': 'prod_year_gas',
-                                'country-list':'mult_countries', 'fuel-type': 'fuel'},
+                    #   'extraction': {'unit-id':'id', 'wiki-name': 'name', 'country': 'areas', 'subnational-unit-(province,-state)': 'subnat', 'discovery-year': 'start_year', 'production-start-year': 'prod_start_year',
+                    #             'gem-region': 'region', 'wiki-url': 'url', 'production---oil-(million-bbl/y)': 'prod_oil', 'production---gas-(million-m³/y)': 'prod_gas',
+                    #             'production---total-(oil,-gas-and-hydrocarbons)-(million-boe/y)': 'capacity','production-year---oil': 'prod_year_oil', 'production-year---gas': 'prod_year_gas',
+                    #             'country-list':'mult_countries', 'fuel-type': 'fuel'},
 
-                      'pipes': {'projectid':'id','countries': 'areas','wiki': 'url',
+                      'EGT-gas': {'projectid':'id','countries': 'areas','wiki': 'url',
                                    'pipelinename':'name', 'segmentname':'unit_name',
                                    'startyear1': 'start_year', 'capacity': 'given_capacity','capacitybcm/y': 'capacity', 'startstate/province': 'subnat',
                                    'startregion': 'region', 'endstate/province': 'subnat2', 'endregion': 'region2', 'otherenglishnames': 'other-name',
                                     'otherlanguageprimarypipelinename': 'other-local',
                                    },
-                      'term': {'comboid':'id','wiki': 'url', 'terminalname': 'name',
+                      'EGT-term': {'comboid':'id','wiki': 'url', 'terminalname': 'name',
                                    'unitname': 'unit_name', 'country': 'areas', 'capacity': 'given_capacity','capacityinmtpa': 'capacity', 'startyear1': 'start_year', 'Region': 'region',
                                    'State/Province': 'subnat', 'otherlanguagename': 'other-name'},
                         }
