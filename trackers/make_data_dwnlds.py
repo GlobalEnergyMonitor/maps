@@ -33,7 +33,7 @@ def make_data_dwnlds(tracker):
     # make an object called map
     bufferday = 0
     map_obj_list = []  # Initialize map_obj_list outside the loop
-    
+    problem_map_objs = []
         ### * FOR SPEEDING IT UP * ####
 
     # while bufferday <= 7:
@@ -59,23 +59,35 @@ def make_data_dwnlds(tracker):
         prep_dict = source_tab_df.to_dict(orient='index')            
   
         for row in map_tab_df.index:
+            
+            # TO HELP PRIORITIZE AND SPEED UP CODE WHEN DEBUGGING SOMETHING AND NEED TO GET ANOTHER FILE OUT QUICKLY
+            if map_tab_df.loc[row, 'mapname'] in priority:
+                print(f'Map name is in priority {priority} so making map object')
+            elif priority == [''] or None:
+                print(f'Nothing is in priority so making map object')
+            else:
+                print(f"Not making map object for {map_tab_df.loc[row, 'mapname']} moving onto next row in map_tab_df to save time!")
+                continue
+            
+            
             if tracker in map_tab_df.loc[row, 'source']:
                 # create a map object from that row if tracker is in the source col
                 # TODO THIS pkl file dumping will likely need to be removed before I push
                 # just helps to debugging
-                # try: 
-                #     with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/map_obj_for_{map_obj.name}_on_{iso_today_date}.pkl', 'rb') as f:
+                try: 
+                    with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/map_obj_for_{map_tab_df.loc[row, "mapname"]}_on_{iso_today_date}.pkl', 'rb') as f:
                         
-                #         print(f'opened from {f}')
-                #         map_obj = pickle.load(f)
-                # except:
-                
-                map_obj = create_map_objs(map_tab_df, row, prep_dict)
-                
+                        print(f'opened from {f}')
+                        input('CHECK')
+                        map_obj = pickle.load(f)
+                except:
+                    
+                    map_obj = create_map_objs(map_tab_df, row, prep_dict)
+                    
 
-                with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/map_obj_for_{map_obj.name}_on_{iso_today_date}.pkl', 'wb') as f:
-                    print(f'saved to {f}')
-                    pickle.dump(map_obj, f)
+                    with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/map_obj_for_{map_obj.name}_on_{iso_today_date}.pkl', 'wb') as f:
+                        print(f'saved to {f}')
+                        pickle.dump(map_obj, f)
                 # map_obj.data = df_list
                 print(f"Updated map_obj.trackers for {map_obj.name}: {map_obj.source}")
                 # print(f'This is df_list: \n{df_list}') # list of dfs

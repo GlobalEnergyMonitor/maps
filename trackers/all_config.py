@@ -8,10 +8,31 @@ from trackers.creds import *
 
 
 
-trackers_to_update = ['Gas Pipelines']# ['Gas Pipelines'] #['Iron & Steel']
-new_release_date = 'March_2025' # for within about page
-releaseiso = '2025-03'
-# priority = ['europe', 'asia'] # europe
+trackers_to_update = ['Hydropower']# ['Gas Pipelines'] #['Iron & Steel']
+new_release_date = 'April_2025' # for within about page
+releaseiso = '2025-04'
+priority = [''] # europe # NOTE NEEDS TO BE [''] to be skipped NEEDS TO BE mapname in map_tab internal
+                    # africa
+                    # integrated
+                    # europe
+                    # asia
+                    # latam
+                    # ggit
+                    # goit
+                    # goget
+                    # gctt
+                    # gcpt
+                    # gcmt
+                    # gogpt
+                    # gspt
+                    # gwpt
+                    # gnpt
+                    # gbpt
+                    # ggpt
+                    # ghpt
+                    # gist
+                    # gmet
+                    # giomt
 
 augmented = True
 data_filtering = True
@@ -103,7 +124,7 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                       'GNPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Country/Area': 'areas', 'Project Name': 'name', 'Unit Name': 'unit_name',
                                'Capacity (MW)': 'capacity', 'Status': 'status', 'Start Year': 'start_year', 'Owner': 'owner',
                                'Region': 'region', 'State/Province':'subnat', 'Wiki URL': 'url'},
-                      'GHPT': {'GEM location ID':'pid', 'GEM unit ID':'id','Country 1': 'areas', 'Country 2': 'area2','Project Name': 'name', 'Country 1 Capacity (MW)': 'capacity', 'Country 2 Capacity (MW)': 'capacity2',
+                      'GHPT': {'GEM location ID':'pid', 'GEM unit ID':'id','Country/Area 1': 'areas', 'Country/Area 2': 'area2','Project Name': 'name', 'Country/Area 1 Capacity (MW)': 'capacity', 'Country/Area 2 Capacity (MW)': 'capacity2',
                                'Status': 'status', 'Start Year': 'start_year', 'Owner': 'owner',
                                'Region 1': 'region', 'Region 2': 'region2','State/Province 1':'subnat', 'State/Province 2':'subnat2', 
                                'Wiki URL': 'url', 'River / Watercourse': 'river'},
@@ -169,8 +190,8 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                                     'otherlanguageprimarypipelinename': 'other-local',
                                    },
                       'EGT-term': {'comboid':'id','wiki': 'url', 'terminalname': 'name',
-                                   'unitname': 'unit_name', 'country': 'areas', 'capacity': 'given_capacity','capacityinmtpa': 'capacity', 'startyear1': 'start_year', 'Region': 'region',
-                                   'State/Province': 'subnat', 'otherlanguagename': 'other-name'},
+                                   'unitname': 'unit_name', 'country': 'areas', 'capacity': 'given_capacity','capacityinmtpa': 'capacity', 'startyear1': 'start_year', 'region': 'region',
+                                   'state/province': 'subnat', 'otherlanguagename': 'other-name'},
                         }
 
 # which trackers do have meaningful project ids
