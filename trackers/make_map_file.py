@@ -79,6 +79,7 @@ def make_map(list_of_map_objs):
         map_obj.set_fuel_goit()
         map_obj.last_min_fixes()
         map_obj.save_file()
+
         
     list_of_map_objs_mapversion.append(map_obj) # this will be the map obj with the filtered cleaned concatted one gdf
             

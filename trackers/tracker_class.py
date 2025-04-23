@@ -84,9 +84,11 @@ class TrackerObject:
             with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/trackerdf_for_{self.acro}_on_{iso_today_date}.pkl', 'rb') as f:
                 
                 print(f'opened from {f}')
-                
                 self.data = pickle.load(f)
                 input(f'Check the file is up to date or needs to be deleted from local_pk!')
+                [print (col) for col in self.data.columns]
+                input(f'Review orig cols in {self.name}')
+                
         except:
             
             parquet_file_source_path = 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/'
@@ -214,6 +216,8 @@ class TrackerObject:
             with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/trackerdf_for_{self.acro}_on_{iso_today_date}.pkl', 'wb') as f:
                 print(f'saved to {f}')
                 pickle.dump(self.data, f)
+                [print (col) for col in self.data.columns]
+                input(f'Review orig cols in {self.name}')
 
 
     def get_about(self):
