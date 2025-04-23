@@ -1,7 +1,7 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
-    geojson: 'ghpt_2025-04-22.geojson',
+    geojson: 'ghpt_2025-04-23.geojson',
 
     colors: {
         'red greeninfo': '#c00',
@@ -57,7 +57,7 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['name', 'capacity', 'technology_type', 'status', 'start-year', 'owner', 'operator',  'areas', 'area2'],
+        values: ['name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator',  'areas', 'area2'],
         labels: ['Project name','Capacity (MW)','Technology type','Status','Start year', 'Owner', 'Operator', 'Country/Area 1','Country/Area 2'],
         clickColumns: ['name'],
         rightAlign: ['capacity','start-year']
@@ -65,7 +65,7 @@ var config = {
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Project': ['project_name'], 
+    searchFields: { 'Project': ['name'], 
         'Companies': ['owner', 'operator'],
         'Start Year': ['start-year']
     },
@@ -80,12 +80,12 @@ var config = {
     detailView: {
         'name': {'display': 'heading'},
         'owner': {'label': 'Owner'},
-        // 'operator': {'label': 'Operator'},
+        'operator': {'label': 'Operator'},
         'start-year': {'label': 'Start Year'},
         'areas' : {'label': 'Country/Area 1'},
-        // 'binational': {'label': 'Binational'},
+        'binational': {'label': 'Binational'},
         'area2' : {'label': 'Country/Area 2'},
-        // 'location_accuracy': {'label': 'Location Accuracy'},
+        'loc-accu': {'label': 'Location Accuracy'},
         'areas-subnat-sat-display': {'display': 'location'},
 
     },

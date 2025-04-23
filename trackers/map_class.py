@@ -192,7 +192,9 @@ class MapObject:
             print(f"No {self.name} is not in gas only maps")
             gdf = self.trackers.drop(['count-of-semi','multi-country', 'original-units', 'conversion-factor', 'area2', 'region2', 'subnat2', 'capacity2', 'cleaned-cap', 'wiki-from-name', 'tracker-legend'], axis=1) #  'multi-country', 'original-units', 'conversion-factor', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2', 'cleaned-cap', 'wiki-from-name', 'tracker-legend']
 
-        check_for_lists(gdf)
+        print(f'Final cols:\n')
+        [print(col) for col in gdf.columns]
+        input(f'Final cols above! {self.name}')
         
         # save the file to unique path for africa-energy if africa, else save to map name
         # also saving to testing folder 
