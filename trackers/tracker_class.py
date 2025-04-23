@@ -1,6 +1,6 @@
 from requests import HTTPError
-from .all_config import trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
-from .helper_functions import clean_about_df, replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
+from .all_config import iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
+from .helper_functions import rename_gdfs, fuel_filter, maturity, clean_about_df, replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
 import pandas as pd
 from numpy import absolute
 import json
@@ -10,6 +10,9 @@ import boto3
 from trackers.creds import *
 import time
 import numpy as np
+from shapely import wkt
+import pickle
+
 
 class TrackerObject:
     def __init__(self,
@@ -75,49 +78,146 @@ class TrackerObject:
     
 
     def set_df(self):
-        # this creates the dataframe for the tracker
-        if self.name == 'Oil Pipelines':
-            print('handle non_gsheet_data for pulling data from s3 already has coords')
+
+        print(f'See if data already exists locally for {self.name}...')
+        try: 
+            with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/trackerdf_for_{self.acro}_on_{iso_today_date}.pkl', 'rb') as f:
+                
+                print(f'opened from {f}')
+                self.data = pickle.load(f)
+                input(f'Check the file is up to date or needs to be deleted from local_pk!')
+                [print (col) for col in self.data.columns]
+                input(f'Review orig cols in {self.name}')
+                
+        except:
             
-            # to get the file names in latest
-            goit_geojson_s3 = self.get_file_name(releaseiso)
+            parquet_file_source_path = 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/'
+
+            # this creates the dataframe for the tracker
+            if self.name == 'Oil Pipelines':
+                print('handle non_gsheet_data for pulling data from s3 already has coords')
+                
+                # to get the file names in latest
+                parquet_s3 = self.get_file_name(releaseiso)
+                print(f'This is file: {parquet_s3}')
+                if 'parquet' in parquet_s3:
+
+                    df = pd.read_parquet(f'{parquet_file_source_path}{parquet_s3}') # , engine='pyarrow' NOTE gpd calls a different method "read_table" that requires a file path NOT a URI
+                
+                    df['geometry'] = df['geometry'].apply(lambda geom: wkt.loads(geom) if geom else None)
+
+                    gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
+                
+                else:
+                    gdf = gpd.read_file(f'{parquet_file_source_path}{parquet_s3}')
+                
+                self.data = gdf
+                # gdf = add_goit_boedcap_from_baird(gdf)
+                # input('successfully created gdf from s3 file') #worked!
+                
+            elif self.name == 'Gas Pipelines':
+                
+
+                print('handle non_gsheet_data for pulling data from s3 already has coords')
+
+                # to get the file names in latest
+                parquet_s3 = self.get_file_name(releaseiso)
+                print(f'This is file: {parquet_s3}')
+
+                # self.data = pd.read_parquet(f'{parquet_file_source_path}{parquet_s3}', engine='pyarrow')   # GEM-GGIT-Gas-Pipelines-2024-12_DATA_TEAM_COPY_md_2025-04-16.parquet
+                df = pd.read_parquet(f'{parquet_file_source_path}{parquet_s3}')
+                df['geometry'] = df['geometry'].apply(lambda geom: wkt.loads(geom) if geom else None)
+
+                gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
+                self.data = gdf
+                
+            elif self.name == 'LNG Terminals':
+
+                print('handle non_gsheet_data for pulling data from s3 already has coords')
+                
+                # to get the file names in latest
+                parquet_s3 = self.get_file_name(releaseiso)
+                print(f'This is file: {parquet_s3}')
+
+                df = pd.read_parquet(f'{parquet_file_source_path}{parquet_s3}') 
+                # print(df['geometry'])
+                # from shapely import wkt
+                # Convert geometry to WKT format for saving as Parquet
+                # Assuming `df` is the DataFrame loaded from the Parquet file
+                df['geometry'] = df['geometry'].apply(lambda geom: wkt.loads(geom) if geom else None)
+                # TODO NEED TO TRANSFER geometry back to 
+                # TypeError("Input must be valid geometry objects: {0}".format(geom)) 
+                # TypeError: Input must be valid geometry objects: POINT (-90.194444 29.105833)
+                gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
+                self.data = gdf
             
-            #assign gdf to data 
+    
+            elif self.name == 'Gas Pipelines EU':
+                print('handle non_gsheet_data for pulling data from s3 already has coords')
+                
+                # to get the file names in latest
+                parquet_s3 = self.get_file_name(releaseiso)
+                
+                #assign gdf to data 
 
-            self.data = gpd.read_file(goit_geojson_s3)
+                df = pd.read_parquet(f'{parquet_file_source_path}{parquet_s3}') 
+                df['geometry'] = df['geometry'].apply(lambda geom: wkt.loads(geom) if geom else None)
+    
+                gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
+                self.data = gdf
+                
+            elif self.name == 'LNG Terminals EU':
+                print('handle non_gsheet_data for pulling data from s3 already has coords')
+                
+                # to get the file names in latest
+                parquet_s3 = self.get_file_name(releaseiso)
+                
+                #assign gdf to data 
 
-            # gdf = add_goit_boedcap_from_baird(gdf)
-            # input('successfully created gdf from s3 file') #worked!
+                df = pd.read_parquet(f'{parquet_file_source_path}{parquet_s3}')  
+                df['geometry'] = df['geometry'].apply(lambda geom: wkt.loads(geom) if geom else None)
+    
+                gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
+                self.data = gdf                    
+                
+            elif self.name == 'GOGPT EU': 
+                df_tuple = self.create_df_gogpt_eu()  
+                self.data = df_tuple
             
-        elif self.name == 'Gas Pipelines':
+            elif self.name == 'Oil & Gas Extraction':
+                df_tuple = self.create_df_goget()
+                main = df_tuple[0]
+                prod = df_tuple[1]
+                # use ids after filter by country and fuel for dd for two tab dd
+                # print(df_tuple[0].info())
+                # print(df_tuple[1].info())
+                
+                #assign df tuple to data 
+                self.data = df_tuple # not sure how to handle this, concat? 
+                # gdf = gdf[gdf[geocol].apply(lambda x: check_list(x, needed_geo))]
             
-            #assign gdf to data 
+            else:
+                #assign df to data 
 
-            self.data = gpd.read_file(ggit_geojson)
+                df = self.create_df()
+                # input('Check df') # works! didn't call the method correctly..
+                
+                
+                # to get the file names in latest 
+                # TODO need to standardize naming saved in s3 first
+                # parquet_s3 = self.get_file_name(releaseiso)
+                
+                # #assign gdf to data 
 
-        elif self.name == 'LNG Terminals':
-            #assign gdf to data 
+                # df = pd.read_parquet(f'{parquet_file_source_path}{parquet_s3}') 
+                self.data = df
 
-            self.data = gpd.read_file(ggit_lng_geojson)
-            
-        elif self.name == 'Oil & Gas Extraction':
-            df_tuple = self.create_df_goget()
-            main = df_tuple[0]
-            prod = df_tuple[1]
-            # use ids after filter by country and fuel for dd for two tab dd
-            print(df_tuple[0].info())
-            print(df_tuple[1].info())
-            
-            #assign df tuple to data 
-            self.data = df_tuple # not sure how to handle this, concat? 
-            # gdf = gdf[gdf[geocol].apply(lambda x: check_list(x, needed_geo))]
 
-        else:
-            #assign df to data 
-
-            df = self.create_df()
-            # input('Check df') # works! didn't call the method correctly..
-            self.data = df
+            with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/trackerdf_for_{self.acro}_on_{iso_today_date}.pkl', 'wb') as f:
+                print(f'saved to {f}')
+                pickle.dump(self.data, f)
+                [print (col) for col in self.data.columns]
+                input(f'Review orig cols in {self.name}')
 
 
     def get_about(self):
@@ -145,8 +245,11 @@ class TrackerObject:
 
 
     def list_all_contents(self, release):
-        tracker = self.acro.lower()
-
+        acro = self.acro.lower() # eu, ggit
+        print(acro)
+        name = self.name.lower() # pipelines, terminals, gas
+        print(name)
+        
         list_all_contents = [] # should be one file, if not then we need to remove / update
         # Initialize a session using DigitalOcean Spaces
         session = boto3.session.Session()
@@ -166,50 +269,97 @@ class TrackerObject:
         # Check if the 'Contents' key is in the response
         if 'Contents' in response:
             for obj in response['Contents']:
-                print(obj['Key'])
-                if tracker and release in obj['Key']:
+                print(obj['Key']) # this is name of the file in s3
+                print(f"Using this {acro} and this {name} to look")
+                # it's the current tracker update data so GOIT when it got updated in March
+                # if tracker and release in obj['Key']:
+                #     list_all_contents.append(obj['Key'])
+                
+                if acro in obj['Key'].lower() and '-' not in acro:
                     list_all_contents.append(obj['Key'])
+                
+                elif acro in obj['Key'].lower():
+                    # list_all_contents.append(obj['Key'])
+                    # weeds out ggit without eu for egt version
+                    if name.split(' ')[1].lower() in obj['Key'].lower() and acro.split('-')[-1] == 'eu':
+                        list_all_contents.append(obj['Key'])     
+                    # weed out ggit without lng for lng 
+                    elif name.split(' ')[1].lower() in obj['Key'].lower() and acro.split('-')[-1] == 'lng':
+                        list_all_contents.append(obj['Key'])
+                    # for the actual ggit when it is ggit, for all EGT ones too
+                    elif name.split(' ')[1].lower() in obj['Key'].lower(): # and '-lng' not in acro
+                        list_all_contents.append(obj['Key'])    
+                    
+                    else:
+                        print(f'May need to adjust logic in list_all_contents for: {acro}')                    
+                    
+                else:
+                    if name in obj['Key'].lower():
+                        list_all_contents.append(obj['Key']) 
+                    elif name[:-1] in obj['Key'].lower():
+                        list_all_contents.append(obj['Key'])
+                    else:
+                        print(f'May need to adjust logic in list_all_contents for: {acro}')    
+                         
+                
         else:
             print("No files found in the specified folder.")
-        
+    
         return list_all_contents
+
 
 
     def get_file_name(self, release):
         
-        path_name = self.list_all_contents(release)[0]
-        if path_name:
+        # path_name = self.list_all_contents(release)[0]
+        path_name_all = self.list_all_contents(release)
+        
+        if len(set(path_name_all)) > 1:
+            print(path_name_all)
+            # input('check it! and adjust logic to pick correct or clean latest folder!') # egt terminals, ggit terminals for ggit lng
+            for path in path_name_all:
+                if release in path:
+                    path_name = f'{path}'
+                else:
+                    path_name = path_name_all[0]
+                    print(f'There are more than 2 so picked first:\n{path_name}')
+                
+        # if theres more than two and its not EGT then we need to clean latest folder to remove old
+        elif len(set(path_name_all)) == 1:
+            path_name = f'{path_name_all[0]}'
             print(path_name)
             # input('check it!')
         else:
             input('Might be an issue with path name look into get_file_name plz!')
         # Define the terminal command
-        testing_source_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/'
-        # path_name = 'latest/GEM-GOIT-Oil-NGL-Pipelines-2025-03.geojson' # TODO could rename these month, tracker
-        terminal_cmd = (
-            f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
-            f'aws s3 cp s3://$BUCKETEER_BUCKET_NAME/{path_name}/ {testing_source_path} '
-            f'--endpoint-url https://nyc3.digitaloceanspaces.com --recursive'
-        )
+        # parquet_file_source_path = 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/latest/'
 
-        # Execute the terminal command to pull down file from digital ocean
-        process = subprocess.run(terminal_cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # testing_source_path = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/source/'
+        # path_name = 'latest/GEM-GOIT-Oil-NGL-Pipelines-2025-03.geojson' # TODO could rename these month, tracker
+        # terminal_cmd = (
+        #     f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
+        #     f'aws s3 cp s3://$BUCKETEER_BUCKET_NAME/{path_name}/ {testing_source_path} '
+        #     f'--endpoint-url https://nyc3.digitaloceanspaces.com --recursive'
+        # )
+
+        # # Execute the terminal command to pull down file from digital ocean
+        # process = subprocess.run(terminal_cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 # todo can read file without downloading pd.parquet
 # can set up public notebook if can read w/o local access 
 
-        # Print the output and errors (if any)
-        print(process.stdout.decode('utf-8'))
-        if process.stderr:
-            print(process.stderr.decode('utf-8'))
+        # # Print the output and errors (if any)
+        # print(process.stdout.decode('utf-8'))
+        # if process.stderr:
+        #     print(process.stderr.decode('utf-8'))
 
-        path_name = path_name.split('latest/')[1]
-        file = f'{testing_source_path}{path_name}'
+        # path_name = path_name.split('latest/')[1] # TODO maybe reinstate this to have latest
+        # file = f'{testing_source_path}{path_name}'
 
-        return file
+        return path_name
     
 
-
+    
 
     def create_df(self):
         # print(tabs)
@@ -263,6 +413,153 @@ class TrackerObject:
 
         return main_df, prod_df            
 
+    def create_df_gogpt_eu(self):
+        print(f'This is tabs for GOGPT EU: {self.tabs}')
+        # TODO test this, if concatted does not work then keep separate
+        if 'H2 Proposals at Oil & Gas Plant' in self.tabs: 
+            for tab in self.tabs:
+                print(f'This is tab: {tab}')
+                if tab == 'Oil & Gas Plants':
+                    
+                    gsheets = gspread_creds.open_by_key(self.key)
+                    spreadsheet = gsheets.worksheet(tab)
+                    plants_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                    plants_df.columns = plants_df.columns.str.strip()
+                else:
+                    gsheets = gspread_creds.open_by_key(self.key)
+                    spreadsheet = gsheets.worksheet(tab)
+                    plants_hy_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                    plants_hy_df.columns = plants_hy_df.columns.str.strip()
+                #     df['tab-type'] = tab
+                #     dfs += [df]
+                # df = pd.concat(dfs).reset_index(drop=True)
+        return plants_df, plants_hy_df
+    
+    
+    def set_fuel_filter_eu(self):
+        
+        if self.name == 'Oil & Gas Extraction':
+            df = self.data
+            df['fuel-filter'] = 'methane'
+            self.data = df
+        elif self.name == 'GOGPT EU':
+            plants_df, plants_hy_df,  = self.data
+            plants_hy_df.columns = plants_hy_df.columns.str.lower()
+            plants_hy_df.columns = plants_hy_df.columns.str.replace(' ', '-')
+            plants_df.columns = plants_df.columns.str.lower()
+            plants_df.columns = plants_df.columns.str.replace(' ', '-')
+            # df['tab-type'].iloc[0] == 'H2 Proposals at Oil & Gas Plant':
+            # if hydrogen in the fuel column then if H2 usage proposed % to see if it's blend or 100% hydrogen
+            # df['fuel-filter'] = np.where(df['fuel'].str.lower().str.contains('hydrogen'), df['h2-usage-proposed-%'], 'methane')
+            # find all fuels that have hydrogen and [100] in h2-usage-proposed-%
+            for row in plants_hy_df.index:
+                # if hydrogen in fuel column
+                if 'hydrogen' in plants_hy_df.loc[row, 'fuel'].lower():
+                    # print(df.loc[row, 'h2-usage-proposed-%'])
+                    if plants_hy_df.loc[row, 'h2-usage-proposed-%'] == 100:
+                        plants_hy_df.loc[row, 'fuel-filter'] = 'hy'
+                    else:
+                        plants_hy_df.loc[row, 'fuel-filter'] = 'blend'
+
+            plants_df['fuel-filter'] = 'methane'
+            self.data = plants_df, plants_hy_df
+        elif self.acro == 'EGT-term':
+            df = self.data
+            df.columns = df.columns.str.lower()
+            df['fuel'] = df['fuel'].str.lower()
+            df['fuel-filter'] = np.where((df['fuel'] != 'lng') & (df['fuel'] != 'oil'), 'hy', df['fuel-filter'])
+            self.data = df
+        elif self.acro == 'EGT-gas':
+            df = self.data
+            df.columns = df.columns.str.lower()
+            df['h2%'].fillna('', inplace=True)
+            
+            for row in df.index:
+                if df.loc[row, 'fuel'].lower().strip() == 'hydrogen':
+                    # print(df.loc[row, 'h2%']) # h2 does not exist in json or dd so making them all blend
+                    # convert the column to a string after filling na
+                    df.loc[row, 'h2%'] = str(df.loc[row, 'h2%'])
+                    # print(df.loc[row, 'h2%']) # h2 does not exist in json or dd so making them all blend
+                    if df.loc[row, 'h2%'] == '100.00%':
+                        df.loc[row, 'fuel-filter'] = 'hy'
+                    elif df.loc[row, 'h2%'] == '':
+                        df.loc[row, 'fuel-filter'] = 'hy'
+                    else:
+                        df.loc[row, 'fuel-filter'] = 'blend'
+            self.data = df
+        
+    
+    def set_maturity_eu(self):
+        # self.data = maturity(self.data)
+        # print(set(self.data['maturity'].to_list()))
+        # count of maturity equal none by tracker
+        # print(self.trackers[self.trackers['maturity']=='none'][['maturity', 'tracker']].groupby('tracker').count())    
+        
+        if self.name == 'GOGPT EU':
+            plants_df, plants_hy_df = self.data
+            plants_hy_df['maturity'] = np.where((plants_hy_df['status'] == 'Construction') | (plants_hy_df['mou-for-h2-supply?'] == 'Y') | (plants_hy_df['contract-for-h2-supply?'] == 'Y') | (plants_hy_df['financing-for-supply-of-h2?'] == 'Y') | (plants_hy_df['co-located-with-electrolyzer/h2-production-facility?'] == 'Y'), 'y','n')
+
+
+            self.data = plants_hy_df, plants_df
+        else:
+            
+            df = self.data
+                
+            df['maturity'] = 'none' # starts as none
+
+            for row in df.index:
+                if df.loc[row, 'fuel-filter'] == 'methane':
+                    df.loc[row, 'maturity'] = 'none'
+                else:
+                    
+                    if self.name == 'LNG Terminals EU':
+                        # if df.loc[row, 'fuel-filter'] == 'methane':
+                        #     df.loc[row, 'maturity'] = 'none'
+                        # else:
+                        df['maturity'] = np.where((df['status'] == 'Construction') | (df['fidstatus'] == 'FID') | (df['altfuelprelimagreement'] == 'yes') | (df['altfuelcallmarketinterest'] == 'yes'), 'y','n')
+
+                    elif self.name == 'Gas Pipelines EU':
+                        # if df.loc[row, 'fuel-filter'] != 'methane':
+                            # df.loc[row, 'maturity'] = 'none'
+                            # break out of this for loop and go to the next row
+                            df['maturity'] = np.where((df['status'] == 'Construction') | (df['pci5'] == 'yes') | (df['pci6'] == 'yes'), 'y','n')
+
+            # override any where fuel is methane
+            for row in df.index:
+                if df.loc[row, 'fuel-filter'] == 'methane':
+                    df.loc[row, 'maturity'] = 'none'
+            
+            self.data = df
+        
+                
+    def deduplicate_gogpt_eu(self):
+        # deduplicate and merge into ONE df
+        # also lets make tracker-custom GOGPT
+        # not clear if we stillneed this or why there would be duplicates but I had it in there 
+        # if self.name == 'GOGPT EU':
+        #     self.data.drop_duplicates(subset='id', inplace=True, keep='last') # add logic so it defaults to keeping the gogpt-hy ones over the gogpt ones, so if yes in gogpt data remove
+        plants_df, plants_hy_df = self.data
+        
+        plants_df['tracker-acro'] = 'plants'
+        plants_hy_df['tracker-acro'] = 'plants_hy'
+        
+        list_dfs = []
+        for df in [plants_df, plants_hy_df]:
+            df['custom-tracker'] = 'GOGPT'
+             
+            df = df.reset_index()
+            if 'geometry' not in df.columns:
+                df = convert_coords_to_point(df)
+            df = rename_gdfs(df) # TODO check that the right acro in all config is here for the tabs
+            list_dfs.append(df)
+        gogpt_eu_df = pd.concat(list_dfs, sort=False, ignore_index=True)
+        gogpt_eu_df.reset_index(drop=True, inplace=True)
+        gogpt_eu_df.drop_duplicates(subset='id', inplace=True, keep='last') # add logic so it defaults to keeping the hy one, last because second df in list
+    #     # TODO april 21 this is where you dropped off before picking up Fig
+        print(f'TYPE of GOGPT EU SHOULD BE DF NOW: {type(gogpt_eu_df)}')
+        input('IS IT?!')
+        
+        self.data = gogpt_eu_df
 
     def find_about_page(self,key):
             # print(f'this is key and tab list in def find_about_page(tracker,key):function:\n{tracker}{key}')
@@ -323,38 +620,59 @@ class TrackerObject:
     def create_filtered_geo_fuel_df(self, geo, fuel):
         needed_geo = geo_mapping[geo]
         print(f'length of self.data: {len(self.data)}')
-        if self.acro != 'GOGET':
+        if self.acro != 'GOGET' and self.acro != 'GOGPT-eu':
             geocollist = self.geocol.split(';')
+            print(f'Getting geo: {geo} from col list: {geocollist}')
             if geo != ['global'] or geo != ['']:
                 if len(geocollist) > 1:
                     self.data.columns = self.data.columns.str.strip()
-                    print(geocollist)
+                    # print(geocollist)
                     # input('check what geocol list is')
                     print('do multi-column search')
                     # print(self.data)
                     self.data['country_to_check'] = [[] for _ in range(len(self.data))]
                     for row in self.data.index:
                         for col in geocollist:
-                            self.data.at[row, 'country_to_check'] += [self.data.at[row, col]] # issue
+                            if col in self.data.columns:
+                                self.data.at[row, 'country_to_check'] += [self.data.at[row, col]] # issue
+                            # elif col.lower() in self.data.columns:
+                            #     self.data.at[row, 'country_to_check'] += [self.data.at[row, col.lower()]] # issue
+                            else:
+                                print(f'{col} geo col not in df for {self.name}')
+                                # print(self.data.columns)
+                                # for col in self.data.columns:
+                                #     print(col)
+                                # input('look into it')
                     filtered_df = self.data[self.data['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
+                    self.data = filtered_df
+
                 else:
                     self.data['country_to_check'] = self.data[self.geocol].apply(lambda x: split_countries(x) if isinstance(x, str) else [])
                     filtered_df = self.data[self.data['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
-            
+                    self.data = filtered_df
+
             if fuel != ['none']:
                 filtered_df = create_filtered_fuel_df(filtered_df, self)
-            self.data = filtered_df
+                self.data = filtered_df
+            
+            else:
+                print(len(self.data))
+                input('Check length of df for normal case!')
 
+        # elif self.acro == 'GOGPT-eu':
+        #     plants_hy_df, plants_df = self.data # Unpack the tuple
+        #     # TODO not needed 
+        
         elif self.acro == 'GOGET':
             main, prod = self.data  # Unpack the tuple
             to_merge = []
-            fueldf = 0
+            # fueldf = None
             for df in [main, prod]:
                 df.columns = df.columns.str.strip()
                 df['country_to_check'] = df[self.geocol].apply(lambda x: split_countries(x) if isinstance(x, str) else [])
                 
                 if geo != ['global'] or geo != ['']:
-                    print('Skipping geo filter for internal map')
+                    print(f'geo not global or empty so filters via needed geo')
                     df = df[df['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
                 if fuel != ['none']:
                     if self.fuelcol in df.columns:
@@ -367,9 +685,7 @@ class TrackerObject:
             
             filtered_main = to_merge[0] # if there is a fuel filter this main would already be filtered since its the one with fuelcol
             filtered_prod = to_merge[1]
-            if not fueldf:
-                print('no fuel filter needed')
-            else:
+            if fuel != ['none']:
                 # creates list of unit ids only on correct fuel type
                 # then filter
                 gas_goget_ids = fueldf['Unit ID'].to_list()
@@ -382,7 +698,13 @@ class TrackerObject:
                 # main would already be filtered above because it has fuel col so this is filtering prod
                 # filtered_main = filtered_main[filtered_main['Unit ID'].isin(gas_goget_ids)]
             
+            else:
+                print('no fuel filter needed')
+
+
             self.data = (filtered_main, filtered_prod)
+        elif self.acro == 'GOGPT-eu':
+            print('Pass for gogpt eu')
         else:
             print('Nothing should be printed here, length of df is 1 or 2 if its goget tuple')
             input('Check create_filtered_geo_df')
@@ -390,6 +712,8 @@ class TrackerObject:
 
     def clean_num_data(self):
         # clean df
+        print(f'Length of df at clean num data: {len(self.data)}')
+        input('CHECK ITS NOT EMPTY')
         missing_coordinate_row = {} 
         acceptable_range = {
             'lat': {'min': -90, 'max': 90},
@@ -427,7 +751,8 @@ class TrackerObject:
                         # input('Check for QC PM report') # so far problem with StartYearEarliest LNG Terminals geo in there
                         # CapacityBcm/y in Gas Pipelines CapacityBOEd in Gas Pipelines
                         # CapacityBOEd in Oil Pipelines
-                elif 'Latitude' in col:   
+                elif 'Latitude' in col:  
+                    print(f'At {col}') 
                     self.data['float_col_clean_lat'] = self.data[col].apply(lambda x: check_and_convert_float(x))
                     # and add to missing_coordinate_row
                     # drop row if the coordinate 
@@ -454,12 +779,14 @@ class TrackerObject:
                             self.data.loc[row, 'Latitude'] = self.data.loc[row, 'float_col_clean_lat']
 
                 elif 'Longitude' in col:
+                    print(f'At {col}')
                     self.data['float_col_clean_lng'] = self.data[col].apply(lambda x: check_and_convert_float(x))
                     # and add to missing_coordinate_row
                     # drop row if the coordinate is NaN
 
                     for row in self.data.index:
                         if pd.isna(self.data.loc[row, 'float_col_clean_lng']): 
+                            print(f'Missing coordinate for {self.name}')
                             missing_coordinate_row[self.name] = self.data.loc[row]
                             self.data.drop(index=row, inplace=True)
                             
@@ -478,10 +805,11 @@ class TrackerObject:
                         else:
                             self.data.loc[row, 'Longitude'] = self.data.loc[row, 'float_col_clean_lng']           
 
-                                     
+                    print(F"This is missing_coordinate_row: {missing_coordinate_row}")   
+                    input('LOOK INTO IT')          
                 else:
                     print(f"Skipping non-numeric column: {col}")
-
+        else:
             print("Error: 'self.data' is not a DataFrame.")
 
     
@@ -687,27 +1015,33 @@ class TrackerObject:
     
         
     def transform_to_gdf(self):
-            
-        if 'Latitude' in self.data.columns:
-            print('latitude in cols')
-            gdf = convert_coords_to_point(self.data) 
-            print(f'len of gdf after convert coords: {len(gdf)}')
-
-
-        elif 'WKTFormat' in self.data.columns:
-            # print('Latitude not in cols')
-            print(f'Using WKTFormat {self.name}')
-            # input('check if eu pipelines eventually come up here - if so check the next inputs that they are not empty until "GeoDataFrames have been saved to"')
-
-            # df_map = insert_incomplete_WKTformat_ggit_eu(df_map)
-            # if 'WKTFormat' in df.columns:
-
-            gdf = convert_google_to_gdf(self.data) # this drops all empty WKTformat cols
-            
-            print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
+        
+        if isinstance(self.data, tuple):
+            print(self.name)
+            input('Why is that a tuple up there? GOGET and GOGPT eu should be consolidated by now...')
         else:
-            print(F'likely already a gdf: {self.name}')
-            gdf = self.data
+            
+            if 'Latitude' or 'latitude' in self.data.columns:
+                print('latitude in cols')
+                print(f'len of df before convert coords: {len(self.data)}')
+                gdf = convert_coords_to_point(self.data) 
+                print(f'len of gdf after convert coords: {len(gdf)}')
+
+
+            elif 'WKTFormat' in self.data.columns:
+                # print('Latitude not in cols')
+                print(f'Using WKTFormat {self.name}')
+                # input('check if eu pipelines eventually come up here - if so check the next inputs that they are not empty until "GeoDataFrames have been saved to"')
+
+                # df_map = insert_incomplete_WKTformat_ggit_eu(df_map)
+                # if 'WKTFormat' in df.columns:
+
+                gdf = convert_google_to_gdf(self.data) # this drops all empty WKTformat cols
+                
+                print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
+            else:
+                print(F'likely already a gdf: {self.name}')
+                gdf = self.data
 
         self.data = gdf
         
@@ -715,13 +1049,19 @@ class TrackerObject:
         gdf = self.data
         if self.acro == 'GOGET':
             gdf['tracker_custom'] = 'GOGET-oil'
-        elif self.acro == 'GGIT-lng':
+        elif self.acro == 'GGIT-lng' or self.acro == 'EGT-term':
   
             gdf_ggit_missing_units = gdf[gdf['FacilityType']=='']
             print(gdf_ggit_missing_units)
             # input('for PM QC missing facility type for lng')
             gdf = gdf[gdf['FacilityType']!='']
             gdf['tracker_custom'] = gdf.apply(lambda row: 'GGIT-import' if row['FacilityType'] == 'Import' else 'GGIT-export', axis=1)        
+        
+        elif self.acro == 'EGT-gas':
+            gdf['tracker_custom'] = 'GGIT'
+        
+        elif self.acro == 'GOGPT-eu':
+            gdf['tracker_custom'] = 'GOGPT'
         else:
             gdf['tracker_custom'] = self.acro
 
@@ -732,6 +1072,7 @@ class TrackerObject:
         # add column for units 
         # add tracker_custom
         gdf = self.data
+        print(f"This is tracker_custom for gdf:\n{gdf['tracker_custom']}")
 
         if self.acro == 'GOGET': 
             # # # printf'We are on tracker: {gdf["tracker"].iloc[0]} length: {len(gdf)}')
@@ -743,7 +1084,7 @@ class TrackerObject:
             gdf = gdf.reset_index(drop=True)
 
             
-        elif self.acro == 'GGIT-lng':
+        elif self.acro == 'GGIT-lng' or self.acro == 'EGT-term':
             for row in gdf.index:
                 if gdf.loc[row, 'tracker_custom'] == 'GGIT-export':
                     gdf.loc[row, 'original_units'] = conversion_df[conversion_df['tracker']=='GGIT-export']['original_units'].values[0]
@@ -754,20 +1095,26 @@ class TrackerObject:
             gdf = gdf.reset_index(drop=True)
 
             
-        elif self.acro == 'GGIT-eu':
-            gdf.loc[row, 'tracker_custom'] = 'GGIT'
+        elif self.acro == 'EGT-gas':
+            gdf['tracker_custom'] = 'GGIT'
             gdf['original_units'] = conversion_df[conversion_df['tracker']=='GGIT']['original_units'].values[0]
             gdf['conversion_factor'] = conversion_df[conversion_df['tracker']=='GGIT']['conversion_factor'].values[0]
             gdf = gdf.reset_index(drop=True)
 
-            
+        elif self.acro == 'GOGPT-eu':
+            gdf['tracker_custom'] = 'GOGPT'
+            gdf['original_units'] = conversion_df[conversion_df['tracker']=='GOGPT']['original_units'].values[0]
+            gdf['conversion_factor'] = conversion_df[conversion_df['tracker']=='GOGPT']['conversion_factor'].values[0]
+            gdf = gdf.reset_index(drop=True)
+               
         else:
 
             if len(gdf) > 0:
                 gdf = gdf.reset_index(drop=True)
                 conversion_df = conversion_df.reset_index(drop=True)
                 # print(f'printing this out to troubleshoot no zero: {gdf}')
-                gdf['tracker_custom'] = self.acro
+                print(f'Setting acro as tracker custom: {self.acro} which is needed to look up conversion factor')
+                # gdf['tracker_custom'] = self.acro
 
                 gdf['original_units'] = conversion_df[conversion_df['tracker']==self.acro]['original_units'].values[0]
                 gdf['conversion_factor'] = conversion_df[conversion_df['tracker']==self.acro]['conversion_factor'].values[0]
@@ -869,16 +1216,18 @@ def create_filtered_fuel_df(df, self):
     # self.acro, self.fuelcol
     if self.acro == 'GOGET':
         drop_row = []
+        print(f'Length of goget before oil drop: {len(df)}')
         for row in df.index:
             if df.loc[row, 'Fuel type'] == 'oil':
                 drop_row.append(row)
-            print(f'Length of goget before oil drop: {len(df)}')
-            df.drop(drop_row, inplace=True)        
-            print(f'Length of goget after oil drop: {len(df)}')
-            input('Check the above to see if gas only for goget!')
+            
+        df.drop(drop_row, inplace=True)        
+        print(f'Length of goget after oil drop: {len(df)}')
+        # input('Check the above to see if gas only for goget!')
     
-    elif self.acro in ['GGIT-eu', 'GGIT']:
+    elif self.acro in ['GGIT-eu', 'GGIT', 'EGT-gas']:
         drop_row = []
+        print(f'Length of ggit before oil drop: {len(df)}')
         for row in df.index:
             if df.loc[row, 'Fuel'] == 'Oil':
                 drop_row.append(row)
@@ -886,9 +1235,13 @@ def create_filtered_fuel_df(df, self):
                 drop_row.append(row)
         
         df.drop(drop_row, inplace=True)
+        print(f'len after gas only filter {self.acro} {len(df)}')
+
     
-    elif self.acro == 'GOGPT':
+    elif self.acro in ['GOGPT']: # GOGPT-eu # if GOGPT-eu does not need to be run on hydrogen tab, also does not need to be run on 'GOGPT-eu' because it was pre filtered for us
         drop_row = []
+        
+        print(f'Length of {self.acro} before oil drop: {len(df)}')
         for row in df.index:
             fuel_cat_list = df.loc[row, 'Fuel'].split(',')
             new_fuel_cat_list = []
@@ -897,8 +1250,10 @@ def create_filtered_fuel_df(df, self):
                 new_fuel_cat_list.append(fuel)
             
             if len(new_fuel_cat_list) > 1:
+                # if all in list is fossil liquids
                 if new_fuel_cat_list.count('fossil liquids') == len(new_fuel_cat_list):
                     drop_row.append(row)
+                # if just one in there and it is fossil liquids
             elif new_fuel_cat_list == ['fossil liquids']:
                 drop_row.append(row)
         

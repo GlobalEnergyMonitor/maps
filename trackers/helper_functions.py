@@ -54,16 +54,60 @@ SQL = '''
 #                     # input('Check that this number aligns with the number of units in the map')
 #     return 
 
-def save_to_s3(obj, df, path_dwn=''):
-    parquet = save_as_parquet(df, obj.name, path_dwn)
+def save_to_s3(obj, df, filetype='', path_dwn=''):
+    print('in save_to_s3')
+    geojsonpath = ''
+    # print(type(df))
+    
+    # Ensure geometry is properly handled before saving
+    if 'geometry' in df.columns:
+        if not isinstance(df, gpd.GeoDataFrame):
+            print("Converting DataFrame to GeoDataFrame...")
+            df = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
+            geojsonpath = f"{path_dwn}{obj.name}{filetype}{releaseiso}.geojson"
+        # Convert geometry to WKT format for saving as Parquet
+        df['geometry'] = df['geometry'].apply(lambda geom: geom.wkt if geom else None)
+    
+    # Handle missing values and ensure the column is stored as a string
+    # if 'unit-name' in df.columns:
+    #     df['unit-name'] = df['unit-name'].fillna('').astype(str)
+    for col in df.columns:
+        # check if mixed dtype
+        if df[col].apply(type).nunique() > 1:
+            # if so, convert it to string
+            df[col] = df[col].fillna('').astype(str)
+        
+    
+    parquetpath = f"{path_dwn}{obj.name}{filetype}{releaseiso}.parquet"
+    df.to_parquet(parquetpath, index=False)
+    print('Parquet file is saved!')
+    
+    # Determine S3 folder based on filetype
+    if filetype == 'map':
+        s3folder = 'mapfiles'
+    elif filetype == 'datadownload':
+        s3folder = 'latest'
+    else:
+        s3folder = 'uncategorized'
+    
+    # Prepare and execute S3 upload command
+    if geojsonpath != '':
+        
+        do_command_s3 = (
+            f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
+            f'aws s3 cp {parquetpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
+            f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read && '
+            f'aws s3 cp {geojsonpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
+            f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
+        )
+    else:
+        do_command_s3 = (
+            f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
+            f'aws s3 cp {parquetpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
+            f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
+        )    
+        
             
-          
-    do_command_s3 = (
-                f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
-                f'aws s3 cp {parquet} s3://$BUCKETEER_BUCKET_NAME/latest/ '
-                f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read')
-
-            # Execute the terminal command to pull down file from digital ocean
     process = subprocess.run(do_command_s3, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return process
 
@@ -325,18 +369,19 @@ def geojson_to_gdf(geojson_file):
 
     return gdf, crs
 
-def save_as_parquet(df, mapname, path_dwn):
-    # DataFrame.to_parquet(path=None, engine='auto', compression='snappy', index=None, partition_cols=None, storage_options=None, **kwargs)
-    # partition_colslist, optional, default None
-    # Column names by which to partition the dataset. Columns are partitioned in the order they are given. Must be None if path is not a string.
-    # partition by country into data lakes, and status
-    # explore storage storage_options dict, optional
-    df.fillna('', inplace=True)
+# def save_as_parquet(gdf, mapname, filetype, path_dwn):
+#     # DataFrame.to_parquet(path=None, engine='auto', compression='snappy', index=None, partition_cols=None, storage_options=None, **kwargs)
+#     # partition_colslist, optional, default None
+#     # Column names by which to partition the dataset. Columns are partitioned in the order they are given. Must be None if path is not a string.
+#     # partition by country into data lakes, and status
+#     # explore storage storage_options dict, optional
+#     gdf.fillna('', inplace=True)
+#     print(type(gdf))
         
-    df.to_parquet(f"{path_dwn}{mapname}{releaseiso}.parquet", index=False)  # partition_cols=["country/area"],
-    print('Parquet file is saved!')
+#     gdf.to_parquet(f"{path_dwn}{mapname}{filetype}{releaseiso}.parquet", index=False)  # partition_cols=["country/area"],
+#     print('Parquet file is saved!')
     
-    return f"{path_dwn}{mapname}{releaseiso}.parquet"
+#     return f"{path_dwn}{mapname}{releaseiso}.parquet"
 
 def get_standard_country_names():
     
@@ -563,6 +608,10 @@ def coordinate_qc(df):
                 df.loc[row, 'latitude'] = df.loc[row, 'float_col_clean_lat']
                 df.loc[row, 'longitude'] = df.loc[row, 'float_col_clean_lng']
 
+
+        # write issues_coords dict to a csv file in gem_tracker_maps
+        issue_df = pd.DataFrame(issues_coords)
+        issue_df.to_csv('issues_coords.csv',  index=False)
     return df, issues_coords
 
 # def find_missing_geometry(gdf,col_country_name):
@@ -767,14 +816,37 @@ def remove_diacritics(name_value):
 
     return name_value
 
+# def split_goget_ggit_eu(df):
+
+#     if df['tracker'].iloc[0] == 'extraction':
+#         # df_goget_missing_units.to_csv('compilation_output/missing_gas_oil_unit_goget.csv')
+#         # gdf['tracker_custom'] = gdf.apply(lambda row: 'GOGET - gas' if row['Production - Gas (Million m³/y)'] != '' else 'GOGET-oil', axis=1)
+#         df['tracker_custom'] = 'GOGET-oil'
+
+#     elif df['tracker'].iloc[0] == 'term':
+#         # gdf_ggit_missing_units = df[df['facilitytype']=='']
+#         # gdf_ggit_missing_units.to_csv('/content/drive/MyDrive/output_from_colab/missing_gas_oil_unit_ggit.csv')
+#         # df = df[df['facilitytype']!='']
+#         df['tracker_custom'] = df.apply(lambda row: 'GGIT-import' if row['facilitytype'] == 'Import' else 'GGIT-export', axis=1)
+
+#     elif df['tracker'].iloc[0] == 'plants':
+#         df['tracker_custom'] = 'GOGPT'
+
+#     elif df['tracker'].iloc[0] == 'pipes':
+#         df['tracker_custom'] = 'GGIT'
+#     elif df['tracker'].iloc[0] == 'plants_hy':
+#         df['tracker_custom'] = 'GOGPT'
+
+#     return df
+
 def split_goget_ggit_eu(df):
 
-    if df['tracker'].iloc[0] == 'extraction':
+    if df['tracker'].iloc[0] == 'GOGET':
         # df_goget_missing_units.to_csv('compilation_output/missing_gas_oil_unit_goget.csv')
         # gdf['tracker_custom'] = gdf.apply(lambda row: 'GOGET - gas' if row['Production - Gas (Million m³/y)'] != '' else 'GOGET-oil', axis=1)
         df['tracker_custom'] = 'GOGET-oil'
 
-    elif df['tracker'].iloc[0] == 'term':
+    elif df['tracker'].iloc[0] == 'EGT-term':
         # gdf_ggit_missing_units = df[df['facilitytype']=='']
         # gdf_ggit_missing_units.to_csv('/content/drive/MyDrive/output_from_colab/missing_gas_oil_unit_ggit.csv')
         # df = df[df['facilitytype']!='']
@@ -783,7 +855,7 @@ def split_goget_ggit_eu(df):
     elif df['tracker'].iloc[0] == 'plants':
         df['tracker_custom'] = 'GOGPT'
 
-    elif df['tracker'].iloc[0] == 'pipes':
+    elif df['tracker'].iloc[0] == 'EGT-gas':
         df['tracker_custom'] = 'GGIT'
     elif df['tracker'].iloc[0] == 'plants_hy':
         df['tracker_custom'] = 'GOGPT'
@@ -842,8 +914,9 @@ def assign_conversion_factors(df, conversion_df):
 def rename_gdfs(df):
     # df.columns = df.columns.str.lower() # TEST but this shouldn't be here
     # df.columns = df.columns.str.replace(' ', '-')
-
-    tracker_sel = df['tracker'].iloc[0] # plants, term, pipes, extraction
+    
+    # TODO April 21st check that tracker is a column not just a attribute?!
+    tracker_sel = df['tracker-acro'].iloc[0] # plants, term, pipes, extraction
 
     renaming_dict_sel = renaming_cols_dict[tracker_sel]
     # rename the columns!
@@ -900,10 +973,10 @@ def maturity(df):
   return df
 
 def fuel_filter(df):
-  df.columns = df.columns.str.lower()
-  df.columns = df.columns.str.replace(' ', '-')
+#   df.columns = df.columns.str.lower()
+#   df.columns = df.columns.str.replace(' ', '-')
   df['fuel-filter'] = 'methane'
-  if df['tracker'].iloc[0] == 'extraction':
+  if df['tracker'].iloc[0] == 'GOGET':
       df['fuel-filter'] = 'methane'
 
   elif df['tracker'].iloc[0] == 'plants_hy':
@@ -922,11 +995,11 @@ def fuel_filter(df):
   elif df['tracker'].iloc[0] == 'plants':
     df['fuel-filter'] = 'methane'
 
-  elif df['tracker'].iloc[0] == 'term':
+  elif df['tracker'].iloc[0] == 'EGT-term':
     df['fuel'] = df['fuel'].str.lower()
     df['fuel-filter'] = np.where((df['fuel'] != 'lng') & (df['fuel'] != 'oil'), 'hy', df['fuel-filter'])
 
-  elif df['tracker'].iloc[0] == 'pipes':
+  elif df['tracker'].iloc[0] == 'EGT-gas':
     df['h2%'].fillna('', inplace=True)
 
     for row in df.index:
@@ -1357,10 +1430,6 @@ def capacity_conversions_eu(cleaned_dict_map_by_one_gdf):
         gdf_converted['units-of-m'] = gdf_converted.apply(lambda row: pd.Series(workaround_table_units(row)), axis=1)
         # gdf_converted['units-of-m'] = gdf_converted.apply(lambda row: '' if 'GOGET' in row['tracker-acro'] else row['units-of-m'], axis=1)
 
-        # below doesn't work cap details was empty all the time
-        # gdf_converted = workaround_no_sum_cap_project(gdf_converted) # adds capacity-details for singular maps we can just disregard
-        # TODO nov 13 test this I think it now adds all cap for a project and applies the original units to it
-        # gdf_converted['capacity-details-unit'] = gdf_converted.apply(lambda row: workaround_display_cap(row, 'capacity-details'), axis=1)
 
         cleaned_dict_map_by_one_gdf_with_conversions[mapname] = gdf_converted
 
@@ -1501,6 +1570,7 @@ def create_search_column(dict_of_gdfs):
 
 def last_min_fixes(one_gdf_by_maptype):
     one_gdf_by_maptype_fixed = {}
+    # TODO handle for Bonaire, Sint Eustatius, and Saba
     # # printone_gdf_by_maptype.keys())
     # # # ##(input('check that GIPT is in the above')
     for mapname, gdf in one_gdf_by_maptype.items():            # do filter out oil
@@ -1508,6 +1578,7 @@ def last_min_fixes(one_gdf_by_maptype):
         # handle situation where Guinea-Bissau IS official and ok not to be split into separate countries 
         gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Guinea,Bissau','Guinea-Bissau')) 
         gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Timor,Leste','Timor-Leste')) 
+        gdf['areas'] = gdf['areas'].apply(lambda x: x.replace('Bonaire; Sint Eustatius; and Saba;','Bonaire, Sint Eustatius, and Saba;'))
         
         # something is happening when we concat, we lose goget's name ... 
         # gdf_empty_name = gdf[gdf['name']=='']
@@ -1551,7 +1622,6 @@ def last_min_fixes(one_gdf_by_maptype):
         for col in year_cols:
             gdf[col] = gdf[col].apply(lambda x: str(x).split('.')[0])
             gdf[col].replace('-1', 'not stated')
-        # TODO add check that year isn't a -1 ... goget.. for egt
         
         if mapname == 'europe':
             print(mapname)
@@ -1642,8 +1712,18 @@ def convert_coords_to_point(df):
     geometry_col = 'geometry'
     df = df.reset_index(drop=True)
     # df.columns = df.columns.str.lower()
-    for row in df.index:
-        df.loc[row,'geometry'] = Point(df.loc[row,'Longitude'], df.loc[row,'Latitude'])
+    df['geometry'] = None  # Initialize the geometry column
+    if 'Longitude' in df.columns and 'Latitude' in df.columns:
+        print('Long in there')
+        df['geometry'] = df.apply(lambda row: Point(row['Longitude'], row['Latitude']), axis=1)
+    elif 'longitude' in df.columns and 'latitude' in df.columns:
+        print('long in there')
+        df['geometry'] = df.apply(lambda row: Point(row['longitude'], row['latitude']), axis=1)
+    else:
+        print('issues with finding lat lng to convert to gdf!!')
+        print(df.columns)
+            
+            
     gdf = gpd.GeoDataFrame(df, geometry=geometry_col, crs=crs)
     
     return gdf
@@ -2015,9 +2095,6 @@ def create_df(key, tabs=['']):
     
     return df
 
-def create_df_for_dd(key, tabs=['']):
-    # TODO
-    return 
 
 #     return isinstance(x, (int, float)) and not pd.isna(x) and x != '' and x != 0 and x != 0.0
 def handle_goget_gas_only_workaround(goget_orig_file):
@@ -2197,7 +2274,7 @@ def process_goget_reserve_prod_data(main, prod):
     # input('check unique countries that need descriptive points')
     # normally would use descriptive point
     
-    centroid_df = gspread_access_file_read_only(centroid_key, centroid_tab) # TODO update this with descriptive point on subregion
+    centroid_df = gspread_access_file_read_only(centroid_key, centroid_tab)
     # print(centroid_df.head())
     # input('check centroid df')
     centroid_df.rename(columns={'Latitude':'Latitude-centroid', 'Longitude':'Longitude-centroid'},inplace=True)
@@ -2441,7 +2518,7 @@ def rebuild_countriesjs(mapname, newcountriesjs):
             # save the sorted file
             newcountriesjs = newcountriesjs.sort()
             print(f'This is the sorted countries file with net new: \n {newcountriesjs}')
-            input('Paste this in')
+            # input('Paste this in')
             # cjs = {'countries': newcountriesjs}
             # cjs_df = pd.DataFrame(data=cjs)
             # cjs_df.to_csv(f'{tracker_folder_path}{mapname}/countriesjsnew{iso_today_date}.js')
@@ -2452,19 +2529,19 @@ def rebuild_countriesjs(mapname, newcountriesjs):
 def pci_eu_map_read(gdf):
     # take columns PCI5 and pci6 
     # create one column, both, 5, 6, none, all as strings
-
+    # April 14th Made adjustments based on new filter for legend
     gdf['pci-list'] = ''
     for row in gdf.index:
         pci5 = gdf.loc[row, 'pci5']
         pci6 = gdf.loc[row, 'pci6']
         if pci5 == 'yes' and pci6 == 'yes':
-            gdf.at[row, 'pci-list'] = 'both'
+            gdf.at[row, 'pci-list'] = '5,6'
         elif pci5 == 'yes':
             gdf.at[row, 'pci-list'] = '5'
         elif pci6 == 'yes':
             gdf.at[row, 'pci-list'] = '6'
-        else:
-            gdf.at[row, 'pci-list'] = 'none'
+        # else:
+        #     gdf.at[row, 'pci-list'] = 'none'
         
     return gdf
 
@@ -3007,9 +3084,8 @@ def workaround_no_sum_cap_project(gdf):
         
         # If the sum is NaN, replace it with an empty string
         # capacity_details['capacity'] = capacity_details['capacity'].fillna('')
-        # TODO WORK IN PROGRESS to help fix the summary cap bug affecting solar and all ... 
-        all_unit_names_statuses = gdf[gdf['name'] == name].apply(lambda x: f"{x['unit_name']} ({x['status']})", axis=1).to_list()
-        all_unit_names_statuses_str = ', '.join(all_unit_names_statuses)
+        # all_unit_names_statuses = gdf[gdf['name'] == name].apply(lambda x: f"{x['unit_name']} ({x['status']})", axis=1).to_list()
+        # all_unit_names_statuses_str = ', '.join(all_unit_names_statuses)
         
         # print(all_unit_names_statuses_str)
         # input('check this uni status thing')
@@ -3115,8 +3191,6 @@ def check_rename_keys(renaming_dict_sel, gdf):
         if k not in gdf_cols:
             print(f'Missing {k}')
     
-    # input('Pause to go check source file and see what changes in col name!') TODO april 7the 6:42 this is where I left off, 
-    # issue with renaming, no subnat for GOIT and GOGPT, but now with Capacity for nuclear?
     
     
     

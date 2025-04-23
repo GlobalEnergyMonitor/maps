@@ -97,3 +97,50 @@ tracker_summary_pages = {
         "Number of Coal Mines by Country/Area"
     ]
 }
+
+
+#########################
+### SUMMARY FILES ###
+#########################
+
+# # TODO maybe do this once it is one_gdf so we have consistent column names
+# def create_summary_files(dict_list_dfs): # map name: list of filtered dfs for map
+#     # go through each df
+#     types_of_pivots = {'all': ['Country', 'Owner', 'Start year', 'Province']} # come back to this, can be {tracker name: [list of specific pivot types]}
+#     cols_to_organize = ['Status', 'Start year']
+#     cols_to_sum = ['Capacity', 'Kilometers']
+#     cols_to_count = ['Project Name']
+#     status_filter = ['operating', 'prospective']
+#     country_filter = ['China']
+    
+#     dict_of_summary_dfs = {} # {mapname: [list of summary dfs]}
+#     list_of_summary_dfs = []
+#     for mapname, list_dfs in dict_list_dfs.items():
+#         for df in list_dfs:
+#             # have a list of all files needed
+#             # do a groupby to create the df for each file
+#             df = df.reset_index(drop=True)
+#             # # printf'this is df cols: {df.cols}') # yep it was reset issue, just needs consistnet column names no Country
+#             tracker = df['tracker-acro'].loc[0]
+#             # # printf'Creating summary files for {tracker}')
+#             for pivot_type in types_of_pivots['all']:
+#                 pivot = df.groupby([pivot_type, 'Status'])['Capacity'].sum().reset_index() 
+#                 list_of_summary_dfs.append(pivot)
+#     dict_of_summary_dfs[mapname] = list_of_summary_dfs
+#     # TODO save each df to a gsheet and or excel
+#     df = pd.DataFrame(dict_of_summary_dfs)
+#     sheet = gspread_creds.open("https://docs.google.com/spreadsheets/d/18zyOMB7S_bAnvFDOPqC1emPA_AT1OMO26CXzTjpwN7o/edit?gid=0#gid=0").sheet1  # Use .worksheet("Sheet Name") to specify a sheet
+#     set_with_dataframe(sheet, df)
+    
+#     return None
+
+# def pull_existing_summary_files(prep_df):
+#     # in prep_df get the URL for each tracker's summary tables
+#     # using scrapy or bs go to the site and find each summary table by the div
+#     # pull the google link 
+#     # read the google link into df with gspread
+#     # pull the title
+#     # compare title to the needed ones for AET
+#     # if in their pull it and filter for Africa so we can compare to the new one
+#     # we can compare manually for now
+#     return None

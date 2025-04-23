@@ -80,8 +80,7 @@ class MapObject:
         gdf['capacity-details'].fillna('',inplace=True)
         self.trackers = gdf
 
-        
-    
+
     def create_search_column(self):
         # this can be one string with or without spaces 
         # this creates a new column for project and project in local language
@@ -193,7 +192,9 @@ class MapObject:
             print(f"No {self.name} is not in gas only maps")
             gdf = self.trackers.drop(['count-of-semi','multi-country', 'original-units', 'conversion-factor', 'area2', 'region2', 'subnat2', 'capacity2', 'cleaned-cap', 'wiki-from-name', 'tracker-legend'], axis=1) #  'multi-country', 'original-units', 'conversion-factor', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2', 'cleaned-cap', 'wiki-from-name', 'tracker-legend']
 
-        check_for_lists(gdf)
+        print(f'Final cols:\n')
+        [print(col) for col in gdf.columns]
+        input(f'Final cols above! {self.name}')
         
         # save the file to unique path for africa-energy if africa, else save to map name
         # also saving to testing folder 
@@ -203,35 +204,49 @@ class MapObject:
         
         if self.name == 'africa':
             
-            # process = save_to_s3(self, gdf, path_for_download_and_map_files_af)
 
-            # print(process.stdout.decode('utf-8'))
-            # if process.stderr:
-            #     print(process.stderr.decode('utf-8'))
-                        
             gdf.to_file(f'{path_for_download_and_map_files_af}{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
-            gdf.to_excel(f'{path_for_download_and_map_files_af}{self.name}_{iso_today_date}.xlsx', index=False)
+            gdf.to_csv(f'{path_for_download_and_map_files_af}{self.name}_{iso_today_date}.csv', encoding='utf-8')
             gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
-            gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.xlsx', index=False)
+            gdf.to_csv(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.csv', encoding='utf-8')
             
+            process = save_to_s3(self, gdf, 'map', path_for_download_and_map_files_af)
+
+            print(process.stdout.decode('utf-8'))
+            if process.stderr:
+                print(process.stderr.decode('utf-8'))
+                        
+
             newcountriesjs = list(set(gdf['areas'].to_list()))
             rebuild_countriesjs(self.name, newcountriesjs)
             
 
         else:
-            # process = save_to_s3(self, gdf, path_for_download_and_map_files)
-
-            # print(process.stdout.decode('utf-8'))
-            # if process.stderr:
-            #     print(process.stderr.decode('utf-8'))
-                        
-
+            # Check if the dataframe is a GeoDataFrame
+            if isinstance(gdf, gpd.GeoDataFrame):
+                print('Already a GeoDataFrame!')
+            else:
+                print(f'Converting to GeoDataFrame for {self.name} ...')
+                if 'geometry' not in gdf.columns:
+                    raise ValueError("The dataframe does not have a 'geometry' column to convert to GeoDataFrame.")
+                gdf = gpd.GeoDataFrame(gdf, geometry=gdf['geometry'])
+                gdf.set_crs(epsg=4326, inplace=True)  # Set CRS to EPSG:4326 (WGS 84)  
+    
+                   
             gdf.to_file(f'{path_for_download_and_map_files}{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
             gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
 
 
-            gdf.to_excel(f'{path_for_download_and_map_files}{self.name}_{iso_today_date}.xlsx', index=False)
-            gdf.to_excel(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.xlsx', index=False)
+            gdf.to_csv(f'{path_for_download_and_map_files}{self.name}_{iso_today_date}.csv', encoding='utf-8')
+            gdf.to_csv(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.csv', encoding='utf-8')
+
+
+            process = save_to_s3(self, gdf, 'map', path_for_download_and_map_files)
+
+            print(process.stdout.decode('utf-8'))
+            if process.stderr:
+                print(process.stderr.decode('utf-8'))
+                
             newcountriesjs = list(set(gdf['areas'].to_list()))
             rebuild_countriesjs(self.name, newcountriesjs)
 
@@ -672,11 +687,15 @@ class MapObject:
             
             gdf = tracker_obj.data
             tracker_sel = tracker_obj.acro # GOGPT, GGIT, GGIT-lng, GOGET
-            gdf['tracker-acro'] = tracker_sel
+            
+            if tracker_sel == 'GOGPT-eu':
+                pass
+            else:
+                gdf['tracker-acro'] = tracker_sel
             # if tracker_sel == 'GCTT':
             #     print(gdf)
             #     input('GCTT gdf here')
-            print(f'renaming on tracker: {tracker_sel}')
+            print(f"renaming on tracker acro: {gdf['tracker-acro'].iloc[0]}")
             # all_trackers.append(tracker_sel)
             # select the correct renaming dict from config.py based on tracker name
             renaming_dict_sel = renaming_cols_dict[tracker_sel]
@@ -720,6 +739,7 @@ class MapObject:
                         credentials_filename=client_secret_full_path,
                         # authorized_user_filename=json_token_name,
                     )
+                print(f'Opening about key for map {self.name}')
                 gsheets = gspread_creds.open_by_key(self.aboutkey)  
                 sheet_names = [sheet.title for sheet in gsheets.worksheets()]
                 multi_tracker_about_page = sheet_names[0]  
