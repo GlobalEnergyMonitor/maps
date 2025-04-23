@@ -48,7 +48,7 @@ var config = {
 
     /* Labels for describing the assets */
     assetFullLabel: "Hydropowered Stations",
-    assetLabel: 'unit',
+    assetLabel: 'units',
 
     /* the column that contains the asset name. this varies between trackers */
     nameField: 'name',
@@ -66,7 +66,7 @@ var config = {
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: { 'Project': ['name'], 
-        'Companies': ['owner', 'operator'],
+        'Companies': ['owner', 'operator', 'loc-oper', 'loc-owner'],
         'Start Year': ['start-year']
     },
 
