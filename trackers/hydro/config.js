@@ -62,7 +62,8 @@ var config = {
         labels: ['Project name','Capacity (MW)','Technology type','Status','Start year', 'Owner', 'Operator', 'Country/Area 1','Country/Area 2'],
         clickColumns: ['name'],
         rightAlign: ['capacity','start-year'],
-        removeLastComma: ['areas']
+        removeLastComma: ['areas'],
+        toLocaleString: ['capacity'],
     },
 
     /* configure the search box; 
