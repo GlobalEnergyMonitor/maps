@@ -83,7 +83,9 @@ var config = {
 
         clickColumns: ['name'],
         rightAlign: ['Government Well ID','plume_emissions','date'],
-        removeLastComma: ['country']
+        removeLastComma: ['country'],
+        toLocaleString: ['scaling_col'], // not displayed
+
     },
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */

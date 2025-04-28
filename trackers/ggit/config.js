@@ -42,7 +42,9 @@ var config = {
         values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'region', 'areas', 'subnat', 'start-year', 'tracker-display'],
         labels: ['Project','Unit','Owner','Parent','Capacity','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year', 'Type'],
         clickColumns: ['name'],
-        rightAlign: ['unit-name','capacity-table','start-year']
+        rightAlign: ['unit-name','capacity-table','start-year'],
+        toLocaleString: ['capacity-table'],
+    
     },
     searchFields: { 'Infrastructure Type': ['tracker-custom'],
         'Project': ['name'], 

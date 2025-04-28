@@ -62,9 +62,13 @@ var config = {
         and designated which column has the link */
     
     tableHeaders: {
-        values: ['wiki-name', 'operator', 'status_display', 'country/area', 'subnational-unit-(province,-state)', 'production---oil-(million-bbl/y)', 'production---gas-(million-m³/y)', 'production-year---oil', 'production-year---gas', 'production-start-year',],        labels: ['Extraction Area', 'Operator', 'Status','Country/Area(s)','Subnational unit (province/state)', 'Production - Oil (Million bbl/y)', 'Production - Gas (Million m³/y)', 'Production Year - Oil', 'Production Year - Gas', 'Production start year',],
+        values: ['wiki-name', 'operator', 'status_display', 'country/area', 'subnational-unit-(province,-state)', 'production---oil-(million-bbl/y)', 'production---gas-(million-m³/y)', 'production-year---oil', 'production-year---gas', 'production-start-year',],        
+        labels: ['Extraction Area', 'Operator', 'Status','Country/Area(s)','Subnational unit (province/state)', 'Production - Oil (Million bbl/y)', 'Production - Gas (Million m³/y)', 'Production Year - Oil', 'Production Year - Gas', 'Production start year',],
         clickColumns: ['wiki-name'],
-        rightAlign: ['wiki-name','discovery-year', 'fid-year', 'production-start-year', 'production-year---gas', 'production---gas-(million-m³/y)', 'production-year---oil', 'production---oil-(million-bbl/y)', ]
+        rightAlign: ['wiki-name','discovery-year', 'fid-year', 'production-start-year', 'production---oil-(million-bbl/y)', 'production---gas-(million-m³/y)', 'production-year---oil', ],
+        toLocaleString: ['production---oil-(million-bbl/y)', 'production---gas-(million-m³/y)'],
+    
+    
     },
 
     /* configure the search box; 

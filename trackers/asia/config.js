@@ -92,6 +92,7 @@ var config = {
         clickColumns: ['name'],
         rightAlign: ['unit','capacity', 'prod-gas','start-year','prod-year-gas'], 
         removeLastComma: ['areas'], 
+        toLocaleString: ['capacity'],
   
     },
     searchFields: { 'Project': ['name'], 

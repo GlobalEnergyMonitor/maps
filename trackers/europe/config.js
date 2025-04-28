@@ -115,6 +115,8 @@ var config = {
         clickColumns: ['name'],
         rightAlign: ['capacity-table','prod-gas','start-year','prod-year-gas'], 
         removeLastComma: ['areas'], 
+        toLocaleString: ['capacity-table'],
+
 
     },
     searchFields: { 'Project': ['name', 'other-name', 'local-name'], 

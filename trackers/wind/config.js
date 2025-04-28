@@ -72,7 +72,9 @@ var config = {
         values: ['project-name','phase-name', 'capacity-(mw)', 'installation-type', 'status', 'start-year', 'owner', 'operator',  'state/province', 'country/area'],
         labels: ['Project', 'Phase','Capacity (MW)','Installation Type','Status','Start year', 'Owner', 'Operator', 'State/Province', 'Country/Area'],
         clickColumns: ['project-name'],
-        rightAlign: ['capacity-(mw)','start-year']
+        rightAlign: ['capacity-(mw)','start-year'],
+        toLocaleString: ['capacity-(mw)'],
+
 
     },
 

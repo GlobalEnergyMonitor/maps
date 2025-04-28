@@ -75,7 +75,9 @@ var config = {
         values: ['name', 'owner', 'parent', 'status', 'areas', 'subnat', 'capacity-table', 'units-of-m','start-year'],        
         labels: ['Name', 'Owner','Parent', 'Status','Country/Area(s)','Subnational unit (province/state)', 'Capacity', '','Start Year'],
         clickColumns: ['name'],
-        rightAlign: ['name', 'start-year', 'capacity' ]
+        rightAlign: ['name', 'start-year', 'capacity' ],
+        toLocaleString: ['capacity'],
+    
     },
 
     /* configure the search box; 
