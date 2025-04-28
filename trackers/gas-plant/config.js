@@ -33,7 +33,8 @@ var config = {
         values: ['plant-name','unit-name', 'owner(s)', 'parent(s)', 'capacity-(mw)', 'status', 'region', 'country/area', 'state/province', 'start-year'],
         labels: ['Plant','Unit','Owner','Parent','Capacity (MW)','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year'],
         clickColumns: ['plant-name'],
-        rightAlign: ['unit-name','capacity-(mw)','start-year']
+        rightAlign: ['unit-name','capacity-(mw)','start-year'],
+        toLocaleString: ['capacity-(mw)'],
 
     },
     searchFields: { 'Plant': ['plant-name'], 

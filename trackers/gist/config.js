@@ -91,7 +91,9 @@ var config = {
         values: ['plant-name-(english)','owner', 'parent', 'status_display', 'start-date','prod-method-tier-display','main-production-equipment', 'subnational-unit-(province/state)','country/area'],
         labels: ['Plant','Owner','Parent', 'Plant Status', 'Start date', 'Production Method','Main Production Equipment','Subnational Unit','Country/Area'],
         clickColumns: ['plant-name-(english)'],
-        rightAlign: []
+        rightAlign: [],
+        toLocaleString: ['scaling-cap'], // not displayed
+
     },
 
     /* configure the search box; 

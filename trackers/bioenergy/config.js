@@ -57,7 +57,8 @@ var config = {
         values: ['project-name', 'capacity-(mw)', 'status', 'owner(s)', 'operator(s)',  'country/area', 'fuel'],
         labels: ['Project name','Capacity (MW)','Status','Owner', 'Operator', 'Country/Area(s)','Fuel',],
         clickColumns: ['project-name'],
-        rightAlign: ['capacity-(mw)']
+        rightAlign: ['capacity-(mw)'],
+        toLocaleString: ['capacity-(mw)'],
     },
 
     /* configure the search box; 

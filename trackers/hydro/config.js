@@ -14,6 +14,7 @@ var config = {
         'yellow greeninfo': '#f3ff00'
     },
     countryField: 'areas',
+    multiCountry: true,
     /* define the column and associated values for color application */
     color: {
         field: 'status',
@@ -60,7 +61,9 @@ var config = {
         values: ['name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator',  'areas', 'area2'],
         labels: ['Project name','Capacity (MW)','Technology type','Status','Start year', 'Owner', 'Operator', 'Country/Area 1','Country/Area 2'],
         clickColumns: ['name'],
-        rightAlign: ['capacity','start-year']
+        rightAlign: ['capacity','start-year'],
+        removeLastComma: ['areas'],
+        toLocaleString: ['capacity'],
     },
 
     /* configure the search box; 

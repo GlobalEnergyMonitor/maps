@@ -1061,7 +1061,7 @@ function filterGeoJSON() {
     }
 }
 function updateSummary() {
-    $('#total_in_view').text(config.totalCount.toString())
+    $('#total_in_view').text(config.totalCount.toLocaleString())
     $('#summary').html("Total " + config.assetFullLabel + " selected");
     countFilteredFeatures();
     config.filters.forEach((filter) => {
@@ -1074,24 +1074,24 @@ function updateSummary() {
 
     if (config.showMinCapacity & config.showMaxCapacity) {
         if (config.maxCapacityLabel) {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
             $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);
-            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toString());
+            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toLocaleString());
             $('#capacity_summary_min').html("Minimum " + config.maxCapacityLabel);
         } else {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
             $('#capacity_summary').html("Maximum " + config.capacityLabel);
-            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toString());
+            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toLocaleString());
             $('#capacity_summary_min').html("Minimum " + config.capacityLabel);
         }
     }
 
     else if (config.showMaxCapacity) {
         if (config.maxCapacityLabel) {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
             $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);
         } else {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
             $('#capacity_summary').html("Maximum " + config.capacityLabel);
         }
     }
@@ -1141,7 +1141,17 @@ function createTable() {
         });        
     }
     config.table = $('#table').DataTable({
-        data: geoJSON2Table(),
+        data: geoJSON2Table().map(row => {
+            if ('toLocaleString' in config.tableHeaders) {
+                config.tableHeaders.toLocaleString.forEach((col) => {
+                    const colIndex = config.tableHeaders.values.indexOf(col);
+                    if (colIndex !== -1 && row[colIndex] != null) {
+                        row[colIndex] = Number(row[colIndex]).toLocaleString();
+                    }
+                });
+            }
+            return row;
+        }),
         searching: false,
         pageLength: 100,
         fixedHeader: true,
@@ -1368,12 +1378,12 @@ function displayDetails(features) {
                 if (config.color.field == config.statusField){ 
 
                     if (count[k] != 0) {
-                        detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                        detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + k + '</div><div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
                     }
                 }
                 else {
                     if (count[k] != 0) {
-                        detail_capacity += '<div class="row"><div class="col-5">' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                        detail_capacity += '<div class="row"><div class="col-5">' + k + '</div><div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
                     }
                 }
             });
@@ -1387,7 +1397,7 @@ function displayDetails(features) {
         else {
             detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
                 '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-            detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + features[0].properties[config.capacityDisplayField] + ' ' + capacityLabel;
+            detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + parseInt(features[0].properties[config.capacityDisplayField], 10).toLocaleString() + ' ' + capacityLabel;
         }
     }
     // This is where you can remove the colored circle primary = true

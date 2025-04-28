@@ -147,6 +147,7 @@ var config = {
         rightAlign: ['unit','capacity-table','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
 
         removeLastComma: ['areas'], 
+        toLocaleString: ['capacity-table'],
         // displayValue: {'tracker-display': "assetLabel"},
         // appendValue: {'capacity': "capItemLabel"},
         // appendValue: {'production': "prodItemLabel"},
