@@ -26,7 +26,7 @@ def create_map_objs(map_tab_df,row, prep_dict):
     # create a tracker obj for each item in map source
     for item in map_obj.source:
         print(f'Creating source object for: {map_obj.name} {item}')
-        input('Check') # working
+        # input('Check') # working
 
         tracker_source_obj = TrackerObject(
             key = prep_dict[item]['gspread_key'],
@@ -55,7 +55,7 @@ def create_map_objs(map_tab_df,row, prep_dict):
         print(f"Fuelcol: {tracker_source_obj.fuelcol}")
         print(f"About DataFrame: {tracker_source_obj.about}")
         print(f"Data DataFrame: {tracker_source_obj.data}")
-        input('Check if tracker object attributes look right') #working
+        # input('Check if tracker object attributes look right') #working
         # append tracker obj to map obj attribute trackers 
         map_obj.trackers.append(tracker_source_obj)
         
@@ -63,12 +63,13 @@ def create_map_objs(map_tab_df,row, prep_dict):
     # test if data got added
     for i, tracker in enumerate(map_obj.trackers):  # Iterate through tracker objects
         # df = tracker.data # TODO check if this is right
+        
         try:
-            print(f"DataFrame BEFORE {i}: {tracker.data.shape}")
+            print(f"DataFrame BEFORE {i}{tracker.acro}: {tracker.data.shape}")
             # filter by geo and fuel and check result
 
             tracker.create_filtered_geo_fuel_df(map_obj.geo, map_obj.fuel)
-            print(f"DataFrame AFTER {i}: {tracker.data.shape}")
+            print(f"DataFrame AFTER {i}{tracker.acro}: {tracker.data.shape}")
 
             input('Check after geo filter')
             
@@ -76,20 +77,20 @@ def create_map_objs(map_tab_df,row, prep_dict):
 
             main_or_h2 = tracker.data[0]
             prod_or_og = tracker.data[1]
-            print(f"DataFrame {i}main: {main_or_h2.shape}")
-            print(f"DataFrame {i}prod: {prod_or_og.shape}")
+            print(f"DataFrame {i}main{tracker.acro}: {main_or_h2.shape}")
+            print(f"DataFrame {i}prod{tracker.acro}: {prod_or_og.shape}")
 
             tracker.create_filtered_geo_fuel_df(map_obj.geo, map_obj.fuel)
             main_or_h2 = tracker.data[0]
             prod_or_og = tracker.data[1]
-            print(f"DataFrame {i}main geo filt: {main_or_h2.shape}")
-            print(f"DataFrame {i}prod geo filt: {prod_or_og.shape}")
+            print(f"DataFrame {i}main geo filt{tracker.acro}: {main_or_h2.shape}")
+            print(f"DataFrame {i}prod geo filt{tracker.acro}: {prod_or_og.shape}")
 
             # input('Check after geo filter')
 
         except TypeError as e:
             print(f'Fix error for {map_obj.name}: \n{e}')
-            input('Check')
+            input('Check TypeError')
     
 
             

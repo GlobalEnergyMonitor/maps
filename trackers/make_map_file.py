@@ -25,6 +25,9 @@ def make_map(list_of_map_objs):
     for map_obj in list_of_map_objs:
         
         for tracker_obj in map_obj.trackers:
+            # if tracker_obj.acro == 'GGIT' or tracker_obj.acro == 'GOIT':
+            #     print(f'Len of {tracker_obj.acro} is {len(tracker_obj.data)}')
+            #     input('CHECK GOIT GGIT MISSING')
             # this gets to each df within each map
             # first I should combine goget so we can stop filtering by tuple
             if isinstance(tracker_obj.data, tuple):
@@ -65,19 +68,46 @@ def make_map(list_of_map_objs):
             
             # this should happen to ALL
             # clean_capacity and coordinate qc
+            # TODO should lower case all cols at ONE point ... chaotic for split_goget because europe has lowercase and all else is unchanged unitl rename_and_concat
             tracker_obj.clean_num_data()
-
+            if tracker_obj.acro == 'GGIT' or tracker_obj.acro == 'GOIT':
+                print(tracker_obj.data.info())
+            #     print(f'Len of {tracker_obj.acro} is {len(tracker_obj.data)}')
+                input('CHECK GOIT GGIT MISSING AFTER clean_num_data')
             tracker_obj.transform_to_gdf()
+            if tracker_obj.acro == 'GGIT' or tracker_obj.acro == 'GOIT':
+                print(tracker_obj.data.info())
+
+            #     print(f'Len of {tracker_obj.acro} is {len(tracker_obj.data)}')
+                input('CHECK GOIT GGIT MISSING AFTER transform_to_gdf')            
             tracker_obj.split_goget_ggit()
+            if tracker_obj.acro == 'GGIT' or tracker_obj.acro == 'GOIT':
+                print(tracker_obj.data.info())
+
+            #     print(f'Len of {tracker_obj.acro} is {len(tracker_obj.data)}')
+                input('CHECK GOIT GGIT MISSING AFTER split_goget_ggit')   
             tracker_obj.assign_conversion_factors(conversion_df)
-        
+            if tracker_obj.acro == 'GGIT' or tracker_obj.acro == 'GOIT':
+                print(tracker_obj.data.info())
+
+            #     print(f'Len of {tracker_obj.acro} is {len(tracker_obj.data)}')
+                input('CHECK GOIT GGIT MISSING AFTER assign_conversion_factors')     #258 GGIT #159 GOIT         
+
         map_obj.rename_and_concat_gdfs() # we account for GOGPT eu that already aritficially set tracker-acro according to differences in columns of hy and plants in gogpt eu
+        print(map_obj.trackers[map_obj.trackers['tracker-acro']=='GOIT'].info())
+        input('check info for goit after rename_and_concat_gdfs')
         map_obj.set_capacity_conversions()
+
         map_obj.map_ready_statuses_and_countries()
+
         map_obj.create_search_column()
+
         map_obj.capacity_hide_goget_gcmt()
+
         map_obj.set_fuel_goit()
+
         map_obj.last_min_fixes()
+
         map_obj.save_file()
 
         
