@@ -87,7 +87,7 @@ class TrackerObject:
                 self.data = pickle.load(f)
                 input(f'Check the file is up to date or needs to be deleted from local_pk!')
                 [print (col) for col in self.data.columns]
-                input(f'Review orig cols in {self.name}')
+                # input(f'Review orig cols in {self.name}')
                 
         except:
             
@@ -180,7 +180,8 @@ class TrackerObject:
                 gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
                 self.data = gdf                    
                 
-            elif self.name == 'GOGPT EU': 
+            elif self.name == 'GOGPT-eu':  # TODO issue here april 28th went to else statement when it was gogpt eu
+                print('It is a tuple')
                 df_tuple = self.create_df_gogpt_eu()  
                 self.data = df_tuple
             
@@ -216,8 +217,17 @@ class TrackerObject:
             with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/trackerdf_for_{self.acro}_on_{iso_today_date}.pkl', 'wb') as f:
                 print(f'saved to {f}')
                 pickle.dump(self.data, f)
-                [print (col) for col in self.data.columns]
-                input(f'Review orig cols in {self.name}')
+                try:
+                    [print (col) for col in self.data.columns]
+                    # input(f'Review orig cols in {self.name}')
+                except AttributeError as e:
+                    print(f'{e} Should be attribute error for tuple')
+                    df_tuple = self.data
+                    one = df_tuple[0]
+                    two = df_tuple[1]
+                    [print (col) for col in one.columns]
+                    [print (col) for col in two.columns]
+                    
 
 
     def get_about(self):
@@ -443,7 +453,7 @@ class TrackerObject:
             df['fuel-filter'] = 'methane'
             self.data = df
         elif self.name == 'GOGPT EU':
-            plants_df, plants_hy_df,  = self.data
+            plants_df, plants_hy_df  = self.data
             plants_hy_df.columns = plants_hy_df.columns.str.lower()
             plants_hy_df.columns = plants_hy_df.columns.str.replace(' ', '-')
             plants_df.columns = plants_df.columns.str.lower()
@@ -463,15 +473,21 @@ class TrackerObject:
 
             plants_df['fuel-filter'] = 'methane'
             self.data = plants_df, plants_hy_df
+            
+        # ISSUE no fuel-filter df['fuel-filter'] = np.where((df['fuel'] != 'lng') & (df['fuel'] != 'oil'), 'hy', df['fuel-filter'])
         elif self.acro == 'EGT-term':
             df = self.data
+            df['fuel-filter'] = 'methane'
             df.columns = df.columns.str.lower()
+            df.columns = df.columns.str.replace(' ', '-')
             df['fuel'] = df['fuel'].str.lower()
             df['fuel-filter'] = np.where((df['fuel'] != 'lng') & (df['fuel'] != 'oil'), 'hy', df['fuel-filter'])
             self.data = df
         elif self.acro == 'EGT-gas':
             df = self.data
+            df['fuel-filter'] = 'methane'
             df.columns = df.columns.str.lower()
+            df.columns = df.columns.str.replace(' ', '-')
             df['h2%'].fillna('', inplace=True)
             
             for row in df.index:
@@ -557,7 +573,7 @@ class TrackerObject:
         gogpt_eu_df.drop_duplicates(subset='id', inplace=True, keep='last') # add logic so it defaults to keeping the hy one, last because second df in list
     #     # TODO april 21 this is where you dropped off before picking up Fig
         print(f'TYPE of GOGPT EU SHOULD BE DF NOW: {type(gogpt_eu_df)}')
-        input('IS IT?!')
+        input('IS IT?!REALLY LOOK')
         
         self.data = gogpt_eu_df
 
@@ -821,6 +837,12 @@ class TrackerObject:
         # split into two dfs
 
         main, prod = self.data
+        # TODO need to implement the below...
+        # lower case and str.replace(' ', '-')
+        # main.columns = main.columns.str.lower()
+        # prod.columns = prod.columns.str.lower()
+        # main.columns = main.columns.str.replace(' ', '-')
+        # prod.columns = prod.columns.str.replace(' ', '-')
         
         # Convert 'Data year' to integers in the 'production_reserves_df'
         prod['Data year'] = pd.to_numeric(prod['Data year'], errors='coerce').fillna(-1).astype(int)
@@ -1014,14 +1036,14 @@ class TrackerObject:
         self.data = clean_export_center_clean_reorder_rename
     
         
-    def transform_to_gdf(self):
+    def transform_to_gdf(self): # This is dropping all geo rows for pipeline data
         
         if isinstance(self.data, tuple):
             print(self.name)
             input('Why is that a tuple up there? GOGET and GOGPT eu should be consolidated by now...')
         else:
             
-            if 'Latitude' or 'latitude' in self.data.columns:
+            if 'latitude' in self.data.columns.str.lower():
                 print('latitude in cols')
                 print(f'len of df before convert coords: {len(self.data)}')
                 gdf = convert_coords_to_point(self.data) 
@@ -1039,8 +1061,11 @@ class TrackerObject:
                 gdf = convert_google_to_gdf(self.data) # this drops all empty WKTformat cols
                 
                 print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
+                input(self.name)
+
             else:
                 print(F'likely already a gdf: {self.name}')
+                input(self.name)
                 gdf = self.data
 
         self.data = gdf
@@ -1050,13 +1075,23 @@ class TrackerObject:
         if self.acro == 'GOGET':
             gdf['tracker_custom'] = 'GOGET-oil'
         elif self.acro == 'GGIT-lng' or self.acro == 'EGT-term':
-  
-            gdf_ggit_missing_units = gdf[gdf['FacilityType']=='']
-            print(gdf_ggit_missing_units)
-            # input('for PM QC missing facility type for lng')
-            gdf = gdf[gdf['FacilityType']!='']
-            gdf['tracker_custom'] = gdf.apply(lambda row: 'GGIT-import' if row['FacilityType'] == 'Import' else 'GGIT-export', axis=1)        
-        
+            if 'facilitytype' in gdf.columns:
+                gdf_ggit_missing_units = gdf[gdf['facilitytype']=='']
+                print(gdf_ggit_missing_units)
+                # input('for PM QC missing facility type for lng')
+                gdf = gdf[gdf['facilitytype']!='']
+                gdf['tracker_custom'] = gdf.apply(lambda row: 'GGIT-import' if row['facilitytype'] == 'Import' else 'GGIT-export', axis=1)        
+            elif 'FacilityType' in gdf.columns:
+                gdf_ggit_missing_units = gdf[gdf['FacilityType']=='']
+                print(gdf_ggit_missing_units)
+                # input('for PM QC missing facility type for lng')
+                gdf = gdf[gdf['FacilityType']!='']
+                gdf['tracker_custom'] = gdf.apply(lambda row: 'GGIT-import' if row['FacilityType'] == 'Import' else 'GGIT-export', axis=1)
+            else:
+                print(f'Look at cols for {self.acro}:')
+                for col in gdf.columns:
+                    print(col)   
+                input('Checkkk it, issues with Facility Type in split_goget_ggit func')                  
         elif self.acro == 'EGT-gas':
             gdf['tracker_custom'] = 'GGIT'
         
@@ -1121,6 +1156,7 @@ class TrackerObject:
             
             else:
                 print("gdf is empty!")
+                print('maybe a problem with not having tracker as a col?')
                 input(f'Prob not good {self.name}')
             
         self.data = gdf

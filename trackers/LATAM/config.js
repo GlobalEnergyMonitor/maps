@@ -1,5 +1,5 @@
 var config = {
-    json: 'compilation_output/latam_2025-04-09.geojson',
+    json: 'compilation_output/latam_2025-04-29.geojson',
     geometries: ['Point','LineString'],
     center: [-60, 0], //previously was -90, -14
     zoomFactor: 1.4,
@@ -46,7 +46,7 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     
-    // capacityDisplayField: 'capacity-display',
+    capacityDisplayField: 'capacity-table',
 
     //interpolate: ["cubic-bezier", 0, 0, 0, 1],
     //can be string for single value, or hash. always single value is showMaxCapacity is true
@@ -62,7 +62,7 @@ var config = {
             'GWPT':	'MW',
             'GHPT':	'MW',
             'GGPT':	'MW',
-            // 'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
+            'GOGET-oil': 'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
             'GOIT': 'boe/d',
             'GGIT':	'bcm/y of natural gas',
             'GGIT-import': 'MTPA of natural gas',
@@ -152,6 +152,7 @@ var config = {
     // maxRadius: 10,
     minLineWidth: 1,
     maxLineWidth: 3,
+
 
     // /* radius to increase min/max to under high zoom */
     // highZoomMinRadius: 4,

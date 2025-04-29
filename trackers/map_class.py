@@ -687,9 +687,14 @@ class MapObject:
             
             gdf = tracker_obj.data
             tracker_sel = tracker_obj.acro # GOGPT, GGIT, GGIT-lng, GOGET
-            
+            print(f'tracker_sel is {tracker_sel} equal to tracker-acro...')
+            # print('This is tracker-acro:')
+            # print(gdf['tracker-acro'])
             if tracker_sel == 'GOGPT-eu':
-                pass
+                print('passing because GOGPT-eu')
+                gdf['tracker-acro'] = tracker_sel
+                print(f'What is data in this right now: {type(tracker_obj.data)}')
+
             else:
                 gdf['tracker-acro'] = tracker_sel
             # if tracker_sel == 'GCTT':

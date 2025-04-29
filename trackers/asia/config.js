@@ -40,7 +40,7 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     
-    // capacityDisplayField: 'capacity-display',
+    capacityDisplayField: 'capacity-table',
     capacityLabel: {
         field: 'tracker-custom',
         values: {
