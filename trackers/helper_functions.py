@@ -863,6 +863,8 @@ def split_goget_ggit_eu(df):
     return df
 
 
+
+
 def create_conversion_df(conversion_key, conversion_tab):
     # if local_copy:
 
@@ -2444,6 +2446,8 @@ def bold_first_row(writer, sheet_name):
         cell.font = Font(bold=True)
     
     return writer
+
+
 
 
 def clean_about_df(df):

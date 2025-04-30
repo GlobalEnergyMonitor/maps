@@ -31,6 +31,7 @@ def create_map_objs(map_tab_df,row, prep_dict):
         tracker_source_obj = TrackerObject(
             key = prep_dict[item]['gspread_key'],
             name = prep_dict[item]['official name'], 
+            off_name = prep_dict[item]['official tracker name'], 
             tabs = prep_dict[item]['gspread_tabs'],
             release = prep_dict[item]['latest release'],
             acro = prep_dict[item]['tracker-acro'],
@@ -48,6 +49,7 @@ def create_map_objs(map_tab_df,row, prep_dict):
         print("TrackerObject Attributes:")
         print(f"Key: {tracker_source_obj.key}")
         print(f"Name: {tracker_source_obj.name}")
+        print(f"Off Name: {tracker_source_obj.off_name}")
         print(f"Tabs: {tracker_source_obj.tabs}")
         print(f"Release: {tracker_source_obj.release}")
         print(f"Acro: {tracker_source_obj.acro}")

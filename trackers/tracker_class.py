@@ -1,5 +1,5 @@
 from requests import HTTPError
-from .all_config import iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
+from .all_config import new_release_date, iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
 from .helper_functions import rename_gdfs, fuel_filter, maturity, clean_about_df, replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
 import pandas as pd
 from numpy import absolute
@@ -17,6 +17,7 @@ import pickle
 class TrackerObject:
     def __init__(self,
                  name="",
+                 off_name="",
                  acro="",
                  key="",
                  tabs=[],
@@ -29,6 +30,7 @@ class TrackerObject:
                  data_official = pd.DataFrame() # should be for final data downloads removed new columns!
                  ):
         self.name = name
+        self.off_name = off_name
         self.acro = acro
         self.key = key
         self.tabs = tabs
@@ -247,9 +249,69 @@ class TrackerObject:
             tracker_key = self.key
             # trying this new function instead of below, messing up for GOGET
         about_df = self.find_about_page(tracker_key)
-        print(about_df)
-        about_df = clean_about_df(about_df) 
         
+            
+        # NEEDS 
+        # Copyright © Global Energy Monitor. Global Wind Power Tracker, February 2025 release. Distributed under a Creative Commons Attribution 4.0 International License.
+        # Recommended Citation: "Global Energy Monitor, Global Wind Power Tracker, February 2025 release" (See the CC license for attribution requirements if sharing or adapting the data set.)
+        
+        tracker_official_name = f"{self.off_name}"
+        if self.name in trackers_to_update:
+            # use new date not old one in map log gsheets
+            release_month_year = f"{new_release_date.replace('_', ' ')}" 
+        else:
+            release_month_year = self.release
+        copyright_full = f"Copyright © Global Energy Monitor. Global {tracker_official_name} Tracker, {release_month_year} release. Distributed under a Creative Commons Attribution 4.0 International License."
+        citation_full = f'Recommended Citation: "Global Energy Monitor, Global {tracker_official_name} Tracker, {release_month_year} release" (See the CC license for attribution requirements if sharing or adapting the data set.)'
+        # if either are not in there fully then insert into the df after first row
+        # elif partially in there, delete row and insert
+        # else pass
+        if copyright_full in about_df.values:
+            print(f'Already has full copyright: {copyright_full}')
+        elif about_df.apply(lambda row: row.astype(str).str.contains('Copyright © Global Energy Monitor.').any(), axis=1).any():
+            print('Partial copyright, delete row and insert full')
+            # find row number in df that holds partial
+            partial_row_index = about_df.apply(lambda row: row.astype(str).str.contains('Copyright © Global Energy Monitor.').any(), axis=1).idxmax()
+            about_df.drop(index=partial_row_index, inplace=True)
+            about_df.reset_index(drop=True, inplace=True)
+            print(about_df.shape)
+            full_copy_row = pd.DataFrame([[copyright_full] * len(about_df.columns)], columns=about_df.columns)
+            print(full_copy_row)
+            print(full_copy_row.shape)
+            about_df = pd.concat([about_df.iloc[:1], full_copy_row, about_df.iloc[1:]]).reset_index(drop=True)
+
+        else:
+            print('Inserting full copyright into second row') 
+            # insert a new blank row in the second row
+            full_copy_row = pd.DataFrame([[copyright_full] * len(about_df.columns)], columns=about_df.columns)
+            # split the existing df in two at the second row, concat full copy row like a sandwich in between
+            about_df = pd.concat([about_df.iloc[:1], full_copy_row, about_df.iloc[1:]]).reset_index(drop=True)
+
+        about_df.reset_index(drop=True, inplace=True)
+        
+        
+        if citation_full in about_df:
+            print(f'Already has full citation: {citation_full}')
+        # see if any of the full citation is found in any of the about df rows
+        elif about_df.apply(lambda row: row.astype(str).str.contains('Recommended Citation: "Global Energy Monitor,').any(), axis=1).any():
+            print('Partial Citations, delete row and insert full via concat sandwich')
+            partial_row_index = about_df.apply(lambda row: row.astype(str).str.contains('Recommended Citation: "Global Energy Monitor,').any(), axis=1).idxmax()
+            about_df.drop(index=partial_row_index, inplace=True)
+            about_df.reset_index(drop=True, inplace=True)
+            full_cite_row = pd.DataFrame([[citation_full] * len(about_df.columns)], columns=about_df.columns)
+            about_df = pd.concat([about_df.iloc[:2], full_cite_row, about_df.iloc[2:]]).reset_index(drop=True)
+            
+        else:
+            print('Inserting full citation into third row') 
+            full_cite_row = pd.DataFrame([[citation_full] * len(about_df.columns)], columns=about_df.columns)
+            about_df = pd.concat([about_df.iloc[:2], full_cite_row, about_df.iloc[2:]]).reset_index(drop=True) 
+                       
+
+        about_df = clean_about_df(about_df) 
+
+        # print(about_df)
+        # input("Check for changes in about_df, full copyright with date and full citation with date.")
+            
         self.about = about_df
 
 
@@ -728,8 +790,8 @@ class TrackerObject:
 
     def clean_num_data(self):
         # clean df
-        print(f'Length of df at clean num data: {len(self.data)}')
-        input('CHECK ITS NOT EMPTY')
+        # print(f'Length of df at clean num data: {len(self.data)}')
+        # input('CHECK ITS NOT EMPTY') #working
         missing_coordinate_row = {} 
         acceptable_range = {
             'lat': {'min': -90, 'max': 90},

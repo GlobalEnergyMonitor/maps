@@ -9,7 +9,7 @@ from trackers.creds import *
 
 
 trackers_to_update = ['Hydropower']# ['Hydropower']# ['Gas Pipelines'] #['Iron & Steel']
-new_release_date = 'April_2025' # for within about page
+new_release_date = 'April_2025' # for within about page NEEDS TO BE FULL MONTH
 releaseiso = '2025-04'
 priority = ['africa', 'latam'] # europe # NOTE NEEDS TO BE [''] to be skipped NEEDS TO BE mapname in map_tab internal
                     # africa
