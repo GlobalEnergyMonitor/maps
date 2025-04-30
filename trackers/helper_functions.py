@@ -2629,17 +2629,25 @@ def rename_cols(df):
 
     df = df.copy()
     df = df.rename(columns=str.lower)
+    [print(col) for col in df.columns]
     df.columns = df.columns.str.replace(' ', '-')
     df.columns = df.columns.str.replace('.', '')
     if 'gem-wiki-url' in df.columns:
         df = df.rename(columns={'latitude': 'lat', 'longitude':'lng', 'gem-wiki-url': 'url'})
     elif 'wiki-url' in df.columns:
         df = df.rename(columns={'latitude': 'lat', 'longitude':'lng', 'wiki-url': 'url'})
+    
+    elif 'gemwiki-url' in df.columns:
+        df = df.rename(columns={'latitude': 'lat', 'longitude':'lng', 'gemwiki-url': 'url'})
+
     else:
         print(f'Not sure about wiki url column name.')
         input('check above to adjust rename_cols')
     print(f'Cols after: {df.columns}')
     return df
+
+    
+     
 
 def remove_missing_coord_rows(df):
     df['lng'] = df['lng'].fillna('')
