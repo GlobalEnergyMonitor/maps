@@ -88,7 +88,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         df= rename_cols(df)
         df = remove_missing_coord_rows(df)
         
-        input_to_output(df, output_file)
+        df.to_csv(output_file, index=False, encoding='utf-8' )
 
 
 
@@ -553,7 +553,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         print('DONE MAKING Coal SINGLE MAP onto MULTI MAPS')
         input('continue?')
     
-    subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
+    # subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
     
     
     

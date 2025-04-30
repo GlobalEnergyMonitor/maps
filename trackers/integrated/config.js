@@ -1,8 +1,8 @@
 var config = {
-    csv: 'compilation_output/gipt-data-2025-03-26.csv', 
+    csv: 'compilation_output/gipt-data-2025-04-30.csv', 
     tiles: [
         // 'https://gem.dev.c10e.org/2024-03-12/{z}/{x}/{y}.pbf'
-        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2025-03-26/{z}/{x}/{y}.pbf'
+        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2025-04-30/{z}/{x}/{y}.pbf'
         ],
     tileSourceLayer: 'integrated',
 
