@@ -24,6 +24,10 @@ def make_map(list_of_map_objs):
     conversion_df = create_conversion_df(conversion_key, conversion_tab)
     for map_obj in list_of_map_objs:
         
+        input(f'Stopping on Map name: {map_obj.name}')
+        [print(tracker_obj.name) for tracker_obj in map_obj.trackers]
+        input(f'Confirm all trackers in map')
+
         for tracker_obj in map_obj.trackers:
             # if tracker_obj.acro == 'GGIT' or tracker_obj.acro == 'GOIT':
             #     print(f'Len of {tracker_obj.acro} is {len(tracker_obj.data)}')
@@ -35,16 +39,20 @@ def make_map(list_of_map_objs):
                 # print(tracker_obj.name)
                 # input('check') # passed, only on goget
                 print(isinstance(tracker_obj.data, tuple))
-                if tracker_obj.name == 'GOGPT EU':
+                if tracker_obj.acro == 'GOGPT-eu' or tracker_obj.name == 'GOGPT EU':
                     # TODO april 19th left off here, we need to make sure gogpt eu is handled correctly
                     # it cannot be concatted, needs to be kept separate as two dfs
                     # if map_obj.geo in ['europe']:
                     # TODO make sure these methods work correctly using GOGPT EU as a tuple now 
-                    
+                    print('We are in make map for gogpt eu! about to set fuel and maturity and deduplicate!')
+                    input('NEW - DOES THIS HAPPEN?')
                     tracker_obj.set_fuel_filter_eu() # this fuel filter needs to happen for gogpt eu before they get merged into one
                     tracker_obj.set_maturity_eu()
                     # this one should create one gdf for the map
-                    tracker_obj.deduplicate_gogpt_eu() 
+                    tracker_obj.deduplicate_gogpt_eu() # this is where gogpt-eu gets renamed 
+                    print(len(tracker_obj.data))
+                    print(type(tracker_obj.data))
+                    input('Check length and type after all that, shouldnot be 2 tuple')
                     
                 elif tracker_obj.name == 'Oil & Gas Extraction':
                     tracker_obj.process_goget_reserve_prod_data()
@@ -54,17 +62,26 @@ def make_map(list_of_map_objs):
                         tracker_obj.set_fuel_filter_eu() # this fuel filter should happen after goget is put into one and only if its for a europe map
                         tracker_obj.set_maturity_eu()                       
                 print(isinstance(tracker_obj.data, tuple))
-                # input('Check if there was a change') # TODO checek if filtering is correct
+                input('Check if there was a change') 
                 # clean_capacity and coordinate qc
                 # tracker_obj.clean_num_data()
                 # tracker_obj.transform_to_gdf()
-            
+            elif tracker_obj.name == 'GOGPT EU':
+                print('Odd that it is not a tuple?')
+                print(tracker_obj.data['tracker-acro'])
+                print(len(tracker_obj.data))
+                print(type(tracker_obj.data))
+                input("Check type for GOGPT EU")
             # this should happen if not tuple so not gogpt eu or goget but IS in europe
             else:       
                 if tracker_obj.name in ['LNG Terminals EU', 'Gas Pipelines EU']:
                     input('europe hit for map adjustments') 
                     tracker_obj.set_fuel_filter_eu() # this fuel filter should happen when we are at this point of non tuple ville and just needs to happen to these other eu specific tracker dfs
                     tracker_obj.set_maturity_eu()               
+            
+            
+            # [print(col) for col in tracker_obj.data.columns if col == 'fuel-filter']
+            # # input('Is fuel filter printed?')
             
             # this should happen to ALL
             # clean_capacity and coordinate qc

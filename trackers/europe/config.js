@@ -1,5 +1,5 @@
 var config = {
-    geojson: 'compilation_output/europe_2025-02-25.geojson',
+    geojson: 'compilation_output/europe_i5_2025-05-02.geojson',
     geometries: ['Point','LineString'],
     center: [8, 50],
     zoomFactor: 1.9,
@@ -43,8 +43,8 @@ var config = {
         {
             field: 'status-legend',
             label: 'Status',
-            values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved', 'not-found'],
-            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
+            values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus', 'abandoned','shelved', 'ugs', 'not-found'],
+            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Abandoned','Shelved', 'UGS', 'Not Found']
         },
         {
             field: 'maturity', 
@@ -59,20 +59,20 @@ var config = {
             // change this to be a filter
             field: 'pci-list',
             label: 'EU Projects of Common Interest (PCI)',
-            values_test: ['5', '6'],
-            values_labels_test: ['PCI-5 ', 'PCI-6'],
+            filterFunction: (value, selectedValue) => {
+                if (selectedValue === '5,6') {
+                    return value.includes('5') && value.includes('6');
+                }
+                return value.includes(selectedValue);
+            },
+            values: ['5', '6', '5,6','none'], 
+            values_labels: ['PCI-5 only', 'PCI-6 only', 'PCI 5 & PCI 6 Overlap','Non-PCI'] 
 
-            // filterFunction: (value, selectedValue) => {
-            //     // Check if the value contains the selectedValue (Oil or NGL)
-            //     return value.includes(selectedValue);
-            values: ['5', '6', 'both', 'none',], // can we join both into 5 and 6??? can we merge? both should show up in pci 5 and pci 6 separately
-            values_labels: ['PCI-5 only', 'PCI-6 only', 'PCI 5 & PCI 6 Overlap', 'Non-PCI'] 
-
-        },
+        }
 
     ],
     capacityField: 'scaling-capacity',
-    
+    // linkField: 'pid',
     capacityLabel: {
         field: 'tracker-custom',
         values: {

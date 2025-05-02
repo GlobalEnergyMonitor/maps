@@ -56,7 +56,8 @@ SQL = '''
 
 def save_to_s3(obj, df, filetype='', path_dwn=''):
     print('in save_to_s3')
-    geojsonpath = ''
+    geojsonpath = '' # for maps with line data
+    csvpath = '' # for maps with no line data
     # print(type(df))
     
     # Ensure geometry is properly handled before saving
@@ -67,7 +68,11 @@ def save_to_s3(obj, df, filetype='', path_dwn=''):
             geojsonpath = f"{path_dwn}{obj.name}{filetype}{releaseiso}.geojson"
         # Convert geometry to WKT format for saving as Parquet
         df['geometry'] = df['geometry'].apply(lambda geom: geom.wkt if geom else None)
-    
+    else:
+        # create csv for all so can be used directly by map without converting from parquet
+        csvpath = f"{path_dwn}{obj.name}{filetype}{releaseiso}.csv"
+        print(csvpath)
+        
     # Handle missing values and ensure the column is stored as a string
     # if 'unit-name' in df.columns:
     #     df['unit-name'] = df['unit-name'].fillna('').astype(str)
@@ -100,6 +105,15 @@ def save_to_s3(obj, df, filetype='', path_dwn=''):
             f'aws s3 cp {geojsonpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
             f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
         )
+    # TODO resolve getting the returned non-zero exit status 255. error from s3
+    # elif csvpath != '':
+    #     do_command_s3 = (
+    #         f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
+    #         f'aws s3 cp {parquetpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
+    #         f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read && '
+    #         f'aws s3 cp {csvpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
+    #         f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
+    #     )        
     else:
         do_command_s3 = (
             f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
@@ -920,6 +934,10 @@ def rename_gdfs(df):
     # TODO April 21st check that tracker is a column not just a attribute?!
     tracker_sel = df['tracker-acro'].iloc[0] # plants, term, pipes, extraction
 
+    # TO DO remove this later 
+    if tracker_sel in ['plants_hy', 'plants', 'GOGPT-eu']:
+        df.columns = df.columns.str.lower()
+        df.columns = df.columns.str.replace(' ', '-')
     renaming_dict_sel = renaming_cols_dict[tracker_sel]
     # rename the columns!
     df = df.rename(columns=renaming_dict_sel)
@@ -1037,62 +1055,62 @@ def make_sure_methane_is_none_maturity(gdf):
 
     return gdf
 
-def create_map_file_eu(one_gdf_by_maptype_fixed):
-    finalcols = ['status-legend','status', 'fuel-filter', 'tracker-custom', 'maturity', 'pci-list', 'scaling-capacity', 'name', 'areas',
-        'unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','start-year', 'prod-gas', 'prod-year-gas', 'tracker-display',
-        'areas-subnat-sat-display','other-name', 'local-name', 'geometry', 'url', 'id', 'pid']
+# def create_map_file_eu(one_gdf_by_maptype_fixed):
+#     finalcols = ['status-legend','status', 'fuel-filter', 'tracker-custom', 'maturity', 'pci-list', 'scaling-capacity', 'name', 'areas',
+#         'unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','start-year', 'prod-gas', 'prod-year-gas', 'tracker-display',
+#         'areas-subnat-sat-display','other-name', 'local-name', 'geometry', 'url', 'id', 'pid']
     
-    final_cols_eu = ['unit_id', 'mapname','tracker-acro','url', 'areas','name', 'unit_name', 'capacity', 'status', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
-        'original_units', 'conversion_factor', 'geometry', 'river', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
-        'prod-coal', 'pid','id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas', 'fuel', 'pci5', 'pci6', 'geometry', 'tracker', 'start_year', 'region2', 'subnat2', 'other-local', 'other-name',
-        'fuel-filter', 'maturity', 'tracker_custom', 'original_units','mult_countries', 'prod_start_year',
-        'conversion_factor', 'capacity', 'location', 'prefecture/district', 'state/province', 'search', 'operator(s)_search', 'name_search',
-        'owner_search', 'parent_search']
-    final_dict_gdfs = {}
-    for mapname, gdf in one_gdf_by_maptype_fixed.items():
-        # gdf = gdf.copy()
-        if 'fuel-filter' not in gdf.columns:
-            input('issue here')
-        elif 'geometry' not in gdf.columns:
-            input('issue here')
+#     final_cols_eu = ['unit_id', 'mapname','tracker-acro','url', 'areas','name', 'unit_name', 'capacity', 'status', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom',
+#         'original_units', 'conversion_factor', 'geometry', 'river', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
+#         'prod-coal', 'pid','id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas', 'fuel', 'pci5', 'pci6', 'geometry', 'tracker', 'start_year', 'region2', 'subnat2', 'other-local', 'other-name',
+#         'fuel-filter', 'maturity', 'tracker_custom', 'original_units','mult_countries', 'prod_start_year',
+#         'conversion_factor', 'capacity', 'location', 'prefecture/district', 'state/province', 'search', 'operator(s)_search', 'name_search',
+#         'owner_search', 'parent_search']
+#     final_dict_gdfs = {}
+#     for mapname, gdf in one_gdf_by_maptype_fixed.items():
+#         # gdf = gdf.copy()
+#         if 'fuel-filter' not in gdf.columns:
+#             input('issue here')
+#         elif 'geometry' not in gdf.columns:
+#             input('issue here')
 
-        # filter by finalcols
-        cols_to_drop = [col for col in gdf.columns if col not in (finalcols + final_cols_eu)]
-        # print(gdf.columns)
+#         # filter by finalcols
+#         cols_to_drop = [col for col in gdf.columns if col not in (finalcols + final_cols_eu)]
+#         # print(gdf.columns)
 
-        gdf.drop(columns=cols_to_drop, inplace=True)
+#         gdf.drop(columns=cols_to_drop, inplace=True)
 
-        print(gdf.columns)
-        if 'fuel-filter' not in gdf.columns:
-            input('issue here')
-        elif 'geometry' not in gdf.columns:
-            input('issue here')
-        print(mapname)
-        print(f'Saving file for map {mapname}')
-        print(f'This is len of gdf {len(gdf)}')
-        path_for_download_and_map_files_eu = gem_path + 'europe' + '/compilation_output/'
+#         print(gdf.columns)
+#         if 'fuel-filter' not in gdf.columns:
+#             input('issue here')
+#         elif 'geometry' not in gdf.columns:
+#             input('issue here')
+#         print(mapname)
+#         print(f'Saving file for map {mapname}')
+#         print(f'This is len of gdf {len(gdf)}')
+#         path_for_download_and_map_files_eu = gem_path + 'europe' + '/compilation_output/'
 
-        # gdf.to_file("/tmp/output.geojson", driver="GeoJSON")
-        # if mapname in gas_only_maps: # will probably end up making all regional maps all energy I would think
-        #     gdf = gdf.drop(['count-of-semi', 'multi-country', 'original-units', 'conversion-factor', 'cleaned-cap', 'wiki-from-name', 'tracker-legend'], axis=1) # 'multi-country', 'original-units', 'conversion-factor', 'cleaned-cap', 'wiki-from-name', 'tracker-legend']
+#         # gdf.to_file("/tmp/output.geojson", driver="GeoJSON")
+#         # if mapname in gas_only_maps: # will probably end up making all regional maps all energy I would think
+#         #     gdf = gdf.drop(['count-of-semi', 'multi-country', 'original-units', 'conversion-factor', 'cleaned-cap', 'wiki-from-name', 'tracker-legend'], axis=1) # 'multi-country', 'original-units', 'conversion-factor', 'cleaned-cap', 'wiki-from-name', 'tracker-legend']
 
-        # else:
-        #     gdf = gdf.drop(['count-of-semi','multi-country', 'original-units', 'conversion-factor', 'area2', 'region2', 'subnat2', 'capacity2', 'cleaned-cap', 'wiki-from-name', 'tracker-legend'], axis=1) #  'multi-country', 'original-units', 'conversion-factor', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2', 'cleaned-cap', 'wiki-from-name', 'tracker-legend']
+#         # else:
+#         #     gdf = gdf.drop(['count-of-semi','multi-country', 'original-units', 'conversion-factor', 'area2', 'region2', 'subnat2', 'capacity2', 'cleaned-cap', 'wiki-from-name', 'tracker-legend'], axis=1) #  'multi-country', 'original-units', 'conversion-factor', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2', 'cleaned-cap', 'wiki-from-name', 'tracker-legend']
 
-        check_for_lists(gdf)
+#         check_for_lists(gdf)
 
-        print(gdf['geometry'])
-        # df.set_geometry(gpd.GeoSeries.from_wkt(df['geometry']), inplace=True)
-        # gdf = gdf.to_crs(epsg=4326)
-        print(f'this is fuel filter {gdf["fuel-filter"]}')
-        gdf = make_sure_methane_is_none_maturity(gdf)
-        gdf.to_file(f'{path_for_download_and_map_files_eu}europe_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
-        gdf.to_csv(f'{path_for_download_and_map_files_eu}europe_{iso_today_date}.csv', encoding='utf-8')
-        gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/europe_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
-        final_dict_gdfs[mapname] = gdf
+#         print(gdf['geometry'])
+#         # df.set_geometry(gpd.GeoSeries.from_wkt(df['geometry']), inplace=True)
+#         # gdf = gdf.to_crs(epsg=4326)
+#         print(f'this is fuel filter {gdf["fuel-filter"]}')
+#         gdf = make_sure_methane_is_none_maturity(gdf)
+#         gdf.to_file(f'{path_for_download_and_map_files_eu}europe_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+#         gdf.to_csv(f'{path_for_download_and_map_files_eu}europe_{iso_today_date}.csv', encoding='utf-8')
+#         gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/europe_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+#         final_dict_gdfs[mapname] = gdf
 
-    # print(final_dict_gdfs.keys())
-    return final_dict_gdfs
+#     # print(final_dict_gdfs.keys())
+#     return final_dict_gdfs
 
 
 
@@ -1145,12 +1163,14 @@ def map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions):
                     'mothballed': 'mothballed_plus',
                     'idle': 'mothballed_plus',
                     'shut in': 'mothballed_plus',
+                    'abandoned': 'mothballed_plus',
                     # retired
                     'retired': 'retired_plus',
                     'closed': 'retired_plus',
                     'decommissioned': 'retired_plus',
-                    'not found': 'not-found'})
-
+                    'not found': 'not-found',
+                    })
+# 'ugs': 'not-found'
 
         # Create a mask for rows where 'status' is empty
 
@@ -1317,41 +1337,41 @@ def map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses):
     return cleaned_dict_by_map_one_gdf_with_better_countries
 
 
-def workarounds_eg_interim_goget_gcmt_eu(cleaned_dict_by_map_one_gdf_with_better_countries):
-    # this function mostly creates a new col for correctly formatted info when there is multiple countries, especially for the details card
-    # it also handles oil and gas for goget, TODO should add removal of oil for gas only map maybe?
-    one_gdf_by_maptype = {}
-    for mapname, gdf in cleaned_dict_by_map_one_gdf_with_better_countries.items():
-        gdf = gdf.copy()
+# def workarounds_eg_interim_goget_gcmt_eu(cleaned_dict_by_map_one_gdf_with_better_countries):
+#     # this function mostly creates a new col for correctly formatted info when there is multiple countries, especially for the details card
+#     # it also handles oil and gas for goget, TODO should add removal of oil for gas only map maybe?
+#     one_gdf_by_maptype = {}
+#     for mapname, gdf in cleaned_dict_by_map_one_gdf_with_better_countries.items():
+#         gdf = gdf.copy()
 
-        list_invalid_goget = []
-        list_invalid_gcmt = []
-        if mapname in ['GIPT', 'Global']:
-            # does not have goget
-            one_gdf_by_maptype[mapname] = gdf
+#         list_invalid_goget = []
+#         list_invalid_gcmt = []
+#         if mapname in ['GIPT', 'Global']:
+#             # does not have goget
+#             one_gdf_by_maptype[mapname] = gdf
 
-        else:
-            # # # printgdf.columns)
-            # # # ##(input('Check if prod-oil is there in columns')
-            for row in gdf.index:
+#         else:
+#             # # # printgdf.columns)
+#             # # # ##(input('Check if prod-oil is there in columns')
+#             for row in gdf.index:
 
-                tracker = (gdf.loc[row, 'tracker'])
-                #if goget then make capacity table and capacity details empty
+#                 tracker = (gdf.loc[row, 'tracker'])
+#                 #if goget then make capacity table and capacity details empty
 
 
-                if tracker == 'extraction':
-                    gdf.loc[row, 'capacity-table'] = np.nan
-                    gdf.loc[row, 'capacity-details'] = ''
-                    prod_oil = gdf.loc[row, 'prod_oil']
-                    prod_gas = gdf.loc[row, 'prod_gas']
-                    prod_oil = check_and_convert_float(prod_oil) # NEW TO TEST FOR ROUNDING ALL GETTING CAUGH TIN INVALID GOGET
-                    prod_gas = check_and_convert_float(prod_gas)
+#                 if tracker == 'extraction':
+#                     gdf.loc[row, 'capacity-table'] = np.nan
+#                     gdf.loc[row, 'capacity-details'] = ''
+#                     prod_oil = gdf.loc[row, 'prod_oil']
+#                     prod_gas = gdf.loc[row, 'prod_gas']
+#                     prod_oil = check_and_convert_float(prod_oil) # NEW TO TEST FOR ROUNDING ALL GETTING CAUGH TIN INVALID GOGET
+#                     prod_gas = check_and_convert_float(prod_gas)
 
-                else:
-                    continue
-        one_gdf_by_maptype[mapname] = gdf
-    # # printone_gdf_by_maptype.keys())
-    return one_gdf_by_maptype
+#                 else:
+#                     continue
+#         one_gdf_by_maptype[mapname] = gdf
+#     # # printone_gdf_by_maptype.keys())
+#     return one_gdf_by_maptype
 
 
 def capacity_conversions_eu(cleaned_dict_map_by_one_gdf):
@@ -1628,7 +1648,7 @@ def last_min_fixes(one_gdf_by_maptype):
         if mapname == 'europe':
             print(mapname)
             gdf = pci_eu_map_read(gdf)
-
+            print('Done with pci_eu_map_read in last min fixes')
         
         one_gdf_by_maptype_fixed[mapname] = gdf
     # # printone_gdf_by_maptype_fixed.keys())
@@ -2544,8 +2564,8 @@ def pci_eu_map_read(gdf):
             gdf.at[row, 'pci-list'] = '5'
         elif pci6 == 'yes':
             gdf.at[row, 'pci-list'] = '6'
-        # else:
-        #     gdf.at[row, 'pci-list'] = 'none'
+        else:
+            gdf.at[row, 'pci-list'] = 'none'
         
     return gdf
 

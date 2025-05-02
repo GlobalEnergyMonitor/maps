@@ -1329,8 +1329,6 @@ function displayDetails(features) {
                 console.log('outer else issue')
 
             }
-            
-
         }
     });
 

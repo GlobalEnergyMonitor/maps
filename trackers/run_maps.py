@@ -170,9 +170,7 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         list_of_map_objs_mapversion = make_map(map_obj_list) # this returns map obj list map version that can be run thru tests
         
         print(f'Now that all map and dd files that can work have completed, here are the issue map objs:')
-        print(f'Problem Map Name: {problem_map_objs[0]}')
-        print(f'Error: {problem_map_objs[1]}')
-        
+
         
         print('Great, now lets run those map objs map version thru tests on source!')
         input('Confirm above')

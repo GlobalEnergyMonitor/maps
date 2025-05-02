@@ -166,6 +166,11 @@ class TrackerObject:
                 df['geometry'] = df['geometry'].apply(lambda geom: wkt.loads(geom) if geom else None)
     
                 gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
+                print(len(gdf))
+                print(gdf.columns)
+                test = gdf[gdf['PipelineName']=='Azerbaijan-Georgia-Romania Interconnector Gas']
+                print(test)
+                input('its there on s3 download')
                 self.data = gdf
                 
             elif self.name == 'LNG Terminals EU':
@@ -182,10 +187,13 @@ class TrackerObject:
                 gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
                 self.data = gdf                    
                 
-            elif self.name == 'GOGPT-eu':  # TODO issue here april 28th went to else statement when it was gogpt eu
-                print('It is a tuple')
-                df_tuple = self.create_df_gogpt_eu()  
+            elif self.name == 'GOGPT EU':  # TODO issue here april 28th went to else statement when it was gogpt eu
+
+                df_tuple = self.create_df_gogpt_eu() 
+                print(type(df_tuple)) 
                 self.data = df_tuple
+                print('It is a tuple GOGPT EU')
+                input('Check')
             
             elif self.name == 'Oil & Gas Extraction':
                 df_tuple = self.create_df_goget()
@@ -497,11 +505,13 @@ class TrackerObject:
                     spreadsheet = gsheets.worksheet(tab)
                     plants_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
                     plants_df.columns = plants_df.columns.str.strip()
+                    plants_df['tracker-acro'] = 'plants'
                 else:
                     gsheets = gspread_creds.open_by_key(self.key)
                     spreadsheet = gsheets.worksheet(tab)
                     plants_hy_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
                     plants_hy_df.columns = plants_hy_df.columns.str.strip()
+                    plants_hy_df['tracker-acro'] = 'plants_hy'
                 #     df['tab-type'] = tab
                 #     dfs += [df]
                 # df = pd.concat(dfs).reset_index(drop=True)
@@ -575,6 +585,8 @@ class TrackerObject:
         
         if self.name == 'GOGPT EU':
             plants_df, plants_hy_df = self.data
+            plants_df['maturity'] = 'none'
+            plants_hy_df['maturity'] = 'none'
             plants_hy_df['maturity'] = np.where((plants_hy_df['status'] == 'Construction') | (plants_hy_df['mou-for-h2-supply?'] == 'Y') | (plants_hy_df['contract-for-h2-supply?'] == 'Y') | (plants_hy_df['financing-for-supply-of-h2?'] == 'Y') | (plants_hy_df['co-located-with-electrolyzer/h2-production-facility?'] == 'Y'), 'y','n')
 
 
@@ -603,9 +615,9 @@ class TrackerObject:
                             df['maturity'] = np.where((df['status'] == 'Construction') | (df['pci5'] == 'yes') | (df['pci6'] == 'yes'), 'y','n')
 
             # override any where fuel is methane
-            for row in df.index:
-                if df.loc[row, 'fuel-filter'] == 'methane':
-                    df.loc[row, 'maturity'] = 'none'
+            # for row in df.index:
+            #     if df.loc[row, 'fuel-filter'] == 'methane':
+            #         df.loc[row, 'maturity'] = 'none'
             
             self.data = df
         
@@ -629,14 +641,22 @@ class TrackerObject:
             if 'geometry' not in df.columns:
                 df = convert_coords_to_point(df)
             df = rename_gdfs(df) # TODO check that the right acro in all config is here for the tabs
+            [print(col) for col in df.columns]
+            input('CHECK After renaming in deduplciate_gogpt_eu')
             list_dfs.append(df)
         gogpt_eu_df = pd.concat(list_dfs, sort=False, ignore_index=True)
         gogpt_eu_df.reset_index(drop=True, inplace=True)
+        print(len(gogpt_eu_df))
         gogpt_eu_df.drop_duplicates(subset='id', inplace=True, keep='last') # add logic so it defaults to keeping the hy one, last because second df in list
     #     # TODO april 21 this is where you dropped off before picking up Fig
+        print(len(gogpt_eu_df))
+        [print(col) for col in df.columns]
+        input('After concat in deduplciate_gogpt_eu')
         print(f'TYPE of GOGPT EU SHOULD BE DF NOW: {type(gogpt_eu_df)}')
         input('IS IT?!REALLY LOOK')
-        
+        [print(col) for col in gogpt_eu_df.columns]
+        print('Look at cols in it now to see how to rename in rename_and_concat_gdfs for map GOGPT-eu')
+        input('CHECK cols for tracker_obj.name == GOGPT EU')
         self.data = gogpt_eu_df
 
     def find_about_page(self,key):

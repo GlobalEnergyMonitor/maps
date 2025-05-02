@@ -46,19 +46,21 @@ def create_map_objs(map_tab_df,row, prep_dict):
         tracker_source_obj.get_about()
             
         # set data and about attributes for each tracker
-        print("TrackerObject Attributes:")
-        print(f"Key: {tracker_source_obj.key}")
-        print(f"Name: {tracker_source_obj.name}")
-        print(f"Off Name: {tracker_source_obj.off_name}")
-        print(f"Tabs: {tracker_source_obj.tabs}")
-        print(f"Release: {tracker_source_obj.release}")
-        print(f"Acro: {tracker_source_obj.acro}")
-        print(f"Geocol: {tracker_source_obj.geocol}")
-        print(f"Fuelcol: {tracker_source_obj.fuelcol}")
-        print(f"About DataFrame: {tracker_source_obj.about}")
-        print(f"Data DataFrame: {tracker_source_obj.data}")
-        # input('Check if tracker object attributes look right') #working
-        # append tracker obj to map obj attribute trackers 
+        if tracker_source_obj.acro == 'GOGPT-eu':
+            
+            print("TrackerObject Attributes:")
+            print(f"Key: {tracker_source_obj.key}")
+            print(f"Name: {tracker_source_obj.name}")
+            print(f"Off Name: {tracker_source_obj.off_name}")
+            print(f"Tabs: {tracker_source_obj.tabs}")
+            print(f"Release: {tracker_source_obj.release}")
+            print(f"Acro: {tracker_source_obj.acro}")
+            print(f"Geocol: {tracker_source_obj.geocol}")
+            print(f"Fuelcol: {tracker_source_obj.fuelcol}")
+            print(f"About DataFrame: {tracker_source_obj.about}")
+            print(f"Data DataFrame: {tracker_source_obj.data}")
+            input('Check if tracker object attributes look right for GOGPT-eu') #working
+            # append tracker obj to map obj attribute trackers 
         map_obj.trackers.append(tracker_source_obj)
         
 
