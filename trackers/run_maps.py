@@ -81,6 +81,25 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
 
     
         df = create_df(key, tabs)
+        ### send to s3 for latest data download
+        s3folder = 'latest'
+        filetype = 'datadownload'
+        parquetpath = f'{output_folder}{tracker}{filetype}{releaseiso}.parquet'
+        for col in df.columns:
+        # check if mixed dtype
+            if df[col].apply(type).nunique() > 1:
+                # if so, convert it to string
+                df[col] = df[col].fillna('').astype(str)
+        
+        df.to_parquet(parquetpath, index=False)
+        do_command_s3 = (
+            f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
+            f'aws s3 cp {parquetpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
+            f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
+        )            
+        process = subprocess.run(do_command_s3, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                
+        
         df = clean_capacity(df) 
         df = semicolon_for_mult_countries_gipt(df)
         df = fix_status_inferred(df)        
@@ -90,6 +109,48 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
         
         df.to_csv(output_file, index=False, encoding='utf-8' )
 
+        s3folder = 'mapfiles'                
+        filetype = 'map'
+        parquetpath_m = f'{output_folder}{tracker}{filetype}{releaseiso}.parquet'
+        for col in df.columns:
+        # check if mixed dtype
+            if df[col].apply(type).nunique() > 1:
+                # if so, convert it to string
+                df[col] = df[col].fillna('').astype(str)
+        df.to_parquet(parquetpath_m, index=False)
+
+        ### do aws command copy to s3 publicgem data
+        do_command_s3 = (
+            f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
+            f'aws s3 cp {parquetpath_m} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
+            f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
+        )            
+        process = subprocess.run(do_command_s3, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        input('Check that ingt was saved to s3')
+        capacityfield = 'capacity-(mw)'
+        # run csv2json
+        do_csv2json = (
+            f"csv2geojson --numeric-fields {capacityfield} &&"
+            f"'{output_folder}gipt-data-{releaseiso}.csv' > integrated_{releaseiso}.geojson"
+        )
+        process = subprocess.run(do_csv2json, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        # run tippecanoe
+        do_tippecanoe = (
+            f"tippecanoe -e integrated-{releaseiso}.dir --no-tile-compression -r1 -pk -pf --force -l && "
+            f"integrated < integrated_{releaseiso}.geojson"
+        )
+        process = subprocess.run(do_tippecanoe, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        # set aws configue and bucket name  # do aws command copy to s3 mapintegrated 
+
+        do_aws_bucket = (
+            f"aws configure set s3.max_concurrent_requests 100 && "
+            f"export BUCKETEER_BUCKET_NAME=mapsintegrated && "
+            f"aws s3 cp --endpoint-url https://nyc3.digitaloceanspaces.com {output_folder}integrated-{releaseiso}.dir s3://$BUCKETEER_BUCKET_NAME/maps/integrated-{releaseiso} --recursive --acl public-read"
+        )
+        process = subprocess.run(do_aws_bucket, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
     elif tracker == 'Geothermal':
@@ -555,133 +616,133 @@ for tracker in tqdm(trackers_to_update, desc='Baking'):
     
     
     
-else:
-    # all calls in multi_tracker_maps_script
-    if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
-        print('Start augmented')
-        # print('TESTING what_maps_are_needed_new')
-        # result of new is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
-        # needed_map_and_tracker_dict_new = what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab) # result is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
-        needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, regional_multi_map_tab) # map_tab
-        # map_country_region has the list of needed maps to be created and their countries/regions
-        print(needed_map_and_tracker_dict)
-        # ##(input('inspect')
-        needed_tracker_geo_by_map = what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, needed_map_and_tracker_dict)
-        # print(path_for_download_and_map_files)
-        folder_setup(needed_tracker_geo_by_map)
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'Ended augmented {elapsed_time}')
+# else:
+#     # all calls in multi_tracker_maps_script
+#     if augmented: # these vars are all set in all_config, this helped adapt AET code to all multi maps
+#         print('Start augmented')
+#         # print('TESTING what_maps_are_needed_new')
+#         # result of new is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
+#         # needed_map_and_tracker_dict_new = what_maps_are_needed_new(multi_tracker_log_sheet_key, map_tab) # result is {'Africa Energy': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower'], 'Asia Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals'], 'Europe Gas': ['Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines EU', 'LNG Terminals'], 'LATAM': ['Coal Plants', 'Coal Mines', 'Coal Terminals', 'Oil & Gas Plants', 'Oil & Gas Extraction', 'Gas Pipelines', 'LNG Terminals', 'Oil Pipelines', 'Solar', 'Wind', 'Nuclear', 'Bioenergy', 'Geothermal', 'Hydropower']}
+#         needed_map_and_tracker_dict = what_maps_are_needed(multi_tracker_log_sheet_key, regional_multi_map_tab) # map_tab
+#         # map_country_region has the list of needed maps to be created and their countries/regions
+#         print(needed_map_and_tracker_dict)
+#         # ##(input('inspect')
+#         needed_tracker_geo_by_map = what_countries_or_regions_are_needed_per_map(multi_tracker_countries_sheet, needed_map_and_tracker_dict)
+#         # print(path_for_download_and_map_files)
+#         folder_setup(needed_tracker_geo_by_map)
+#         end_time = time.time()  # Record the end time
+#         elapsed_time = end_time - start_time  # Calculate the elapsed time
+#         print(f'Ended augmented {elapsed_time}')
         
-    if data_filtering: # this creates gdfs and dfs for all filtered datasets per map, lots of repetition here
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print('Start data filtering')
-        prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)  # so we are using source, so can delete prep file
-        conversion_df = create_conversion_df(conversion_key, conversion_tab)
+#     if data_filtering: # this creates gdfs and dfs for all filtered datasets per map, lots of repetition here
+#         end_time = time.time()  # Record the end time
+#         elapsed_time = end_time - start_time  # Calculate the elapsed time
+#         print('Start data filtering')
+#         prep_df = create_prep_file(multi_tracker_log_sheet_key, source_data_tab)  # so we are using source, so can delete prep file
+#         conversion_df = create_conversion_df(conversion_key, conversion_tab)
         
-        to_pass = []
-        if priority != ['']:
-            for key, value in needed_tracker_geo_by_map.items():
-                if key not in priority:
-                    to_pass.append(key)
-                else:
-                    print(f'Prioritizing {key}')
+#         to_pass = []
+#         if priority != ['']:
+#             for key, value in needed_tracker_geo_by_map.items():
+#                 if key not in priority:
+#                     to_pass.append(key)
+#                 else:
+#                     print(f'Prioritizing {key}')
 
             
-            for key in to_pass:
-                del needed_tracker_geo_by_map[key]
+#             for key in to_pass:
+#                 del needed_tracker_geo_by_map[key]
             
         
-        dict_list_dfs_by_map, dict_list_gdfs_by_map = pull_gsheet_data(prep_df, needed_tracker_geo_by_map) # map_country_region
-        incorporated_dict_list_gdfs_by_map, incorporated_dict_list_dfs_by_map = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, dict_list_dfs_by_map, dict_list_gdfs_by_map) 
-        # print(incorporated_dict_list_gdfs_by_map)
-        # print(len(incorporated_dict_list_gdfs_by_map))
-        # for map in incorporated_dict_list_dfs_by_map.items:
-        #     df = 
-        # (input(f'Check the above, should not be empty! were in filtering. that is the length of local geojson file dfs.')
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'Ended data filtering {elapsed_time}')  
+#         dict_list_dfs_by_map, dict_list_gdfs_by_map = pull_gsheet_data(prep_df, needed_tracker_geo_by_map) # map_country_region
+#         incorporated_dict_list_gdfs_by_map, incorporated_dict_list_dfs_by_map = incorporate_geojson_trackers(goit_geojson, ggit_geojson, ggit_lng_geojson, dict_list_dfs_by_map, dict_list_gdfs_by_map) 
+#         # print(incorporated_dict_list_gdfs_by_map)
+#         # print(len(incorporated_dict_list_gdfs_by_map))
+#         # for map in incorporated_dict_list_dfs_by_map.items:
+#         #     df = 
+#         # (input(f'Check the above, should not be empty! were in filtering. that is the length of local geojson file dfs.')
+#         end_time = time.time()  # Record the end time
+#         elapsed_time = end_time - start_time  # Calculate the elapsed time
+#         print(f'Ended data filtering {elapsed_time}')  
 
         
-    if map_create:
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'Start map file creation {elapsed_time}')
-        custom_dict_list_gdfs_by_map = split_goget_ggit(incorporated_dict_list_gdfs_by_map)  #incorporated_dict_list_gdfs_by_map
-        custom_dict_list_gdfs_by_map_with_conversion = assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df)
-        renamed_one_gdf_by_map = rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion)
-        renamed_one_gdf_by_map_with_search = create_search_column(renamed_one_gdf_by_map)
-        input('done with create_search_column')
-        # renamed_one_gdf_by_map = add_boed_routes_from_baird(renamed_one_gdf_by_map)
-        # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
+#     if map_create:
+#         end_time = time.time()  # Record the end time
+#         elapsed_time = end_time - start_time  # Calculate the elapsed time
+#         print(f'Start map file creation {elapsed_time}')
+#         custom_dict_list_gdfs_by_map = split_goget_ggit(incorporated_dict_list_gdfs_by_map)  #incorporated_dict_list_gdfs_by_map
+#         custom_dict_list_gdfs_by_map_with_conversion = assign_conversion_factors(custom_dict_list_gdfs_by_map, conversion_df)
+#         renamed_one_gdf_by_map = rename_gdfs(custom_dict_list_gdfs_by_map_with_conversion)
+#         renamed_one_gdf_by_map_with_search = create_search_column(renamed_one_gdf_by_map)
+#         input('done with create_search_column')
+#         # renamed_one_gdf_by_map = add_boed_routes_from_baird(renamed_one_gdf_by_map)
+#         # cleaned_dict_map_by_one_gdf = remove_null_geo(renamed_one_gdf_by_map) # doesn't do anything
         
-        cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map_with_search)
-        cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
+#         cleaned_dict_map_by_one_gdf_with_conversions = capacity_conversions(renamed_one_gdf_by_map_with_search)
+#         cleaned_dict_by_map_one_gdf_with_better_statuses = map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions)
         
-        cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
-        one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
-        one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
-        # print(f'This is final gdf keys for: {one_gdf_by_maptype}')
-        final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
+#         cleaned_dict_by_map_one_gdf_with_better_countries = map_ready_countries(cleaned_dict_by_map_one_gdf_with_better_statuses)
+#         one_gdf_by_maptype = workarounds_eg_interim_goget_gcmt(cleaned_dict_by_map_one_gdf_with_better_countries)
+#         one_gdf_by_maptype_fixed = last_min_fixes(one_gdf_by_maptype) 
+#         # print(f'This is final gdf keys for: {one_gdf_by_maptype}')
+#         final_dict_gdfs = create_map_file(one_gdf_by_maptype_fixed)
         
-        final_count(final_dict_gdfs)
+#         final_count(final_dict_gdfs)
 
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'End map file creation {elapsed_time}')     
+#         end_time = time.time()  # Record the end time
+#         elapsed_time = end_time - start_time  # Calculate the elapsed time
+#         print(f'End map file creation {elapsed_time}')     
 
-    if dwlnd_create: # this creates and saves the tabular data sheets for the data download from the filtered dfs
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'Start dwlnd creation {elapsed_time}')
-        create_data_dwnld_file(incorporated_dict_list_dfs_by_map) 
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print(f'End dwlnd creation {elapsed_time}')
+#     if dwlnd_create: # this creates and saves the tabular data sheets for the data download from the filtered dfs
+#         end_time = time.time()  # Record the end time
+#         elapsed_time = end_time - start_time  # Calculate the elapsed time
+#         print(f'Start dwlnd creation {elapsed_time}')
+#         create_data_dwnld_file(incorporated_dict_list_dfs_by_map) 
+#         end_time = time.time()  # Record the end time
+#         elapsed_time = end_time - start_time  # Calculate the elapsed time
+#         print(f'End dwlnd creation {elapsed_time}')
     
 
-    if about_create: # this creates and saves a preliminary file with all about pages no adjustments made
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time 
-        print('Start about creation')
-        about_df_dict_by_map = gather_all_about_pages(prev_key_dict, prep_df, needed_tracker_geo_by_map)
-        create_about_page_file(about_df_dict_by_map)
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  
-        print(f'End about creation {elapsed_time}')
+#     if about_create: # this creates and saves a preliminary file with all about pages no adjustments made
+#         end_time = time.time()  # Record the end time
+#         elapsed_time = end_time - start_time 
+#         print('Start about creation')
+#         about_df_dict_by_map = gather_all_about_pages(prev_key_dict, prep_df, needed_tracker_geo_by_map)
+#         create_about_page_file(about_df_dict_by_map)
+#         end_time = time.time()  # Record the end time
+#         elapsed_time = end_time - start_time  
+#         print(f'End about creation {elapsed_time}')
 
     
-    if refine: # this reorders the data download file
-        end_time = time.time()  
-        elapsed_time = end_time - start_time  
-        print('Start refining')
-        if local_copy:
-            about_df_dict_by_map = ''
-            incorporated_dict_list_dfs_by_map = ''
-        print(incorporated_dict_list_dfs_by_map)
-        # for map, gdfs in incorporated_dict_list_dfs_by_map.items():
-        #     print(map)
-        #     print(gdfs)
-        #     if map == 'latam':
-        #         input('pause for latam')
-        # for map, aboutdfs in about_df_dict_by_map.items():
-        #     print(map)
-        #     print(aboutdfs)
-        #     if map == 'latam':
-        #         input('pause for latam')
+#     if refine: # this reorders the data download file
+#         end_time = time.time()  
+#         elapsed_time = end_time - start_time  
+#         print('Start refining')
+#         if local_copy:
+#             about_df_dict_by_map = ''
+#             incorporated_dict_list_dfs_by_map = ''
+#         print(incorporated_dict_list_dfs_by_map)
+#         # for map, gdfs in incorporated_dict_list_dfs_by_map.items():
+#         #     print(map)
+#         #     print(gdfs)
+#         #     if map == 'latam':
+#         #         input('pause for latam')
+#         # for map, aboutdfs in about_df_dict_by_map.items():
+#         #     print(map)
+#         #     print(aboutdfs)
+#         #     if map == 'latam':
+#         #         input('pause for latam')
 
 
-        reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map) 
-        end_time = time.time()  # Record the end time
-        elapsed_time = end_time - start_time  # Calculate the elapsed time
-        print('End refining')  
+#         reorder_dwld_file_tabs(incorporated_dict_list_dfs_by_map) 
+#         end_time = time.time()  # Record the end time
+#         elapsed_time = end_time - start_time  # Calculate the elapsed time
+#         print('End refining')  
 
-    if run_post_tests:
-        # post_tests(final_dict_gdfs)
-        robust_tests_map()
-        # robust_tests_dd()
+#     if run_post_tests:
+#         # post_tests(final_dict_gdfs)
+#         robust_tests_map()
+#         # robust_tests_dd()
         
 # if tracker in tracker to update is part of a multi tracker map then run that script in addition
 # individual script

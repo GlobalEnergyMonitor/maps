@@ -2559,7 +2559,7 @@ def pci_eu_map_read(gdf):
         pci5 = gdf.loc[row, 'pci5']
         pci6 = gdf.loc[row, 'pci6']
         if pci5 == 'yes' and pci6 == 'yes':
-            gdf.at[row, 'pci-list'] = '5,6'
+            gdf.at[row, 'pci-list'] = 'both'
         elif pci5 == 'yes':
             gdf.at[row, 'pci-list'] = '5'
         elif pci6 == 'yes':
