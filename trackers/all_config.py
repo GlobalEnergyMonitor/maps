@@ -8,10 +8,10 @@ from trackers.creds import *
 
 
 
-trackers_to_update = ['Integrated']# ['Hydropower']# ['Gas Pipelines'] #['Iron & Steel']
-new_release_date = 'April_2025' # for within about page NEEDS TO BE FULL MONTH
-releaseiso = '2025-04'
-priority = [] # europe # NOTE NEEDS TO BE [''] to be skipped NEEDS TO BE mapname in map_tab internal
+trackers_to_update = ['Gas Pipelines']# ['Hydropower']# ['Gas Pipelines'] #['Iron & Steel']
+new_release_date = 'March_2025' # for within about page NEEDS TO BE FULL MONTH
+releaseiso = '2025-03'
+priority = ['europe'] # europe # NOTE NEEDS TO BE [''] to be skipped NEEDS TO BE mapname in map_tab internal
                     # africa
                     # integrated
                     # europe
@@ -106,7 +106,7 @@ gcmt_closed_tab = 'Global Coal Mine Tracker (Close'
 final_cols = ['facilitytype','unit_id', 'loc-oper', 'loc-owner', 'tech-type','ea_scaling_capacity', 'operator', 'Operator', 'Binational', 'binational', 'loc-accu','units-of-m','mapname','tracker-acro','official_name','url', 'areas','name', 'unit_name', 'capacity',
               'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom', 'operator-name-(local-lang/script)', 'owner-name-(local-lang/script)',
         'original_units', 'location-accuracy','conversion_factor', 'geometry', 'river', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
-        'prod-coal', 'Latitude', 'Longitude', 'pid','id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas', 'fuel', 'PCI5', 'PCI6', 'pci5','pci6','WKTFormat', 'Fuel']
+        'prod-coal', 'Latitude', 'Longitude', 'pid','id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas', 'fuel', 'PCI5', 'PCI6', 'pci5','pci6','WKTFormat', 'Fuel', 'maturity', 'fuel-filter', 'pci-list']
 
 renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wiki URL': 'url','Country/Area': 'areas', 'Plant name': 'name', 'Unit name': 'unit_name', 
                                 'Capacity (MW)': 'capacity', 'Status': 'status', 'Fuel': 'fuel', 'Owner(s)': 'owner', 'Parent(s)': 'parent',
@@ -138,23 +138,23 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                                'Region': 'region', 'State/Province':'subnat', 'Wiki URL': 'url'},
                       # TODO TO DECIDE need to copy for infra and extraction non power to make a pid copy of the unit id, for ease of use, or just apply unit logic to power
                       
-                      'GCTT': {'GEM Terminal ID':'id', 'GEM Unit/Phase ID': 'unit_id','Coal Terminal Name': 'name', 'Coal Terminal Name (detail or other)': 'other_name','Parent Port Name': 'port','Wiki URL': 'url', 'Status': 'status', 'Owner': 'owner', 'Capacity (Mt)':'capacity',
+                      'GCTT': {'GEM Terminal ID':'pid', 'GEM Unit/Phase ID': 'unit_id','Coal Terminal Name': 'name', 'Coal Terminal Name (detail or other)': 'other_name','Parent Port Name': 'port','Wiki URL': 'url', 'Status': 'status', 'Owner': 'owner', 'Capacity (Mt)':'capacity',
                                'Start Year': 'start_year', 'Region': 'region', 'State/Province':'subnat', 'Country/Area': 'areas'},
                       'GOGET': {'Unit ID':'id', 'Wiki name': 'name', 'Country/Area': 'areas', 'Subnational unit (province, state)': 'subnat', 'Status': 'status', 'Discovery year': 'start_year', 'Production start year': 'prod_start_year',
                                 'GEM region': 'region','Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'prod_oil', 'Production - Gas (Million m³/y)': 'prod_gas',
                                 'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)': 'capacity','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'
                                 , 'Country List':'mult_countries', 'Fuel type': 'fuel'},
-                      'GCMT': {'GEM Mine ID':'id','Country': 'areas', 'Mine Name': 'name', 'Status': 'status', 'Owners': 'owner', 'Parent Company': 'parent', 'Capacity (Mtpa)': 'capacity', 
+                      'GCMT': {'GEM Mine ID':'pid','Country': 'areas', 'Mine Name': 'name', 'Status': 'status', 'Owners': 'owner', 'Parent Company': 'parent', 'Capacity (Mtpa)': 'capacity', 
                                'Production (Mtpa)':'prod-coal', 'Opening Year': 'start_year', 'State, Province': 'subnat', 'Region': 'region', },
-                      'GOIT': {'ProjectID':'id','Countries': 'areas', 'Wiki': 'url', 'PipelineName': 'name', 'SegmentName': 'unit_name', 'Status': 'status', 'Owner': 'owner',
+                      'GOIT': {'ProjectID':'pid','Countries': 'areas', 'Wiki': 'url', 'PipelineName': 'name', 'SegmentName': 'unit_name', 'Status': 'status', 'Owner': 'owner',
                                'Parent': 'parent', 'CapacityBOEd': 'capacity', 'StartYear1': 'start_year', 'EndState/Province':'subnat', 'StartRegion': 'region',
                                'EndRegion': 'region2'},
-                      'GGIT': {'ProjectID':'id','Countries': 'areas','Wiki': 'url',
+                      'GGIT': {'ProjectID':'pid','Countries': 'areas','Wiki': 'url',
                                    'PipelineName':'name', 'SegmentName':'unit_name', 'Status':'status', 'Owner':'owner', 'Parent': 'parent',
                                    'StartYear1': 'start_year', 'CapacityBcm/y': 'capacity', 'StartState/Province': 'subnat',
                                    'StartRegion': 'region', 'EndState/Province': 'subnat2', 'EndRegion': 'region2'
                                    }, 
-                      'GGIT-lng': {'ComboID':'id','Wiki': 'url', 'TerminalName': 'name',
+                      'GGIT-lng': {'ComboID':'pid','Wiki': 'url', 'TerminalName': 'name',
                                    'UnitName': 'unit_name', 'Status': 'status', 'Country': 'areas', 'Owner': 'owner', 
                                    'Parent': 'parent', 'CapacityInMtpa': 'capacity', 'StartYearEarliest': 'start_year', 'Region': 'region', 
                                    'State/Province': 'subnat'},
@@ -170,9 +170,9 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                         # GOGPT EU	GOGPT-eu
                       # gogpt-eu fuel, h2%, h2-usage-proposed-%, pci5, pci6
                     #   'GOGPT-eu': {},
-                    'gogpt-eu': {'gem-location-id':'pid', 'gem-unit-id': 'id','wiki-url': 'url','country/area': 'areas', 'plant-name': 'name', 'unit-name': 'unit_name', 
-                                                    'capacity-(mw)': 'capacity', 'status': 'status', 'fuel': 'fuel', 'owner(s)': 'owner', 'parent(s)': 'parent',
-                                                    'start-year': 'start_year', 'subnational-unit-(province,-state)': 'subnat', 'region': 'region', 'owner':'owner', 'parent': 'parent'},
+                    # 'GOGPT-eu': {'gem-location-id':'pid', 'gem-unit-id': 'id','wiki-url': 'url','country/area': 'areas', 'plant-name': 'name', 'unit-name': 'unit_name', 
+                    #                                 'capacity-(mw)': 'capacity', 'status': 'status', 'fuel': 'fuel', 'owner(s)': 'owner', 'parent(s)': 'parent',
+                    #                                 'start-year': 'start_year', 'subnational-unit-(province,-state)': 'subnat', 'region': 'region', 'owner':'owner', 'parent': 'parent'},
                     'plants': {'gem-location-id':'pid', 'gem-unit-id': 'id','wiki-url': 'url','country/area': 'areas', 'plant-name': 'name', 'unit-name': 'unit_name',
                             'capacity-(mw)': 'capacity', 'owner(s)': 'owner', 'parent(s)': 'parent', 'plant-name-in-local-language-/-script': 'other-local', 'other-name(s)': 'other-name',
                             'start-year': 'start_year', 'state/province': 'subnat'},
@@ -186,13 +186,13 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                     #             'production---total-(oil,-gas-and-hydrocarbons)-(million-boe/y)': 'capacity','production-year---oil': 'prod_year_oil', 'production-year---gas': 'prod_year_gas',
                     #             'country-list':'mult_countries', 'fuel-type': 'fuel'},
 
-                      'EGT-gas': {'projectid':'id','countries': 'areas','wiki': 'url',
+                      'EGT-gas': {'projectid':'pid','countries': 'areas','wiki': 'url',
                                    'pipelinename':'name', 'segmentname':'unit_name',
                                    'startyear1': 'start_year', 'capacity': 'given_capacity','capacitybcm/y': 'capacity', 'startstate/province': 'subnat',
                                    'startregion': 'region', 'endstate/province': 'subnat2', 'endregion': 'region2', 'otherenglishnames': 'other-name',
                                     'otherlanguageprimarypipelinename': 'other-local',
                                    },
-                      'EGT-term': {'comboid':'id','wiki': 'url', 'terminalname': 'name',
+                      'EGT-term': {'comboid':'pid','wiki': 'url', 'terminalname': 'name',
                                    'unitname': 'unit_name', 'country': 'areas', 'capacity': 'given_capacity','capacityinmtpa': 'capacity', 'startyear1': 'start_year', 'region': 'region',
                                    'state/province': 'subnat', 'otherlanguagename': 'other-name'},
                         }

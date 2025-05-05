@@ -65,6 +65,18 @@ function loadData() {
                 addGeoJSON(results.data);   
             }
         });
+    // } else if ("parquet" in config) {
+        
+    //     console.log('adding parquet')
+    //     const url = config.parquet
+    //     const file = await asyncBufferFromUrl({ url });
+    //     const data = await parquetReadObjects({ file });
+        // import { parquetRead } from 'hyparquet'
+        // await parquetRead({
+        //     file,
+        //     rowFormat: 'object',
+        //     onComplete: data => console.log(data),
+        //   })
     } else if ("geojson" in config) {
         $.ajax({
             type: "GET",
@@ -1040,10 +1052,16 @@ function filterGeoJSON() {
         }
         
         if (config.selectedCountries.length > 0) {
-            //update to handle multiple countries selected, and handle when countries are substrings of each other
-            if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(';').includes(value)).length == 0) include = false;
-            //if (! (feature.properties[config.countryField].includes( config.selectedCountries.join(',')))) include = false;
-            //if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
+            // Check if any of the selected countries are associated with the project
+            const projectCountries = feature.properties[config.countryField].split(';').map(country => country.trim());
+
+            if (!config.selectedCountries.some(country => projectCountries.includes(country))) {
+            include = false;
+            }
+            else {
+                console.log(projectCountries)
+                console.log(country)
+            }
         }
         if (include) {
             filteredGeoJSON.features.push(feature);
@@ -1329,8 +1347,6 @@ function displayDetails(features) {
                 console.log('outer else issue')
 
             }
-            
-
         }
     });
 
@@ -1534,7 +1550,9 @@ function buildCountrySelect() {
     $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
             config.selectedCountryText = this.dataset.countrytext;
-            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []); // I think this needs to be exchanged with ; for multiple countries 
+            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(";") : []); // I think this needs to be exchanged with ; for multiple countries 
+            console.log(config.selectedCountries)
+            
             $('#selectedCountryLabel').text(config.selectedCountryText || "all");
 
             $('#spinner-container-filter').removeClass('d-none')
