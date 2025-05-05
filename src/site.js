@@ -1053,9 +1053,14 @@ function filterGeoJSON() {
         
         if (config.selectedCountries.length > 0) {
             // Check if any of the selected countries are associated with the project
-            const projectCountries = feature.properties[config.countryField].split(';');
+            const projectCountries = feature.properties[config.countryField].split(';').map(country => country.trim());
+
             if (!config.selectedCountries.some(country => projectCountries.includes(country))) {
             include = false;
+            }
+            else {
+                console.log(projectCountries)
+                console.log(country)
             }
         }
         if (include) {
