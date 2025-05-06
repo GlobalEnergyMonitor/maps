@@ -11,10 +11,24 @@ from tqdm import tqdm # can adapt more, special tweaking for dataframe!
 # CALL ALL FUNCTIONS
 
 
-for tracker in tqdm(trackers_to_update, desc='Baking'):
+for tracker in tqdm(trackers_to_update, desc='Running'):
     # print(tracker)
     
-    if tracker == 'Hydropower':
+    if tracker == 'Coal Mines':
+        print('Creating global map for Coal Mines then dependent maps and dd')
+        # add a comparison between all_config column dictionary and new file
+        # make data downloads 
+        map_obj_list, problem_map_objs = make_data_dwnlds(tracker)
+        # creates single map file
+        print(f'{len(map_obj_list)} maps to be updated with new {tracker} data!')
+        # input('Check if the above statement makes sense ^')
+        list_of_map_objs_mapversion = make_map(map_obj_list) # this returns map obj list map version that can be run thru tests
+        
+        print('Great, now lets run those map objs map version thru tests on source!')
+        input('Confirm above')                        
+        
+    
+    elif tracker == 'Hydropower':
         # make data downloads 
         map_obj_list, problem_map_objs = make_data_dwnlds(tracker)
         # creates single map file
