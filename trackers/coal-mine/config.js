@@ -110,10 +110,6 @@ var config = {
         'coalfield': {'label': 'Coal Field'},
         'areas-subnat-sat-display': {'display': 'location'},
     }, 
-<<<<<<< HEAD
-=======
-
->>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     showMaxCapacity: false,
     
 }
