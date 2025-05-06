@@ -65,6 +65,18 @@ function loadData() {
                 addGeoJSON(results.data);   
             }
         });
+    // } else if ("parquet" in config) {
+        
+    //     console.log('adding parquet')
+    //     const url = config.parquet
+    //     const file = await asyncBufferFromUrl({ url });
+    //     const data = await parquetReadObjects({ file });
+        // import { parquetRead } from 'hyparquet'
+        // await parquetRead({
+        //     file,
+        //     rowFormat: 'object',
+        //     onComplete: data => console.log(data),
+        //   })
     } else if ("geojson" in config) {
         $.ajax({
             type: "GET",
@@ -1040,10 +1052,16 @@ function filterGeoJSON() {
         }
         
         if (config.selectedCountries.length > 0) {
-            //update to handle multiple countries selected, and handle when countries are substrings of each other
-            if (config.selectedCountries.filter(value => feature.properties[config.countryField].split(';').includes(value)).length == 0) include = false;
-            //if (! (feature.properties[config.countryField].includes( config.selectedCountries.join(',')))) include = false;
-            //if (! (config.selectedCountries.includes(feature.properties[config.countryField]))) include = false;
+            // Check if any of the selected countries are associated with the project
+            const projectCountries = feature.properties[config.countryField].split(';').map(country => country.trim());
+
+            if (!config.selectedCountries.some(country => projectCountries.includes(country))) {
+            include = false;
+            }
+            else {
+                console.log(projectCountries)
+                console.log(country)
+            }
         }
         if (include) {
             filteredGeoJSON.features.push(feature);
@@ -1061,7 +1079,7 @@ function filterGeoJSON() {
     }
 }
 function updateSummary() {
-    $('#total_in_view').text(config.totalCount.toString())
+    $('#total_in_view').text(config.totalCount.toLocaleString())
     $('#summary').html("Total " + config.assetFullLabel + " selected");
     countFilteredFeatures();
     config.filters.forEach((filter) => {
@@ -1074,24 +1092,24 @@ function updateSummary() {
 
     if (config.showMinCapacity & config.showMaxCapacity) {
         if (config.maxCapacityLabel) {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
             $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);
-            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toString());
+            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toLocaleString());
             $('#capacity_summary_min').html("Minimum " + config.maxCapacityLabel);
         } else {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
             $('#capacity_summary').html("Maximum " + config.capacityLabel);
-            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toString());
+            $('#min_capacity').text(Math.round(config.minFilteredCapacity).toLocaleString());
             $('#capacity_summary_min').html("Minimum " + config.capacityLabel);
         }
     }
 
     else if (config.showMaxCapacity) {
         if (config.maxCapacityLabel) {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
             $('#capacity_summary').html("Maximum " + config.maxCapacityLabel);
         } else {
-            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toString());
+            $('#max_capacity').text(Math.round(config.maxFilteredCapacity).toLocaleString());
             $('#capacity_summary').html("Maximum " + config.capacityLabel);
         }
     }
@@ -1141,7 +1159,17 @@ function createTable() {
         });        
     }
     config.table = $('#table').DataTable({
-        data: geoJSON2Table(),
+        data: geoJSON2Table().map(row => {
+            if ('toLocaleString' in config.tableHeaders) {
+                config.tableHeaders.toLocaleString.forEach((col) => {
+                    const colIndex = config.tableHeaders.values.indexOf(col);
+                    if (colIndex !== -1 && row[colIndex] != null) {
+                        row[colIndex] = Number(row[colIndex]).toLocaleString();
+                    }
+                });
+            }
+            return row;
+        }),
         searching: false,
         pageLength: 100,
         fixedHeader: true,
@@ -1319,8 +1347,6 @@ function displayDetails(features) {
                 console.log('outer else issue')
 
             }
-            
-
         }
     });
 
@@ -1368,12 +1394,12 @@ function displayDetails(features) {
                 if (config.color.field == config.statusField){ 
 
                     if (count[k] != 0) {
-                        detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                        detail_capacity += '<div class="row"><div class="col-5"><span class="legend-dot" style="background-color:' + config.color.values[k] + '"></span>' + k + '</div><div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
                     }
                 }
                 else {
                     if (count[k] != 0) {
-                        detail_capacity += '<div class="row"><div class="col-5">' + k + '</div><div class="col-4">' + capacity[k] + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
+                        detail_capacity += '<div class="row"><div class="col-5">' + k + '</div><div class="col-4">' + Number(capacity[k]).toLocaleString() + '</div><div class="col-3">' + count[k] + " of " + features.length + "</div></div>";
                     }
                 }
             });
@@ -1387,7 +1413,7 @@ function displayDetails(features) {
         else {
             detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
                 '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-            detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + features[0].properties[config.capacityDisplayField] + ' ' + capacityLabel;
+            detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + parseInt(features[0].properties[config.capacityDisplayField], 10).toLocaleString() + ' ' + capacityLabel;
         }
     }
     // This is where you can remove the colored circle primary = true
@@ -1524,7 +1550,9 @@ function buildCountrySelect() {
     $('.country-dropdown-item').each(function() {
         this.addEventListener("click", function() {
             config.selectedCountryText = this.dataset.countrytext;
-            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(",") : []); // I think this needs to be exchanged with ; for multiple countries 
+            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(";") : []); // I think this needs to be exchanged with ; for multiple countries 
+            console.log(config.selectedCountries)
+            
             $('#selectedCountryLabel').text(config.selectedCountryText || "all");
 
             $('#spinner-container-filter').removeClass('d-none')

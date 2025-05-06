@@ -1,5 +1,5 @@
 from requests import HTTPError
-from .all_config import iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
+from .all_config import new_release_date, iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
 from .helper_functions import rename_gdfs, fuel_filter, maturity, clean_about_df, replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
 import pandas as pd
 from numpy import absolute
@@ -17,6 +17,7 @@ import pickle
 class TrackerObject:
     def __init__(self,
                  name="",
+                 off_name="",
                  acro="",
                  key="",
                  tabs=[],
@@ -29,6 +30,7 @@ class TrackerObject:
                  data_official = pd.DataFrame() # should be for final data downloads removed new columns!
                  ):
         self.name = name
+        self.off_name = off_name
         self.acro = acro
         self.key = key
         self.tabs = tabs
@@ -87,7 +89,7 @@ class TrackerObject:
                 self.data = pickle.load(f)
                 input(f'Check the file is up to date or needs to be deleted from local_pk!')
                 [print (col) for col in self.data.columns]
-                input(f'Review orig cols in {self.name}')
+                # input(f'Review orig cols in {self.name}')
                 
         except:
             
@@ -164,6 +166,11 @@ class TrackerObject:
                 df['geometry'] = df['geometry'].apply(lambda geom: wkt.loads(geom) if geom else None)
     
                 gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
+                print(len(gdf))
+                print(gdf.columns)
+                test = gdf[gdf['PipelineName']=='Azerbaijan-Georgia-Romania Interconnector Gas']
+                print(test)
+                input('its there on s3 download')
                 self.data = gdf
                 
             elif self.name == 'LNG Terminals EU':
@@ -180,9 +187,13 @@ class TrackerObject:
                 gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
                 self.data = gdf                    
                 
-            elif self.name == 'GOGPT EU': 
-                df_tuple = self.create_df_gogpt_eu()  
+            elif self.name == 'GOGPT EU':  # TODO issue here april 28th went to else statement when it was gogpt eu
+
+                df_tuple = self.create_df_gogpt_eu() 
+                print(type(df_tuple)) 
                 self.data = df_tuple
+                print('It is a tuple GOGPT EU')
+                input('Check')
             
             elif self.name == 'Oil & Gas Extraction':
                 df_tuple = self.create_df_goget()
@@ -216,8 +227,17 @@ class TrackerObject:
             with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/trackerdf_for_{self.acro}_on_{iso_today_date}.pkl', 'wb') as f:
                 print(f'saved to {f}')
                 pickle.dump(self.data, f)
-                [print (col) for col in self.data.columns]
-                input(f'Review orig cols in {self.name}')
+                try:
+                    [print (col) for col in self.data.columns]
+                    # input(f'Review orig cols in {self.name}')
+                except AttributeError as e:
+                    print(f'{e} Should be attribute error for tuple')
+                    df_tuple = self.data
+                    one = df_tuple[0]
+                    two = df_tuple[1]
+                    [print (col) for col in one.columns]
+                    [print (col) for col in two.columns]
+                    
 
 
     def get_about(self):
@@ -237,9 +257,69 @@ class TrackerObject:
             tracker_key = self.key
             # trying this new function instead of below, messing up for GOGET
         about_df = self.find_about_page(tracker_key)
-        print(about_df)
-        about_df = clean_about_df(about_df) 
         
+            
+        # NEEDS 
+        # Copyright © Global Energy Monitor. Global Wind Power Tracker, February 2025 release. Distributed under a Creative Commons Attribution 4.0 International License.
+        # Recommended Citation: "Global Energy Monitor, Global Wind Power Tracker, February 2025 release" (See the CC license for attribution requirements if sharing or adapting the data set.)
+        
+        tracker_official_name = f"{self.off_name}"
+        if self.name in trackers_to_update:
+            # use new date not old one in map log gsheets
+            release_month_year = f"{new_release_date.replace('_', ' ')}" 
+        else:
+            release_month_year = self.release
+        copyright_full = f"Copyright © Global Energy Monitor. Global {tracker_official_name} Tracker, {release_month_year} release. Distributed under a Creative Commons Attribution 4.0 International License."
+        citation_full = f'Recommended Citation: "Global Energy Monitor, Global {tracker_official_name} Tracker, {release_month_year} release" (See the CC license for attribution requirements if sharing or adapting the data set.)'
+        # if either are not in there fully then insert into the df after first row
+        # elif partially in there, delete row and insert
+        # else pass
+        if copyright_full in about_df.values:
+            print(f'Already has full copyright: {copyright_full}')
+        elif about_df.apply(lambda row: row.astype(str).str.contains('Copyright © Global Energy Monitor.').any(), axis=1).any():
+            print('Partial copyright, delete row and insert full')
+            # find row number in df that holds partial
+            partial_row_index = about_df.apply(lambda row: row.astype(str).str.contains('Copyright © Global Energy Monitor.').any(), axis=1).idxmax()
+            about_df.drop(index=partial_row_index, inplace=True)
+            about_df.reset_index(drop=True, inplace=True)
+            print(about_df.shape)
+            full_copy_row = pd.DataFrame([[copyright_full] * len(about_df.columns)], columns=about_df.columns)
+            print(full_copy_row)
+            print(full_copy_row.shape)
+            about_df = pd.concat([about_df.iloc[:1], full_copy_row, about_df.iloc[1:]]).reset_index(drop=True)
+
+        else:
+            print('Inserting full copyright into second row') 
+            # insert a new blank row in the second row
+            full_copy_row = pd.DataFrame([[copyright_full] * len(about_df.columns)], columns=about_df.columns)
+            # split the existing df in two at the second row, concat full copy row like a sandwich in between
+            about_df = pd.concat([about_df.iloc[:1], full_copy_row, about_df.iloc[1:]]).reset_index(drop=True)
+
+        about_df.reset_index(drop=True, inplace=True)
+        
+        
+        if citation_full in about_df:
+            print(f'Already has full citation: {citation_full}')
+        # see if any of the full citation is found in any of the about df rows
+        elif about_df.apply(lambda row: row.astype(str).str.contains('Recommended Citation: "Global Energy Monitor,').any(), axis=1).any():
+            print('Partial Citations, delete row and insert full via concat sandwich')
+            partial_row_index = about_df.apply(lambda row: row.astype(str).str.contains('Recommended Citation: "Global Energy Monitor,').any(), axis=1).idxmax()
+            about_df.drop(index=partial_row_index, inplace=True)
+            about_df.reset_index(drop=True, inplace=True)
+            full_cite_row = pd.DataFrame([[citation_full] * len(about_df.columns)], columns=about_df.columns)
+            about_df = pd.concat([about_df.iloc[:2], full_cite_row, about_df.iloc[2:]]).reset_index(drop=True)
+            
+        else:
+            print('Inserting full citation into third row') 
+            full_cite_row = pd.DataFrame([[citation_full] * len(about_df.columns)], columns=about_df.columns)
+            about_df = pd.concat([about_df.iloc[:2], full_cite_row, about_df.iloc[2:]]).reset_index(drop=True) 
+                       
+
+        about_df = clean_about_df(about_df) 
+
+        # print(about_df)
+        # input("Check for changes in about_df, full copyright with date and full citation with date.")
+            
         self.about = about_df
 
 
@@ -425,11 +505,13 @@ class TrackerObject:
                     spreadsheet = gsheets.worksheet(tab)
                     plants_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
                     plants_df.columns = plants_df.columns.str.strip()
+                    plants_df['tracker-acro'] = 'plants'
                 else:
                     gsheets = gspread_creds.open_by_key(self.key)
                     spreadsheet = gsheets.worksheet(tab)
                     plants_hy_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
                     plants_hy_df.columns = plants_hy_df.columns.str.strip()
+                    plants_hy_df['tracker-acro'] = 'plants_hy'
                 #     df['tab-type'] = tab
                 #     dfs += [df]
                 # df = pd.concat(dfs).reset_index(drop=True)
@@ -443,7 +525,7 @@ class TrackerObject:
             df['fuel-filter'] = 'methane'
             self.data = df
         elif self.name == 'GOGPT EU':
-            plants_df, plants_hy_df,  = self.data
+            plants_df, plants_hy_df  = self.data
             plants_hy_df.columns = plants_hy_df.columns.str.lower()
             plants_hy_df.columns = plants_hy_df.columns.str.replace(' ', '-')
             plants_df.columns = plants_df.columns.str.lower()
@@ -463,15 +545,21 @@ class TrackerObject:
 
             plants_df['fuel-filter'] = 'methane'
             self.data = plants_df, plants_hy_df
+            
+        # ISSUE no fuel-filter df['fuel-filter'] = np.where((df['fuel'] != 'lng') & (df['fuel'] != 'oil'), 'hy', df['fuel-filter'])
         elif self.acro == 'EGT-term':
             df = self.data
+            df['fuel-filter'] = 'methane'
             df.columns = df.columns.str.lower()
+            df.columns = df.columns.str.replace(' ', '-')
             df['fuel'] = df['fuel'].str.lower()
             df['fuel-filter'] = np.where((df['fuel'] != 'lng') & (df['fuel'] != 'oil'), 'hy', df['fuel-filter'])
             self.data = df
         elif self.acro == 'EGT-gas':
             df = self.data
+            df['fuel-filter'] = 'methane'
             df.columns = df.columns.str.lower()
+            df.columns = df.columns.str.replace(' ', '-')
             df['h2%'].fillna('', inplace=True)
             
             for row in df.index:
@@ -497,6 +585,8 @@ class TrackerObject:
         
         if self.name == 'GOGPT EU':
             plants_df, plants_hy_df = self.data
+            plants_df['maturity'] = 'none'
+            plants_hy_df['maturity'] = 'none'
             plants_hy_df['maturity'] = np.where((plants_hy_df['status'] == 'Construction') | (plants_hy_df['mou-for-h2-supply?'] == 'Y') | (plants_hy_df['contract-for-h2-supply?'] == 'Y') | (plants_hy_df['financing-for-supply-of-h2?'] == 'Y') | (plants_hy_df['co-located-with-electrolyzer/h2-production-facility?'] == 'Y'), 'y','n')
 
 
@@ -525,9 +615,9 @@ class TrackerObject:
                             df['maturity'] = np.where((df['status'] == 'Construction') | (df['pci5'] == 'yes') | (df['pci6'] == 'yes'), 'y','n')
 
             # override any where fuel is methane
-            for row in df.index:
-                if df.loc[row, 'fuel-filter'] == 'methane':
-                    df.loc[row, 'maturity'] = 'none'
+            # for row in df.index:
+            #     if df.loc[row, 'fuel-filter'] == 'methane':
+            #         df.loc[row, 'maturity'] = 'none'
             
             self.data = df
         
@@ -551,14 +641,22 @@ class TrackerObject:
             if 'geometry' not in df.columns:
                 df = convert_coords_to_point(df)
             df = rename_gdfs(df) # TODO check that the right acro in all config is here for the tabs
+            [print(col) for col in df.columns]
+            input('CHECK After renaming in deduplciate_gogpt_eu')
             list_dfs.append(df)
         gogpt_eu_df = pd.concat(list_dfs, sort=False, ignore_index=True)
         gogpt_eu_df.reset_index(drop=True, inplace=True)
+        print(len(gogpt_eu_df))
         gogpt_eu_df.drop_duplicates(subset='id', inplace=True, keep='last') # add logic so it defaults to keeping the hy one, last because second df in list
     #     # TODO april 21 this is where you dropped off before picking up Fig
+        print(len(gogpt_eu_df))
+        [print(col) for col in df.columns]
+        input('After concat in deduplciate_gogpt_eu')
         print(f'TYPE of GOGPT EU SHOULD BE DF NOW: {type(gogpt_eu_df)}')
-        input('IS IT?!')
-        
+        input('IS IT?!REALLY LOOK')
+        [print(col) for col in gogpt_eu_df.columns]
+        print('Look at cols in it now to see how to rename in rename_and_concat_gdfs for map GOGPT-eu')
+        input('CHECK cols for tracker_obj.name == GOGPT EU')
         self.data = gogpt_eu_df
 
     def find_about_page(self,key):
@@ -712,8 +810,8 @@ class TrackerObject:
 
     def clean_num_data(self):
         # clean df
-        print(f'Length of df at clean num data: {len(self.data)}')
-        input('CHECK ITS NOT EMPTY')
+        # print(f'Length of df at clean num data: {len(self.data)}')
+        # input('CHECK ITS NOT EMPTY') #working
         missing_coordinate_row = {} 
         acceptable_range = {
             'lat': {'min': -90, 'max': 90},
@@ -821,6 +919,12 @@ class TrackerObject:
         # split into two dfs
 
         main, prod = self.data
+        # TODO need to implement the below...
+        # lower case and str.replace(' ', '-')
+        # main.columns = main.columns.str.lower()
+        # prod.columns = prod.columns.str.lower()
+        # main.columns = main.columns.str.replace(' ', '-')
+        # prod.columns = prod.columns.str.replace(' ', '-')
         
         # Convert 'Data year' to integers in the 'production_reserves_df'
         prod['Data year'] = pd.to_numeric(prod['Data year'], errors='coerce').fillna(-1).astype(int)
@@ -1014,14 +1118,14 @@ class TrackerObject:
         self.data = clean_export_center_clean_reorder_rename
     
         
-    def transform_to_gdf(self):
+    def transform_to_gdf(self): # This is dropping all geo rows for pipeline data
         
         if isinstance(self.data, tuple):
             print(self.name)
             input('Why is that a tuple up there? GOGET and GOGPT eu should be consolidated by now...')
         else:
             
-            if 'Latitude' or 'latitude' in self.data.columns:
+            if 'latitude' in self.data.columns.str.lower():
                 print('latitude in cols')
                 print(f'len of df before convert coords: {len(self.data)}')
                 gdf = convert_coords_to_point(self.data) 
@@ -1039,8 +1143,11 @@ class TrackerObject:
                 gdf = convert_google_to_gdf(self.data) # this drops all empty WKTformat cols
                 
                 print(f'len of gdf after convert_google_to_gdf: {len(gdf)}')
+                input(self.name)
+
             else:
                 print(F'likely already a gdf: {self.name}')
+                input(self.name)
                 gdf = self.data
 
         self.data = gdf
@@ -1050,13 +1157,23 @@ class TrackerObject:
         if self.acro == 'GOGET':
             gdf['tracker_custom'] = 'GOGET-oil'
         elif self.acro == 'GGIT-lng' or self.acro == 'EGT-term':
-  
-            gdf_ggit_missing_units = gdf[gdf['FacilityType']=='']
-            print(gdf_ggit_missing_units)
-            # input('for PM QC missing facility type for lng')
-            gdf = gdf[gdf['FacilityType']!='']
-            gdf['tracker_custom'] = gdf.apply(lambda row: 'GGIT-import' if row['FacilityType'] == 'Import' else 'GGIT-export', axis=1)        
-        
+            if 'facilitytype' in gdf.columns:
+                gdf_ggit_missing_units = gdf[gdf['facilitytype']=='']
+                print(gdf_ggit_missing_units)
+                # input('for PM QC missing facility type for lng')
+                gdf = gdf[gdf['facilitytype']!='']
+                gdf['tracker_custom'] = gdf.apply(lambda row: 'GGIT-import' if row['facilitytype'] == 'Import' else 'GGIT-export', axis=1)        
+            elif 'FacilityType' in gdf.columns:
+                gdf_ggit_missing_units = gdf[gdf['FacilityType']=='']
+                print(gdf_ggit_missing_units)
+                # input('for PM QC missing facility type for lng')
+                gdf = gdf[gdf['FacilityType']!='']
+                gdf['tracker_custom'] = gdf.apply(lambda row: 'GGIT-import' if row['FacilityType'] == 'Import' else 'GGIT-export', axis=1)
+            else:
+                print(f'Look at cols for {self.acro}:')
+                for col in gdf.columns:
+                    print(col)   
+                input('Checkkk it, issues with Facility Type in split_goget_ggit func')                  
         elif self.acro == 'EGT-gas':
             gdf['tracker_custom'] = 'GGIT'
         
@@ -1121,6 +1238,7 @@ class TrackerObject:
             
             else:
                 print("gdf is empty!")
+                print('maybe a problem with not having tracker as a col?')
                 input(f'Prob not good {self.name}')
             
         self.data = gdf

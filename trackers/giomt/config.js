@@ -79,7 +79,9 @@ var config = {
         values: ['name-(english)', 'name-(other-language)','design-capacity-(ttpa)', 'total-reserves-(proven-and-probable', 'total-resource-(inferred','status', 'owner', 'parent',  'country/area'],
         labels: ['Asset name', 'Asset Name (other language)','Design Capacity (ttpa)','Reserve (thousand tonnes)', 'Resource (thousand tonnes)','Status','Owner', 'Parent', 'Country/Area(s)'],
         clickColumns: ['name-(english)'],
-        rightAlign: ['design-capacity-(ttpa)']
+        rightAlign: ['design-capacity-(ttpa)', 'total-reserves-(proven-and-probable', 'total-resource-(inferred'],
+        toLocaleString: ['design-capacity-(ttpa)', 'total-reserves-(proven-and-probable', 'total-resource-(inferred'],
+        
     },
 
     /* configure the search box; 

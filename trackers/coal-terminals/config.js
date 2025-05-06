@@ -57,7 +57,7 @@ var config = {
         labels: ['Coal terminal name','Coal terminal name (detail or other)','Owner','Parent port','Capacity (Mt)','Status','Start year', 'Retired year','Region','Country/Area','Subnational unit (province, state)'],
         clickColumns: ['coal-terminal-name'],
         rightAlign: ['capacity_mt_display','start-year','retired-year'],
-
+        toLocaleString: ['capacity'],
     },
 
     /* configure the search box; 

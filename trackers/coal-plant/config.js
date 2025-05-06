@@ -48,9 +48,8 @@ var config = {
         values: ['plant-name','unit-name','plant-name-(local)','owner', 'parent', 'capacity-(mw)', 'status', 'start-year', 'retired-year', 'region', 'country/area', 'subnational-unit-(province,-state)'],
         labels: ['Plant','Unit','Plant name (local)','Owner','Parent','Capacity (MW)','Status','Start year', 'Retired year','Region','Country/Area','Subnational unit (province, state)'],
         clickColumns: ['plant-name'],
-        rightAlign: ['unit-name','capacity-(mw)','start-year','retired-year']
-<<<<<<< HEAD
-=======
+        rightAlign: ['unit-name','capacity-(mw)','start-year','retired-year'],
+        toLocaleString: ['capacity-(mw)'],
 
 >>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     },

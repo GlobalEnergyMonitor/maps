@@ -77,7 +77,8 @@ var config = {
         values: ['project','owner', 'parent', 'capacity', 'production', 'status', 'workforce', 'coalfield', 'country', 'region', 'opening_year', 'closing_year'],
         labels: ['Project','Owner','Parent','Capacity (Mt)', 'Production (Mt)', 'Status', 'Workforce', 'Coal Field', 'Country/Area', 'Region','Opening year', 'Closing year'],
         clickColumns: ['project'],
-        rightAlign: ['production','capacity','opening_year, closing_year']
+        rightAlign: ['production','capacity','opening_year, closing_year'],
+        toLocaleString: ['capacity'],
     },
 
     /* configure the search box; 

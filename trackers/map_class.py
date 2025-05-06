@@ -133,7 +133,7 @@ class MapObject:
         print(f'Check all columns:')
         for col in gdf.columns:
             print(col)
-        # input('Is prod gas year there?')
+        input('Is fuel-filter there?')
 
         # translate acronyms to full names for legend and table 
         gdf['tracker-display'] = gdf['tracker-custom'].map(tracker_to_fullname)
@@ -443,54 +443,56 @@ class MapObject:
                 
                 # concat them back together now that ghpt capacity is in one col
                 gdf = pd.concat([gdf_minus_ghpt, ghpt_only],sort=False).reset_index(drop=True)
-            # create cleaned cap for logic below 
-            gdf['cleaned_cap'] = pd.to_numeric(gdf['capacity'], errors='coerce')
-
-            total_counts_trackers = []
-            avg_trackers = []
-
-            for tracker in set(gdf['tracker-acro'].to_list()):
-                print(f'tracker')
-  
-                # for singular map will only go through one
-                total = len(gdf[gdf['tracker-acro'] == tracker])
-                sum = gdf[gdf['tracker-acro'] == tracker]['cleaned_cap'].sum()
-                avg = sum / total
-                total_pair = (tracker, total)
-                total_counts_trackers.append(total_pair)
-                avg_pair = (tracker, avg)
-                avg_trackers.append(avg_pair)
-                
-            # assign average capacity to rows missing or na capacity
-            for row in gdf.index:
-                cap_cleaned = gdf.loc[row, 'cleaned_cap']
-                tracker = gdf.loc[row, 'tracker-acro']
-                if pd.isna(cap_cleaned):
-                    for pair in avg_trackers:
-                        if pair[0] == tracker:
-                            gdf.loc[row, 'cleaned_cap'] = pair[1]
-                cap_cleaned = gdf.loc[row, 'cleaned_cap']
-                if pd.isna(cap_cleaned):
-                    input('still na')
         
-
-            pd.options.display.float_format = '{:.0f}'.format
-            # gdf_converted['ea_scaling_capacity'] = gdf_converted.apply(lambda row: conversion_equal_area(row), axis=1) # square root(4 * capacity / pi)
-
-            gdf['scaling_capacity'] = gdf.apply(lambda row: conversion_multiply(row), axis=1)
-            # must be float for table to sort
-            gdf['capacity'] = gdf['capacity'].fillna('') # issue if it's natype so filling in
-            gdf['capacity-table'] = gdf.apply(lambda row: pd.Series(workaround_table_float_cap(row, 'capacity')), axis=1)
-            gdf['units-of-m'] = gdf.apply(lambda row: pd.Series(workaround_table_units(row)), axis=1)
-            # TODO april 7th 3:57 come back to the below
-            # gdf_converted['units-of-m'] = gdf_converted.apply(lambda row: '' if 'GOGET' in row['tracker-acro'] else row['units-of-m'], axis=1)
-
-            # below doesn't work cap details was empty all the time
-            # gdf_converted = workaround_no_sum_cap_project(gdf_converted) # adds capacity-details for singular maps we can just disregard
-            # TODO nov 13 test this I think it now adds all cap for a project and applies the original units to it 
-            # gdf_converted['capacity-details-unit'] = gdf_converted.apply(lambda row: workaround_display_cap(row, 'capacity-details'), axis=1)
         
-            self.trackers = gdf        
+        # create cleaned cap for logic below 
+        gdf['cleaned_cap'] = pd.to_numeric(gdf['capacity'], errors='coerce')
+
+        total_counts_trackers = []
+        avg_trackers = []
+
+        for tracker in set(gdf['tracker-acro'].to_list()):
+            print(f'{tracker}')
+
+            # for singular map will only go through one
+            total = len(gdf[gdf['tracker-acro'] == tracker])
+            sum = gdf[gdf['tracker-acro'] == tracker]['cleaned_cap'].sum()
+            avg = sum / total
+            total_pair = (tracker, total)
+            total_counts_trackers.append(total_pair)
+            avg_pair = (tracker, avg)
+            avg_trackers.append(avg_pair)
+            
+        # assign average capacity to rows missing or na capacity
+        for row in gdf.index:
+            cap_cleaned = gdf.loc[row, 'cleaned_cap']
+            tracker = gdf.loc[row, 'tracker-acro']
+            if pd.isna(cap_cleaned):
+                for pair in avg_trackers:
+                    if pair[0] == tracker:
+                        gdf.loc[row, 'cleaned_cap'] = pair[1]
+            cap_cleaned = gdf.loc[row, 'cleaned_cap']
+            if pd.isna(cap_cleaned):
+                input('still na')
+    
+
+        pd.options.display.float_format = '{:.0f}'.format
+        # gdf_converted['ea_scaling_capacity'] = gdf_converted.apply(lambda row: conversion_equal_area(row), axis=1) # square root(4 * capacity / pi)
+
+        gdf['scaling_capacity'] = gdf.apply(lambda row: conversion_multiply(row), axis=1)
+        # must be float for table to sort
+        gdf['capacity'] = gdf['capacity'].fillna('') # issue if it's natype so filling in
+        gdf['capacity-table'] = gdf.apply(lambda row: pd.Series(workaround_table_float_cap(row, 'capacity')), axis=1)
+        gdf['units-of-m'] = gdf.apply(lambda row: pd.Series(workaround_table_units(row)), axis=1)
+        # TODO april 7th 3:57 come back to the below
+        # gdf_converted['units-of-m'] = gdf_converted.apply(lambda row: '' if 'GOGET' in row['tracker-acro'] else row['units-of-m'], axis=1)
+
+        # below doesn't work cap details was empty all the time
+        # gdf_converted = workaround_no_sum_cap_project(gdf_converted) # adds capacity-details for singular maps we can just disregard
+        # TODO nov 13 test this I think it now adds all cap for a project and applies the original units to it 
+        # gdf_converted['capacity-details-unit'] = gdf_converted.apply(lambda row: workaround_display_cap(row, 'capacity-details'), axis=1)
+    
+        self.trackers = gdf        
         
     def map_ready_statuses_and_countries(self):
         
@@ -687,36 +689,46 @@ class MapObject:
             
             gdf = tracker_obj.data
             tracker_sel = tracker_obj.acro # GOGPT, GGIT, GGIT-lng, GOGET
-            
+            print(f'tracker_sel is {tracker_sel} equal to tracker-acro...')
+            # print('This is tracker-acro:')
+            # print(gdf['tracker-acro'])
             if tracker_sel == 'GOGPT-eu':
-                pass
+                print('passing because GOGPT-eu already renamed when concatted hy and plants tabs')
+                # gdf['tracker-acro'] = tracker_sel
+                # print(f'What is data in this right now: {type(tracker_obj.data)}')
+                # use plants and plants_hy to rename or pass it since its already been renamed
+                print(set(gdf['tracker-acro'].to_list()))
+                input('This should be two, plants and plants_hy!')
+                
             else:
                 gdf['tracker-acro'] = tracker_sel
-            # if tracker_sel == 'GCTT':
-            #     print(gdf)
-            #     input('GCTT gdf here')
-            print(f"renaming on tracker acro: {gdf['tracker-acro'].iloc[0]}")
-            # all_trackers.append(tracker_sel)
-            # select the correct renaming dict from config.py based on tracker name
-            renaming_dict_sel = renaming_cols_dict[tracker_sel]
-            # rename the columns!
-            # check check_rename_keys(renaming_dict_sel)
-            print(f'Check rename keys against cols for {tracker_sel}')
-            check_rename_keys(renaming_dict_sel, gdf)
-            gdf.columns = gdf.columns.str.strip()
-            gdf = gdf.rename(columns=renaming_dict_sel) 
-            
-            # print(gdf['areas'].value_counts())
-            # ##(input('check value counts for area after rename')
-            gdf.reset_index(drop=True, inplace=True)  # Reset index in place
+                # if tracker_sel == 'GCTT':
+                #     print(gdf)
+                #     input('GCTT gdf here')
+                print(f"renaming on tracker acro: {gdf['tracker-acro'].iloc[0]}")
+                # all_trackers.append(tracker_sel)
+                # select the correct renaming dict from config.py based on tracker name
+                renaming_dict_sel = renaming_cols_dict[tracker_sel]
+                # rename the columns!
+                # check check_rename_keys(renaming_dict_sel)
+                print(f'Check rename keys against cols for {tracker_sel}')
+                check_rename_keys(renaming_dict_sel, gdf)
+                gdf.columns = gdf.columns.str.strip()
+                gdf = gdf.rename(columns=renaming_dict_sel) 
+                
+                # print(gdf['areas'].value_counts())
+                # ##(input('check value counts for area after rename')
+                gdf.reset_index(drop=True, inplace=True)  # Reset index in place
             # check why subnat in there
             if 'subnat' in gdf.columns:
                 print(f'subnat here for {tracker_obj.name}')
-                pass
+                
             else:
                 print(f'subnat not here for {tracker_obj.name}')
                 input('check which tracker')
+            print(f'Adding {tracker_sel} gdf to renamed_gdfs')
             renamed_gdfs.append(gdf)
+            input('Check it adds for gogpt eu')
             
         one_gdf = pd.concat(renamed_gdfs, sort=False, verify_integrity=True, ignore_index=True) 
         # one_gdf = one_gdf.drop_duplicates('id').reset_index(drop=True)

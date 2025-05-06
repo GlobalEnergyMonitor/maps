@@ -1,6 +1,5 @@
 var config = {
-    json: 'compilation_output/africa_2025-04-09.geojson',
-
+    json: 'compilation_output/africa_2025-04-29.geojson',
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
@@ -46,7 +45,7 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     
-    // capacityDisplayField: 'capacity-table',
+    capacityDisplayField: 'capacity-table',
 
 
     //can be string for single value, or hash. always single value is showMaxCapacity is true
@@ -62,7 +61,7 @@ var config = {
             'GWPT':	'MW',
             'GHPT':	'MW',
             'GGPT':	'MW',
-            // 'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
+            'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
             'GOIT': 'boe/d',
             'GGIT':	'bcm/y of natural gas',
             'GGIT-import': 'MTPA of natural gas',
@@ -144,6 +143,7 @@ var config = {
         clickColumns: ['name'],
         rightAlign: ['unit','capacity-table','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
         removeLastComma: ['areas'], 
+        toLocaleString: ['capacity-table'],
         // displayValue: {'tracker-display': "assetLabel"},
         // appendValue: {'capacity': "capItemLabel"},
         // appendValue: {'production': "prodItemLabel"},

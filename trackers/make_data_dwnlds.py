@@ -109,96 +109,106 @@ def make_data_dwnlds(tracker):
         problem_map_objs = []
         print(F'This is map name:\n{map_obj.name}')
         print(F'This is list of sources:\n{map_obj.source}')
-        # input('Read that!')
-        try:
-            # write to xls
-            # THEN turn that xls into a df and then parquet for multi-tracker dd to parquet and s3
-            path_dwn = gem_path + map_obj.name + '/compilation_output/'
-            path_tst = gem_path_tst + f'final/{iso_today_date}/'
-            os.makedirs(path_dwn, exist_ok=True)
-            os.makedirs(path_tst, exist_ok=True)
-            xlsfile = f'{path_dwn}{map_obj.name}-data-download_{new_release_date}_{iso_today_date}.xlsx'
-            xlsfile_testing = f'{path_tst}{map_obj.name}-data-download_{new_release_date}_{iso_today_date}_test.xlsx'
 
-            # write to excel files! 
-            for filename in [xlsfile, xlsfile_testing]:
-                with pd.ExcelWriter(filename, engine='openpyxl') as writer: 
-                    # df_list = map_obj.data
-                    # df_list = map_obj.trackers.data # maybe?
-                    # THIS is where we can remap for the actual tab
-                    if map_obj.source[0] in trackers_to_update:
-                        about_tab_name = map_obj.source[0]
-                    
-                    else:
-                        print(map_obj.source[0])
-                        about_tab_name = dd_tab_mapping[map_obj.name]
-                    
-                    # print(map_obj.about)
-                    # # Ensure the column names are not treated as a header row
-                    # # Use header=False when writing to the xls file
-                    # df.to_excel(writer, sheet_name='Sheet1', index=False, header=False)
-                    map_obj.about.to_excel(writer, sheet_name=f'About {about_tab_name}', index=False, header=False) # TODO using header false id not work
-                    writer = bold_first_row(writer, sheet_name=f'About {about_tab_name}') # TODO this did not work 
+        # try:
+        # write to xls
+        # THEN turn that xls into a df and then parquet for multi-tracker dd to parquet and s3
+        path_dwn = gem_path + map_obj.name + '/compilation_output/'
+        path_tst = gem_path + map_obj.name + '/testing/'
+        os.makedirs(path_dwn, exist_ok=True)
+        os.makedirs(path_tst, exist_ok=True)
+        xlsfile = f'{path_dwn}{map_obj.name}-data-download_{new_release_date}_{iso_today_date}.xlsx'
+        xlsfile_testing = f'{path_tst}{map_obj.name}-data-download_{new_release_date}_{iso_today_date}_test.xlsx'
 
-                    for tracker_obj in map_obj.trackers:
-                        print(f"Writing source to filename: {tracker_obj.name}")
-                        # df = tracker_obj.data
-                        about = tracker_obj.about
-                        tracker_name = tracker_obj.name
-                        acro = tracker_obj.acro
-                        about.to_excel(writer, sheet_name=f'About {tracker_name}', index=False)
-                        writer = bold_first_row(writer, sheet_name=f'About {tracker_name}')
-                        if isinstance(tracker_obj.data, tuple):
-                            tracker_obj.set_data_official() # so have data for map and for datadownload
-                            main, prod = tracker_obj.data_official 
-                            # check if set data official works
-                            for df in [main, prod]: 
-                                if 'country_to_check' in df.columns.to_list():
-                                    print(f'it is still there')
-                                    input('data official not working')                      
-                            print(f"Main DataFrame shape: {main.shape}")
-                            print(f"Prod DataFrame shape: {prod.shape}")
-                            main = main.map(remove_illegal_characters)
-                            prod = prod.map(remove_illegal_characters)
-                            main.to_excel(writer, sheet_name=f'Extraction Main data', index=False)
-                            writer = bold_first_row(writer, sheet_name=f'Extraction Main data')
+        # write to excel files! 
+        for filename in [xlsfile, xlsfile_testing]:
+            with pd.ExcelWriter(filename, engine='openpyxl') as writer: 
+                # df_list = map_obj.data
+                # df_list = map_obj.trackers.data # maybe?
+                # THIS is where we can remap for the actual tab
+                if map_obj.name in dd_tab_mapping.keys():
+                    about_tab_name = dd_tab_mapping[map_obj.name]
+                else:
+                    about_tab_name = map_obj.name
+                
+                
+                # if any(source in trackers_to_update for source in map_obj.source):
+                #     about_tab_name = map_obj.source[0]
+                
+                # elif any(name in priority for name in map_obj.name):
+                #     about_tab_name = map_obj.name                  
+                # else:
 
-                            prod.to_excel(writer, sheet_name=f'Extraction Production & reserves', index=False)
-                            writer = bold_first_row(writer, sheet_name=f'Extraction Production & reserves')
+                #     about_tab_name = dd_tab_mapping[map_obj.name]
+                
+                # print(map_obj.about)
+                # # Ensure the column names are not treated as a header row
+                # # Use header=False when writing to the xls file
+                # df.to_excel(writer, sheet_name='Sheet1', index=False, header=False)
+                map_obj.about.to_excel(writer, sheet_name=f'About {about_tab_name}', index=False, header=False) # TODO using header false id not work
+                writer = bold_first_row(writer, sheet_name=f'About {about_tab_name}') # TODO this did not work 
 
-                            print(f'Wrote {tracker_name} to file {filename} successfully!')
-                        
-                        else:
-                            tracker_obj.set_data_official() # so have data for map and for datadownload
-                            df = tracker_obj.data_official
-                            # check if set data official works
+                for tracker_obj in map_obj.trackers:
+                    # print(f"Writing source to filename: {tracker_obj.name}")
+                    # print(f'Length of tracker df is: {len(tracker_obj.data)}')
+                    # input('Read that!')
+                    # df = tracker_obj.data
+                    about = tracker_obj.about
+                    tracker_name = tracker_obj.name
+                    acro = tracker_obj.acro
+                    about.to_excel(writer, sheet_name=f'About {tracker_name}', index=False)
+                    writer = bold_first_row(writer, sheet_name=f'About {tracker_name}')
+                    if isinstance(tracker_obj.data, tuple):
+                        tracker_obj.set_data_official() # so have data for map and for datadownload
+                        main, prod = tracker_obj.data_official 
+                        # check if set data official works
+                        for df in [main, prod]: 
                             if 'country_to_check' in df.columns.to_list():
                                 print(f'it is still there')
-                                input('data official not working')
-                            df = df.map(remove_illegal_characters)
-                            df.to_excel(writer, sheet_name=f'{tracker_name}', index=False)
-                            writer = bold_first_row(writer, sheet_name=f'{tracker_name}')
+                                input('data official not working')                      
+                        print(f"Main DataFrame shape: {main.shape}")
+                        print(f"Prod DataFrame shape: {prod.shape}")
+                        main = main.map(remove_illegal_characters)
+                        prod = prod.map(remove_illegal_characters)
+                        main.to_excel(writer, sheet_name=f'Extraction Main data', index=False)
+                        writer = bold_first_row(writer, sheet_name=f'Extraction Main data')
 
-                            print(f'Wrote {tracker_name} to file {filename} successfully!')
-                        
+                        prod.to_excel(writer, sheet_name=f'Extraction Production & reserves', index=False)
+                        writer = bold_first_row(writer, sheet_name=f'Extraction Production & reserves')
 
-            # read from excel to parquet in DO
-            for filename in [xlsfile, xlsfile_testing]:
-                df = pd.read_excel(filename)
-                # save parquet file locally
-                process = save_to_s3(map_obj, df, 'datadownload', path_dwn)
-                # save parquet file in DO in latest folder
-                # Print the output and errors (if any)
-                print(process.stdout.decode('utf-8'))
-                if process.stderr:
-                    print(process.stderr.decode('utf-8'))
+                        print(f'Wrote {tracker_name} to file {filename} successfully!')
+                    
+                    else:
+                        tracker_obj.set_data_official() # so have data for map and for datadownload
+                        df = tracker_obj.data_official
+                        # check if set data official works
+                        if 'country_to_check' in df.columns.to_list():
+                            print(f'it is still there')
+                            input('data official not working')
+                        df = df.map(remove_illegal_characters)
+                        df.to_excel(writer, sheet_name=f'{tracker_name}', index=False)
+                        writer = bold_first_row(writer, sheet_name=f'{tracker_name}')
+
+                        print(f'Wrote {tracker_name} to file {filename} successfully!')
+                    
+
+        # read from excel to parquet in DO
+        for filename in [xlsfile, xlsfile_testing]:
+            df = pd.read_excel(filename)
+            # save parquet file locally
+            process = save_to_s3(map_obj, df, 'datadownload', path_dwn)
+            # save parquet file in DO in latest folder
+            # Print the output and errors (if any)
+            print(process.stdout.decode('utf-8'))
+            if process.stderr:
+                print(process.stderr.decode('utf-8'))
         
-        except Exception as e:
-            print(f'Issue with {map_obj.name}, let us skip it, go onto making maps and then come back.')
-            # remove problem map_obj.name from map_obj_list
-            map_obj_list.remove(map_obj)
-            problem_map_objs.append((map_obj, e))
-            # print(e)       
+        # except Exception as e:
+        #     print(f'Issue with {map_obj.name}, let us skip it, go onto making maps and then come back.')
+        #     # remove problem map_obj.name from map_obj_list
+        #     map_obj_list.remove(map_obj)
+        #     problem_map_objs.append((map_obj, e))
+        #     print(e)       
         
     test_make_data_dwnlds()
     return map_obj_list, problem_map_objs
