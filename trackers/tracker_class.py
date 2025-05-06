@@ -822,7 +822,7 @@ class TrackerObject:
             
             for col in self.data.columns: # handling for all capacity, production, 
                 # if pd.api.types.is_numeric_dtype(self.data[col]): # the problem is we know its not always all numeric unfortunatley
-                if any(keyword in col for keyword in ['Capacity (MW)', 'Capacity (Mtpa)', 'CapacityBcm/y', 'CapacityBOEd', 'Capacity (MT)', 'Production - Gas', 'Production - Oil']):                    
+                if any(keyword in col for keyword in ['Capacity (MW)', 'Capacity (Mt)','Capacity (Mtpa)', 'CapacityBcm/y', 'CapacityBOEd', 'Capacity (MT)', 'Production - Gas', 'Production - Oil', 'Production (Mt)']):                    
                     # print(col)
                     try:
                         self.data.fillna('', inplace=True) # cannot apply to geometry column
@@ -836,14 +836,16 @@ class TrackerObject:
                         # input('Check for QC PM report') # so far problem with StartYearEarliest LNG Terminals geo in there
                         
                 
-                elif 'Year' in col:
+                elif 'year' in col.lower():
                     print(col)
                     # self.data.fillna('', inplace=True) # cannot apply to geometry column
                     try:
                         self.data[col] = self.data[col].apply(lambda x: check_and_convert_int(x))
                         self.data[col].fillna('', inplace=True)
                         # Round all year columns to 0 decimal places
-                        self.data[col] = self.data[col].apply(lambda x: round(x, 0) if x != '' else x)    
+                        self.data[col] = self.data[col].apply(lambda x: round(x, 0) if x != '' else x)   
+                        self.data[col] = self.data[col].apply(lambda x: int(str(x).replace('.0', '')) if x != '' else x)
+                         
                     except TypeError as e:
                         print(f'{e} error for {col} in {self.name}')
                         # input('Check for QC PM report') # so far problem with StartYearEarliest LNG Terminals geo in there
@@ -902,9 +904,11 @@ class TrackerObject:
                             
                         else:
                             self.data.loc[row, 'Longitude'] = self.data.loc[row, 'float_col_clean_lng']           
-
-                    print(F"This is missing_coordinate_row: {missing_coordinate_row}")   
-                    input('LOOK INTO IT')          
+                    if len(missing_coordinate_row) > 0:
+                        print(F"This is missing_coordinate_row: {missing_coordinate_row}")   
+                        input('LOOK INTO IT')       
+                    
+                       
                 else:
                     print(f"Skipping non-numeric column: {col}")
         else:
