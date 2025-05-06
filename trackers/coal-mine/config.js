@@ -24,8 +24,7 @@ var config = {
             'cancelled': 'green',
             'retired': 'orange',
             'shelved': 'dark grey',
-            'mothballed': 'grey',
-            'closed': 'grey'
+            'mothballed': 'grey'
         }
     },
     filters: [
