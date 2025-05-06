@@ -56,8 +56,8 @@ SQL = '''
 
 def save_to_s3(obj, df, filetype='', path_dwn=''):
     print('in save_to_s3')
-    geojsonpath = '' # for maps with line data
-    csvpath = '' # for maps with no line data
+    geojsonpath = f"{path_dwn}{obj.name}_map_{iso_today_date}.geojson" # for africa or regular
+    print(f'This is geojsonpath: {geojsonpath}')
     # print(type(df))
     
     # Ensure geometry is properly handled before saving
@@ -65,14 +65,10 @@ def save_to_s3(obj, df, filetype='', path_dwn=''):
         if not isinstance(df, gpd.GeoDataFrame):
             print("Converting DataFrame to GeoDataFrame...")
             df = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
-            geojsonpath = f"{path_dwn}{obj.name}{filetype}{releaseiso}.geojson"
+
         # Convert geometry to WKT format for saving as Parquet
         df['geometry'] = df['geometry'].apply(lambda geom: geom.wkt if geom else None)
-    else:
-        # create csv for all so can be used directly by map without converting from parquet
-        csvpath = f"{path_dwn}{obj.name}{filetype}{releaseiso}.csv"
-        print(csvpath)
-        
+
     # Handle missing values and ensure the column is stored as a string
     # if 'unit-name' in df.columns:
     #     df['unit-name'] = df['unit-name'].fillna('').astype(str)
@@ -96,7 +92,7 @@ def save_to_s3(obj, df, filetype='', path_dwn=''):
         s3folder = 'uncategorized'
     
     # Prepare and execute S3 upload command
-    if geojsonpath != '':
+    if geojsonpath != '' and filetype == 'map':
         
         do_command_s3 = (
             f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
@@ -105,15 +101,7 @@ def save_to_s3(obj, df, filetype='', path_dwn=''):
             f'aws s3 cp {geojsonpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
             f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
         )
-    # TODO resolve getting the returned non-zero exit status 255. error from s3
-    # elif csvpath != '':
-    #     do_command_s3 = (
-    #         f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
-    #         f'aws s3 cp {parquetpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
-    #         f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read && '
-    #         f'aws s3 cp {csvpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
-    #         f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
-    #     )        
+  
     else:
         do_command_s3 = (
             f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
@@ -1170,8 +1158,6 @@ def map_ready_statuses(cleaned_dict_map_by_one_gdf_with_conversions):
                     'decommissioned': 'retired_plus',
                     'not found': 'not-found',
                     })
-# 'ugs': 'not-found'
-
         # Create a mask for rows where 'status' is empty
 
         gdf_map_ready_no_status = gdf_map_ready.loc[mask_status_empty]

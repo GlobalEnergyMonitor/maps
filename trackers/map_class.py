@@ -72,7 +72,9 @@ class MapObject:
                     # input('in gcmt')
                     gdf.loc[row, 'capacity-table'] = np.nan
                     gdf.loc[row, 'capacity-details'] = ''
-                    prod_coal = gdf.loc[row, 'prod-coal']                    
+                    prod_coal = gdf.loc[row, 'prod-coal']
+                    
+                                        
                 else:
                     gdf.loc[row, 'capacity-table'] = gdf.loc[row, 'capacity']
                     gdf.loc[row, 'capacity-details'] = gdf.loc[row, 'capacity']
@@ -182,7 +184,10 @@ class MapObject:
         print(f'This is len of gdf {len(self.trackers)}')
         path_for_download_and_map_files = gem_path + self.name + '/compilation_output/'
         path_for_download_and_map_files_af = gem_path + f'{self.name}-energy' + '/compilation_output/'
-
+        # path_for_download_and_map_files_cm = gem_path + 'coal-mine' + '/compilation_output/'
+        # path_for_download_and_map_files_gp = gem_path + 'gas-plant' + '/compilation_output/'    
+        # path_for_download_and_map_files_cp = gem_path + 'coal-plant' + '/compilation_output/'    
+        
         # #(input('check if prod-coal is there')
         if self.name in gas_only_maps or self.geo == 'global': # will probably end up making all regional maps all energy I would think
             print(f"Yes {self.name} is in gas only maps so skip 'area2', 'subnat2', 'capacity2'")
@@ -204,11 +209,11 @@ class MapObject:
         
         if self.name == 'africa':
             
-
-            gdf.to_file(f'{path_for_download_and_map_files_af}{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
-            gdf.to_csv(f'{path_for_download_and_map_files_af}{self.name}_{iso_today_date}.csv', encoding='utf-8')
-            gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
-            gdf.to_csv(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.csv', encoding='utf-8')
+            gdf.to_file(f'{path_for_download_and_map_files_af}{self.name}_map_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')            
+            gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_map_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+            
+            gdf.to_csv(f'{path_for_download_and_map_files_af}{self.name}_map_{iso_today_date}.csv', encoding='utf-8')
+            gdf.to_csv(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_map_{iso_today_date}.csv', encoding='utf-8')
             
             process = save_to_s3(self, gdf, 'map', path_for_download_and_map_files_af)
 
@@ -220,7 +225,9 @@ class MapObject:
             newcountriesjs = list(set(gdf['areas'].to_list()))
             rebuild_countriesjs(self.name, newcountriesjs)
             
-
+        # elif self.name == 'gcmt':
+        #     # coal-min
+            
         else:
             # Check if the dataframe is a GeoDataFrame
             if isinstance(gdf, gpd.GeoDataFrame):
@@ -233,12 +240,12 @@ class MapObject:
                 gdf.set_crs(epsg=4326, inplace=True)  # Set CRS to EPSG:4326 (WGS 84)  
     
                    
-            gdf.to_file(f'{path_for_download_and_map_files}{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
-            gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+            gdf.to_file(f'{path_for_download_and_map_files}{self.name}_map_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
+            gdf.to_file(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_map_{iso_today_date}.geojson', driver='GeoJSON', encoding='utf-8')
 
 
-            gdf.to_csv(f'{path_for_download_and_map_files}{self.name}_{iso_today_date}.csv', encoding='utf-8')
-            gdf.to_csv(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_{iso_today_date}.csv', encoding='utf-8')
+            gdf.to_csv(f'{path_for_download_and_map_files}{self.name}_map_{iso_today_date}.csv', encoding='utf-8')
+            gdf.to_csv(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/testing/final/{self.name}_map_{iso_today_date}.csv', encoding='utf-8')
 
 
             process = save_to_s3(self, gdf, 'map', path_for_download_and_map_files)
@@ -536,6 +543,7 @@ class MapObject:
                     'closed': 'retired_plus',
                     'decommissioned': 'retired_plus',
                     'not found': 'not-found'})
+        
 
             # Create a mask for rows where 'status' is empty
 
@@ -554,6 +562,9 @@ class MapObject:
         
         print(set(gdf_map_ready['areas'].to_list()))
 
+        tracker_sel = gdf_map_ready['tracker-acro'].iloc[0] 
+        if tracker_sel == 'GCMT':
+            gdf_map_ready['status'] = gdf_map_ready['status'].replace('not-found', 'retired')
 
         
         # check that areas isn't empty
@@ -699,7 +710,7 @@ class MapObject:
                 # use plants and plants_hy to rename or pass it since its already been renamed
                 print(set(gdf['tracker-acro'].to_list()))
                 input('This should be two, plants and plants_hy!')
-                
+               
             else:
                 gdf['tracker-acro'] = tracker_sel
                 # if tracker_sel == 'GCTT':
@@ -718,17 +729,34 @@ class MapObject:
                 
                 # print(gdf['areas'].value_counts())
                 # ##(input('check value counts for area after rename')
-                gdf.reset_index(drop=True, inplace=True)  # Reset index in place
-            # check why subnat in there
+                gdf.reset_index(inplace=True)
+                # Reset index in place
+                if tracker_sel == 'GCMT':
+                    # Handle for non-English Chinese wiki pages
+                    print('In if statement of rename and concat in map class for GCMT')
+                    
+                    # Use np.where for a more Pythonic approach
+                    gdf['wiki-from-name'] = np.where(
+                        gdf['areas'] == 'China',
+                        gdf['noneng_name'].apply(lambda x: f"https://www.gem.wiki/{x.strip().replace(' ', '_')}"),
+                        gdf['name'].apply(lambda x: f"https://www.gem.wiki/{x.strip().replace(' ', '_')}")
+                    )  # check why subnat in there
+                    gdf['url'] = gdf.apply(lambda row: row['wiki-from-name'] if 'gem.wiki' not in row['url'] else row['url'], axis=1)
+                    
+                    gdf['mine-type'] = gdf['mine-type'].fillna('').str.lower().replace(' ', '-').replace('&', 'and').replace('','-')
+                    gdf['coal-grade'] = gdf['coal-grade'].fillna('').str.lower().replace(' ', '-').replace('&', 'and').replace('','-')
+ 
             if 'subnat' in gdf.columns:
                 print(f'subnat here for {tracker_obj.name}')
                 
             else:
                 print(f'subnat not here for {tracker_obj.name}')
-                input('check which tracker')
+                input('check which tracker is missing subnat')
             print(f'Adding {tracker_sel} gdf to renamed_gdfs')
             renamed_gdfs.append(gdf)
             input('Check it adds for gogpt eu')
+        
+        
             
         one_gdf = pd.concat(renamed_gdfs, sort=False, verify_integrity=True, ignore_index=True) 
         # one_gdf = one_gdf.drop_duplicates('id').reset_index(drop=True)
@@ -736,8 +764,7 @@ class MapObject:
 
         cols_to_be_dropped = set(one_gdf.columns) - set(final_cols)
         print(f'These cols will be dropped: {cols_to_be_dropped}')
-        # # if slowmo:
-            # # ##(input('Pause to check cols before filtering out all cols in our gdf that are not in final cols, there will be a problem if our gdf does not have a col in final_cols.')
+       
         final_gdf = one_gdf.drop(columns=cols_to_be_dropped)
         self.trackers = final_gdf
             

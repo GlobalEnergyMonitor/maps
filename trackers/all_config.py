@@ -8,10 +8,10 @@ from trackers.creds import *
 
 
 
-trackers_to_update = ['Gas Pipelines']# ['Hydropower']# ['Gas Pipelines'] #['Iron & Steel']
-new_release_date = 'March_2025' # for within about page NEEDS TO BE FULL MONTH
-releaseiso = '2025-03'
-priority = ['europe'] # europe # NOTE NEEDS TO BE [''] to be skipped NEEDS TO BE mapname in map_tab internal
+trackers_to_update = ['Coal Mines']# ['Hydropower']# ['Gas Pipelines'] #['Iron & Steel']
+new_release_date = 'May_2025' # for within about page NEEDS TO BE FULL MONTH
+releaseiso = '2025-05'
+priority = ['gcmt'] # europe # NOTE NEEDS TO BE [''] to be skipped NEEDS TO BE mapname in map_tab internal
                     # africa
                     # integrated
                     # europe
@@ -106,7 +106,8 @@ gcmt_closed_tab = 'Global Coal Mine Tracker (Close'
 final_cols = ['facilitytype','unit_id', 'loc-oper', 'loc-owner', 'tech-type','ea_scaling_capacity', 'operator', 'Operator', 'Binational', 'binational', 'loc-accu','units-of-m','mapname','tracker-acro','official_name','url', 'areas','name', 'unit_name', 'capacity',
               'status', 'start_year', 'subnat', 'region', 'owner', 'parent', 'tracker', 'tracker_custom', 'operator-name-(local-lang/script)', 'owner-name-(local-lang/script)',
         'original_units', 'location-accuracy','conversion_factor', 'geometry', 'river', 'area2', 'region2', 'subnat2', 'capacity1', 'capacity2',
-        'prod-coal', 'Latitude', 'Longitude', 'pid','id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas', 'fuel', 'PCI5', 'PCI6', 'pci5','pci6','WKTFormat', 'Fuel', 'maturity', 'fuel-filter', 'pci-list']
+        'prod-coal', 'Latitude', 'Longitude', 'pid','id', 'prod_oil', 'prod_gas', 'prod_year_oil', 'prod_year_gas', 'fuel', 'PCI5', 'PCI6', 'pci5','pci6','WKTFormat', 'Fuel', 'maturity', 'fuel-filter', 
+        'pci-list', 'coal-grade', 'mine-type', 'prod-coal', 'owners_noneng', 'noneng_name', 'coalfield', 'workforce', 'prod_year', 'opening-year', 'closing-year', 'opening_year', 'closing_year']
 
 renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wiki URL': 'url','Country/Area': 'areas', 'Plant name': 'name', 'Unit name': 'unit_name', 
                                 'Capacity (MW)': 'capacity', 'Status': 'status', 'Fuel': 'fuel', 'Owner(s)': 'owner', 'Parent(s)': 'parent',
@@ -144,8 +145,9 @@ renaming_cols_dict = {'GOGPT': {'GEM location ID':'pid', 'GEM unit ID': 'id','Wi
                                 'GEM region': 'region','Owner': 'owner', 'Parent': 'parent', 'Wiki URL': 'url', 'Production - Oil (Million bbl/y)': 'prod_oil', 'Production - Gas (Million m³/y)': 'prod_gas',
                                 'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)': 'capacity','Production Year - Oil': 'prod_year_oil', 'Production Year - Gas': 'prod_year_gas'
                                 , 'Country List':'mult_countries', 'Fuel type': 'fuel'},
-                      'GCMT': {'GEM Mine ID':'pid','Country': 'areas', 'Mine Name': 'name', 'Status': 'status', 'Owners': 'owner', 'Parent Company': 'parent', 'Capacity (Mtpa)': 'capacity', 
-                               'Production (Mtpa)':'prod-coal', 'Opening Year': 'start_year', 'State, Province': 'subnat', 'Region': 'region', },
+                      'GCMT': {'GEM Mine ID':'pid','Country / Area': 'areas', 'Mine Name': 'name', 'Mine Name (Non-ENG)': 'noneng_name','Status': 'status', 'Owners': 'owner', 'Owners (Non-ENG)': 'owners_noneng','Parent Company': 'parent', 'Capacity (Mtpa)': 'capacity', 
+                               'Production (Mtpa)':'prod-coal', 'Year of Production': 'prod_year','Opening Year': 'opening_year', 'Closing Year': 'closing_year','State, Province': 'subnat', 'Region': 'region', 'GEM Wiki Page (ENG)': 'url', 'GEM Wiki Page (Non-ENG)': 'urlchina', 'Coalfield': 'coalfield', 'Workforce Size': 'workforce', 'Coal Grade': 'coal-grade',
+                               'Mine Type': 'mine-type'},
                       'GOIT': {'ProjectID':'pid','Countries': 'areas', 'Wiki': 'url', 'PipelineName': 'name', 'SegmentName': 'unit_name', 'Status': 'status', 'Owner': 'owner',
                                'Parent': 'parent', 'CapacityBOEd': 'capacity', 'StartYear1': 'start_year', 'EndState/Province':'subnat', 'StartRegion': 'region',
                                'EndRegion': 'region2'},
