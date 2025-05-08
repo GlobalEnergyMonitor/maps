@@ -4,6 +4,9 @@ node_modules/
 npm-debug.log
 **/creds.py
 .env
+*oldcode/
+*scrap/
+*testingcode/
 *.zip
 *.parquet
 *.dir

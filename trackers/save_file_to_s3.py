@@ -73,7 +73,7 @@ def googlelinktoparquet(link=''):
     # Load the file into a pandas DataFrame
     try:
 
-        df = pd.read_excel(most_recent_file, engine='openpyxl')
+        df = pd.read_excel(most_recent_file, engine='openpyxl', sheet_name=None)
         new_name = most_recent_file.split('/')[-1].split('.xlsx')[0].replace(' ', '').replace('-','').replace('DATATEAMCOPY', 'DTC')
         print(f'new_name: {new_name}')
 

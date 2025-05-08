@@ -1,4 +1,4 @@
-from all_config import *
+from gem_tracker_maps.all_config import *
 import pandas as pd
 ###
 ### pull in each final map file by map and tracker

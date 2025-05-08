@@ -18,7 +18,7 @@ import os
 from datetime import date
 import openpyxl
 import xlsxwriter
-from .all_config import *
+from ..all_config import *
 import re
 from openpyxl import Workbook
 from openpyxl import load_workbook
@@ -2497,6 +2497,7 @@ def rebuild_countriesjs(mapname, newcountriesjs):
         default = f"{'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/src/countries.js'}"
      
         print(prev_countriesjs)
+        print('The above is from the existing countries.js file if it exists in the map folder)
         # prev_countriesjs = pd.read_csv(prev_countriesjs)
         # print(prev_countriesjs)
         
@@ -2522,18 +2523,21 @@ def rebuild_countriesjs(mapname, newcountriesjs):
         missing_countries_areas = set(newcountriesjs) - set(prev_countriesjs)
         
         if len(missing_countries_areas) > 0 and missing_countries_areas != None:
-            print(f'paste in this sorted list of new countries into {mapname} countries.js file')
-            print(f'These are the net new countries:')
-            print(missing_countries_areas)
+            # print(f'paste in this sorted list of new countries into {mapname} countries.js file')
+            # print(f'These are the net new countries:')
+            # # print(missing_countries_areas)
             # save the sorted file
-            newcountriesjs = newcountriesjs.sort()
+            cleaned_countriesjs = [country.strip(';') for country in newcountriesjs]
+            newcountriesjs = sorted(cleaned_countriesjs)
             print(f'This is the sorted countries file with net new: \n {newcountriesjs}')
             # input('Paste this in')
+            print(newcountriesjs)
             # cjs = {'countries': newcountriesjs}
             # cjs_df = pd.DataFrame(data=cjs)
             # cjs_df.to_csv(f'{tracker_folder_path}{mapname}/countriesjsnew{iso_today_date}.js')
             # input('check file in tracker folder countriesjsnew DATE.js')
     
+        # add a check to see if the country in missing is not currently in the map's geo list .. but that's accomplished by previous js
 
 
 def pci_eu_map_read(gdf):
