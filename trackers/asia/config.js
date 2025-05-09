@@ -1,6 +1,6 @@
 var config = {
 
-    json: 'compilation_output/asia_2025-02-24.geojson',
+    json: 'compilation_output/asia_2025-05-01.geojson',
     geometries: ['Point','LineString'],
     center: [60, 20],
     zoomFactor: 1.9,
@@ -40,7 +40,7 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     
-    // capacityDisplayField: 'capacity-display',
+    capacityDisplayField: 'capacity-table',
     capacityLabel: {
         field: 'tracker-custom',
         values: {
@@ -92,6 +92,7 @@ var config = {
         clickColumns: ['name'],
         rightAlign: ['unit','capacity', 'prod-gas','start-year','prod-year-gas'], 
         removeLastComma: ['areas'], 
+        toLocaleString: ['capacity'],
   
     },
     searchFields: { 'Project': ['name'], 

@@ -1,5 +1,6 @@
 var config = {
-    geojson: 'compilation_output/europe_2025-02-25.geojson',
+    geojson: 'compilation_output/europe_i5_2025-05-05.geojson',
+    // parquet: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/mapfiles/europemap2025-03.parquet',
     geometries: ['Point','LineString'],
     center: [8, 50],
     zoomFactor: 1.9,
@@ -7,12 +8,7 @@ var config = {
     statusField: 'status-legend',
     statusDisplayField: 'status',
     color: {
-        // field: 'fuel-filter',
-        // values: {
-        //     'hy': 'blue',
-        //     'methane': 'green',
-        //     'blend': 'red'
-        // }
+
         field: 'tracker-custom',
         values: {  
             'GOGPT': 'blue',
@@ -43,8 +39,8 @@ var config = {
         {
             field: 'status-legend',
             label: 'Status',
-            values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved', 'not-found'],
-            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
+            values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus', 'abandoned','shelved', 'ugs', 'not-found'],
+            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Abandoned','Shelved', 'UGS', 'Not Found']
         },
         {
             field: 'maturity', 
@@ -56,6 +52,7 @@ var config = {
 
         },
         {
+            // change this to be a filter
             field: 'pci-list',
             label: 'EU Projects of Common Interest (PCI)',
             values: ['5', '6', 'both', 'none',], // can we join both into 5 and 6??? can we merge? both should show up in pci 5 and pci 6 separately
@@ -65,7 +62,7 @@ var config = {
 
     ],
     capacityField: 'scaling-capacity',
-    
+    // linkField: 'pid',
     capacityLabel: {
         field: 'tracker-custom',
         values: {
@@ -108,6 +105,8 @@ var config = {
         clickColumns: ['name'],
         rightAlign: ['capacity-table','prod-gas','start-year','prod-year-gas'], 
         removeLastComma: ['areas'], 
+        toLocaleString: ['capacity-table'],
+
 
     },
     searchFields: { 'Project': ['name', 'other-name', 'local-name'], 

@@ -1,7 +1,7 @@
 var config = {
     geometries: ['Point','LineString'],
 
-    json: 'data/ggit_2024-12-20.geojson',
+    json: 'compilation_output/ggit_2025-05-01.geojson', //'data/ggit_2024-12-20.geojson',
     color: {
         field: 'status-legend',
         values: {
@@ -34,15 +34,40 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     capacityDisplayField: 'capacity-table', 
-    capacityLabel: '',
-    assetFullLabel: "Pipelines / Terminals", 
-    assetLabel: '',
+    capacityLabel: {
+        field: 'tracker-custom',
+        values: {
+            'GGIT': 'bcm/y of gas',
+            'GGIT-import': 'MTPA of natural gas',
+            'GGIT-export': 'MTPA of natural gas',            
+        }
+    },
+    
+    assetFullLabel: {
+        field: 'tracker-custom',
+        values: {
+            'GGIT': 'Pipelines',
+            'GGIT-import': 'Terminals',
+            'GGIT-export': 'Terminals',            
+        }
+    },
+    
+    assetLabel: {
+        field: 'tracker-custom',
+        values: {
+            'GGIT': 'segments',
+            'GGIT-import': 'trains',
+            'GGIT-export': 'trains',            
+        }
+    },
     nameField: 'name', 
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'status', 'region', 'areas', 'subnat', 'start-year', 'tracker-display'],
-        labels: ['Project','Unit','Owner','Parent','Capacity','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year', 'Type'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m', 'status', 'region', 'areas', 'subnat', 'start-year', 'tracker-display'],
+        labels: ['Project','Unit','Owner','Parent','Capacity', '','Status','Region','Country/Area(s)','Subnational unit (province/state)','Start year', 'Type'],
         clickColumns: ['name'],
-        rightAlign: ['unit-name','capacity-table','start-year']
+        rightAlign: ['unit-name','capacity-table','start-year'],
+        toLocaleString: ['capacity-table'],
+    
     },
     searchFields: { 'Infrastructure Type': ['tracker-custom'],
         'Project': ['name'], 
@@ -51,8 +76,8 @@ var config = {
     },
     detailView: {
         'name': {'display': 'heading'},
-        'status': {'label': 'Status'},
-        'capacity-table': {'label': 'Capacity'},
+        // 'status': {'label': 'Status'},
+        // 'capacity-table': {'label': 'Capacity'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'start-year': {'label': 'Start Year'},
@@ -62,6 +87,19 @@ var config = {
 
 showMaxCapacity: false,
 multiCountry: true,
+
+minLineWidth: 1,
+maxLineWidth: 4,
+highZoomMinLineWidth: 2,
+highZoomMaxLineWidth: 5,
+
+minRadius: 3,
+maxRadius: 10,
+// /* radius to increase min/max to under high zoom */
+highZoomMinRadius: 5,
+highZoomMaxRadius: 30,
+
+    
 
 
 };

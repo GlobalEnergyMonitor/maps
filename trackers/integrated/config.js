@@ -1,8 +1,8 @@
 var config = {
-    csv: 'compilation_output/csv-data-2025-02-14.csv', 
+    csv: 'compilation_output/gipt-data-2025-04-30.csv', 
     tiles: [
         // 'https://gem.dev.c10e.org/2024-03-12/{z}/{x}/{y}.pbf'
-        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2025-02-14/{z}/{x}/{y}.pbf'
+        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2025-04-30/{z}/{x}/{y}.pbf'
         ],
     tileSourceLayer: 'integrated',
 
@@ -64,7 +64,9 @@ var config = {
         values: ['plant-/-project-name','unit-/-phase-name', 'owner', 'parent', 'capacity-(mw)', 'status', 'subnational-unit-(state,-province)', 'country/area', 'start-year', 'retired-year', 'type'],
         labels: ['Plant/project name','Unit/phase name','Owner','Parent','Capacity (MW)','Status','Subnational unit (province/state)','Country/Area','Start year','Retired year','Type'],
         clickColumns: 'plant-/-project-name',
-        removeLastComma: ['country/area']
+        removeLastComma: ['country/area'],
+        toLocaleString: ['capacity-(mw)'],
+
 
     },
     detailView: {

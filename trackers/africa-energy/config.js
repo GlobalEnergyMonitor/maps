@@ -1,6 +1,5 @@
 var config = {
-    json: 'compilation_output/africa_2025-02-24.geojson',
-
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/mapfiles/africa_map_2025-05-09.geojson', //'compilation_output/africa_2025-04-29.geojson',
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
@@ -47,7 +46,7 @@ var config = {
     ],
     capacityField: 'scaling-capacity',
     
-    // capacityDisplayField: 'capacity-table',
+    capacityDisplayField: 'capacity-table',
 
 
     //can be string for single value, or hash. always single value is showMaxCapacity is true
@@ -63,7 +62,7 @@ var config = {
             'GWPT':	'MW',
             'GHPT':	'MW',
             'GGPT':	'MW',
-            // 'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
+            'GOGET-oil':	'million boe/y', // remove because they dont have capacity is only relevant for scaling here Scott request
             'GOIT': 'boe/d',
             'GGIT':	'bcm/y of natural gas',
             'GGIT-import': 'MTPA of natural gas',
@@ -140,13 +139,14 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'tracker-display',],
-        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Facility Type'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'prod-coal','tracker-display',],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Production (Mt)','Facility Type'],
 
         clickColumns: ['name'],
         rightAlign: ['unit','capacity-table','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
 
         removeLastComma: ['areas'], 
+        toLocaleString: ['capacity-table'],
         // displayValue: {'tracker-display': "assetLabel"},
         // appendValue: {'capacity': "capItemLabel"},
         // appendValue: {'production': "prodItemLabel"},
@@ -171,7 +171,7 @@ var config = {
         'prod-gas': {'label': 'Production (Million m³/y)'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
-
+        'prod-coal': {'label': 'Production (Mt)'},
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},

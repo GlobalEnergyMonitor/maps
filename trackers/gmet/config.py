@@ -13,12 +13,12 @@ client_secret = "Desktop/GEM_INFO/client_secret.json"
 
 client_secret_full_path = os.path.expanduser("~/") + client_secret
 
-gem_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/'
+gem_path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/'
 
 tracker = 'gmet'
 
 
-local_file_path = f'/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/gmet/test/{today_date}ready_to_be_manipulated.csv'
+local_file_path = f'/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/gmet/test/{today_date}ready_to_be_manipulated.csv'
 
 path_for_download_and_map_files = gem_path + tracker + '/compilation_output/' + iso_today_date_folder
 os.makedirs(path_for_download_and_map_files, exist_ok=True)

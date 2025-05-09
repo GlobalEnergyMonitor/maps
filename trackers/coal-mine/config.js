@@ -1,6 +1,6 @@
 var config = {
-    // csv: 'coal-mine.csv', (Mikel's file)
-    csv: 'data.csv',
+
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/mapfiles/gcmt_map_2025-05-05.geojson', //'compilation_output/gcmt_2025-05-05.geojson',
 
     colors: {
         'red': '#c74a48',
@@ -32,27 +32,29 @@ var config = {
             field: 'status',
             /* values need to be specified for ordering */
             values: ['operating','proposed','cancelled','retired','shelved','mothballed'],
+            // values_labels: ['operating','proposed','cancelled','retired','shelved','mothballed'],
             primary: true
         },
         {
             field: 'mine-type',
             label: 'Mine Type',
-            values: ['surface','underground','underground_and_surface', 'unknown'],
-            values_labels: ['Surface','Underground','Underground & Surface', 'Unknown']
+            values: ['surface','underground','underground & surface', '-'],
+            values_labels: ['Surface','Underground','Underground & Surface', 'Not found']
 
         },
         {
             field: 'coal-grade',
             label: 'Coal Grade',
-            values: ['thermal','met','thermal_and_met','unknown'],
+            values: ['thermal','met','thermal & met','-'],
             /* value_labels must match order/number in values */
-            values_labels: ['Thermal','Met','Thermal & Met','Unknown']
+            values_labels: ['Thermal','Met','Thermal & Met','Not found']
         }
     ],
-    capacityField: 'circle_value',
-    // capacityDisplayField: 'circle_value',
-    // capacityLabel: '(Mt)', # to accomodate new feature Mikel put in, 
+    capacityField: 'scaling-capacity',
+    capacityDisplayField: 'capacity-details',
+    // capacityLabel: '(Mt)', 
     capacityLabel: '',
+    countryField: 'areas',
     // context_layers: [
     //     {
     //         field: 'coalfield',
@@ -68,23 +70,24 @@ var config = {
     assetLabel: 'projects',
 
     /* the column that contains the asset name. this varies between trackers */
-    nameField: 'project',
+    nameField: 'name',
 
     
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['project','owner', 'parent', 'capacity', 'production', 'status', 'workforce', 'coalfield', 'country', 'region', 'opening_year', 'closing_year'],
-        labels: ['Project','Owner','Parent','Capacity (Mt)', 'Production (Mt)', 'Status', 'Workforce', 'Coal Field', 'Country/Area', 'Region','Opening year', 'Closing year'],
-        clickColumns: ['project'],
-        rightAlign: ['production','capacity','opening_year, closing_year']
+        values: ['name','owner', 'parent', 'capacity', 'prod-coal', 'prod-year', 'status', 'workforce', 'coalfield', 'areas', 'region', 'start-year', 'end-year'],
+        labels: ['Project','Owner','Parent','Capacity (Mt)', 'Production (Mt)', 'Production year','Status', 'Workforce', 'Coal Field', 'Country/Area', 'Region','Opening year', 'Closing year'],
+        clickColumns: ['name'],
+        rightAlign: ['prod-coal','capacity','start-year', 'end-year'],
+        toLocaleString: ['capacity', 'prod-coal'],
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Project': ['project'], 
-        'Companies': ['owner', 'parent'],
-        'Opening Year': ['opening_year']
+    searchFields: { 'Project': ['name', 'noneng-name'], 
+        'Companies': ['owner', 'parent', 'owners-noneng'],
+        'Opening Year': ['start-year']
     },
 
     /* define fields and how they are displayed. 
@@ -95,15 +98,16 @@ var config = {
         `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'project': {'display': 'heading'},
+        'name': {'display': 'heading'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'capacity': {'label': 'Capacity (Mt)'},
-        'production': { 'label': 'Production (Mt)' },
+        'prod-coal': { 'label': 'Production (Mt)' },
         'workforce': {'label': 'Estimated Workforce'},
-        'opening_year': {'label': 'Opening Year'},
-        'coalfield': {'display': 'location'},
-        'country': {'display': 'location'}
+        'start-year': {'label': 'Opening Year'},
+        'end-year': {'label': 'Closing Year'},
+        'coalfield': {'label': 'Coal Field'},
+        'areas-subnat-sat-display': {'display': 'location'},
     }, 
 
     showMaxCapacity: false,

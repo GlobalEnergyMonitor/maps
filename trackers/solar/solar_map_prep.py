@@ -11,7 +11,7 @@ today_date = date.today()
 # Format the date in ISO format
 iso_today_date = today_date.isoformat()
 
-input_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/solar/Global-Solar-Power-Tracker-June-2024 DATA TEAM COPY.xlsx'#'all-fields-2024-05-24T162358-solar.csv'
+input_file = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/solar/Global-Solar-Power-Tracker-June-2024 DATA TEAM COPY.xlsx'#'all-fields-2024-05-24T162358-solar.csv'
 output_file = f'data.csv'
 
 # see which is longer is phase or project

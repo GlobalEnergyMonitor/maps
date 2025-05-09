@@ -1,7 +1,7 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
-    csv: 'Global-Hydropower-Tracker-May-2024_2024-05-15.csv',
+    geojson: 'ghpt_2025-04-23.geojson',
 
     colors: {
         'red greeninfo': '#c00',
@@ -13,7 +13,8 @@ var config = {
         'orange greeninfo': '#fd7e14',
         'yellow greeninfo': '#f3ff00'
     },
-
+    countryField: 'areas',
+    multiCountry: true,
     /* define the column and associated values for color application */
     color: {
         field: 'status',
@@ -42,32 +43,34 @@ var config = {
 
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
-    capacityField: 'capacity_(mw)',
-    capacityDisplayField: 'capacity_(mw)',
-    capacityLabel: 'Capacity (MW)',
+    capacityField: 'capacity',
+    capacityDisplayField: 'capacity',
+    capacityLabel: '(MW)',
 
     /* Labels for describing the assets */
     assetFullLabel: "Hydropowered Stations",
-    assetLabel: 'unit',
+    assetLabel: 'units',
 
     /* the column that contains the asset name. this varies between trackers */
-    nameField: 'project_name',
+    nameField: 'name',
 
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['project_name', 'capacity_(mw)', 'technology_type', 'status', 'start_year', 'owner', 'operator',  'country', 'country_2'],
+        values: ['name', 'capacity', 'tech-type', 'status', 'start-year', 'owner', 'operator',  'areas', 'area2'],
         labels: ['Project name','Capacity (MW)','Technology type','Status','Start year', 'Owner', 'Operator', 'Country/Area 1','Country/Area 2'],
-        clickColumns: ['project_name'],
-        rightAlign: ['capacity_(mw)','start_year']
+        clickColumns: ['name'],
+        rightAlign: ['capacity','start-year'],
+        removeLastComma: ['areas'],
+        toLocaleString: ['capacity'],
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Project': ['project_name'], 
-        'Companies': ['owner', 'operator'],
-        'Start Year': ['start_year']
+    searchFields: { 'Project': ['name'], 
+        'Companies': ['owner', 'operator', 'loc-oper', 'loc-owner'],
+        'Start Year': ['start-year']
     },
 
     /* define fields and how they are displayed. 
@@ -78,16 +81,15 @@ var config = {
       `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'project_name': {'display': 'heading'},
+        'name': {'display': 'heading'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
-        'start_year': {'label': 'Start Year'},
-        'country' : {'label': 'Country/Area 1'},
+        'start-year': {'label': 'Start Year'},
+        'areas' : {'label': 'Country/Area 1'},
         'binational': {'label': 'Binational'},
-        'country_2' : {'label': 'Country/Area 2'},
-        'location_accuracy': {'label': 'Location Accuracy'},
-        'state/province_1': {'display': 'location'},
-        'country': {'display': 'location'},
+        'area2' : {'label': 'Country/Area 2'},
+        'loc-accu': {'label': 'Location Accuracy'},
+        'areas-subnat-sat-display': {'display': 'location'},
 
     },
 

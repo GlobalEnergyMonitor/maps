@@ -4,7 +4,7 @@
 
 
 
-# gem-tracker-maps
+# gem_tracker_maps
 
 GEM Tracker Maps is served entirely staticly, with no build process. Each tracker only requires a JSON based configuration file, and a data file (CSV or JSON, as currently produced for GEM Trackers).
 
@@ -35,7 +35,7 @@ Fork the repository. Place new data file in the appropriate tracker directory. T
 
 ### Regional / Multi-tracker Maps and Data Downloads: 
 * Run multi_tracker_maps_script.py directly or from run_maps.py with subprocess
-subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/multi_tracker_maps_script.py"])                 
+subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
 
 
 ### Pre and Post Tests

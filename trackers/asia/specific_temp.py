@@ -1,10 +1,10 @@
 import pandas as pd
 import geopandas as gpd
 
-# map_xls = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/asia/compilation_output/asia_2024-09-25.xlsx'
-map = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/asia/compilation_output/asia_2024-09-25.geojson'
+# map_xls = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/asia/compilation_output/asia_2024-09-25.xlsx'
+map = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/asia/compilation_output/asia_2024-09-25.geojson'
 
-dd = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/asia/compilation_output/2024-09-25/asia-energy-tracker-data-download-with-about August 2024.xlsx'
+dd = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/asia/compilation_output/2024-09-25/asia-energy-tracker-data-download-with-about August 2024.xlsx'
 
 files = [map, dd]
 
@@ -216,7 +216,7 @@ def filter_dd(dd_df):
 
 def to_file(map_df, dd_df):
     
-    path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem-tracker-maps/trackers/asia/compilation_output/'
+    path = '/Users/gem-tah/Desktop/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/asia/compilation_output/'
     map_df.to_file(f'{path}/asia_2024-09-25-gas-only-w-asia.geojson', driver='GeoJSON')
     map_df.to_excel(f'{path}/asia_2024-09-25-gas-only-w-asia.xlsx')
     # dd_df.to_excel(f'{path}/2024-09-25/asia-energy-tracker-data-download-with-about August 2024.xlsx')
