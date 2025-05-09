@@ -1,9 +1,9 @@
 import pandas as pd
 # from all_config import *
-from .all_config import *
+from all_config import *
 # from helper_functions import *
-from .helper_functions import *
-from .create_map_objs import create_map_objs
+from helper_functions import *
+from make_map_tracker_objs import make_map_tracker_objs
 from collections import OrderedDict
 from tqdm import tqdm
 import subprocess
@@ -24,9 +24,11 @@ def make_map(list_of_map_objs):
     conversion_df = create_conversion_df(conversion_key, conversion_tab)
     for map_obj in list_of_map_objs:
         
-        input(f'Stopping on Map name: {map_obj.name}')
-        [print(tracker_obj.name) for tracker_obj in map_obj.trackers]
-        input(f'Confirm all trackers in map')
+        with open(f"{logpath}tracker_data_log.txt", "a") as log_file:
+            log_file.write(f"Stopping on Map name: {map_obj.name}\n")
+            log_file.write("Trackers in map:\n")
+            [log_file.write(f"{tracker_obj.name}\n") for tracker_obj in map_obj.trackers]
+            log_file.write("Confirm all trackers in map\n")
 
         for tracker_obj in map_obj.trackers:
             # if tracker_obj.acro == 'GGIT' or tracker_obj.acro == 'GOIT':

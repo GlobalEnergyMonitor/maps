@@ -1,9 +1,9 @@
 import pandas as pd
 # from all_config import *
-from .all_config import *
+from all_config import *
 # from helper_functions import *
-from .helper_functions import *
-from .create_map_objs import create_map_objs
+from helper_functions import *
+from make_map_tracker_objs import make_map_tracker_objs
 from collections import OrderedDict
 from tqdm import tqdm
 import subprocess
@@ -82,7 +82,7 @@ def make_data_dwnlds(tracker):
                         map_obj = pickle.load(f)
                 except:
                     
-                    map_obj = create_map_objs(map_tab_df, row, prep_dict)
+                    map_obj = make_map_tracker_objs(map_tab_df, row, prep_dict)
                     
 
                     with open(f'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/local_pkl/map_obj_for_{map_obj.name}_on_{iso_today_date}.pkl', 'wb') as f:
