@@ -1,1 +1,0 @@
-stubb_file = f"About Countries liscense Data are derived from GEM’s global trackers: Recommended Citation Contact Notes"

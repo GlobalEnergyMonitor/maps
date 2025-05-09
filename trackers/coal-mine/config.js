@@ -76,10 +76,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['name','owner', 'parent', 'capacity', 'prod-coal', 'prod-year', 'status', 'workforce', 'coalfield', 'areas', 'region', 'opening-year', 'closing-year'],
+        values: ['name','owner', 'parent', 'capacity', 'prod-coal', 'prod-year', 'status', 'workforce', 'coalfield', 'areas', 'region', 'start-year', 'end-year'],
         labels: ['Project','Owner','Parent','Capacity (Mt)', 'Production (Mt)', 'Production year','Status', 'Workforce', 'Coal Field', 'Country/Area', 'Region','Opening year', 'Closing year'],
         clickColumns: ['name'],
-        rightAlign: ['prod-coal','capacity','opening-year', 'closing-year'],
+        rightAlign: ['prod-coal','capacity','start-year', 'end-year'],
         toLocaleString: ['capacity', 'prod-coal'],
     },
 
@@ -87,7 +87,7 @@ var config = {
         each label has a value with the list of fields to search. Multiple fields might be searched */
     searchFields: { 'Project': ['name', 'noneng-name'], 
         'Companies': ['owner', 'parent', 'owners-noneng'],
-        'Opening Year': ['opening-year']
+        'Opening Year': ['start-year']
     },
 
     /* define fields and how they are displayed. 
@@ -104,8 +104,8 @@ var config = {
         'capacity': {'label': 'Capacity (Mt)'},
         'prod-coal': { 'label': 'Production (Mt)' },
         'workforce': {'label': 'Estimated Workforce'},
-        'opening-year': {'label': 'Opening Year'},
-        'closing-year': {'label': 'Closing Year'},
+        'start-year': {'label': 'Opening Year'},
+        'end-year': {'label': 'Closing Year'},
         'coalfield': {'label': 'Coal Field'},
         'areas-subnat-sat-display': {'display': 'location'},
     }, 

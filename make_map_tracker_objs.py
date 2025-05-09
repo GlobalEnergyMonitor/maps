@@ -1,11 +1,11 @@
 import pandas as pd
 from numpy import absolute
 import geopandas as gpd
-from .map_class import MapObject
-from .tracker_class import TrackerObject
-from tqdm import tqdm # can adapt more, special tweaking for dataframe!
+from map_class import MapObject
+from map_tracker_class import TrackerObject
+# from tqdm import tqdm # can adapt more, special tweaking for dataframe!
 
-def create_map_objs(map_tab_df,row, prep_dict):
+def make_map_tracker_objs(map_tab_df,row, prep_dict):
     map_obj = MapObject(
         name=map_tab_df.loc[row, 'mapname'],
         source=map_tab_df.loc[row, 'source'],
@@ -26,6 +26,7 @@ def create_map_objs(map_tab_df,row, prep_dict):
     # create a tracker obj for each item in map source
     for item in map_obj.source:
         print(f'Creating source object for: {map_obj.name} {item}')
+        print(f'Remember to clear out the local pkl files if needed!')
         # input('Check') # working
 
         tracker_source_obj = TrackerObject(
@@ -69,13 +70,18 @@ def create_map_objs(map_tab_df,row, prep_dict):
         # df = tracker.data # TODO check if this is right
         
         try:
-            print(f"DataFrame BEFORE {i}{tracker.acro}: {tracker.data.shape}")
-            # filter by geo and fuel and check result
-
+            # Open a file in append mode to log results
+            with open("tracker_data_log.txt", "a") as log_file:
+                log_file.write(f"DataFrame BEFORE {i}{tracker.acro}: {tracker.data.shape}\n")
+            
+            # Filter by geo and fuel and check result
             tracker.create_filtered_geo_fuel_df(map_obj.geo, map_obj.fuel)
-            print(f"DataFrame AFTER {i}{tracker.acro}: {tracker.data.shape}")
+            
+            # Log the results after filtering
+            with open("tracker_data_log.txt", "a") as log_file:
+                log_file.write(f"DataFrame AFTER {i}{tracker.acro}: {tracker.data.shape}\n")
 
-            input('Check after geo filter')
+            # input('Check after geo filter')
             
         except AttributeError:
 

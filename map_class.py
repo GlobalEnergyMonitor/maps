@@ -5,8 +5,8 @@ import pandas as pd
 import json
 import subprocess
 import boto3
-from .helper_functions import save_to_s3, replace_old_date_about_page_reg, check_for_lists, rebuild_countriesjs, pci_eu_map_read, check_and_convert_float, remove_diacritics, check_rename_keys, fix_status_inferred, conversion_multiply, workaround_table_float_cap, workaround_table_units
-from .all_config import client_secret_full_path, gem_path, tracker_to_fullname, tracker_to_legendname, iso_today_date, gas_only_maps, final_cols, renaming_cols_dict, ggit_geojson, ggit_lng_geojson, new_release_date, gspread_creds, africa_countries, asia_countries, europe_countries, latam_countries, full_country_list
+from helper_functions import save_to_s3, replace_old_date_about_page_reg, check_for_lists, rebuild_countriesjs, pci_eu_map_read, check_and_convert_float, remove_diacritics, check_rename_keys, fix_status_inferred, conversion_multiply, workaround_table_float_cap, workaround_table_units
+from all_config import logger, client_secret_full_path, gem_path, tracker_to_fullname, tracker_to_legendname, iso_today_date, gas_only_maps, final_cols, renaming_cols_dict, ggit_geojson, ggit_lng_geojson, new_release_date, gspread_creds, africa_countries, asia_countries, europe_countries, latam_countries, full_country_list
 import geopandas as gpd
 import numpy as np
 import gspread
@@ -135,7 +135,7 @@ class MapObject:
         print(f'Check all columns:')
         for col in gdf.columns:
             print(col)
-        input('Is fuel-filter there?')
+        # input('Is fuel-filter there?')
 
         # translate acronyms to full names for legend and table 
         gdf['tracker-display'] = gdf['tracker-custom'].map(tracker_to_fullname)
@@ -174,6 +174,8 @@ class MapObject:
             # gdf = manual_lng_pci_eu_temp_fix(gdf)
             # gdf = swap_gas_methane(gdf)
         
+        gdf.fillna('', inplace = True)
+        
         self.trackers = gdf
 
 
@@ -199,7 +201,10 @@ class MapObject:
 
         print(f'Final cols:\n')
         [print(col) for col in gdf.columns]
-        input(f'Final cols above! {self.name}')
+        # input(f'Final cols above! {self.name}')
+        logger.info(f'Final cols:\n')
+        cols = [(col) for col in gdf.columns]
+        logger.info(cols)
         
         # save the file to unique path for africa-energy if africa, else save to map name
         # also saving to testing folder 
@@ -710,7 +715,7 @@ class MapObject:
                 # use plants and plants_hy to rename or pass it since its already been renamed
                 print(set(gdf['tracker-acro'].to_list()))
                 input('This should be two, plants and plants_hy!')
-               
+            
             else:
                 gdf['tracker-acro'] = tracker_sel
                 # if tracker_sel == 'GCTT':
@@ -732,6 +737,9 @@ class MapObject:
                 gdf.reset_index(inplace=True)
                 # Reset index in place
                 if tracker_sel == 'GCMT':
+                    print(f'cols after rename in GCMT:\n{gdf.info()}')
+                    print(gdf['start_year'])
+                    input('check if start-year there')
                     # Handle for non-English Chinese wiki pages
                     print('In if statement of rename and concat in map class for GCMT')
                     
@@ -752,9 +760,9 @@ class MapObject:
             else:
                 print(f'subnat not here for {tracker_obj.name}')
                 input('check which tracker is missing subnat')
-            print(f'Adding {tracker_sel} gdf to renamed_gdfs')
+            # print(f'Adding {tracker_sel} gdf to renamed_gdfs')
             renamed_gdfs.append(gdf)
-            input('Check it adds for gogpt eu')
+            # input('Check it adds for gogpt eu')
         
         
             
