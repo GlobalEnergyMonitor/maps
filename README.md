@@ -171,11 +171,7 @@ Live branch is gitpages-production
 
 ## Next trackers to move into EG
 
-* GMET (add in pipelines soon)
-
-* GOIT (able to change soon)
-
-* Steel & Iron (able to change soon, planned for early 2025) 
+* GMET (add in pipelines soaon)
 * Coal Project Finance Tracker (no plans)
 * Global Energy Ownership (no plans, no map) 
 * Private Equity tracker (no plans, no map)
