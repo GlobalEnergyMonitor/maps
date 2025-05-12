@@ -88,7 +88,9 @@ NOTE this is currently set up manually in a jupyter notebook so the above test d
 
 
 
+INTEGRATED POWER TRACKER
 
+Note that James Norman combines the data for this tracker and shares the final data to be converted into the map format. It is currently the only map that takes tiles instead of a geojson or csv file. The steps to convert the spreadsheet into tiles and load them into s3 are now in the Integrated portion of the run_maps.py script. In case it is not working the full write up is below under building vector tiles and in the document: [Detailed GEM Specific Instructions for creating and updating GIPT tiles](https://docs.google.com/document/d/1Lh2GbscAGpM-UKx2UIo2ajHrmII_RWDDiLvGfhMktZg/edit)
 
 
 
