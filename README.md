@@ -1,4 +1,4 @@
-UPDATED INSTRUCTIONS
+INSTRUCTIONS FOR PROCESSING FINAL DATA FOR MAPS
 
 When there is new data for a given tracker release this script is run to create the global map and any dependent regional or multi-tracker maps. A byproduct of creating dependent maps is that we also create the relevant data downloads for those subsets of data. 
 
@@ -81,6 +81,10 @@ NOTE: The test repo process can be confusing at first, so it'd probably be best 
 
 BUILT IN TESTS FOR THE OUTPUTS
 
+At the end of the run_maps.py file for each tracker a test gets run in file named "topline_stats.py" that prints out the source/original data count versus the count in the map and or data download file. This is most relevant for regional maps that get filtered by country/area and or fuel type. 
+It also uses the last map file to compare the amount that has changed for all trackers. Unless there was a known patch to a tracker that didn't have new data, then the only tracker that would have a difference (almost always more) would be the one with the upcoming data release. 
+
+NOTE this is currently set up manually in a jupyter notebook so the above test description is aspirational. 
 
 
 
@@ -89,11 +93,10 @@ BUILT IN TESTS FOR THE OUTPUTS
 
 
 
-## 
-[Steps to create and test multi-tracker maps WIP]([https://docs.google.com/document/d/1LacVuubl4T4CtGzy1KT_GsWrjV-DOI8XQFuLsUliT88]
-) https://docs.google.com/document/d/1LacVuubl4T4CtGzy1KT_GsWrjV-DOI8XQFuLsUliT88
 
 
+
+### EARTH GENOME INSTRUCTIONS
 
 # gem_tracker_maps
 
@@ -112,27 +115,6 @@ Clone the repo. Create a new directory under `/trackers/`. Place the data for th
 First, there are sitewide configurations with [`site-config.js`](site-config.js). Any parameter can be configured site wide. Documentation on the typical site wide parameters is in that file.
 
 The [`config.js for coal-plant`](/trackers/coal-plant/config.js) has documentation on the parameters typically set for a tracker.
-
-## Update tracker data
-
-Fork the repository. Place new data file in the appropriate tracker directory. Test and do quality checks on that fork. When ready, make a pull request to the main repository. And accept the pull request to make the update.
-
-## Routine tracker releases
-### Global Single Tracker Maps: 
-* Save a copy of the new data to the: [Tracker official releases (data team copies)](https://drive.google.com/drive/folders/1Ql9V1GLLNuOGoJOotX-wK6wCtDq1dOxo)
-* Update the map tracker log sheet ([tab name prep_file](https://docs.google.com/spreadsheets/d/15l2fcUBADkNVHw-Gld_kk7EaMiFFi8ysWt6aXVW26n8/edit?gid=1817870001#gid=1817870001) with the new data's google sheet key from the copy of official data saved above
-* In the all_config.py file add the tracker name(s) with new data to the list held in parameter: trackers_to_update = [] NOTE: This tracker name needs to match the one in prep_file tab of the log sheet
-* Run run_maps.py 
-
-### Regional / Multi-tracker Maps and Data Downloads: 
-* Run multi_tracker_maps_script.py directly or from run_maps.py with subprocess
-subprocess.run(["python", "/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/multi_tracker_maps_script.py"])                 
-
-
-### Pre and Post Tests
-* [Testing and data set up for multi tracker map files and data download files](https://docs.google.com/document/d/1LacVuubl4T4CtGzy1KT_GsWrjV-DOI8XQFuLsUliT88/edit?tab=t.0#heading=h.eooqz1k5afdy)
-* Tests final dataframe size to original
-* Tests capacity values to be sure none after converting to joules are larger than capacity in original units for a country
 
 
 ## Building vector tiles
