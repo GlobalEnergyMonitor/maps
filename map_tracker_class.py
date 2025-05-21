@@ -1,13 +1,14 @@
 from requests import HTTPError
-from .all_config import new_release_date, iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
-from .helper_functions import rename_gdfs, fuel_filter, maturity, clean_about_df, replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
+from all_config import logger, new_release_date, iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
+from helper_functions import rename_gdfs, fuel_filter, maturity, clean_about_df, replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
 import pandas as pd
 from numpy import absolute
 import json
 import subprocess
 import geopandas as gpd
 import boto3
-from trackers.creds import *
+from creds import *
+from all_config import logpath
 import time
 import numpy as np
 from shapely import wkt
@@ -87,8 +88,8 @@ class TrackerObject:
                 
                 print(f'opened from {f}')
                 self.data = pickle.load(f)
-                input(f'Check the file is up to date or needs to be deleted from local_pk!')
-                [print (col) for col in self.data.columns]
+                # input(f'Check the file is up to date or needs to be deleted from local_pk!')
+                # [print (col) for col in self.data.columns]
                 # input(f'Review orig cols in {self.name}')
                 
         except:
@@ -206,7 +207,11 @@ class TrackerObject:
                 #assign df tuple to data 
                 self.data = df_tuple # not sure how to handle this, concat? 
                 # gdf = gdf[gdf[geocol].apply(lambda x: check_list(x, needed_geo))]
-            
+            # elif self.name == 'Coal Mines':
+            #     df = self.create_df()
+            #     logger.info('Cols for coal mine:')
+            #     logger.info(df.info(buf=None))  # Log the DataFrame info
+            #     input('Look at cols for coal mine')
             else:
                 #assign df to data 
 
@@ -720,7 +725,8 @@ class TrackerObject:
         print(f'length of self.data: {len(self.data)}')
         if self.acro != 'GOGET' and self.acro != 'GOGPT-eu':
             geocollist = self.geocol.split(';')
-            print(f'Getting geo: {geo} from col list: {geocollist}')
+            print(f'Getting geo: {geo} from col list: {geocollist} for {self.acro}')
+               
             if geo != ['global'] or geo != ['']:
                 if len(geocollist) > 1:
                     self.data.columns = self.data.columns.str.strip()
@@ -745,7 +751,12 @@ class TrackerObject:
                     self.data = filtered_df
 
                 else:
-                    self.data['country_to_check'] = self.data[self.geocol].apply(lambda x: split_countries(x) if isinstance(x, str) else [])
+                    if self.geocol in self.data.columns:
+                        self.data['country_to_check'] = self.data[self.geocol].apply(lambda x: split_countries(x) if isinstance(x, str) else [])
+                    else:
+                        print(f"Column '{self.geocol}' not found in data for {self.name}.")
+                        [print(col) for col in self.data.columns]
+
                     filtered_df = self.data[self.data['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
                     self.data = filtered_df
 
@@ -754,8 +765,9 @@ class TrackerObject:
                 self.data = filtered_df
             
             else:
-                print(len(self.data))
-                input('Check length of df for normal case!')
+                # print(len(self.data))
+                # print(f"Length of df for normal case: {len(self.data)}")
+                logger.info(f"Length of df for normal case: {len(self.data)}")
 
         # elif self.acro == 'GOGPT-eu':
         #     plants_hy_df, plants_df = self.data # Unpack the tuple
@@ -905,9 +917,11 @@ class TrackerObject:
                         else:
                             self.data.loc[row, 'Longitude'] = self.data.loc[row, 'float_col_clean_lng']           
                     if len(missing_coordinate_row) > 0:
-                        print(F"This is missing_coordinate_row: {missing_coordinate_row}")   
-                        input('LOOK INTO IT')       
-                    
+                        logger.info(f"Missing coordinates for {self.name}:")
+                        for key, value in missing_coordinate_row.items():
+                            logger.info(f"{key}: {value}")
+                        logger.info("\n")
+                        print(f"Missing coordinates logged for {self.name}.")
                        
                 else:
                     print(f"Skipping non-numeric column: {col}")
@@ -1334,7 +1348,7 @@ def split_countries(country_str):
     
 
 
-def create_filtered_fuel_df(df, self):
+def create_filtered_fuel_df(df, self): # TODO HOW ARE WE HANDLING GGIT LNG?!
     # self.acro, self.fuelcol
     if self.acro == 'GOGET':
         drop_row = []

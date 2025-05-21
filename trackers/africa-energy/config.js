@@ -1,5 +1,5 @@
 var config = {
-    json: 'compilation_output/africa_2025-04-29.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/mapfiles/africa_map_2025-05-09.geojson', //'compilation_output/africa_2025-04-29.geojson',
     geometries: ['Point','LineString'],
     center: [30, 0],
     zoomFactor: 1.5,
@@ -137,8 +137,8 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'tracker-display',],
-        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Facility Type'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'prod-coal','tracker-display',],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Production (Mt)','Facility Type'],
 
         clickColumns: ['name'],
         rightAlign: ['unit','capacity-table','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
@@ -168,7 +168,7 @@ var config = {
         'prod-gas': {'label': 'Production (Million m³/y)'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
-
+        'prod-coal': {'label': 'Production (Mt)'},
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
