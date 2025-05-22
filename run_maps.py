@@ -13,8 +13,29 @@ from tqdm import tqdm # can adapt more, special tweaking for dataframe!
 
 for tracker in tqdm(trackers_to_update, desc='Running'):
     # print(tracker)
+    if tracker == 'Oil & Gas Plants':
+        map_obj_list, problem_map_objs = make_data_dwnlds(tracker)  
+        print(f'{len(map_obj_list)} maps to be updated with new {tracker} data!')
+        # input('Check if the above statement makes sense ^')
+        list_of_map_objs_mapversion = make_map(map_obj_list) # this returns map obj list map version that can be run thru tests
+                
+        print('Great, now lets run those map objs map version thru tests on source!')
+        input('Confirm above')                  
+              
+    elif tracker == 'Cement and Concrete':
+        print('Creating global map for Cement and Concrete then dependent maps and dd')
+        # add a comparison between all_config column dictionary and new file
+        # make data downloads 
+        map_obj_list, problem_map_objs = make_data_dwnlds(tracker)
+        # creates single map file
+        print(f'{len(map_obj_list)} maps to be updated with new {tracker} data!')
+        # input('Check if the above statement makes sense ^')
+        list_of_map_objs_mapversion = make_map(map_obj_list) # this returns map obj list map version that can be run thru tests
+        
+        print('Great, now lets run those map objs map version thru tests on source!')
+        input('Confirm above')          
     
-    if tracker == 'Coal Mines':
+    elif tracker == 'Coal Mines':
         print('Creating global map for Coal Mines then dependent maps and dd')
         # add a comparison between all_config column dictionary and new file
         # make data downloads 
@@ -163,6 +184,91 @@ for tracker in tqdm(trackers_to_update, desc='Running'):
             f"aws configure set s3.max_concurrent_requests 100 && "
             f"export BUCKETEER_BUCKET_NAME=mapsintegrated && "
             f"aws s3 cp --endpoint-url https://nyc3.digitaloceanspaces.com {output_folder}integrated-{releaseiso}.dir s3://$BUCKETEER_BUCKET_NAME/maps/integrated-{releaseiso} --recursive --acl public-read"
+        )
+        process = subprocess.run(do_aws_bucket, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+                
+    elif tracker == 'Integrated-simple':
+        test_results_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/integrated/test_results/'
+
+        output_folder = '/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/trackers/integrated/compilation_output/'
+        
+        output_file = f'{output_folder}gipt-data-{iso_today_date}.csv'
+
+        # creates single map file
+        key, tabs = get_key_tabs_prep_file(tracker)
+
+    
+        df = create_df(key, tabs)
+        ### send to s3 for latest data download
+        s3folder = 'GIPT-simple'
+        filetype = 'dd'
+        parquetpath = f'{output_folder}{tracker}{filetype}{releaseiso}.parquet'
+        for col in df.columns:
+        # check if mixed dtype
+            if df[col].apply(type).nunique() > 1:
+                # if so, convert it to string
+                df[col] = df[col].fillna('').astype(str)
+        
+        df.to_parquet(parquetpath, index=False)
+        do_command_s3 = (
+            f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
+            f'aws s3 cp {parquetpath} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
+            f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
+        )            
+        process = subprocess.run(do_command_s3, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                
+        df = clean_capacity(df) 
+        df = semicolon_for_mult_countries_gipt(df)
+        df = fix_status_inferred(df)        
+        # harmonize_countries(df, countries_dict, test_results_folder) # find countries_dict
+        df= rename_cols(df)
+        df = remove_missing_coord_rows(df)
+        df = reduce_cols(df)
+        
+        
+        df.to_csv(output_file, index=False, encoding='utf-8' )
+
+        s3folder = 'GIPT-simple'                
+        filetype = 'map'
+        parquetpath_m = f'{output_folder}{tracker}{filetype}{releaseiso}.parquet'
+        for col in df.columns:
+        # check if mixed dtype
+            if df[col].apply(type).nunique() > 1:
+                # if so, convert it to string
+                df[col] = df[col].fillna('').astype(str)
+        df.to_parquet(parquetpath_m, index=False)
+
+        ### do aws command copy to s3 publicgem data
+        do_command_s3 = (
+            f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
+            f'aws s3 cp {parquetpath_m} s3://$BUCKETEER_BUCKET_NAME/{s3folder}/ '
+            f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
+        )            
+        process = subprocess.run(do_command_s3, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        input('Check that ingt was saved to s3')
+        capacityfield = 'capacity-(mw)'
+        # run csv2json
+        do_csv2json = (
+            f"csv2geojson --numeric-fields '{capacityfield}' {output_folder}gipt-data-{iso_today_date}.csv "
+            f"> integrated_{iso_today_date}.geojson"
+        )
+        process = subprocess.run(do_csv2json, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        # run tippecanoe
+        do_tippecanoe = (
+            f"tippecanoe -e integrated-{iso_today_date}.dir --no-tile-compression -r1 -pk -pf --force -l "
+            f"integrated < integrated_{iso_today_date}.geojson"
+        )
+        process = subprocess.run(do_tippecanoe, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        # set aws configue and bucket name  # do aws command copy to s3 mapintegrated 
+
+        do_aws_bucket = (
+            f"aws configure set s3.max_concurrent_requests 100 && "
+            f"export BUCKETEER_BUCKET_NAME=mapsintegrated && "
+            f"aws s3 cp --endpoint-url https://nyc3.digitaloceanspaces.com {output_folder}integrated-{iso_today_date}.dir s3://$BUCKETEER_BUCKET_NAME/maps/integrated-{iso_today_date} --recursive --acl public-read"
         )
         process = subprocess.run(do_aws_bucket, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
