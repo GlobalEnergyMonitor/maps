@@ -48,7 +48,7 @@ var config = {
     capacityDisplayField: 'capacity-(mw)',
     capacityLabel: 'Capacity (MW)',
     linkField: 'gem-location-id',
-    urlField: 'gemwiki-url',
+    urlField: 'url',
     countryField: 'country/area',
     searchFields: { 'Project': ['plant-/-project-name', 'plant-/-project-name_search'], 
         'Companies': ['owner', 'parent', 'owner_search', 'parent_search'],
