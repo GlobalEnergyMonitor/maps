@@ -149,9 +149,9 @@ def make_data_dwnlds(tracker):
                 writer = bold_first_row(writer, sheet_name=f'About {about_tab_name}') # TODO this did not work 
 
                 for tracker_obj in map_obj.trackers:
-                    # print(f"Writing source to filename: {tracker_obj.name}")
-                    # print(f'Length of tracker df is: {len(tracker_obj.data)}')
-                    # input('Read that!')
+                    print(f"Writing source to filename: {tracker_obj.name}")
+                    print(f'Length of tracker df is: {len(tracker_obj.data)}')
+                    input('Read that!')
                     # df = tracker_obj.data
                     about = tracker_obj.about
                     tracker_name = tracker_obj.name
@@ -159,28 +159,64 @@ def make_data_dwnlds(tracker):
                     about.to_excel(writer, sheet_name=f'About {tracker_name}', index=False)
                     writer = bold_first_row(writer, sheet_name=f'About {tracker_name}')
                     if isinstance(tracker_obj.data, tuple):
+                        print(tracker_obj.name)
+                        input("In tuple part of make data dwnlds, check the name")
                         tracker_obj.set_data_official() # so have data for map and for datadownload
-                        main, prod = tracker_obj.data_official 
-                        # check if set data official works
-                        for df in [main, prod]: 
-                            if 'country_to_check' in df.columns.to_list():
-                                print(f'it is still there')
-                                input('data official not working')                      
-                        print(f"Main DataFrame shape: {main.shape}")
-                        print(f"Prod DataFrame shape: {prod.shape}")
-                        main = main.map(remove_illegal_characters)
-                        prod = prod.map(remove_illegal_characters)
-                        main.to_excel(writer, sheet_name=f'Extraction Main data', index=False)
-                        writer = bold_first_row(writer, sheet_name=f'Extraction Main data')
 
-                        prod.to_excel(writer, sheet_name=f'Extraction Production & reserves', index=False)
-                        writer = bold_first_row(writer, sheet_name=f'Extraction Production & reserves')
+                        if tracker_name == 'Oil & Gas Extraction':
+                            print(tracker_obj.data)
+                            input('Check if there is anything there before data official')
+                            
 
-                        print(f'Wrote {tracker_name} to file {filename} successfully!')
-                    
+                            main, prod = tracker_obj.data_official 
+                            # check if set data official works
+                            for df in [main, prod]: 
+                                if 'country_to_check' in df.columns.to_list():
+                                    print(f'it is still there')
+                                    input('data official not working')                      
+                            print(f"Main DataFrame shape: {main.shape}")
+                            print(f"Prod DataFrame shape: {prod.shape}")
+                            
+                            main = main.map(remove_illegal_characters)
+                            prod = prod.map(remove_illegal_characters)
+                            main.to_excel(writer, sheet_name=f'Extraction Main data', index=False)
+                            writer = bold_first_row(writer, sheet_name=f'Extraction Main data')
+
+                            prod.to_excel(writer, sheet_name=f'Extraction Production & reserves', index=False)
+                            writer = bold_first_row(writer, sheet_name=f'Extraction Production & reserves')
+
+                            print(f'Wrote {tracker_name} to file {filename} successfully!')
+                            
+                        elif tracker_name == 'GOGPT EU':
+                        
+                            print(tracker_obj.data)
+                            input('Check if there is anything there before data official')
+                            
+                            plants, plants_hy = tracker_obj.data_official 
+                            # check if set data official works
+                            for df in [plants, plants_hy]: 
+                                if 'country_to_check' in df.columns.to_list():
+                                    print(f'it is still there')
+                                    input('data official not working')                      
+                            print(f"plants DataFrame shape: {plants.shape}")
+                            print(f"plants_hy DataFrame shape: {plants_hy.shape}")
+                            
+                            plants = plants.map(remove_illegal_characters)
+                            plants_hy = plants_hy.map(remove_illegal_characters)
+                            
+                            plants.to_excel(writer, sheet_name=f'plants', index=False)
+                            writer = bold_first_row(writer, sheet_name=f'plants')
+
+                            plants_hy.to_excel(writer, sheet_name=f'plants_hy', index=False)
+                            writer = bold_first_row(writer, sheet_name=f'plants_hy')
+
+                            print(f'Wrote {tracker_name} to file {filename} successfully!')
+                            
                     else:
+
                         tracker_obj.set_data_official() # so have data for map and for datadownload
                         df = tracker_obj.data_official
+
                         # check if set data official works
                         if 'country_to_check' in df.columns.to_list():
                             print(f'it is still there')
