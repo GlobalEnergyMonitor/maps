@@ -1,5 +1,5 @@
 {
-  "Africa": [
+    "Africa": [
     "Algeria",
     "Angola",
     "Benin",
@@ -60,8 +60,8 @@
     "Western Sahara",
     "Zambia",
     "Zimbabwe"
-  ],
-  "Americas": [
+    ],
+    "Americas": [
     "Anguilla",
     "Antigua and Barbuda",
     "Argentina",
@@ -119,8 +119,8 @@
     "Venezuela",
     "Virgin Islands (British)",
     "Virgin Islands (U.S.)"
-  ],
-  "Asia": [
+    ],
+    "Asia": [
     "Afghanistan",
     "Armenia",
     "Azerbaijan",
@@ -172,8 +172,8 @@
     "Uzbekistan",
     "Vietnam",
     "Yemen"
-  ],
-  "Europe": [
+    ],
+    "Europe": [
     "Åland Islands",
     "Albania",
     "Andorra",
@@ -226,8 +226,8 @@
     "Switzerland",
     "Ukraine",
     "United Kingdom"
-  ],
-  "Oceania": [
+    ],
+    "Oceania": [
     "American Samoa",
     "Australia",
     "Christmas Island",
@@ -257,5 +257,7 @@
     "United States Minor Outlying Islands",
     "Vanuatu",
     "Wallis and Futuna"
-  ]
+    ]
 }
+
+
