@@ -1518,7 +1518,6 @@ function enableNavFilters() {
     }); 
 }
 function enableCountrySelect() {
-
     $.ajax({
         type: "GET",
         url: config.countryFile,
@@ -1527,10 +1526,13 @@ function enableCountrySelect() {
     });
 }
 function buildCountrySelect() {
-    if (config.allCountrySelect) $('#country_select').append('<li><a class="country-dropdown-item dropdown-item h4" data-countries="" data-countryText="" href="#">all</a></li>');
+    if (config.allCountrySelect) {
+        $('#country_select').append('<li><a class="country-dropdown-item dropdown-item h4" data-countries="" data-countryText="" href="#">all</a></li>');
+    }
     Object.keys(config.countries).forEach((continent, continent_idx) => {
         let dropdown_html = '';
-        dropdown_html += `<li><a class="country-dropdown-item dropdown-item h4" data-countries="${config.countries[continent].join(',')}" data-countryText="${continent}" href="#">${continent}</a>`;
+        // Add continent as a selectable item (clicking selects all countries in continent)
+        dropdown_html += `<li class="continent-li"><a class="country-dropdown-item dropdown-item h4 continent-select" data-countries="${config.countries[continent].join(';')}" data-countryText="${continent}" href="#">${continent}</a>`;
         dropdown_html += '<ul class="submenu dropdown-menu">';
         config.countries[continent].forEach((country, country_idx) => {
             dropdown_html += `<li><a class="h5 country-dropdown-item dropdown-item" data-countries="${country}" data-countryText="${country}" href="#">${country}</a></li>`;
@@ -1547,17 +1549,47 @@ function buildCountrySelect() {
         $('#country_select').append(dropdown_html);
     });
 
+    // Click handler: select continent or country
     $('.country-dropdown-item').each(function() {
-        this.addEventListener("click", function() {
+        this.addEventListener("click", function(e) {
+            // Only filter if not just expanding submenu
             config.selectedCountryText = this.dataset.countrytext;
-            config.selectedCountries = (this.dataset.countries.length > 0 ?  this.dataset.countries.split(";") : []); // I think this needs to be exchanged with ; for multiple countries 
-            console.log(config.selectedCountries)
-            
+            config.selectedCountries = (this.dataset.countries.length > 0 ? this.dataset.countries.split(";") : []);
             $('#selectedCountryLabel').text(config.selectedCountryText || "all");
-
             $('#spinner-container-filter').removeClass('d-none')
             $('#spinner-container-filter').addClass('d-flex')
             filterData();
+        });
+    });
+
+    // Hover logic for continent: show submenu, keep open when moving to submenu
+    $('.continent-li').each(function() {
+        let $li = $(this);
+        let $submenu = $li.children('.submenu');
+        let submenuTimeout;
+
+        // Show submenu on hover
+        $li.children('.continent-select').on('mouseenter', function() {
+            clearTimeout(submenuTimeout);
+            $submenu.css({ display: 'block' });
+        });
+
+        // Hide submenu when mouse leaves both continent and submenu
+        $li.children('.continent-select').on('mouseleave', function() {
+            submenuTimeout = setTimeout(() => {
+                $submenu.css({ display: 'none' });
+            }, 200);
+        });
+
+        $submenu.on('mouseenter', function() {
+            clearTimeout(submenuTimeout);
+            $submenu.css({ display: 'block' });
+        });
+
+        $submenu.on('mouseleave', function() {
+            submenuTimeout = setTimeout(() => {
+                $submenu.css({ display: 'none' });
+            }, 200);
         });
     });
 
