@@ -1,0 +1,36 @@
+# testing out how handling metadata and data mgmt info with yaml
+
+tracker: Oil & Gas
+
+releasedate: 2025-08-01
+
+long_command_to_combine_data: >
+  ljdlflsldks
+  sdlkfsldlfk
+  slkdfljslkfj
+  potentially whether 
+  to tab or concat and on 
+  what 
+
+release_history: |
+  yyyy-mm-dd
+  filename
+  toplinestats
+
+  yyyy-mm-dd
+  filename
+  toplinestats
+
+dependent_maps:
+  - gogpt
+  - latam
+  - africa-energy
+  - europe-gas
+  - asia-gas
+
+about_page_info:
+  contact: PM@globalenergymonitor.org etc
+  release_notes: 
+  citation:
+  copyright:
+  column_definitions: 
