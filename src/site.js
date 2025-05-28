@@ -478,7 +478,7 @@ function addPointLayer() {
 
     let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
     paint['circle-radius'] = [
-        "interpolate", ["linear"], ["zoom"],
+        "interpolate", ["exponential", .5], ["zoom"],
         1, ["interpolate", interpolateExpression,
             ["to-number",["get", config.capacityField]],
             config.minPointCapacity, config.minRadius,
@@ -516,7 +516,7 @@ function addPointLayer() {
             'icon-image': ["get", "icon"],
             'icon-allow-overlap': true,
             'icon-size': [
-                "interpolate", ["linear"], ["zoom"],
+                "interpolate", ["exponential", .5], ["zoom"],
                 1, ['interpolate', interpolateExpression,
                     ["to-number", ["get", config.capacityField]],
                     config.minPointCapacity, config.minRadius * 2 / 64,
@@ -580,7 +580,7 @@ function addLineLayer() {
 
     let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
     paint['line-width'] = [
-        "interpolate", ["linear"], ["zoom"],
+        "interpolate", ["exponential", .5], ["zoom"],
         1, ["interpolate", interpolateExpression,
             ["to-number",["get", config.capacityField]],
             config.minLineCapacity, config.minLineWidth,

@@ -23,10 +23,24 @@ var config = {
         }
 
     },
+
+    // /* radius associated with minimum/maximum value on map */
+    // minRadius: 2,
+    // maxRadius: 10,
+    // minLineWidth: 1,
+    // maxLineWidth: 10,
+
+    // /* radius to increase min/max to under high zoom */
+    // highZoomMinRadius: 4,
+    // highZoomMaxRadius: 32,
+    // highZoomMinLineWidth: 4,
+    // highZoomMaxLineWidth: 32,
+
     minRadius: 1,
     maxRadius: 10,
     highZoomMinRadius: 4,
     highZoomMaxRadius: 32,
+
     interpolate: ["cubic-bezier", 0, 0, 0, 1],
     filters: [
         {

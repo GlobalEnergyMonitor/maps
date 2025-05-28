@@ -177,17 +177,30 @@ var config = {
         'areas': {'label': 'Country/Area(s)'},
         'areas-subnat-sat-display': {'display': 'location'}, 
     },
-        /* radius associated with minimum/maximum value on map */
+
+    // /* radius associated with minimum/maximum value on map */
     // minRadius: 2,
     // maxRadius: 10,
-    minLineWidth: 1,
-    maxLineWidth: 3,
+    // minLineWidth: 1,
+    // maxLineWidth: 10,
 
     // /* radius to increase min/max to under high zoom */
     // highZoomMinRadius: 4,
     // highZoomMaxRadius: 32,
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
+
+        /* radius associated with minimum/maximum value on map */
+    minRadius: 2,
+    maxRadius: 10,
+    minLineWidth: 1,
+    maxLineWidth: 3,
+
+    // /* radius to increase min/max to under high zoom */
+    highZoomMinRadius: 4,
+    highZoomMaxRadius: 32,
+    highZoomMinLineWidth: 4,
+    highZoomMaxLineWidth: 32,
     // showAllPhases: true
     
 };

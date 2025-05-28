@@ -52,6 +52,7 @@ var config = {
         toLocaleString: ['capacity-(mw)'],
 
     },
+    // interpolate: ["cubic-bezier", 0, 0, 0, 1],
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
@@ -78,5 +79,29 @@ var config = {
         'country/area': {'display': 'location'}
     },
 
+
+
+    // /* radius associated with minimum/maximum value on map */
+    // minRadius: 2,
+    // maxRadius: 10,
+    // minLineWidth: 1,
+    // maxLineWidth: 10,
+
+    // /* radius to increase min/max to under high zoom */
+    // highZoomMinRadius: 4,
+    // highZoomMaxRadius: 32,
+    // highZoomMinLineWidth: 4,
+    // highZoomMaxLineWidth: 32,
+
+    
+        /* radius associated with minimum/maximum value on map */
+    minRadius: 2,
+    maxRadius: 10,
+
+    // /* radius to increase min/max to under high zoom */
+    highZoomMinRadius: 4,
+    highZoomMaxRadius: 32,
+
+    // showAllPhases: true,
     showMinCapacity: true
 }
