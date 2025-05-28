@@ -33,20 +33,25 @@ var site_config = {
         'line-cap': 'round', 
         'line-join': 'round'
     },
-    
-    /* radius associated with minimum/maximum value on map */
-    /* Defined by pixels and be 1- infinity, 0 is invisible */
-    minRadius: 2,
-    maxRadius: 30,
-    minLineWidth: .5,
-    maxLineWidth: 7,
 
-    /* radius to increase min/max to under high zoom */
-    /* In  mapbox there are 22 zoom levels, higher zoom usually meaning samller area "closer in"*/
+    minRadius: 1,
+    maxRadius: 10,
     highZoomMinRadius: 4,
     highZoomMaxRadius: 32,
-    highZoomMinLineWidth: .5,
-    highZoomMaxLineWidth: 7,
+
+    /* radius associated with minimum/maximum value on map */
+    // /* Defined by pixels and be 1- infinity, 0 is invisible */
+    // minRadius: 2,
+    // maxRadius: 30,
+    // minLineWidth: .5,
+    // maxLineWidth: 7,
+
+    // /* radius to increase min/max to under high zoom */
+    // /* In  mapbox there are 22 zoom levels, higher zoom usually meaning samller area "closer in"*/
+    // highZoomMinRadius: 4,
+    // highZoomMaxRadius: 32,
+    // highZoomMinLineWidth: .5,
+    // highZoomMaxLineWidth: 7,
     
     /* define column names to pull data from */
     linkField: 'url',
