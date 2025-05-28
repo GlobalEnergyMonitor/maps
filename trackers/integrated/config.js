@@ -7,10 +7,6 @@ var config = {
     tileSourceLayer: 'integrated',
 
     projection: 'globe',
-<<<<<<< HEAD
-=======
-
->>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     color: { /* will be processed both into style json for paint circle-color property, and for legend. 
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
@@ -71,7 +67,6 @@ var config = {
         toLocaleString: ['capacity-(mw)'],
 
 
->>>>>>> 81808373619ec7caaa2f0f4b2814984378a66e84
     },
     detailView: {
         'plant-/-project-name': {'display': 'heading'},
