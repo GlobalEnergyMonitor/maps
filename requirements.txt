@@ -1,0 +1,15 @@
+boto3==1.37.24
+chardet==4.0.0
+duckdb==1.2.1
+geopandas==0.14.3
+gspread==6.2.0
+gspread_dataframe==4.0.0
+numpy==1.24.3
+openpyxl==3.1.5
+pandas==2.0.3
+polyline==2.0.2
+pyogrio==0.7.2
+Requests==2.32.3
+Shapely==2.1.0
+tqdm==4.65.0
+XlsxWriter==3.1.4

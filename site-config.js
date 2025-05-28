@@ -71,7 +71,7 @@ var site_config = {
     /* initial load zoom multiplier */
     zoomFactor: 1.25,
 
-    countryFile: '../../src/countries.js', 
+    countryFile: '../../src/countries.json', 
     allCountrySelect: true,
     multiCountry: false,
 
