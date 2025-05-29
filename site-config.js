@@ -76,7 +76,7 @@ var site_config = {
     phasesZoom: 8,
 
     /* initial load zoom multiplier */
-    zoomFactor: 1.25,
+    zoomFactor: 1,
 
     countryFile: '../../src/countries.json', 
     allCountrySelect: true,

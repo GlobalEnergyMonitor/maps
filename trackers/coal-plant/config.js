@@ -93,11 +93,9 @@ var config = {
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
 
-    
-        /* radius associated with minimum/maximum value on map */
-    minRadius: 2,
+    /* radius associated with minimum/maximum value on map */
+    minRadius: .8,
     maxRadius: 10,
-
     // /* radius to increase min/max to under high zoom */
     highZoomMinRadius: 4,
     highZoomMaxRadius: 32,

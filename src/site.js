@@ -580,7 +580,7 @@ function addLineLayer() {
 
     let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
     paint['line-width'] = [
-        "interpolate", ["exponential", .5], ["zoom"],
+        "interpolate", ["linear"], ["zoom"],
         1, ["interpolate", interpolateExpression,
             ["to-number",["get", config.capacityField]],
             config.minLineCapacity, config.minLineWidth,

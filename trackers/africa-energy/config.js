@@ -1,8 +1,8 @@
 var config = {
     geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/mapfiles/africa_map_2025-05-09.geojson', //'compilation_output/africa_2025-04-29.geojson',
     geometries: ['Point','LineString'],
-    center: [30, 0],
-    zoomFactor: 1.5,
+    center: [15, 0],
+    zoomFactor: 1,
     statusField: 'status-legend',
     statusDisplayField: 'status',
     // linkField: 'id',
@@ -190,17 +190,19 @@ var config = {
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
 
-        /* radius associated with minimum/maximum value on map */
-    minRadius: 2,
+    /* radius associated with minimum/maximum value on map */
+    minRadius: .8,
     maxRadius: 10,
-    minLineWidth: 1,
-    maxLineWidth: 3,
-
     // /* radius to increase min/max to under high zoom */
     highZoomMinRadius: 4,
     highZoomMaxRadius: 32,
-    highZoomMinLineWidth: 4,
-    highZoomMaxLineWidth: 32,
+
+    minLineWidth: .4,
+    maxLineWidth: 1,
+    highZoomMinLineWidth: .4,
+    highZoomMaxLineWidth: 1,
     // showAllPhases: true
     
+    // interpolate: ["cubic-bezier", 0, 0, 0, 1],
+
 };

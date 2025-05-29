@@ -29,7 +29,7 @@ var config = {
 
         }
     },
-    // interpolate: ["cubic-bezier", 0, 0, 0, 1],
+    interpolate: ["cubic-bezier", 0, 0, 0, 1],
 
     /* define the column and values used for the filter UI. There can be multiple filters listed. 
       Additionally a custom `label` can be defined (default is the field), 
@@ -115,11 +115,10 @@ var config = {
     // highZoomMaxRadius: 32,
     // highZoomMinLineWidth: 4,
     // highZoomMaxLineWidth: 32,
-    
-        /* radius associated with minimum/maximum value on map */
-    minRadius: 2,
-    maxRadius: 10,
 
+    /* radius associated with minimum/maximum value on map */
+    minRadius: .8,
+    maxRadius: 10,
     // /* radius to increase min/max to under high zoom */
     highZoomMinRadius: 4,
     highZoomMaxRadius: 32,
