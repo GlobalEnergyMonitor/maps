@@ -88,10 +88,11 @@ var config = {
         and designated which column has the link */
     tableHeaders: {
         values: ['name','owner', 'status', 'Cement-Capacity-(millions-metric-tonnes-per-annum)', 'start-year','plant-type','prod-type', 'subnat','areas'],
-        labels: ['Plant','Owner','Status', 'Cement Capacity (millions metric tonnes per annum)', 'Start date', 'Plant type', 'Production type','Subnational Unit','Country/Area'],
+        labels: ['Project','Owner','Status', 'Cement Capacity (millions metric tonnes per annum)', 'Start date', 'Plant type', 'Production type','Subnational Unit','Country/Area'],
         clickColumns: ['name'],
         rightAlign: [],
-        toLocaleString: ['Cement Capacity (millions metric tonnes per annum)'], 
+        removeLastComma: ['areas'], 
+        toLocaleString: ['Cement-Capacity-(millions-metric-tonnes-per-annum)'], 
 
     },
 
