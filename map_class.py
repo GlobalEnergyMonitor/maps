@@ -2,11 +2,8 @@
 
 # from pull_down_s3 import get_file_name 
 import pandas as pd
-import json
-import subprocess
-import boto3
 from helper_functions import save_to_s3, replace_old_date_about_page_reg, check_for_lists, rebuild_countriesjs, pci_eu_map_read, check_and_convert_float, remove_diacritics, check_rename_keys, fix_status_inferred, conversion_multiply, workaround_table_float_cap, workaround_table_units
-from all_config import logger, client_secret_full_path, gem_path, tracker_to_fullname, tracker_to_legendname, iso_today_date, gas_only_maps, final_cols, renaming_cols_dict, ggit_geojson, ggit_lng_geojson, new_release_date, gspread_creds, africa_countries, asia_countries, europe_countries, latam_countries, full_country_list
+from all_config import non_regional_maps, logger, client_secret_full_path, gem_path, tracker_to_fullname, tracker_to_legendname, iso_today_date, gas_only_maps, final_cols, renaming_cols_dict
 import geopandas as gpd
 import numpy as np
 import gspread
@@ -264,166 +261,6 @@ class MapObject:
 
 
 
-    
-    # def getFilteredSourceData(self, prep_dict, geo_mapping):
-    #     # using source attribute which is a list of tracker names per map
-    #     # go into source tab
-    #     # use the tracker name as look up for the acro, key, tabs, release date
-    #     # double check release date
-    #     # create df 
-    #     needed_geo = geo_mapping[self.geo]
-    #     df_list = []
-        
-    #     # for item in self.source:
-    #     #     tracker_source_obj = TrackerObject(
-    #     #     key = prep_dict[item]['gspread_key']
-    #     #     name = prep_dict[item]['official name'] 
-    #     #     )
-    #     #     print(f'Processing source item: {item}')
-    #     #     key = prep_dict[item]['gspread_key']
-    #     #     tabs = prep_dict[item]['gspread_tabs']
-    #     #     release = prep_dict[item]['latest release']
-    #     #     acro = prep_dict[item]['tracker-acro']
-    #     #     geocol = prep_dict[item]['geocol']
-    #     #     fuelcol =  prep_dict[item]['fuelcol']
-    #         # create object or df 
-    #     if item == 'Oil Pipelines':
-    #         print('handle non_gsheet_data for pulling data from s3 already has coords')
-            
-    #         # to get the file names in latest
-    #         goit_geojson_s3 = get_file_name('goit', '2025-03')
-    #         gdf = gpd.read_file(goit_geojson_s3)
-            
-    #         # # filter by geo optionally
-    #         # gdf = create_filtered_geo_df(gdf, geocol, needed_geo)
-            
-    #         # # filter by fuel optionally
-    #         # if map_obj.fuel != ['none']:
-    #         #     gdf = create_filtered_fuel_df(gdf, acro)
-            
-    #         df_list.append(gdf)
-    #     elif item == 'Gas Pipelines':
-    #         gdf = gpd.read_file(ggit_geojson)
-        
-    #         # gdf.info()
-    #         # gdf = gdf[gdf[geocol].apply(lambda x: check_list(x, needed_geo))]
-
-
-    #         # # filter by country 
-    #         # gdf = create_filtered_geo_df(gdf, geocol, needed_geo)
-    #         # # filter by fuel optionally
-    #         # if self.fuel != ['none']:
-    #         #     gdf = create_filtered_fuel_df(gdf, acro)
-                
-    #         df_list.append(gdf)
-            
-    #     elif item == 'LNG Terminals':
-    #         gdf = gpd.read_file(ggit_lng_geojson)
-    #         # gdf.info()
-    #         # gdf = gdf[gdf[geocol].apply(lambda x: check_list(x, needed_geo))]
-
-    #         # # filter by country 
-    #         # gdf = create_filtered_geo_df(gdf, geocol, needed_geo)
-    #         # # filter by fuel optionally
-    #         # if self.fuel != ['none']:
-    #         #     gdf = create_filtered_fuel_df(gdf, acro)
-                
-    #         df_list.append(gdf)
-            
-    #     elif item == 'Oil & Gas Extraction':
-    #         df_tuple = self.create_df_goget(key, tabs)
-    #         main = df_tuple[0]
-    #         prod = df_tuple[1]
-    #         # use ids after filter by country and fuel for dd for two tab dd
-    #         print(df_tuple[0].info())
-    #         print(df_tuple[1].info())
-    #         # gdf = gdf[gdf[geocol].apply(lambda x: check_list(x, needed_geo))]
-            
-    #         # to_merge = []
-    #         # fueldf = 0
-    #         # for df in [main,prod]:
-    #         #     # filter by country 
-    #         #     df = create_filtered_geo_df(df, geocol, needed_geo)
-    #         #     # # filter by fuel optionally
-    #         #     if self.fuel != ['none']:
-    #         #         # get prod filtered then use ID on merge to filter main
-    #         #         if fuelcol in df.columns:
-    #         #             fueldf = create_filtered_fuel_df(df, acro, fuelcol)
-    #         #             to_merge.append(fueldf)
-    #         #         else:
-    #         #             to_merge.append(df)
-    #         #     else:
-    #         #         to_merge.append(df) 
-    #         # filtered_main = to_merge[0]
-    #         # if not fueldf:
-    #         #     # no fuel filter needed so we are good to just print the two tabs in dd
-    #         #     # and merge them for map later
-    #         #     print('no fuel filter needed')
-    #         # else:
-    #         #     gas_goget_ids = fueldf['Unit ID '].to_list()
-    #         #     filtered_main = filtered_main[filtered_main['Unit ID'].isin(gas_goget_ids)]
-            
-    #         # filtered_prod = to_merge[1]
-    #         # filtered_tuple = (filtered_main, filtered_prod)
-                
-            
-    #         # df_list.append(filtered_tuple)
-    #         df_list.append(df_tuple)
-            
-
-    #     else:
-    #         df = self.create_df(key, tabs)
-
-    #         # # filter by country 
-    #         # df = create_filtered_geo_df(df, geocol, needed_geo)
-    #         # # filter by fuel optionally
-
-    #         # if self.fuel != ['none']:
-    #         #     df = create_filtered_fuel_df(df, acro)                    
-
-            
-    #         # df = df[df[geocol].apply(lambda x: check_list(x, needed_geo))]
-    #         df_list.append(df)
-
-    #     # as a check 
-    #     print(f"DataFrames in df_list for {self.name}:")
-    #     # This does not work for goit, did work for ggpt though
-    #     for i, df in enumerate(df_list):
-    #         try:
-    #             print(f"DataFrame {i}: {df.shape}")
-    #         except AttributeError:
-    #             df_tuple_filt = df
-    #             main = df_tuple_filt[0]
-    #             prod = df_tuple_filt[1]
-    #             print(f"DataFrame {i}main: {main.shape}")
-    #             print(f"DataFrame {i}prod: {prod.shape}")
-    #         except TypeError as e:
-    #             print(f'Fix error for {self.name}: \n{e}')
-                
-                
-    #     # then assign the dataframes to the map data attribute
-    #     self.data = df_list
-
-         
-    
-    # def filter_by_fuel(self):
-        
-    #     # using fuel attribute, which often times will be none, filter out rows in df
-    #     if self.fuel == ['none']:
-    #         pass
-    #     else:
-    #         print(f'filter by fuel: {self.fuel}')
-    #         # df = create_filtered_fuel_df(df, acro)                    
-            
-    # def filter_by_geo(self, geocol):
-        
-    #     # using geo attribute, find country/area column and use gem list 
-    #     # to filter out countries not in map's region
-    #     if self.geo == 'global':
-    #         pass
-    #     else:
-    #         print(f'filter by geo: {self.geo}')
-
     def set_capacity_conversions(self):
     
     # you could multiply all the capacity/production values in each tracker by the values in column C, 
@@ -490,9 +327,18 @@ class MapObject:
 
         pd.options.display.float_format = '{:.0f}'.format
         # gdf_converted['ea_scaling_capacity'] = gdf_converted.apply(lambda row: conversion_equal_area(row), axis=1) # square root(4 * capacity / pi)
+        print(self.name)
+        print(len(self.name))
+        input('check self name')
+        if self.name in non_regional_maps: # map name
+            print('skip converting to joules')
 
-        gdf['scaling_capacity'] = gdf.apply(lambda row: conversion_multiply(row), axis=1)
-        # must be float for table to sort
+            gdf['scaling_capacity'] = gdf['cleaned_cap']
+            gdf['scaling_capacity'] = gdf['scaling_capacity'].astype(float)
+     
+        else:
+            gdf['scaling_capacity'] = gdf.apply(lambda row: conversion_multiply(row), axis=1)
+            # must be float for table to sort
         gdf['capacity'] = gdf['capacity'].fillna('') # issue if it's natype so filling in
         gdf['capacity-table'] = gdf.apply(lambda row: pd.Series(workaround_table_float_cap(row, 'capacity')), axis=1)
         gdf['units-of-m'] = gdf.apply(lambda row: pd.Series(workaround_table_units(row)), axis=1)
@@ -636,64 +482,9 @@ class MapObject:
             
             gdf_map_ready['areas'] = gdf_map_ready['areas'].apply(lambda x: x.replace(',', ';')) # try this to fix geojson multiple country issue
             gdf_map_ready['areas'] = gdf_map_ready['areas'].apply(lambda x: f"{x.strip()};")
-            # print(gdf_map_ready['areas'])
-            # input('check above has semicolon for non gas only maps')
-            # print(set(gdf['areas'].to_list()))
-            # print(set(gdf['area2'].to_list()))
-            # nan_areas = gdf[gdf['areas']=='']
-            # print(f'Nan areas: {len(nan_areas)}')
-            # # print(nan_areas)
-            # input('check nan areas')
-            # issues = []
-            # tracker_issues = []
-            # for row in gdf.index:
-            #     if gdf.loc[row, 'areas'] == '':
-            #         issues.append(row)
-            #         tracker_issues.append(gdf.loc[row, 'tracker-acro'])
-            # # if len(issues) >0 :
-            # #     print(f'No areas here for these trackers:')
-            # #     print(set(tracker_issues))
-            # gdf = gdf.drop(issues)
-            # issues_df = {'missing_country': issues}
-            # issues_df = pd.DataFrame(issues_df)
-            # issues_df.to_csv(f'issues/missing_county{mapname}{iso_today_date}.csv')
-            # print('Printed issues_df to file and dropped themf rom the df.')
-            
-            # # ##(input('All area2s in gdf check if any are numbers')
-            # if mapname == 'Global':
-            #     gdf['areas'] = f"{gdf['areas']};"
-                
-            # else:
-            #     for row in gdf.index:
-
-            #         if gdf.loc[row, 'area2'] != '':
-        
-            #             gdf.at[row, 'areas'] = f"{gdf.loc[row, 'areas'].strip()};{gdf.loc[row, 'area2'].strip()};"
-            #             # print(f"Found a area2! Hydro? {gdf.loc[row, 'areas']} {gdf.loc[row, 'tracker-acro']} {gdf.loc[row, 'name']}")
-            #             print(gdf.loc[row,'areas'])
-            #             input('check above is ; ; not ,; mult country')
-            #         else:
-            #             # make it so all areas even just one end with a semincolon 
-            #             gdf['areas'] = gdf['areas'].fillna('')
-            #             # nan_areas = gdf[gdf['areas']=='']
-            #             # print(f'in else: {set(gdf["areas"].to_list())}') # find the rows that are nan or float
-            #             ser = gdf['areas']
-            #             try:
-            #                 ser_str = ser.astype(str)
-            #             except:
-            #                 for row in ser.index:
-            #                     val = ser.iloc[row]
-            #                     try:
-            #                         val_str = str(val)
-            #                     except:
-            #                         print("Error!" + f" val couldn't be converted to str: {val}")
-                        
-            #             gdf.at[row, 'areas'] = f"{gdf.loc[row, 'areas'].strip()};"
-
-        # grouped_tracker_after = gdf.groupby('tracker-acro', as_index=False)['id'].count()
 
         self.trackers = gdf_map_ready        
-        
+      
 
     def rename_and_concat_gdfs(self):
         # This function takes a dictionary and renames columns for all dataframes within
@@ -715,6 +506,7 @@ class MapObject:
                 # use plants and plants_hy to rename or pass it since its already been renamed
                 print(set(gdf['tracker-acro'].to_list()))
                 input('This should be two, plants and plants_hy!')
+
             
             else:
                 gdf['tracker-acro'] = tracker_sel
@@ -812,148 +604,3 @@ class MapObject:
         
     def create_df(self, key, tabs):
         print(self)
-        
-        
-    # def create_filtered_fuel_df(self):
-    #     print(self)
-
-        
-    # def create_filtered_fuel_df(self):
-        
-    #     if acro == 'GOGET':
-
-    #         drop_row = []
-    #         # print(filtered_df.columns)
-    #         # input('Check that Fuel type is in there or fuel')
-    #         for row in filtered_df.index:
-    #             # if df.loc[row, 'tracker-acro'] == 'GOGET':
-    #             # if filtered_df.loc[row, 'Unit ID'] not in list_ids:
-    #             #     drop_row.append(row)
-                
-    #             if filtered_df.loc[row, 'Fuel type'] == 'oil':
-    #                 drop_row.append(row)
-    #         # drop all rows from df that are goget and not in the gas list ids 
-    #         print(f'Length of goget before oil drop: {len(filtered_df)}')
-    #         filtered_df.drop(drop_row, inplace=True)        
-    #         print(f'Length of goget after oil drop: {len(filtered_df)}')
-    #         input('Check the above to see if gas only for goget!')
-
-                
-    #         # print(len(ndf)) # 3012 after removing goget 
-    #     elif acro in ['GGIT-eu', 'GGIT']:
-    #         # filter for hydrogen only, but also gas for pci europe uses this instead of other release
-    #         drop_row = []
-    #         for row in filtered_df.index:
-    #             # if df.loc[row, 'tracker-acro'] == 'GOGPT': # 1751 from 1966 after filter
-    #             if filtered_df.loc[row, 'Fuel'] == 'Oil':
-    #                 drop_row.append(row)
-    #             elif filtered_df.loc[row, 'Fuel'] == '':
-    #                 drop_row.append(row)
-
-    #         filtered_df.drop(drop_row, inplace=True)  
-
-                
-    #     elif acro == 'GOGPT':
-    #         # filter2 = (df['tracker-acro']=='GOGPT') & (df['fuel'].contains('liquid')) #2788
-    #         drop_row = []
-    #         for row in filtered_df.index:
-    #             # if df.loc[row, 'tracker-acro'] == 'GOGPT': # 1751 from 1966 after filter
-    #             fuel_cat_list = filtered_df.loc[row, 'Fuel'].split(',')
-    #             new_fuel_cat_list = []
-    #             for fuel in fuel_cat_list:
-    #                 fuel = fuel.split(':')[0]
-    #                 new_fuel_cat_list.append(fuel)
-                
-    #             # for Alcudia does not contain gas, or only contains fossil liquids
-                
-    #             # fossil liquids: diesel, fossil gas: natural ga...      37.5  operating   
-    #             if len(new_fuel_cat_list) > 1:
-    #                 if new_fuel_cat_list.count('fossil liquids') == len(new_fuel_cat_list):
-    #                         drop_row.append(row)
-
-    #             elif new_fuel_cat_list == ['fossil liquids']:
-    #                 drop_row.append(row)
-                        
-    #         # drop all rows from df that are goget and not in the gas list ids 
-    #         filtered_df.drop(drop_row, inplace=True)  
-    #         # print(len(ndf)) # should be 2797
-    #         print(f'len after gas only filter {acro} {len(filtered_df)}') 
-    #         input('check the above')
-    #         return filtered_df
-        
-    
-    
-    # def create_filtered_geo_df(self):
-    #     print(self)
-
-
-# def create_abouts(map_obj, source_tab_df):
-#     # TODO March 31 yay they are all being written to the file, as expected, at least regionally and gipt
-#     # But now we need to make sure we pull the about page in its entirety, use the old method but insert into current first last function
-#     # for example goget about is not complete, only some columns were pulled in 
-
-#     # not a truly multi tracker dd, like integrated or regional, ggit (with 2) should be handled there 
-#     if len(map_obj.source) <= 2:
-
-#         for tracker in map_obj.source:
-#             if tracker == 'Gas Pipelines':
-#                 tracker_key = about_page_ggit_goit[tracker]
-#             elif tracker == 'LNG Terminals':
-#                 tracker_key = about_page_ggit_goit[tracker]
-#             elif tracker == 'Oil Pipelines':
-#                 tracker_key = about_page_ggit_goit[tracker]
-#             # using the same as gas pipelines because about page was identical from last release dec 2023
-
-#             else:
-#                 tracker_key = source_tab_df[source_tab_df['official name'] == tracker]['gspread_key'].values[0]
-#             about_df = find_about_page(tracker, tracker_key)
-#             map_obj.about = about_df
-#             # nothing for about_deps
-#     else:
-#         prev_key = prev_key_dict[map_obj.name]
-
-#         gspread_creds = gspread.oauth(
-#                 scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
-#                 credentials_filename=client_secret_full_path,
-#                 # authorized_user_filename=json_token_name,
-#             )
-#         wait_time = 30
-#         time.sleep(wait_time)
-#         gsheets = gspread_creds.open_by_key(prev_key)        
-#         sheet_names = [sheet.title for sheet in gsheets.worksheets()]
-#         multi_tracker_about_page = sheet_names[0]
-#         multi_tracker_about_page = gsheets.worksheet(multi_tracker_about_page) 
-#         multi_tracker_about_page = pd.DataFrame(multi_tracker_about_page.get_all_values(combine_merged_cells=True))
-#         multi_tracker_about_page = replace_old_date_about_page_reg(multi_tracker_about_page)
-        
-#         map_obj.about = multi_tracker_about_page
-        
-#         dep_about_list = []
-#         for tracker in map_obj.source:
-            
-#             if tracker == 'Gas Pipelines':
-#                 tracker_key = about_page_ggit_goit[tracker]
-#             elif tracker == 'LNG Terminals':
-#                 tracker_key = about_page_ggit_goit[tracker]
-#             elif tracker == 'Oil Pipelines':
-#                 tracker_key = about_page_ggit_goit[tracker]
-#             # using the same as gas pipelines because about page was identical from last release dec 2023
-#             elif tracker == 'Gas Pipelines EU': 
-#                 tracker_key = about_page_ggit_goit['Gas Pipelines']
-#             elif tracker == 'LNG Terminals EU':
-#                 tracker_key = about_page_ggit_goit['LNG Terminals']
-#             elif tracker == 'Oil & Gas Plants EU':
-#                 tracker_key = source_tab_df[source_tab_df['official name'] == 'Oil & Gas Plants']['gspread_key'].values[0]
-                                        
-#             else:
-#                 tracker_key = source_tab_df[source_tab_df['official name'] == tracker]['gspread_key'].values[0]
-#                 # trying this new function instead of below, messing up for GOGET
-#             about_df = find_about_page(tracker, tracker_key)
-#             dep_about_list.append(about_df)
-
-#         print(f'Length of about dfs: {len(dep_about_list)}')
-#         input('Check length matches 14..')
-#         map_obj.dep_abouts = dep_about_list
-
-#     return map_obj
-    

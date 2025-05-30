@@ -2491,28 +2491,28 @@ def clean_about_df(df):
 
 def rebuild_countriesjs(mapname, newcountriesjs):
 
-        prev_countriesjs = f'{tracker_folder_path}{mapname}/countries.js'
-        default = f"{'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/src/countries.js'}"
+        prev_countriesjs = f'{tracker_folder_path}{mapname}/countries.json'
+        default = f"{'/Users/gem-tah/GEM_INFO/GEM_WORK/earthrise-maps/gem_tracker_maps/src/countries.json'}"
      
         print(prev_countriesjs)
-        print('The above is from the existing countries.js file if it exists in the map folder')
+        print('The above is from the existing countries.json file if it exists in the map folder')
         # prev_countriesjs = pd.read_csv(prev_countriesjs)
         # print(prev_countriesjs)
         
         # or try except FileNotFoundError 
         if os.path.exists(prev_countriesjs):
-            if prev_countriesjs.endswith('.js'):
+            if prev_countriesjs.endswith('.json'):
                 with open(prev_countriesjs, 'r') as js_file:
                     prev_countriesjs = js_file.read()
-                    print("JavaScript content:")
+                    print("json content:")
                     print(prev_countriesjs)
             else:
                 print("The file is not a JavaScript file.")
         else:
-            print(f"File not found. Using default countries.js from {default}")
+            print(f"File not found. Using default countries.json from {default}")
             with open(default, 'r') as js_file:
                 prev_countriesjs = js_file.read()
-                print("Default JavaScript content:")
+                print("Default json content:")
                 print(prev_countriesjs)
         
         # cycle through folder to find new countries.js file and do a comparison
