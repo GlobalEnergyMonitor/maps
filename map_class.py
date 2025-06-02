@@ -45,7 +45,7 @@ class MapObject:
         
         
     
-    def capacity_hide_goget_gcmt(self):
+    def capacity_hide_goget_gcmt_urlchina(self):
 
         mapname = self.name
         gdf = self.trackers
@@ -69,16 +69,20 @@ class MapObject:
                     # input('in gcmt')
                     gdf.loc[row, 'capacity-table'] = np.nan
                     gdf.loc[row, 'capacity-details'] = ''
-                    prod_coal = gdf.loc[row, 'prod-coal']
-                    
-                                        
+                    # prod_coal = gdf.loc[row, 'prod-coal']
+                    # prod_coal = check_and_convert_float(prod_coal)                    
+                    chinarows = gdf[gdf['areas']=='China'].copy()
+                    nonchinarows = gdf[gdf['areas']!='China']
+                    chinarows['url'] = chinarows['urlchina']
+                    gdf = pd.concat([chinarows,nonchinarows])
+               
                 else:
                     gdf.loc[row, 'capacity-table'] = gdf.loc[row, 'capacity']
                     gdf.loc[row, 'capacity-details'] = gdf.loc[row, 'capacity']
         # TODO test if this removes BOED from empty goit capacity details 
         gdf['capacity-details'].fillna('',inplace=True)
         self.trackers = gdf
-
+        
 
     def create_search_column(self):
         # this can be one string with or without spaces 

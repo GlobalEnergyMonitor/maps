@@ -83,7 +83,10 @@ def make_map(list_of_map_objs):
                     tracker_obj.set_maturity_eu() 
                     
                 elif tracker_obj.name in ['Cement and Concrete']: 
-                    tracker_obj.gcct_changes()              
+                    tracker_obj.gcct_changes()  
+                    
+                # elif tracker_obj.name in ['Coal Mines']:
+                #     tracker_obj.gcmt_changes()            
             
             
             # [print(col) for col in tracker_obj.data.columns if col == 'fuel-filter']
@@ -110,8 +113,8 @@ def make_map(list_of_map_objs):
 
         map_obj.create_search_column()
 
-        map_obj.capacity_hide_goget_gcmt()
-
+        map_obj.capacity_hide_goget_gcmt_urlchina()
+        
         map_obj.set_fuel_goit()
 
         map_obj.last_min_fixes()
