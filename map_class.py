@@ -182,10 +182,7 @@ class MapObject:
         print(f'Saving file for map {self.name}')
         print(f'This is len of gdf {len(self.trackers)}')
         path_for_download_and_map_files = gem_path + self.name + '/compilation_output/'
-        path_for_download_and_map_files_af = gem_path + f'{self.name}-energy' + '/compilation_output/'
-        # path_for_download_and_map_files_cm = gem_path + 'coal-mine' + '/compilation_output/'
-        # path_for_download_and_map_files_gp = gem_path + 'gas-plant' + '/compilation_output/'    
-        # path_for_download_and_map_files_cp = gem_path + 'coal-plant' + '/compilation_output/'    
+        path_for_download_and_map_files_af = gem_path + f'{self.name}-energy' + '/compilation_output/'   
         
         # #(input('check if prod-coal is there')
         if self.name in gas_only_maps or self.geo == 'global': # will probably end up making all regional maps all energy I would think
@@ -530,8 +527,8 @@ class MapObject:
                 # Reset index in place
                 if tracker_sel == 'GCMT':
                     print(f'cols after rename in GCMT:\n{gdf.info()}')
-                    print(gdf['start_year'])
-                    input('check if start-year there')
+                    print(gdf['end_year'])
+                    input('check if end_year there')
                     # Handle for non-English Chinese wiki pages
                     print('In if statement of rename and concat in map class for GCMT')
                     
@@ -564,6 +561,7 @@ class MapObject:
 
         cols_to_be_dropped = set(one_gdf.columns) - set(final_cols)
         print(f'These cols will be dropped: {cols_to_be_dropped}')
+        input('Check the above cols that will be dropped because not in final_cols of all_config')
        
         final_gdf = one_gdf.drop(columns=cols_to_be_dropped)
         self.trackers = final_gdf

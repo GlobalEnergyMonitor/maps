@@ -867,7 +867,7 @@ class TrackerObject:
             
             for col in self.data.columns: # handling for all capacity, production, 
                 # if pd.api.types.is_numeric_dtype(self.data[col]): # the problem is we know its not always all numeric unfortunatley
-                if any(keyword in col for keyword in ['Capacity (MW)', 'Capacity (Mt)','Capacity (Mtpa)', 'CapacityBcm/y', 'CapacityBOEd', 'Capacity (MT)', 'Production - Gas', 'Production - Oil', 'Production (Mt)']):                    
+                if any(keyword in col for keyword in ['Capacity (MW)', 'Capacity (Mt)','Capacity (Mtpa)', 'CapacityBcm/y', 'CapacityBOEd', 'Capacity (MT)', 'Production - Gas', 'Production - Oil', 'Production (Mt)', 'Production (Mtpa)']):                    
                     # print(col)
                     try:
                         self.data.fillna('', inplace=True) # cannot apply to geometry column
@@ -883,6 +883,7 @@ class TrackerObject:
                 
                 elif 'year' in col.lower():
                     print(col)
+                    # input(F'Check if closing year {col}')
                     # self.data.fillna('', inplace=True) # cannot apply to geometry column
                     try:
                         self.data[col] = self.data[col].apply(lambda x: check_and_convert_int(x))
