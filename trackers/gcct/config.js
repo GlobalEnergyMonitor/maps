@@ -45,15 +45,15 @@ var config = {
         },
         {
             field: 'prod-type',
-            label: 'Production type',
+            label: 'Clinker Production Method',
             values: ['dry', 'mixed', 'semidry', 'wet', '', 'n/a'],
-            values_labels: ['Dry', 'Mixed', 'Semi-dry', 'Wet', 'Not found', 'N/A']
+            values_labels: ['Dry', 'Mixed', 'Semi-dry', 'Wet', 'Not found', 'N/A (Grinding Plants)']
         },
         {
             field: 'color',
             label: 'Color',
             values: ['both', 'grey', 'white', ''],
-            values_labels: ['Both', 'Grey', 'White', 'Not found']
+            values_labels: ['Grey & White', 'Grey', 'White', 'Not found']
         }
         ],
 
