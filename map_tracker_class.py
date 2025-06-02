@@ -661,6 +661,8 @@ class TrackerObject:
         input('CHECK cols for tracker_obj.name == GOGPT EU')
         self.data = gogpt_eu_df
 
+
+    
     def gcct_changes(self):
         # before renaming 
         # before clean_num_data()
