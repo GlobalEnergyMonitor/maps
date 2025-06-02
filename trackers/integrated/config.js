@@ -46,7 +46,7 @@ var config = {
     statusDisplayField: 'status',
     capacityField: 'capacity-(mw)',
     capacityDisplayField: 'capacity-(mw)',
-    capacityLabel: 'Capacity (MW)',
+    capacityLabel: 'MW',
     linkField: 'gem-location-id',
     urlField: 'url',
     countryField: 'country/area',
