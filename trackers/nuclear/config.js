@@ -86,7 +86,7 @@ var config = {
     */
     detailView: {
         'project-name': {'display': 'heading'},
-        'status': {'label': 'Status'},
+        // 'status': {'label': 'Status'},
         // 'capacity-(mw)': {'label': 'Capacity (MW)'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
