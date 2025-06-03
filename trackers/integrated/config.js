@@ -12,6 +12,7 @@ var config = {
             what's right property name?? is color also listing values used in the summary? 
             should this just be made part of the filter? that might allow to address multiple properties */
         field: 'type',
+        fieldLabel: 'Type',
         values: {
             'bioenergy': 'blue',
             'coal': 'red',
@@ -58,7 +59,7 @@ var config = {
         'Status': ['status']
     },
     assetFullLabel: "units / phases",
-    assetLabel: "Units / Phases",
+    assetLabel: "Units",
     img_detail_zoom: 10,
     tableHeaders: {
         values: ['plant-/-project-name','unit-/-phase-name', 'owner', 'parent', 'capacity-(mw)', 'status', 'subnational-unit-(state,-province)', 'country/area', 'start-year', 'retired-year', 'type'],
@@ -71,7 +72,7 @@ var config = {
     },
     detailView: {
         'plant-/-project-name': {'display': 'heading'},
-        'type': {'label': 'Type'},
+        'type': {'display': 'colorcoded'}, // handled with color field primary
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},
         'technology': {'display': 'join', 'label': ['Technology', 'Technologies']},

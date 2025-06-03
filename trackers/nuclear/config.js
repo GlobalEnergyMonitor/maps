@@ -86,8 +86,8 @@ var config = {
     */
     detailView: {
         'project-name': {'display': 'heading'},
-        'status': {'label': 'Status'},
-        'capacity-(mw)': {'label': 'Capacity (MW)'},
+        // 'status': {'label': 'Status'},
+        // 'capacity-(mw)': {'label': 'Capacity (MW)'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'country' : {'label': 'Country/Area(s)'},

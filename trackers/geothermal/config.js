@@ -52,8 +52,8 @@ var config = {
     capacityLabel: 'Capacity (MW)',
 
     /* Labels for describing the assets */
-    assetFullLabel: "Geothermal Plants",
-    assetLabel: 'unit',
+    assetFullLabel: "Units",
+    assetLabel: 'units',
 
     /* the column that contains the asset name. this varies between trackers */
     nameField: 'project-name',
@@ -100,13 +100,13 @@ var config = {
         'circle-opacity':.85
     },
     
-    /* radius associated with minimum/maximum value on map */
-    minRadius: 4,
-    maxRadius: 14,
+    // /* radius associated with minimum/maximum value on map */
+    // minRadius: 4,
+    // maxRadius: 14,
 
-    /* radius to increase min/max to under high zoom */
-    highZoomMinRadius: 8,
-    highZoomMaxRadius: 32,
+    // /* radius to increase min/max to under high zoom */
+    // highZoomMinRadius: 8,
+    // highZoomMaxRadius: 32,
 
 
     showCapacityTable: true, 
