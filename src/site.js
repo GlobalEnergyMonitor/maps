@@ -1260,11 +1260,14 @@ function displayDetails(features) {
     Object.keys(config.detailView).forEach((detail) => {
         // replace apostrophe in displayDetails to resolve invalid or unexpected token
 
+        if (features[0].properties[detail] == "" || features[0].properties[detail] == 'unknown' || features[0].properties[detail] == 'undefined' || features[0].properties[detail] ==0 || features[0].properties[detail] == NaN || features[0].properties[detail] == 'nan' || features[0].properties[detail] == null){
+            detail_text += ''
+            } else if (Object.keys(config.detailView[detail]).includes('display')) {
 
-        if (Object.keys(config.detailView[detail]).includes('display')) {
+                if (config.detailView[detail]['display'] == 'heading') {
+                    detail_text += '<h4>' + features[0].properties[detail] + '</h4>';
 
-            if (config.detailView[detail]['display'] == 'heading') {
-                detail_text += '<h4>' + features[0].properties[detail] + '</h4>';
+
 
             } else if (config.detailView[detail]['display'] == 'join') {
 
@@ -1280,7 +1283,7 @@ function displayDetails(features) {
                         detail_text += '<span class="fw-bold">' +config.detailView[detail]['label'][0] + '</span>: ';
                     }
                     detail_text += '<span class="text-capitalize">' + join_array[0].replaceAll('_',' ') + '</span><br/>';;
-                }
+            }
 
             } else if (config.detailView[detail]['display'] == 'range') {
 
@@ -1291,8 +1294,8 @@ function displayDetails(features) {
                 ); 
                 let least = features.reduce((accumulator, feature) => {
                         return (feature.properties[detail] != '' && feature.properties[detail] < accumulator ?  feature.properties[detail] : accumulator);
-                 },
-                 5000
+                },
+                5000
                 );
                 if (least != 5000) {
                     if (least == greatest) {
@@ -1312,25 +1315,28 @@ function displayDetails(features) {
                     if (location_text.length > 0) {
                         location_text += ', ';
                     }
-                    //TODO figure out why subnational and country are reversed in nuclear
-                    // console.log(location_text)
-
                     location_text += features[0].properties[detail];
                 }
+            } else if (config.detailView[detail]['display'] == 'colorcoded'){
+                // let's do it so that if it has this then it goes to the color dictionary and mathces up the field name, uses fieldLabel to display label and then also uses color
+                // to create the circle dot we have for most status 
+                let colorLabel = features.map((feature) => feature.properties[detail]);
+                // console.log(config.color.fieldLabel)
+                detail_text += '<span class="fw-bold">' + config.color.fieldLabel + '</span>: ' +
+                '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.color.field] ]
+                + '"></span><span class="text-capitalize">' + features[0].properties[config.color.field] + '</span><br/>';
+                console.log([ features[0].properties[config.color.field] ])
+
             }
+
         } else {
-            // console.log('we are in the last else')
-            // console.log(features[0].properties[detail])
-            // if (features[0].properties[detail] != '' &&  features[0].properties[detail] != NaN && features[0].properties[detail] != null && features[0].properties[detail] != 'Unknown [unknown %]'){
-                // if (config.multiCountry == true && config.detailView[detail]['label'].includes('Country')){
-            if (features[0].properties[detail] != '' && features[0].properties[detail] != 'undefined' && features[0].properties[detail] !=0 && features[0].properties[detail] != NaN && features[0].properties[detail] != 'nan' && features[0].properties[detail] != null && features[0].properties[detail] != 'Unknown [unknown %]') {
+
+
+            if (features[0].properties[detail] != "" && features[0].properties[detail] != 'undefined' && features[0].properties[detail] !=0 && features[0].properties[detail] != NaN && features[0].properties[detail] != 'nan' && features[0].properties[detail] != null && features[0].properties[detail] != 'Unknown [unknown %]' && features[0].properties[detail] != 'unknown') {
                 if (config.multiCountry == true && config.detailView[detail] && config.detailView[detail]['label'] && config.detailView[detail]['label'].includes('Country')) {
                     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
                 }
-                //     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + removeLastComma(features[0].properties[detail]) + '<br/>';
 
-
-                // }
                 else if (Object.keys(config.detailView[detail]).includes('label')) { // and color config add the dot
                     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
                 }
@@ -1338,13 +1344,12 @@ function displayDetails(features) {
                     detail_text += '<span class="fw-bold">' + config.detailView[detail]['label'] + '</span>: ' + features[0].properties[detail] + '<br/>';
                 } else {
                     console.log(features[0].properties[detail])
-                    console.log('inner else issue')
                     // detail_text += features[0].properties[detail] + '<br/>';
                 }
             }
             else {
                 console.log(features[0].properties[detail])
-                console.log('outer else issue')
+     
 
             }
         }
@@ -1360,6 +1365,7 @@ function displayDetails(features) {
 
     // Need this to be customizable for trackers that do not need summary because no units 
     // Build capacity summary
+    // Make sure capacity and () get removed if there is only one feature 
     if (capacityLabel != ''){
         if (features.length > 1) { 
         let filterIndex = 0;
@@ -1410,20 +1416,49 @@ function displayDetails(features) {
                 detail_capacity +
                 '</div>';
         }
+        // if item = 1, for the situation where there is only one unit, 
+        // status should not have a blank where color != status field SO remove the space in status 
+        // so wind one unit integrated map
+
+        // here is where you can remove Capacity () because only one feature
         else {
-            detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
-                '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
-            detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + parseInt(features[0].properties[config.capacityDisplayField], 10).toLocaleString() + ' ' + capacityLabel;
+            // status should not have a blank where color != status field SO remove the space in status 
+            // and color SHOULD be with the type when it is primary - could lay groundwork for making it interactive on color
+            
+            // handle capacity adjustment for solo projects where it looks redundant to have Capacity written out twice
+            
+            // Remove 'Capacity' prefix and parentheses from capacityLabel
+            capacityLabel = capacityLabel.replace(/^Capacity\s*/i, '').replace(/[()]/g, '');
+
+            if (config.color.field != config.statusDisplayField){
+                // for filter field in filter, if primary = True then take field name "type" in intg and use it to find the color dictionary in the colors dict above
+                // and then display the projects type field with the appropriate color based on the value and the dictionary
+                // 
+                detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
+                '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
+                detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + parseInt(features[0].properties[config.capacityDisplayField], 10).toLocaleString() + ' ' + capacityLabel;
+            }
+            // leave as is
+            else {
+                detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
+                    '<span class="legend-dot" style="background-color:' + config.color.values[ features[0].properties[config.statusDisplayField] ] + '"></span><span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
+                detail_text += '<span class="fw-bold text-capitalize">Capacity</span>: ' + parseInt(features[0].properties[config.capacityDisplayField], 10).toLocaleString() + ' ' + capacityLabel;
+        }
         }
     }
     // This is where you can remove the colored circle primary = true
+    // we should use the primary tag in config to color code the type for integrated 
+
 
     else {
+        // do nothing if color not equal to status field AND there is no capacity label
         if (config.color.field != config.statusDisplayField){
             // detail_text += '<span class="fw-bold text-capitalize">Status</span>: ' +
             // '<span class="text-capitalize">' + features[0].properties[config.statusDisplayField] + '</span><br/>';
             detail_text += '';
         }
+
+        // assign color if equal to status field BUT ignore the capacity part when no capacity label
 
         else {
         // add status part not capacity part 
