@@ -22,6 +22,45 @@ const map = new mapboxgl.Map({
     projection: config.projection
 });
 
+map.scrollZoom.enable();
+map.boxZoom.enable();
+map.dragRotate.enable();
+map.dragPan.enable();
+map.keyboard.enable();
+map.doubleClickZoom.enable();
+map.touchZoomRotate.enable();
+
+// Disable spinning when user interacts with the map
+[
+    'mousedown',
+    'wheel',
+    'touchstart',
+    'dragstart',
+    'rotatestart',
+    'zoomstart',
+    'keydown'
+].forEach(event => {
+    map.on(event, () => {
+        userInteracting = true;
+    });
+});
+
+/*
+    *  When a user clicks the button, `fitBounds()` zooms and pans
+    *  the viewport to contain a bounding box that surrounds Kenya.
+    *  The [lng, lat] pairs are the southwestern and northeastern
+    *  corners of the specified geographical bounds.
+    */
+document.getElementById('fit').addEventListener('click', () => {
+    // map.fitBounds([
+    //     [32.958984, -5.353521], // [lng, lat] - southwestern corner of the bounds
+    //     [43.50585, 5.615985] // [lng, lat] - northeastern corner of the bounds
+    // ]);
+    // use the output or return of getBoundingBox() instead of hardcoded default of Kenya
+    let boundingBoxSet = getBoundingBox()
+    map.fitBounds(boundingBoxSet)
+});
+
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
     closeButton: false,
@@ -32,6 +71,7 @@ map.on('load', function () {
     if (config.projection != 'globe'){
         // map.setFog({}); // Set the default atmosphere style
         $('#btn-spin-toggle').hide();
+        $('#fit').hide();
 
     }
     loadData();
@@ -43,7 +83,77 @@ function determineZoom() {
     let zoom = config.zoomFactor * (window.innerWidth - modifier) / modifier;
     return zoom;
 }
+function getBoundingBoxTry() {
+    // this function will result in two coordinate pairings that look like the example below
+    // it'll be used by the mapbox fitbounds() method to re orient the map based off of the locations of selected / filtered projects or map assets
+    // those projects can be selected by the user in four ways:
+    // 1.) adjusting the legend filters on status or project type
+    // 2.) selecting a country or continent from the dropdown
+    // 3.) searching by name of the project in the search bar
+    // 4.) clicking an asset
+    // sometimes only one project or asset will be returned 
+    // in most cases though many projects will be returned
+    // this function should calculate the most relevant bounding box that helps focus and zoom the user into their area of interest on the map
+    // [32.958984, -5.353521], // [lng, lat] - southwestern corner of the bounds
+    // [43.50585, 5.615985] // [lng, lat] - northeastern corner of the bounds
 
+}
+
+function getBoundingBox(features) {
+    
+    // If no features provided, use currently filtered features
+    if (!features) {
+        features = config.processedGeoJSON && config.processedGeoJSON.features
+            ? config.processedGeoJSON.features
+            : [];
+    }
+    if (!features.length) {
+        // If nothing is selected, reset to initial center and resume spinning
+        userInteracting = false;
+        spinGlobe();
+        // Return a small bounds around the initial center to trigger fitBounds
+        const center = config.center;
+        const pad = 0.5;
+        return [
+            [center[0] - pad, center[1] - pad], // SW
+            [center[0] + pad, center[1] + pad]  // NE
+        ];
+    }
+    let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+    features.forEach(f => {
+        let coords = f.geometry && f.geometry.type === "Point"
+            ? f.geometry.coordinates
+            : (f.geometry && f.geometry.coordinates && f.geometry.coordinates.length
+                ? f.geometry.coordinates.flat(Infinity)
+                : []);
+        // Handle both Point and LineString/MultiPoint/MultiLineString
+        if (Array.isArray(coords[0])) {
+            coords.forEach(c => {
+                if (Array.isArray(c) && c.length === 2) {
+                    minLng = Math.min(minLng, c[0]);
+                    minLat = Math.min(minLat, c[1]);
+                    maxLng = Math.max(maxLng, c[0]);
+                    maxLat = Math.max(maxLat, c[1]);
+                }
+            });
+        } else if (coords.length === 2) {
+            minLng = Math.min(minLng, coords[0]);
+            minLat = Math.min(minLat, coords[1]);
+            maxLng = Math.max(maxLng, coords[0]);
+            maxLat = Math.max(maxLat, coords[1]);
+        }
+    });
+    // If only one point, expand bounds slightly for better fit
+    if (minLng === maxLng && minLat === maxLat) {
+        const pad = 0.05;
+        minLng -= pad; maxLng += pad;
+        minLat -= pad; maxLat += pad;
+    }
+    return [
+        [minLng, minLat], // SW
+        [maxLng, maxLat]  // NE
+    ];
+}
 
 /*
   load data in various formats, and prepare for use in application
@@ -318,8 +428,17 @@ function findLinkedAssets() {
         config.totalCount += features.length;
 
         config.processedGeoJSON.features.push(features[0]);
-
     });
+
+    // Try here for fitBounds
+    // if map projection is not mercator or globe do not do fitbounds 
+    if (config.projection == 'globe'){
+        // fit to the highlighted projects and zoom in
+        let boundingBoxSet = getBoundingBox()
+        map.fitBounds(boundingBoxSet)
+        console.log('Just fired fitBounds in filterGeoJson')
+
+    }
 }
 function generateIcon(icon) {
     let label = JSON.stringify(icon);
@@ -663,22 +782,130 @@ function addEvents() {
             $('.modal-body').html(modalText);
         }
 
+        // show the modal if appropriate
         config.modal.show();
+        console.log('modal show')
     });
-    config.layers.forEach(layer => {
-        map.on('mouseenter', layer, (e) => {
-            map.getCanvas().style.cursor = 'pointer';
-            const coordinates = (map.getLayer(layer).type == "line" ? e.lngLat : e.features[0].geometry.coordinates.slice());
-            const description = e.features[0].properties[config.nameField];
-            popup.setLngLat(coordinates).setHTML(description).addTo(map);
+    // Add hover animation: expand and turn yellow on mouseover, reset on mouseout
+    // Animate both point and line markers on hover
+    if (config.geometries.includes('Point')) {
+        console.log(config.geometries)
+        map.on('mousemove', 'assets-points', (e) => {
+            // option to make it easier to get info but unsure if this is needed
+            // const hitArea = config.hitArea || Math.max(10, 30 * (1 / map.getZoom())); 
+            const features = map.queryRenderedFeatures([
+                [e.point.x, e.point.y],
+                [e.point.x, e.point.y]
+            ], { layers: ['assets-points'] });
+            // console.log('This is e ' + e) // [object Object]
+            if (features.length > 0) {
+                map.getCanvas().style.cursor = 'pointer';
+                const feature = features[0];
+                const coordinates = feature.geometry.coordinates.slice();
+                const description = feature.properties[config.nameField];
+                // Highlight all features under the mouse (yellow and expand)
+                const linkIds = features.map(f => f.properties[config.linkField]);
+                // make the assets yellow on hover
+                setHighlightFilter(linkIds);
+                // Expand: set a larger radius for highlight layer
+                map.setPaintProperty('assets-points-highlighted', 'circle-radius', [
+                    "interpolate", ["linear"], ["zoom"],
+                    1, config.maxRadius * 1.1,
+                    10, config.highZoomMaxRadius * 1.1
+                ]);
+                popup.setLngLat(coordinates).setHTML(description).addTo(map);
+                // console.log('set popup')
+            } else {
+                map.getCanvas().style.cursor = '';
+                popup.remove();
+                setHighlightFilter([]);
+                // Reset highlight radius
+                map.setPaintProperty('assets-points-highlighted', 'circle-radius', [
+                    "interpolate", ["linear"], ["zoom"],
+                    1, config.maxRadius,
+                    10, config.highZoomMaxRadius
+                ]);
+            }
         });
-    });
-    config.layers.forEach(layer => {
-        map.on('mouseleave', layer, () => {
+
+        map.on('mouseleave', 'assets-points', () => {
             map.getCanvas().style.cursor = '';
             popup.remove();
-        }); 
-    });
+            setHighlightFilter([]);
+            // Reset highlight radius
+            map.setPaintProperty('assets-points-highlighted', 'circle-radius', [
+                "interpolate", ["linear"], ["zoom"],
+                1, config.maxRadius,
+                10, config.highZoomMaxRadius
+            ]);
+        });
+    }
+
+    if (config.geometries.includes('LineString')) {
+        map.on('mousemove', 'assets-lines', (e) => {
+            // // option to add and subtract padding via hitArea
+            // const hitArea = config.hitArea || Math.max(10, 30 * (1 / map.getZoom()));
+            const features = map.queryRenderedFeatures([
+                [e.point.x, e.point.y],
+                [e.point.x, e.point.y]
+            ], { layers: ['assets-lines'] });
+
+            if (features.length > 0) {
+                map.getCanvas().style.cursor = 'pointer';
+                const feature = features[0];
+                let coordinates;
+                if (feature.geometry.type === "LineString") {
+                    // Use the midpoint of the line for the popup
+                    const lineCoords = feature.geometry.coordinates;
+                    const midIdx = Math.floor(lineCoords.length / 2);
+                    coordinates = lineCoords[midIdx].slice();
+                } else if (feature.geometry.type === "MultiLineString") {
+                    // Use the midpoint of the first line in the MultiLineString
+                    const multiLineCoords = feature.geometry.coordinates[0];
+                    const midIdx = Math.floor(multiLineCoords.length / 2);
+                    coordinates = multiLineCoords[midIdx].slice();
+                } else {
+                    // fallback for other geometry types
+                    coordinates = feature.geometry.coordinates.slice();
+                }
+                const description = feature.properties[config.nameField];
+                
+                // Highlight this line (yellow and expand)
+                // make the assets yellow on hover
+                setHighlightFilter(feature.properties[config.linkField]);
+                // Expand: set a larger width for highlight layer
+                map.setPaintProperty('assets-lines-highlighted', 'line-width', [
+                    "interpolate", ["linear"], ["zoom"],
+                    1, config.maxLineWidth * 1.1,
+                    10, config.highZoomMaxLineWidth * 1.1
+                ]);
+                popup.setLngLat(coordinates).setHTML(description).addTo(map);
+                // console.log('set popup')
+            } else {
+                map.getCanvas().style.cursor = '';
+                popup.remove()
+                setHighlightFilter([]);
+                // Reset highlight width
+                map.setPaintProperty('assets-lines-highlighted', 'line-width', [
+                    "interpolate", ["linear"], ["zoom"],
+                    1, config.maxLineWidth,
+                    10, config.highZoomMaxLineWidth
+                ]);
+            }
+        });
+
+        map.on('mouseleave', 'assets-lines', () => {
+            map.getCanvas().style.cursor = '';
+            popup.remove()
+            setHighlightFilter([]);
+            // Reset highlight width
+            map.setPaintProperty('assets-lines-highlighted', 'line-width', [
+                "interpolate", ["linear"], ["zoom"],
+                1, config.maxLineWidth,
+                10, config.highZoomMaxLineWidth
+            ]);
+        });
+    }
     $('#basemap-toggle').on("click", function() {
         if (config.baseMap == "Streets") {
            // $('#basemap-toggle').text("Streets");
@@ -702,7 +929,7 @@ function addEvents() {
     });
 
     $('#reset-all-button').on("click", function() {
-        enableResetAll(); // change this so it only clears search not all filtering of legend
+        enableResetAll(); // TODO change this so it only clears search not all filtering of legend
     });
 
 
@@ -727,6 +954,7 @@ $('#projection-toggle').on("click", function() {
         config.projection = "naturalEarth";
         map.setProjection('naturalEarth');
         $('#btn-spin-toggle').hide();
+        $('#fit').hide();
         map.setCenter(config.center);
         map.setZoom(determineZoom());
 
@@ -735,6 +963,7 @@ $('#projection-toggle').on("click", function() {
         map.setProjection("globe");
         map.setCenter(config.center);
         $('#btn-spin-toggle').show();
+        $('#fit').show();
         spinGlobe();
         map.setZoom(determineZoom());
 
@@ -962,6 +1191,9 @@ function filterTiles() {
     config.filterExpression = [];
     // TODO apply diacritic solution here for GIPT as well
     if (config.searchText.length >= 3) {
+        // TODO investigate why this doesn't work to stop spin when search bar has something 
+        // userInteracting = true;
+        // spinGlobe();
         let searchExpression = ['any'];
         config.selectedSearchFields.split(',').forEach((field) => {
             // let mapValue = removeDiacritics(field); // too slow so we'll do it the data input way for removing diacritics in search
@@ -1011,7 +1243,10 @@ function filterTiles() {
 
     } else {
         map.on('idle', filterGeoJSON);
+        console.log('Just fired filterGeoJSON in filterTiles')
+
     }
+
 }
 
 function filterGeoJSON() {
@@ -1058,17 +1293,24 @@ function filterGeoJSON() {
             if (!config.selectedCountries.some(country => projectCountries.includes(country))) {
             include = false;
             }
-            else {
-                console.log(projectCountries)
-                console.log(country)
-            }
+
         }
         if (include) {
             filteredGeoJSON.features.push(feature);
         }
     });
     // config.processedGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
+
     config.processedGeoJSON = filteredGeoJSON;
+    // fitBounds should happen after processedGeoJSON gets reassigned to filtered
+    // if map projection is not mercator or globe do not do fitbounds 
+    // if (config.projection == 'globe'){
+    //     // fit to the highlighted projects and zoom in
+    //     let boundingBoxSet = getBoundingBox()
+    //     map.fitBounds(boundingBoxSet)
+    //     console.log('Just fired fitBounds in filterTiles')
+
+    // }    
     findLinkedAssets();
     config.tableDirty = true;
     updateTable();
@@ -1077,6 +1319,18 @@ function filterGeoJSON() {
     if (! config.tiles) { //maybe just use map filter for points and lines, no matter if tiles of geojson
         map.getSource('assets-source').setData(config.processedGeoJSON);
     }
+
+    // // if map projection is not mercator or globe do not do fitbounds 
+    // if (config.projection == 'globe'){
+    //     // fit to the highlighted projects and zoom in
+    //     let boundingBoxSet = getBoundingBox()
+    //     map.fitBounds(boundingBoxSet)
+    //     console.log('Just fired fitBounds in filterGeoJson')
+
+    // }
+
+
+
 }
 function updateSummary() {
     $('#total_in_view').text(config.totalCount.toLocaleString())
@@ -1229,26 +1483,39 @@ function enableModal() {
         setHighlightFilter('');
     })
 }
+/**
+ * Updates the map layers to highlight specific features based on their link IDs.
+ * 
+ * @param {Array|string} links - An array of link IDs or a single link ID to highlight.
+ *                               If empty, the highlight filter will be cleared.
+ */
 function setHighlightFilter(links) {
     if (! Array.isArray(links)) links = [links];
     let filter;
-    let highlightExpression = [
-        'in',
-        ["get", config.linkField],
-        ["literal", links]
-    ];
+    let highlightExpression = [];
+    const batchSize = 500; // Limit the number of items per batch
+    for (let i = 0; i < links.length; i += batchSize) {
+        const batch = links.slice(i, i + batchSize);
+        highlightExpression.push(['in', ["get", config.linkField], ["literal", batch]]);
+    }
+    highlightExpression = ['any', ...highlightExpression];
     if (config.filterExpression != null) {
         filter = JSON.parse(JSON.stringify(config.filterExpression));
         filter.push(highlightExpression);
     } else {
         filter = ['all', highlightExpression];
     }
-    config.layers.forEach(layer => {
-        filter.push(["==",["geometry-type"],
-            map.getLayer(layer).type == "line" ? "LineString" : "Point"
-        ]);
-        map.setFilter(layer + '-highlighted',filter);
-    });
+    // Set highlight filter only on the correct geometry layers
+    if (config.geometries.includes('Point') && map.getLayer('assets-points-highlighted')) {
+        let pointFilter = JSON.parse(JSON.stringify(filter));
+        pointFilter.push(["==", ["geometry-type"], "Point"]);
+        map.setFilter('assets-points-highlighted', pointFilter);
+    }
+    if (config.geometries.includes('LineString') && map.getLayer('assets-lines-highlighted')) {
+        let lineFilter = JSON.parse(JSON.stringify(filter));
+        lineFilter.push(["==", ["geometry-type"], "LineString"]);
+        map.setFilter('assets-lines-highlighted', lineFilter);
+    }
 }
 
 function displayDetails(features) {
@@ -1808,7 +2075,7 @@ function getCoordinatesDump(gj) {
     }
     return coords;
 }
-
+// TODO change this function name to be semicolon not comma
 function removeLastComma(str) {
     if (str.charAt(str.length - 1) === ';') {
         str = str.slice(0, -1);
@@ -1825,7 +2092,7 @@ const secondsPerRevolution = 120;
 const maxSpinZoom = 5;
 // Rotate at intermediate speeds between zoom levels 3 and 5.
 const slowSpinZoom = 3;
-const btnSpinToggle = document.querySelector('#btn-spin-toggle');
+// const btnSpinToggle = document.querySelector('#btn-spin-toggle');
 
 
 let userInteracting = false;
@@ -1858,56 +2125,36 @@ map.on('mousedown', () => {
     userInteracting = true;
 });
 
-// Restart spinning the globe when interaction is complete
-map.on('mouseup', () => {
-    userInteracting = false;
-    spinGlobe();
-});
-
-// // These events account for cases where the mouse has moved
-// // off the map, so 'mouseup' will not be fired.
-map.on('dragend', () => {
-    userInteracting = false;
-    spinGlobe();
-});
-map.on('pitchend', () => {
-    userInteracting = false;
-    spinGlobe();
-});
-map.on('rotateend', () => {
-    userInteracting = false;
-    spinGlobe();
-});
 
 // // When animation is complete, start spinning if there is no ongoing interaction
 map.on('moveend', () => {
     spinGlobe();
 });
 
-document.getElementById('btn-spin-toggle').addEventListener('click', (e) => {
-    spinEnabled = !spinEnabled;
-    if (spinEnabled) {
-        spinGlobe();
-        e.target.innerHTML = 'Pause rotation';
-    } else {
-        map.stop(); // Immediately end ongoing animation
-        e.target.innerHTML = 'Start rotation';
-    }
-});
+// document.getElementById('btn-spin-toggle').addEventListener('click', (e) => {
+//     spinEnabled = !spinEnabled;
+//     if (spinEnabled) {
+//         spinGlobe();
+//         e.target.innerHTML = 'Pause rotation';
+//     } else {
+//         map.stop(); // Immediately end ongoing animation
+//         e.target.innerHTML = 'Start rotation';
+//     }
+// });
 
 
-// # adding option to pause spin with space important for smaller screens
-document.addEventListener('keydown', (e) => {
-    spinEnabled = !spinEnabled;
-    if (e.code === "Space") {
-        if (spinEnabled) {
-            spinGlobe();
-            btnSpinToggle.innerHTML = 'Pause rotation'; // not working not sure why
-        } else {
-            map.stop(); // Immediately end ongoing animation
-            spinGlobe();
-            btnSpinToggle.innerHTML = 'Start rotation';
-        }
-    }
-});
+// // # adding option to pause spin with space important for smaller screens
+// document.addEventListener('keydown', (e) => {
+//     spinEnabled = !spinEnabled;
+//     if (e.code === "Space") {
+//         if (spinEnabled) {
+//             spinGlobe();
+//             btnSpinToggle.innerHTML = 'Pause rotation'; // not working not sure why
+//         } else {
+//             map.stop(); // Immediately end ongoing animation
+//             spinGlobe();
+//             btnSpinToggle.innerHTML = 'Start rotation';
+//         }
+//     }
+// });
 
