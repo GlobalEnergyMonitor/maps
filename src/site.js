@@ -417,6 +417,7 @@ function loadData() {
 }
 }
 function addGeoJSON(jsonData) {
+    console.log('In addGeoJSON')
     // converts all to geojson 
     if ('type' in jsonData && jsonData['type'] == 'FeatureCollection') {
         config.geojson = jsonData;
@@ -508,6 +509,7 @@ function addTiles() {
 
 }
 function geoJSONFromTiles() {
+    console.log('In geoJSONFromTiles')
     map.off('idle', geoJSONFromTiles);
     // since map not idle anymore reintroduce spinner 
     $('#spinner-container-filter').addClass('d-none')
@@ -713,7 +715,9 @@ function generateIcon(icon) {
 
     // get the canvas context
     let context = canvas.getContext('2d');
-    context.globalAlpha = config.pointPaint["circle-opacity"];
+    // context.globalAlpha = config.pointPaint["circle-opacity"];
+    context.globalAlpha = Number(document.getElementById('opacity-value').textContent)
+    console.log(context.globalAlpha + ' = ' + Number(document.getElementById('opacity-value').textContent))
 
     // calculate the coordinates of the center of the circle
     let centerX = canvas.width / 2;
@@ -871,13 +875,18 @@ function addPointLayer() {
         "interpolate", ["linear"], ["zoom"],
         1, ["interpolate", interpolateExpression,
             ["to-number",["get", config.capacityField]],
-            config.minPointCapacity, config.minRadius,
-            config.maxPointCapacity, config.maxRadius
+            // config.minPointCapacity, config.minRadius,
+            // config.maxPointCapacity, config.maxRadius
+            config.minPointCapacity, Number(document.getElementById('minRadius-value').textContent),
+            config.maxPointCapacity, Number(document.getElementById('maxRadius-value').textContent)
+
         ],
         10, ["interpolate", interpolateExpression,
             ["to-number",["get", config.capacityField]],
-            config.minPointCapacity, config.highZoomMinRadius,
-            config.maxPointCapacity, config.highZoomMaxRadius
+            // config.minPointCapacity, config.highZoomMinRadius,
+            // config.maxPointCapacity, config.highZoomMaxRadius
+            config.minPointCapacity, Number(document.getElementById('highZoomMinRadius-value').textContent),
+            config.maxPointCapacity, Number(document.getElementById('highZoomMaxRadius-value').textContent)      
         ],
     ];
 
@@ -906,12 +915,16 @@ function addPointLayer() {
                 "interpolate", ["linear"], ["zoom"],
                 1, ['interpolate', interpolateExpression,
                     ["to-number", ["get", config.capacityField]],
-                    config.minPointCapacity, config.minRadius * 2 / 64,
-                    config.maxPointCapacity, config.maxRadius * 2 / 64],
+                    // config.minPointCapacity, config.minRadius * 2 / 64,
+                    // config.maxPointCapacity, config.maxRadius * 2 / 64],
+                    config.minPointCapacity, Number(document.getElementById('minRadius-value').textContent * 2 / 64),
+                    config.maxPointCapacity, Number(document.getElementById('maxRadius-value').textContent * 2 / 64)],
                 10, ['interpolate', interpolateExpression,
                     ["to-number", ["get", config.capacityField]],
-                    config.minPointCapacity, config.highZoomMinRadius * 2 / 64,
-                    config.maxPointCapacity, config.highZoomMaxRadius * 2 / 64]
+                    // config.minPointCapacity, config.highZoomMinRadius * 2 / 64,
+                    // config.maxPointCapacity, config.highZoomMaxRadius * 2 / 64]
+                    config.minPointCapacity, Number(document.getElementById('highZoomMinRadius-value').textContent * 2 / 64),
+                    config.maxPointCapacity, Number(document.getElementById('highZoomMaxRadius-value').textContent * 2 / 64)],  
             ]
         }
     });
@@ -1287,6 +1300,7 @@ function addEvents() {
 
 
 
+
     $('#basemap-toggle').on("click", function() {
         if (config.baseMap == "Streets") {
            // $('#basemap-toggle').text("Streets");
@@ -1317,7 +1331,6 @@ function addEvents() {
         enableClearSearch(); // TODO change this so it only clears search not all filtering of legend
     });
 
-
     $('#collapse-sidebar').on("click", function() {
         $('#filter-form').hide();
         $('#all-select').hide();
@@ -1332,6 +1345,7 @@ function addEvents() {
         $('#collapse-sidebar').show();
         $('#expand-sidebar').hide();
     });
+
 }
 
 $('#projection-toggle').on("click", function() {
@@ -1354,6 +1368,32 @@ $('#projection-toggle').on("click", function() {
 
     }
 })
+
+/* 
+    // TODO continue
+        // add event listeners to dev sliders
+    // re run addGeoJSON after opacity change 
+*/
+
+$('#opacity-value').on("click", function(){
+    // start spinner to indicate it is re rendering
+    console.log('opa clicked!')
+
+    addGeoJSON()
+    // stop spinner 
+});
+
+$('#minRadius-value').on("click", function(){
+    // start spinner to indicate it is re rendering
+    console.log('minRad clicked!')
+    addGeoJSON()
+    // stop spinner 
+    
+})
+
+
+
+
 
 
 /*
