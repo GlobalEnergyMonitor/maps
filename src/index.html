@@ -1,4 +1,48 @@
 <!DOCTYPE html>
+<div id="sliders-container" style="position: absolute; top: 10px; right: 10px; z-index: 1000; background: rgba(255,255,255,0.95); padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 240px;">
+    <div class="mb-4">
+        <label for="opacity-slider" class="form-label">Opacity: <span id="opacity-value" class="ms-2 fw-bold">1</span></label>
+        <input type="range" class="form-range" min="0" max="1" step="0.01" id="opacity-slider" value="1" oninput="document.getElementById('opacity-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label for="minRadius-slider" class="form-label">Min Radius: <span id="minRadius-value" class="ms-2 fw-bold">1</span></label>
+        <input type="range" class="form-range" min="1" max="100" step="1" id="minRadius-slider" value="1" oninput="document.getElementById('minRadius-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label for="maxRadius-slider" class="form-label">Max Radius: <span id="maxRadius-value" class="ms-2 fw-bold">10</span></label>
+        <input type="range" class="form-range" min="1" max="100" step="1" id="maxRadius-slider" value="1" oninput="document.getElementById('maxRadius-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label for="highZoomMinRadius-slider" class="form-label">High Zoom Min Radius: <span id="highZoomMinRadius-value" class="ms-2 fw-bold">1</span></label>
+        <input type="range" class="form-range" min="1" max="100" step="1" id="highZoomMinRadius-slider" value="1" oninput="document.getElementById('highZoomMinRadius-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label for="highZoomMaxRadius-slider" class="form-label">High Zoom Max Radius: <span id="highZoomMaxRadius-value" class="ms-2 fw-bold">10</span></label>
+        <input type="range" class="form-range" min="1" max="100" step="1" id="highZoomMaxRadius-slider" value="1" oninput="document.getElementById('highZoomMaxRadius-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label for="zoom-level-slider" class="form-label">Zoom Level: <span id="zoom-level-value" class="ms-2 fw-bold">0.5</span></label>
+        <input type="range" class="form-range" min="0" max="22" step="0.01" id="zoom-level-slider" value="0.5" oninput="document.getElementById('zoom-level-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Interpolation</label>
+        <div>
+            <input type="radio" class="btn-check" name="interpolation-type" id="interpolation-linear" autocomplete="off" checked>
+            <label class="btn btn-outline-primary btn-sm" for="interpolation-linear">Linear</label>
+            <input type="radio" class="btn-check" name="interpolation-type" id="interpolation-exp" autocomplete="off">
+            <label class="btn btn-outline-primary btn-sm" for="interpolation-exp">Exp</label>
+        </div>
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Interpolation Zoom</label>
+        <div>
+            <input type="radio" class="btn-check" name="interpolation-type-zoom" id="interpolation-linear-zoom" autocomplete="off" checked>
+            <label class="btn btn-outline-primary btn-sm" for="interpolation-linear-zoom">Linear</label>
+            <input type="radio" class="btn-check" name="interpolation-type-zoom" id="interpolation-exp-zoom" autocomplete="off">
+            <label class="btn btn-outline-primary btn-sm" for="interpolation-exp-zoom">Exp</label>
+        </div>
+    </div>
+</div>
 
 <head>
     <meta charset="utf-8">
