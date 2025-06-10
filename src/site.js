@@ -22,6 +22,7 @@ const map = new mapboxgl.Map({
     projection: config.projection
 });
 
+// add new navigation features
 map.scrollZoom.enable();
 map.boxZoom.enable();
 map.dragRotate.enable();
@@ -51,15 +52,15 @@ map.touchZoomRotate.enable();
     *  The [lng, lat] pairs are the southwestern and northeastern
     *  corners of the specified geographical bounds.
     */
-document.getElementById('fit').addEventListener('click', () => {
-    // map.fitBounds([
-    //     [32.958984, -5.353521], // [lng, lat] - southwestern corner of the bounds
-    //     [43.50585, 5.615985] // [lng, lat] - northeastern corner of the bounds
-    // ]);
-    // use the output or return of getBoundingBox() instead of hardcoded default of Kenya
-    let boundingBoxSet = getBoundingBox()
-    map.fitBounds(boundingBoxSet)
-});
+// document.getElementById('fit').addEventListener('click', () => {
+//     // map.fitBounds([
+//     //     [32.958984, -5.353521], // [lng, lat] - southwestern corner of the bounds
+//     //     [43.50585, 5.615985] // [lng, lat] - northeastern corner of the bounds
+//     // ]);
+//     // use the output or return of getBoundingBox() instead of hardcoded default of Kenya
+//     let boundingBoxSet = getBoundingBox()
+//     map.fitBounds(boundingBoxSet)
+// });
 
 map.addControl(new mapboxgl.NavigationControl({ showCompass: false }));
 const popup = new mapboxgl.Popup({
@@ -67,11 +68,14 @@ const popup = new mapboxgl.Popup({
     closeOnClick: false
 });
 
+// declare this so you can customize features depending on if it's first load or filtering
+let initialLoad = true;
+
 map.on('load', function () {
     if (config.projection != 'globe'){
         // map.setFog({}); // Set the default atmosphere style
-        $('#btn-spin-toggle').hide();
-        $('#fit').hide();
+        // $('#btn-spin-toggle').hide();
+        // $('#fit').hide();
 
     }
     loadData();
@@ -83,24 +87,162 @@ function determineZoom() {
     let zoom = config.zoomFactor * (window.innerWidth - modifier) / modifier;
     return zoom;
 }
-function getBoundingBoxTry() {
+
+function getStandardDeviation (array) {
+    if (!array || array.length === 0) {return 0;}
+
+    const n = array.length
+    const mean = array.reduce((a, b) => a + b) / n
+    return Math.sqrt(array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n)
+    }
+
+function findDensity(gridSize = 10) {
+    /* This function augmnts the getBoundingBox function so that if there are anomolies they do not skew the "should be" center
+    So for issues like Reunion island being technically part of France, or the typo of a oil plant that has South Dakota listed but 
+    is in Mongolia
+    */
+
+    // get the average bounding box or center for all features listed
+    // or for majority of features listed 
+    // and then exclude the feature(s) whos center is too far from the average
+    // OR try to see if you can measure the density of a layer and have the bounding box prefer a dense view instead of 
+    // the ocean or a north or south pole
+
+    // Find the densest region of features using a grid-based approach.
+    // gridSize: size of grid cell in degrees (default 1 degree)
+
+
+    features = config.processedGeoJSON.features
+    // handle for no features returned
+    if (!features.length) {
+        console.warn('No features returned will not zoom in or fly');
+        // TODO figure out zoom out and respin
+        // maybe clear out filter after message saying nothing found
+        // if (map.getZoom() < 12) {
+        //     map.setZoom(12);
+        // }
+        return null;
+    } else {
+
+        // Collect all coordinates acccount for point, multipoint, linestring, multi line string
+        let allCoords = [];
+        features.forEach(f => {
+            let coords = [];
+            if (f.geometry && f.geometry.type === "Point") {
+                coords = [f.geometry.coordinates];
+            } else if (f.geometry && f.geometry.coordinates && f.geometry.coordinates.length) {
+                coords = f.geometry.coordinates.flat(Infinity)
+                    .filter(c => Array.isArray(c) && c.length === 2 && isFinite(c[0]) && isFinite(c[1]))
+                    .map(c => [c[0], c[1]]);
+            }
+            // Ensure coords is always an array of [lng, lat]
+            if (Array.isArray(coords[0])) {
+                coords.forEach(c => {
+                    if (Array.isArray(c) && c.length === 2 && isFinite(c[0]) && isFinite(c[1])) {
+                        allCoords.push([c[0], c[1]]);
+                    }
+                });
+            } else if (coords.length === 2 && isFinite(coords[0]) && isFinite(coords[1])) {
+                allCoords.push([coords[0], coords[1]]);
+            }
+        });
+
+        if (allCoords.length === 0) {
+            // If nothing is selected, reset to initial center and resume spinning
+            userInteracting = false;
+            spinGlobe();
+            // Return a small bounds around the initial center to trigger fitBounds
+            const center = config.center;
+            const pad = 0.5;
+            return [
+                [center[0] - pad, center[1] - pad], // SW
+                [center[0] + pad, center[1] + pad]  // NE
+            ];
+        }
+        console.log('len of allC' + allCoords.length)
+        // Build grid and count points in each cell
+        const grid = {};
+        allCoords.forEach(([lng, lat]) => {
+            // Round to grid cell
+            const x = Math.floor(lng / gridSize);
+            const y = Math.floor(lat / gridSize);
+            const key = `${x},${y}`;
+            if (!grid[key]) grid[key] = [];
+            grid[key].push([lng, lat]);
+        });
+
+        // Find the cell with the most points
+        let maxCell = null;
+        let maxCount = 0;
+        Object.entries(grid).forEach(([key, points]) => {
+            if (points.length > maxCount) {
+                maxCount = points.length;
+                maxCell = key;
+            }
+        });
+
+        // if (!maxCell) {
+        //     // fallback: use the bounding box of all points
+        //     let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
+        //     allCoords.forEach(([lng, lat]) => {
+        //         minLng = Math.min(minLng, lng);
+        //         minLat = Math.min(minLat, lat);
+        //         maxLng = Math.max(maxLng, lng);
+        //         maxLat = Math.max(maxLat, lat);
+        //     });
+        //     const pad = 0.2;
+        //     return [
+        //         [minLng - pad, minLat - pad], // SW
+        //         [maxLng + pad, maxLat + pad]  // NE
+        //     ];
+        // }
+
+        // Get the densest cell's bounding box
+        const [cellX, cellY] = maxCell.split(',').map(Number);
+        const minLng = cellX * gridSize;
+        const minLat = cellY * gridSize;
+        const maxLng = minLng + gridSize;
+        const maxLat = minLat + gridSize;
+
+
+        // find difference between min and max lng to see if should return null
+        let diffLng = Math.abs(minLng - maxLng)
+        // if absolute value of diff is more than 179 return null
+        if (diffLng > 270) {
+            console.log('Greater than 270: ' + diffLng)
+            return null;
+        }
+        console.log('diffLng: ' + diffLng)
+
+        console.log('SW['+ minLng +',' + minLat +']')
+        console.log('NE['+ maxLng +',' + maxLat +']')
+    
+
+        // Optionally, expand the bounding box slightly for better fit
+        // if one feature padding of .5 else ... 
+        const pad = 0;
+        return [
+            [minLng - pad, minLat - pad], // SW
+            [maxLng + pad, maxLat + pad]  // NE
+        ];
+    }
+}
+
+function getBoundingBox(features) {
     // this function will result in two coordinate pairings that look like the example below
     // it'll be used by the mapbox fitbounds() method to re orient the map based off of the locations of selected / filtered projects or map assets
     // those projects can be selected by the user in four ways:
-    // 1.) adjusting the legend filters on status or project type
-    // 2.) selecting a country or continent from the dropdown
-    // 3.) searching by name of the project in the search bar
-    // 4.) clicking an asset
+    // 1.) adjusting the legend filters on status or project type -- rarely will be fitBounds eligible
+    // 2.) selecting a country or continent from the dropdown -- TODO implement std dev but done, instead using density but with a maxZoom
+    // 3.) searching by name of the project in the search bar -- done
+    // 4.) clicking an asset // USE flyTo DONE
+    // TODO if user interacting do not initiate fitBounds ... do we wait? 
     // sometimes only one project or asset will be returned 
     // in most cases though many projects will be returned
     // this function should calculate the most relevant bounding box that helps focus and zoom the user into their area of interest on the map
     // [32.958984, -5.353521], // [lng, lat] - southwestern corner of the bounds
     // [43.50585, 5.615985] // [lng, lat] - northeastern corner of the bounds
 
-}
-
-function getBoundingBox(features) {
-    
     // If no features provided, use currently filtered features
     if (!features) {
         features = config.processedGeoJSON && config.processedGeoJSON.features
@@ -108,17 +250,57 @@ function getBoundingBox(features) {
             : [];
     }
     if (!features.length) {
-        // If nothing is selected, reset to initial center and resume spinning
-        userInteracting = false;
-        spinGlobe();
         // Return a small bounds around the initial center to trigger fitBounds
-        const center = config.center;
-        const pad = 0.5;
-        return [
-            [center[0] - pad, center[1] - pad], // SW
-            [center[0] + pad, center[1] + pad]  // NE
-        ];
+        return null;
     }
+    // // Helper to flatten all coordinates from a geometry
+    // function flattenCoords(geometry) {
+    //     if (!geometry) return [];
+    //     if (geometry.type === "Point") {
+    //         return [geometry.coordinates];
+    //     } else if (geometry.type === "MultiPoint" || geometry.type === "LineString") {
+    //         return geometry.coordinates;
+    //     } else if (geometry.type === "MultiLineString" || geometry.type === "Polygon") {
+    //         return geometry.coordinates.flat();
+    //     } else if (geometry.type === "MultiPolygon") {
+    //         return geometry.coordinates.flat(2);
+    //     }
+    //     return [];
+    // }
+
+    // // Collect all coordinates from features
+    // let allCoords = [];
+    // features.forEach(feature => {
+    //     allCoords.push(...flattenCoords(feature.geometry));
+    // });
+    // console.log('allCoords' + allCoords)
+
+    // // Calculate mean and stddev for lng and lat
+    // function getMeanStd(arr) {
+    //     const n = arr.length;
+    //     if (n === 0) return { mean: 0, std: 0 };
+    //     const mean = arr.reduce((a, b) => a + b, 0) / n;
+    //     const std = Math.sqrt(arr.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / n);
+    //     return { mean, std };
+    // }
+    // const lngs = allCoords.map(c => c[0]);
+    // const lats = allCoords.map(c => c[1]);
+    // const { mean: meanLng, std: stdLng } = getMeanStd(lngs);
+    // const { mean: meanLat, std: stdLat } = getMeanStd(lats);
+
+    // // Filter out features whose all coordinates are > 2 stddev from mean
+    // const filteredFeatures = features.filter(feature => {
+    //     const coords = flattenCoords(feature.geometry);
+    //     // If any coordinate is within 2 stddev, keep the feature
+    //     return coords.some(([lng, lat]) =>
+    //         Math.abs(lng - meanLng) <= 2 * stdLng && Math.abs(lat - meanLat) <= 2 * stdLat
+    //     );
+    // });
+
+    // // Use filteredFeatures for the rest of the function
+    // let featuresGeo = filteredFeatures.map(f => f.geometry);
+
+
     let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity;
     features.forEach(f => {
         let coords = f.geometry && f.geometry.type === "Point"
@@ -145,10 +327,25 @@ function getBoundingBox(features) {
     });
     // If only one point, expand bounds slightly for better fit
     if (minLng === maxLng && minLat === maxLat) {
-        const pad = 0.05;
+        const pad = 0.1;
         minLng -= pad; maxLng += pad;
         minLat -= pad; maxLat += pad;
     }
+
+    // find difference between min and max lng to see if should return null
+    let diffLng = Math.abs(minLng - maxLng)
+    // if absolute value of diff is more than 179 return null
+    if (diffLng > 270) {
+        console.log('Greater than 270: ' + diffLng)
+        return null;
+    }
+    console.log('diffLng: ' + diffLng)
+
+    console.log('SW['+ minLng +',' + minLat +']')
+    console.log('NE['+ maxLng +',' + maxLat +']')
+    
+
+
     return [
         [minLng, minLat], // SW
         [maxLng, maxLat]  // NE
@@ -249,9 +446,9 @@ function addGeoJSON(jsonData) {
             if (feature.properties[config['countryField']]){
                 config.geojson.features.push(feature);
             }
-            else {
-                console.log(feature)
-            }
+            // else {
+            //     console.log(feature)
+            // }
         });
 
     }
@@ -312,6 +509,9 @@ function addTiles() {
 }
 function geoJSONFromTiles() {
     map.off('idle', geoJSONFromTiles);
+    // since map not idle anymore reintroduce spinner 
+    $('#spinner-container-filter').addClass('d-none')
+    $('#spinner-container-filter').removeClass('d-flex')
     let layers = [];
     if (config.geometries.includes('Point')) layers.push('assets-minmax-point');
     if (config.geometries.includes('LineString')) layers.push('assets-minmax-line');
@@ -342,7 +542,9 @@ function geoJSONFromTiles() {
 function findLinkedAssets() {
     
     map.off('idle', findLinkedAssets);
-
+    // since map not idle anymore reintroduce spinner 
+    $('#spinner-container-filter').addClass('d-none')
+    $('#spinner-container-filter').removeClass('d-flex')
     // config.preLinkedGeoJSON = JSON.parse(JSON.stringify(config.processedGeoJSON));
     config.preLinkedGeoJSON = config.processedGeoJSON;
     config.totalCount = 0;
@@ -430,16 +632,77 @@ function findLinkedAssets() {
         config.processedGeoJSON.features.push(features[0]);
     });
 
-    // Try here for fitBounds
-    // if map projection is not mercator or globe do not do fitbounds 
-    if (config.projection == 'globe'){
-        // fit to the highlighted projects and zoom in
-        let boundingBoxSet = getBoundingBox()
-        map.fitBounds(boundingBoxSet)
-        console.log('Just fired fitBounds in filterGeoJson')
 
+    if (initialLoad == true) {
+        // Do not go through fitBounds on initialLoad 
+        userInteracting = false;
+        spinGlobe();
+    } else {
+
+        // Try here for fitBounds
+        // if map projection is not mercator or globe do not do fitbounds 
+        if (config.projection == 'globe'){
+            // fit to the highlighted projects and zoom in
+            // let boundingBoxSet = getBoundingBox()
+            let boundingBoxSet = findDensity(); // better function that will avoid anomalies and poles
+            // TODO find size of bounding box and then determine max zoom so if its small or less features higher zoom less map
+            // if larger or more features or many dense clusters then low zoom more map
+
+            // if there are no search terms or filters
+            // zoom out and spin 
+            
+
+            if (boundingBoxSet) {
+                // find diff 
+                // if difference between max and min longitude is more than 179  +/- 
+                // return to center and start spinning
+                // getZoom
+                // if (diff within range){
+                map.fitBounds(boundingBoxSet, {
+                    padding: {top: 10, bottom:25, left: 15, right: 5},
+                    // maxZoom: {4},
+                    // linear: true,
+                    maxZoom: 2,
+                    // pitch: 0,
+                    // bearing: 0,
+                    // offset: [0,0]
+                });
+                // }else {
+                    
+                // }
+            } else {
+                // if null for no features
+                // return back to start
+                // If nothing is selected, reset to initial center and resume spinning
+
+                // Using easeTo options. jumpTo without animation
+                // or try resetNorth and resetNorthPitch
+                map.jumpTo({
+                    center: [0, 0],
+                    zoom: 1,
+
+                })
+                userInteracting = false;
+                spinGlobe();
+                // map.easeTo({
+                //     center: [0,0],
+                //     zoom: 1,
+                //     speed: 0.2, // easeTo
+                //     curve: 1, // easeTo
+                //     duration: 1000, // easeTo
+                //     easing(t) { // easeTo
+                //         return t;
+                //     }
+                // })
+
+            }
+            console.log('Just fired fitBounds in filterGeoJson')
+
+        }
     }
 }
+
+
 function generateIcon(icon) {
     let label = JSON.stringify(icon);
     if (map.hasImage(label)) return;
@@ -524,6 +787,9 @@ function setMinMax() {
 */
 function enableUX() {
     map.off('idle', enableUX);
+    // since map not idle anymore reintroduce spinner 
+    $('#spinner-container-filter').addClass('d-none')
+    $('#spinner-container-filter').removeClass('d-flex')
     if (config.UXEnabled) {
         console.log('ux already enabled');
         return
@@ -580,9 +846,14 @@ function addLayers() {
 
     addEvents();
 }
+
+// function addLabelLayer( {
+
+// })
+
 function addPointLayer() {
-     // First build circle layer
-    //  build style json for circle-color based on config.color
+    // First build circle layer
+    // build style json for circle-color based on config.color
     let paint = config.pointPaint;
     if ('color' in config) {
         paint["circle-color"] = [
@@ -592,8 +863,8 @@ function addPointLayer() {
             "#000000"
         ];
     }
-// LET"S ADD exponential NOT linear TODO Maisie 
-// ["exponential", base] if base is 1 then it is linear the same, power of 1/2 to do squareroot area based
+    // LET"S ADD exponential NOT linear TODO Maisie 
+    // ["exponential", base] if base is 1 then it is linear the same, power of 1/2 to do squareroot area based
 
     let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
     paint['circle-radius'] = [
@@ -608,10 +879,8 @@ function addPointLayer() {
             config.minPointCapacity, config.highZoomMinRadius,
             config.maxPointCapacity, config.highZoomMaxRadius
         ],
-
     ];
 
-    
     map.addLayer({
         'id': 'assets-points',
         'type': 'circle',
@@ -622,7 +891,6 @@ function addPointLayer() {
         'paint': paint
     });
     config.layers.push('assets-points');
-
 
     // Add layer with proportional icons
     map.addLayer({
@@ -663,6 +931,8 @@ function addPointLayer() {
             'filter': ['in', (config.linkField), '']
         }
     );
+
+    // try moving this and calling it when basemap is toggled 
     map.addLayer(
         {
             'id': 'assets-labels',
@@ -686,6 +956,65 @@ function addPointLayer() {
         }
     );
 }
+
+
+    // // Determine actual basemap style
+    // const styleUrl = map.getStyle().sprite || map.getStyle().name || map.getStyle().metadata?.['mapbox:origin'] || '';
+    // Check if satellite is visible
+    // const satelliteVisible = map.getLayer('Satellite') && map.getLayoutProperty('satellite', 'visibility') === 'visible';
+    // set satelliteVisible it in the actual toggle for basemap
+    // console.log('this is the satellite visibility' + config.satelliteVisible)
+    // if (config.satelliteVisible = true) {
+    //     map.addLayer(
+    //         {
+    //             'id': 'assets-labels',
+    //             'type': 'symbol',
+    //             'source': 'assets-source',
+    //             'filter': ["==",["geometry-type"],'Point'],
+    //             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+    //             'minzoom': 6,
+    //             'layout': {
+    //                 'text-field': '{' + config.nameField + '}',
+    //                 'text-font': ["DIN Pro Italic"],
+    //                 'text-variable-anchor': ['top'],
+    //                 'text-offset': [0, 1],
+    //             },
+    //             'paint': {
+    //                 'text-color': '#ffffff', // white
+    //                 'text-halo-color': "#000000", // Use a solid black 
+    //                 'text-halo-width': .00001, // Reduce width for less distraction
+    //                 'text-halo-blur': 10 // Add blur for smoother, less jagged halo
+    //             }
+    //         }
+    //     );
+    // } else {
+    //     map.addLayer(
+    //         {
+    //             'id': 'assets-labels',
+    //             'type': 'symbol',
+    //             'source': 'assets-source',
+    //             'filter': ["==",["geometry-type"],'Point'],
+    //             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+    //             'minzoom': 6,
+    //             'layout': {
+    //                 'text-field': '{' + config.nameField + '}',
+    //                 'text-font': ["DIN Pro Italic"],
+    //                 'text-variable-anchor': ['top'],
+    //                 'text-offset': [0, 1],
+    //             },
+    //             'paint': {
+    //                 'text-color': '#000000', // black
+    //                 'text-halo-color': "rgba(255,255,255,.85)", // Use a solid white with some transparency
+    //                 'text-halo-width': .00001, // Reduce width for less distraction
+    //                 'text-halo-blur': 10 // Add blur for smoother, less jagged halo
+    //             }
+    //         }
+    //     );
+    // }
+
+
+
+
 function addLineLayer() {
     let paint = config.linePaint;
     if ('color' in config) {
@@ -744,8 +1073,42 @@ function addEvents() {
         const bbox = [ [e.point.x - config.hitArea, e.point.y - config.hitArea], [e.point.x + config.hitArea, e.point.y + config.hitArea]];
         const selectedFeatures = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField).sort((a, b) => a.properties[config.nameField].localeCompare(b.properties[config.nameField]));
         
+        // TODO since using tiles do not have coords in it so even if coords exist and are exact zoom 
+        // we should use the country or subnat and use the rep point to zoom to
+        // then use map.project([lat,lng]); to project into map's geo projection
+
+
+        // geometry param of the quryRenderedFeatures will return the geo of the qurey region in piexles ... 
+        // can we use flyTo or fitBounds with it? 
+
+        // const selectedFeaturesGeo = getUniqueFeatures(map.queryRenderedFeatures(bbox, {layers: config.layers}), config.linkField)
+        // selectedFeatures.forEach(feature => {
+        //     // console.log(feature.geometry);
+        // });
+
+
         if (selectedFeatures.length == 0) return;
 
+        let bboxClick = getBoundingBox(selectedFeatures)
+        console.log('bboxClick: ' + bboxClick)
+        map.flyTo(bboxClick, {
+                // minZoom: 4,
+                });
+        
+        // TODO adjust zoom level at this point with jumpTo or easeTo or setZoom
+        // let curr_zoom = map.getZoom();
+        // // 0 and 22
+        // let new_zoom = curr_zoom * 2
+
+        map.easeTo({
+            zoom: 4,
+            speed: 0.7, // easeTo
+            // curve: 1, // easeTo
+            duration: 1000, // easeTo
+            easing(t) { // easeTo
+                return t;
+            }
+        })
         const links = selectedFeatures.map(
             (feature) => feature.properties[config.linkField]
         );
@@ -788,8 +1151,10 @@ function addEvents() {
     });
     // Add hover animation: expand and turn yellow on mouseover, reset on mouseout
     // Animate both point and line markers on hover
+
+    // TODO look into why or how the cursor can change from drag to point within the maps hitarea of 5 pixels
+    // Currently it seems to only change when you are right ontop of the dot which is misleading I think 
     if (config.geometries.includes('Point')) {
-        console.log(config.geometries)
         map.on('mousemove', 'assets-points', (e) => {
             // option to make it easier to get info but unsure if this is needed
             // const hitArea = config.hitArea || Math.max(10, 30 * (1 / map.getZoom())); 
@@ -797,7 +1162,6 @@ function addEvents() {
                 [e.point.x, e.point.y],
                 [e.point.x, e.point.y]
             ], { layers: ['assets-points'] });
-            // console.log('This is e ' + e) // [object Object]
             if (features.length > 0) {
                 map.getCanvas().style.cursor = 'pointer';
                 const feature = features[0];
@@ -840,7 +1204,7 @@ function addEvents() {
             ]);
         });
     }
-
+    
     if (config.geometries.includes('LineString')) {
         map.on('mousemove', 'assets-lines', (e) => {
             // // option to add and subtract padding via hitArea
@@ -906,10 +1270,28 @@ function addEvents() {
             ]);
         });
     }
+
+    // TODO another time, seems like we'd need to handle for point and line so more complicated than I thought
+    // add same mouse over event for labels so its easier to click
+    // assets-labels
+    // map.on('mousemove', 'assets-labels', (e) => {
+
+    // });
+    // // assets-labels
+    // map.on('mouseleave', 'assets-labels', (e) => {
+    //     map.getCanvas().style.cursor = '';
+    //     popup.remove()
+    // });
+
+    // can we add it so if there is a click on a label it zooms in? 
+
+
+
     $('#basemap-toggle').on("click", function() {
         if (config.baseMap == "Streets") {
            // $('#basemap-toggle').text("Streets");
            config.baseMap = "Satellite";
+        //    config.satelliteVisible = true; // doesn't help because it loads only once, in addLayers() onLoad()
            map.setLayoutProperty('satellite', 'visibility', 'visible');
            map.setFog({
             "range": [0.8, 8],
@@ -922,14 +1304,17 @@ function addEvents() {
         } else {
            // $('#basemap-toggle').text("Satellite");
            config.baseMap = "Streets";
+        //    config.satelliteVisible = false;
            map.setLayoutProperty('satellite', 'visibility', 'none');
 
            map.setFog(null);
         }
+        // re run this so that the labels get added with new design
+        addPointLayer()
     });
 
     $('#reset-all-button').on("click", function() {
-        enableResetAll(); // TODO change this so it only clears search not all filtering of legend
+        enableClearSearch(); // TODO change this so it only clears search not all filtering of legend
     });
 
 
@@ -1166,6 +1551,12 @@ function countFilteredFeatures() {
     });
 }
 function filterData() {
+    // reassign initialLoad so that fly to / fitBounds / findDensity does not use default bbox
+    if (initialLoad === true){
+        initialLoad = false;
+        userInteracting = true;
+    }
+
     if (config.tiles) {
 
         filterTiles();
@@ -1176,7 +1567,9 @@ function filterData() {
     }
 }
 
+
 function filterTiles() {
+
     let filterStatus = {};
     config.filters.forEach(filter => {
         filterStatus[filter.field] = [];
@@ -1204,12 +1597,12 @@ function filterTiles() {
         config.filterExpression.push(searchExpression);
     }
     if (config.selectedCountries.length > 0) {
-        //update to handle so doesn't catch when countries are substrings of each other (Niger/Nigeria)
-        //easy solve could be to add "," at end
+        // update to handle so doesn't catch when countries are substrings of each other (Niger/Nigeria)
+        // easy solve could be to add "," at end
         let countryExpression = ['any'];
         config.selectedCountries.forEach(country => {
             if (config.multiCountry) {
-                country = country + ';'; //this is needed to filter integrated file by country select but doesn't affect filtering by region
+                country = country + ';'; // this is needed to filter integrated file by country select but doesn't affect filtering by region
                 countryExpression.push(['in', ['string', country], ['string',['get', removeLastComma(config.countryField)]]]);
             } else {
                 countryExpression.push(['==', ['string', country], ['string',['get', removeLastComma(config.countryField)]]]);
@@ -1245,6 +1638,7 @@ function filterTiles() {
         map.on('idle', filterGeoJSON);
         console.log('Just fired filterGeoJSON in filterTiles')
 
+
     }
 
 }
@@ -1272,6 +1666,8 @@ function filterGeoJSON() {
             if (! filterStatus[field].includes(feature.properties[field])) include = false;
         }
         if (config.searchText.length >= 3) {
+            userInteracting = true;
+
             if (config.selectedSearchFields.split(',').filter((field) => {
                 // remove diacritics from mapValue
                 if (feature.properties[field] != null){
@@ -1287,6 +1683,7 @@ function filterGeoJSON() {
         }
         
         if (config.selectedCountries.length > 0) {
+            userInteracting = true;
             // Check if any of the selected countries are associated with the project
             const projectCountries = feature.properties[config.countryField].split(';').map(country => country.trim());
 
@@ -1302,33 +1699,17 @@ function filterGeoJSON() {
     // config.processedGeoJSON = JSON.parse(JSON.stringify(filteredGeoJSON));
 
     config.processedGeoJSON = filteredGeoJSON;
-    // fitBounds should happen after processedGeoJSON gets reassigned to filtered
-    // if map projection is not mercator or globe do not do fitbounds 
-    // if (config.projection == 'globe'){
-    //     // fit to the highlighted projects and zoom in
-    //     let boundingBoxSet = getBoundingBox()
-    //     map.fitBounds(boundingBoxSet)
-    //     console.log('Just fired fitBounds in filterTiles')
-
-    // }    
+    
+    spinGlobe();
     findLinkedAssets();
     config.tableDirty = true;
     updateTable();
     updateSummary();
 
+
     if (! config.tiles) { //maybe just use map filter for points and lines, no matter if tiles of geojson
         map.getSource('assets-source').setData(config.processedGeoJSON);
     }
-
-    // // if map projection is not mercator or globe do not do fitbounds 
-    // if (config.projection == 'globe'){
-    //     // fit to the highlighted projects and zoom in
-    //     let boundingBoxSet = getBoundingBox()
-    //     map.fitBounds(boundingBoxSet)
-    //     console.log('Just fired fitBounds in filterGeoJson')
-
-    // }
-
 
 
 }
@@ -1370,6 +1751,7 @@ function updateSummary() {
 
     $('#spinner-container-filter').addClass('d-none')
     $('#spinner-container-filter').removeClass('d-flex')
+    console.log('aftr upat summary spinner addClass d-none, removes spinnr')
 }
 
 
@@ -1767,6 +2149,7 @@ function showAllPhases(link) {
     config.modal.hide();
     setHighlightFilter(link);
     var bbox = geoJSONBBox({'type': 'FeatureCollection', features: config.linked[link] });
+    console.log('show all phases bbox:' + bbox)
     map.flyTo({center: [(bbox[0]+bbox[2])/2,(bbox[1]+bbox[3])/2], zoom: config.phasesZoom});
 }
 function showSelectModal() {
@@ -1957,7 +2340,7 @@ function enableSearchSelect() {
     config.selectedSearchFields = allSearchFields.join(',');
 }
 
-function enableResetAll() {
+function enableResetAll() { // not use anymor but keeping in case we want a clear all button
     // need to also handle for table view - it works the same no special handling needed.
 
     // clear country filter by returning selectedCountryLabel to 'All' DONE!
@@ -1995,6 +2378,43 @@ function enableResetAll() {
 
 }  
 
+function enableClearSearch() {
+    // need to also handle for table view - it works the same no special handling needed.
+
+    // // clear country filter by returning selectedCountryLabel to 'All' DONE!
+    // $('#selectedCountryLabel').text("all");
+    // config.selectedCountryText = '';
+    // config.selectedCountries = [];
+    
+    // // clear search text by making search text ''
+    config.searchText = ''; 
+    $('#search-text').val('');
+
+    // put search field category back to all
+    let allSearchFields = [];
+    Object.keys(config.searchFields).forEach((field_label) => {
+        allSearchFields = allSearchFields.concat(config.searchFields[field_label]);
+    });
+    config.selectedSearchFields = allSearchFields.join(',');
+    $('#selectedSearchLabel').text("all");
+
+    // this removes the functionality that was clearing all filters when you only wnat to clear the search box
+    // clear legend by checking checked boxes DONE! 
+    // $('.filter-row').each(function() {
+    //     if (! $('#' + this.dataset.checkid)[0].checked) {
+    //         $('#' + this.dataset.checkid)[0].checked = true;
+    //         toggleFilter(this.dataset.checkid);
+    //     }
+    // }); 
+
+    // // start the spinner
+    // $('#spinner-container-filter').removeClass('d-none')
+    // $('#spinner-container-filter').addClass('d-flex')
+
+    // then filter data
+    filterData();
+
+}  
 
 
 /* 

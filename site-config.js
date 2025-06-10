@@ -61,7 +61,7 @@ var site_config = {
     },
 
     /* by default, no all phases link; override in tracker config where appropriate */
-    showAllPhases: false,
+    showAllPhases: true,
     showMaxCapacity: true,
 
     /* zoom level to set map when viewing all phases */
@@ -74,7 +74,7 @@ var site_config = {
     allCountrySelect: true,
     multiCountry: false,
 
-    hitArea: 5, 
-
+    hitArea: 10, 
+    // satelliteVisible: false, // to help style the labels better 
     geometries: ['Point']
 };

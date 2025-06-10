@@ -479,7 +479,7 @@ table.dataTable td {
 }
 
 
-#fit {
+/* #fit {
     display: block;
     position: relative;
     margin: 0px auto;
@@ -493,7 +493,7 @@ table.dataTable td {
     color: #fff;
     background: #ee8a65;
 
-}
+} */
 
 #btn-spin-toggle {
     position: relative;  /* keep this */ 
@@ -514,9 +514,9 @@ table.dataTable td {
     padding: 10px 20px;  /* keep this */ 
     border-radius: 3px;  /* keep this */ 
 }
-#fit:hover {
+/* #fit:hover {
     background-color: #eeb8a4;
-}
+} */
 
 #btn-spin-toggle:hover {
     background-color: #4ea0da;

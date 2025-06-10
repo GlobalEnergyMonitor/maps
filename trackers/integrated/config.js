@@ -43,6 +43,7 @@ var config = {
         }
     ],
     nameField: 'plant-/-project-name',
+    showAllPhases: true,
     statusField: 'status',
     statusDisplayField: 'status',
     capacityField: 'capacity-(mw)',
