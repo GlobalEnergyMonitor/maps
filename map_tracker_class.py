@@ -1,10 +1,8 @@
 from requests import HTTPError
-from all_config import logger, new_release_date, iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, ggit_geojson, ggit_lng_geojson, region_key, region_tab, centroid_key, centroid_tab
-from helper_functions import rename_gdfs, fuel_filter, maturity, clean_about_df, replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
+from all_config import logger, new_release_date, iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, region_key, region_tab, centroid_key, centroid_tab
+from helper_functions import rename_gdfs, clean_about_df, replace_old_date_about_page_reg, convert_google_to_gdf, convert_coords_to_point, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
 import pandas as pd
 from numpy import absolute
-import json
-import subprocess
 import geopandas as gpd
 import boto3
 from creds import *
@@ -444,8 +442,6 @@ class TrackerObject:
         return path_name
     
 
-    
-
     def create_df(self):
         # print(tabs)
         dfs = []
@@ -521,6 +517,7 @@ class TrackerObject:
                 #     dfs += [df]
                 # df = pd.concat(dfs).reset_index(drop=True)
         return plants_df, plants_hy_df
+    
     
     
     def set_fuel_filter_eu(self):
@@ -663,6 +660,44 @@ class TrackerObject:
         print('Look at cols in it now to see how to rename in rename_and_concat_gdfs for map GOGPT-eu')
         input('CHECK cols for tracker_obj.name == GOGPT EU')
         self.data = gogpt_eu_df
+
+
+    
+    def gcct_changes(self):
+        # before renaming 
+        # before clean_num_data()
+        # before transform_to_gdf()
+        df = self.data
+
+        # split out coords to be lat, lng 
+        # 'Latitude', 'Longitude',
+        df[['Latitude', 'Longitude']] = df['Coordinates'].str.split(', ', expand=True)
+
+        df['capacity'] = df['Cement Capacity (millions metric tonnes per annum)']
+
+        # Use Clinker Capacity where Capacity is missing or null
+        df['capacity'] = df['capacity'].fillna(df['Clinker Capacity (millions metric tonnes per annum)'])
+             
+        # in capacity replace unknown with not found and preserve >0 by copying over to another column
+        df['capacity'].replace('unknown', 'not found', inplace=True)
+    
+        df['capacity-display'] = df['capacity']
+        
+        # adjust capacity so scaling works 
+        df['capacity'].replace('not found', '', inplace=True)
+        df['capacity'].replace('n/a', '', inplace=True)
+        df['capacity'].replace('>0', .008, inplace=True)
+
+        # remove unknown from color, claycal-yn, altf-yn, ccs-yn, prod-type, plant-type
+        cols_no_unknown = ['Production type', 'Plant type', 'Cement Color', 'Clay Calcination', 'Alternative Fuel', 'CCS/CCUS', 'Start date', 'Cement Capacity (millions metric tonnes per annum)']
+        for col in cols_no_unknown:
+            df[col] = df[col].replace('unknown', '')
+            print(set(df[col].to_list()))
+            input('check no unknown')
+
+        self.data = df 
+
+
 
     def find_about_page(self,key):
             # print(f'this is key and tab list in def find_about_page(tracker,key):function:\n{tracker}{key}')
@@ -834,7 +869,7 @@ class TrackerObject:
             
             for col in self.data.columns: # handling for all capacity, production, 
                 # if pd.api.types.is_numeric_dtype(self.data[col]): # the problem is we know its not always all numeric unfortunatley
-                if any(keyword in col for keyword in ['Capacity (MW)', 'Capacity (Mt)','Capacity (Mtpa)', 'CapacityBcm/y', 'CapacityBOEd', 'Capacity (MT)', 'Production - Gas', 'Production - Oil', 'Production (Mt)']):                    
+                if any(keyword in col for keyword in ['Capacity (MW)', 'Capacity (Mt)','Capacity (Mtpa)', 'CapacityBcm/y', 'CapacityBOEd', 'Capacity (MT)', 'Production - Gas', 'Production - Oil', 'Production (Mt)', 'Production (Mtpa)']):                    
                     # print(col)
                     try:
                         self.data.fillna('', inplace=True) # cannot apply to geometry column
@@ -850,6 +885,7 @@ class TrackerObject:
                 
                 elif 'year' in col.lower():
                     print(col)
+                    # input(F'Check if closing year {col}')
                     # self.data.fillna('', inplace=True) # cannot apply to geometry column
                     try:
                         self.data[col] = self.data[col].apply(lambda x: check_and_convert_int(x))
@@ -1241,6 +1277,29 @@ class TrackerObject:
             gdf['original_units'] = conversion_df[conversion_df['tracker']=='GOGPT']['original_units'].values[0]
             gdf['conversion_factor'] = conversion_df[conversion_df['tracker']=='GOGPT']['conversion_factor'].values[0]
             gdf = gdf.reset_index(drop=True)
+        elif self.acro == 'GMET':
+            gdf['tracker_custom'] = 'GMET'
+            gdf['original_units'] = 'n/a'
+            gdf['conversion_factor'] = 'n/a'
+            gdf = gdf.reset_index(drop=True)                   
+          
+        elif self.acro == 'GCCT':
+            gdf['tracker_custom'] = 'GCCT'
+            gdf['original_units'] = 'n/a'
+            gdf['conversion_factor'] = 'n/a'
+            gdf = gdf.reset_index(drop=True)                   
+
+        elif self.acro == 'GIST':
+            gdf['tracker_custom'] = 'GIST'
+            gdf['original_units'] = 'n/a'
+            gdf['conversion_factor'] = 'n/a'
+            gdf = gdf.reset_index(drop=True)  
+                             
+        elif self.acro == 'GIOMT':
+            gdf['tracker_custom'] = 'GIOMT'
+            gdf['original_units'] = 'n/a'
+            gdf['conversion_factor'] = 'n/a'
+            gdf = gdf.reset_index(drop=True)                   
                
         else:
 

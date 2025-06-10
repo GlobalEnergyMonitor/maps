@@ -1,4 +1,48 @@
 <!DOCTYPE html>
+<div id="sliders-container" style="position: absolute; top: 10px; right: 10px; z-index: 1000; background: rgba(255,255,255,0.95); padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 240px;">
+    <div class="mb-4">
+        <label for="opacity-slider" class="form-label">Opacity: <span id="opacity-value" class="ms-2 fw-bold">.85</span></label>
+        <input type="range" class="form-range" min="0" max="1" step="0.01" id="opacity-slider" value=".85" oninput="document.getElementById('opacity-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label for="minRadius-slider" class="form-label">Min Radius: <span id="minRadius-value" class="ms-2 fw-bold">2</span></label>
+        <input type="range" class="form-range" min="1" max="100" step="1" id="minRadius-slider" value="2" oninput="document.getElementById('minRadius-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label for="maxRadius-slider" class="form-label">Max Radius: <span id="maxRadius-value" class="ms-2 fw-bold">10</span></label>
+        <input type="range" class="form-range" min="1" max="100" step="1" id="maxRadius-slider" value="10" oninput="document.getElementById('maxRadius-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label for="highZoomMinRadius-slider" class="form-label">High Zoom Min Radius: <span id="highZoomMinRadius-value" class="ms-2 fw-bold">4</span></label>
+        <input type="range" class="form-range" min="1" max="100" step="1" id="highZoomMinRadius-slider" value="4" oninput="document.getElementById('highZoomMinRadius-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label for="highZoomMaxRadius-slider" class="form-label">High Zoom Max Radius: <span id="highZoomMaxRadius-value" class="ms-2 fw-bold">32</span></label>
+        <input type="range" class="form-range" min="1" max="100" step="1" id="highZoomMaxRadius-slider" value="32" oninput="document.getElementById('highZoomMaxRadius-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label for="zoom-level-slider" class="form-label">Zoom Level: <span id="zoom-level-value" class="ms-2 fw-bold">1</span></label>
+        <input type="range" class="form-range" min="0" max="22" step="0.01" id="zoom-level-slider" value="1" oninput="document.getElementById('zoom-level-value').textContent = this.value">
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Interpolation</label>
+        <div>
+            <input type="radio" class="btn-check" name="interpolation-type" id="interpolation-linear" autocomplete="off" checked>
+            <label class="btn btn-outline-primary btn-sm" for="interpolation-linear">Linear</label>
+            <input type="radio" class="btn-check" name="interpolation-type" id="interpolation-exp" autocomplete="off">
+            <label class="btn btn-outline-primary btn-sm" for="interpolation-exp">Exp</label>
+        </div>
+    </div>
+    <div class="mb-4">
+        <label class="form-label">Interpolation Zoom</label>
+        <div>
+            <input type="radio" class="btn-check" name="interpolation-type-zoom" id="interpolation-linear-zoom" autocomplete="off" checked>
+            <label class="btn btn-outline-primary btn-sm" for="interpolation-linear-zoom">Linear</label>
+            <input type="radio" class="btn-check" name="interpolation-type-zoom" id="interpolation-exp-zoom" autocomplete="off">
+            <label class="btn btn-outline-primary btn-sm" for="interpolation-exp-zoom">Exp</label>
+        </div>
+    </div>
+</div>
 
 <head>
     <meta charset="utf-8">
@@ -91,8 +135,28 @@
     </div>
 
     <div id="map"></div>
-    <button id="btn-spin-toggle">Pause rotation</button>
+    <!-- <button id="btn-spin-toggle">Pause rotation</button> -->
 
+    
+    <!-- example of how to reveal dev decisions in interface for slider
+        <nav id="listing-group" class="listing-group">
+        <input type="checkbox" id="scrollZoom" checked="checked">
+        <label for="scrollZoom">Scroll zoom</label>
+        <input type="checkbox" id="boxZoom" checked="checked">
+        <label for="boxZoom">Box zoom</label>
+        <input type="checkbox" id="dragRotate" checked="checked">
+        <label for="dragRotate">Drag rotate</label>
+        <input type="checkbox" id="dragPan" checked="checked">
+        <label for="dragPan">Drag pan</label>
+        <input type="checkbox" id="keyboard" checked="checked">
+        <label for="keyboard">Keyboard</label>
+        <input type="checkbox" id="doubleClickZoom" checked="checked">
+        <label for="doubleClickZoom">Double click zoom</label>
+        <input type="checkbox" id="touchZoomRotate" checked="checked">
+        <label for="touchZoomRotate">Touch zoom rotate</label>
+    </nav> -->
+
+    <!-- <button id="fit">Fly to selected</button> -->
     <div id="table-container"><table id="table" class="display primary" width="100%" height="100%"></table></div>
     <div id="modal" class="modal">
         <div class="modal-dialog modal-dialog-centered">
@@ -106,6 +170,8 @@
     <script src="./config.js"></script>
     <script src="../../src/site.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <!-- <script src='//api.tiles.mapbox.com/mapbox.js/plugins/geo-viewport/v0.2.1/geo-viewport.js'></script> -->
+
 </body>
 
 </html>

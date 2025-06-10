@@ -478,6 +478,23 @@ table.dataTable td {
     border-radius: 3px;
 }
 
+
+/* #fit {
+    display: block;
+    position: relative;
+    margin: 0px auto;
+    width: 50%;
+    height: 40px;
+    padding: 10px;
+    border: none;
+    border-radius: 3px;
+    font-size: 12px;
+    text-align: center;
+    color: #fff;
+    background: #ee8a65;
+
+} */
+
 #btn-spin-toggle {
     position: relative;  /* keep this */ 
     top: 10px; /* keep this */ 
@@ -497,7 +514,9 @@ table.dataTable td {
     padding: 10px 20px;  /* keep this */ 
     border-radius: 3px;  /* keep this */ 
 }
-
+/* #fit:hover {
+    background-color: #eeb8a4;
+} */
 
 #btn-spin-toggle:hover {
     background-color: #4ea0da;
