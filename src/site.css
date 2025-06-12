@@ -10,6 +10,14 @@ body {
     width: 100%;
 }
 
+#devMap {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;   
+    visibility: hidden;
+}
+
 #table-container, .page-link {
     font-family: Arial;
     color: rgb(33,37,41);
@@ -419,6 +427,12 @@ table.dataTable td {
     height: 74px;
 }
 
+#dev-testing-toggle {
+    position: relative;
+    top: 0.5px;
+    height: 74px;    
+}
+
 /* #table-toggle-label {
     position: absolue;
     top: 3px;
@@ -448,6 +462,13 @@ table.dataTable td {
 .spinner-grow {
 
     --bs-spinner-animation-speed: 1.5s !important ;
+
+}
+
+/* dev slider interface */
+#sliders-container {
+    position: fixed;
+    visibility: hidden;     
 
 }
 

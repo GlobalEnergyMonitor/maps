@@ -22,6 +22,17 @@ const map = new mapboxgl.Map({
     projection: config.projection
 });
 
+// create a new map 
+const devMap = new mapboxgl.Map({
+    container: 'devMap',
+    style: config.mapStyle,
+    zoom: determineZoom(),
+    center: config.center,
+    projection: config.projection
+});
+// // // Make devMap a global variable so it can be used in addTiles and elsewhere
+// let devMap = null;
+
 // add new navigation features
 map.scrollZoom.enable();
 map.boxZoom.enable();
@@ -70,14 +81,16 @@ const popup = new mapboxgl.Popup({
 
 // declare this so you can customize features depending on if it's first load or filtering
 let initialLoad = true;
+let devTesting = false; 
+let initialDevLoad = true; 
 
 map.on('load', function () {
-    if (config.projection != 'globe'){
-        // map.setFog({}); // Set the default atmosphere style
-        // $('#btn-spin-toggle').hide();
-        // $('#fit').hide();
+    // if (config.projection != 'globe'){
+    //     // map.setFog({}); // Set the default atmosphere style
+    //     // $('#btn-spin-toggle').hide();
+    //     // $('#fit').hide();
 
-    }
+    // }
     loadData();
 });
 function determineZoom() {
@@ -206,9 +219,10 @@ function findDensity(gridSize = 10) {
 
 
         // find difference between min and max lng to see if should return null
-        let diffLng = Math.abs(minLng - maxLng)
-        // if absolute value of diff is more than 179 return null
-        if (diffLng > 270) {
+        // let diffLng = Math.abs(minLng - maxLng) // 270
+        let diffLng = minLng - maxLng
+        // if absolute value of diff is more than 179 return null 
+        if (diffLng > 180) { 
             console.log('Greater than 270: ' + diffLng)
             return null;
         }
@@ -359,7 +373,7 @@ function loadData() {
     // Here we could load in data from csv always minus what's needed for map dots?
     if ("tiles" in config) {
         console.log('addTiles');
-        addTiles();
+        addTiles(); // getting stuck in addTiles with devtesting
         Papa.parse(config.csv, {
             download: true,
             header: true,
@@ -478,42 +492,54 @@ function addGeoJSON(jsonData) {
     console.log('addLayers');
     addLayers();
 
-    setTimeout(enableUX, 3000);
+    setTimeout(enableUX, 3000); 
 
     console.log('enableUX');
-    map.on('idle', enableUX); // enableUX starts to render data
+    map.on('idle', enableUX); 
 }
 
 function addTiles() {
-    map.addSource('assets-source', {
-        'type': 'vector',
-        'tiles': config.tiles,
-        'minzoom': 0,
-        'maxzoom': 10 // ?
-    });
+    if (devTesting === true) {
+        console.log('in addTiles devTesting');
+        // Make devMap global if not already
+        window.devMap = devMap;
+        devMap.addSource('assets-source', {
+            'type': 'vector',
+            'tiles': config.tiles,
+            'minzoom': 0,
+            'maxzoom': 10 // ?
+        });        
+    } else {
+        // Make map global if not already
+        window.map = map;
+        map.addSource('assets-source', {
+            'type': 'vector',
+            'tiles': config.tiles,
+            'minzoom': 0,
+            'maxzoom': 10 // ?
+        });
+    }
+    /* create layer with invisible assets in order to calculate statistics necessary for rendering the map and interface */
+    // config.geometries.forEach(geometry => {
+    //     map.addLayer({
+    //         'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
+    //         'type': geometry == "LineString" ? 'line' : 'circle',
+    //         'source': 'assets-source',
+    //         'source-layer': config.tileSourceLayer,
+    //         'layout': {},
+    //         'filter': ["==",["geometry-type"],geometry],
+    //         'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
+    //     });
+    // });
 
-    /* create layer with invisible aasets in order to calculate statistics necessary for rendering the map and interface */
-//     config.geometries.forEach(geometry => {
-//         map.addLayer({
-//             'id': geometry == "LineString" ? 'assets-minmax-line' : 'assets-minmax-point',
-//             'type': geometry == "LineString" ? 'line' : 'circle',
-//             'source': 'assets-source',
-//             'source-layer': config.tileSourceLayer,
-//             'layout': {},
-//             'filter': ["==",["geometry-type"],geometry],
-//             'paint': geometry == "LineString" ? {'line-width': 0, 'line-color': 'red'} : {'circle-radius': 0}
-//         });
-//     });
-
-//     map.on('idle', geoJSONFromTiles);
-
+    // map.on('idle', geoJSONFromTiles);
 }
 function geoJSONFromTiles() {
     console.log('In geoJSONFromTiles')
     map.off('idle', geoJSONFromTiles);
     // since map not idle anymore reintroduce spinner 
-    $('#spinner-container-filter').addClass('d-none')
-    $('#spinner-container-filter').removeClass('d-flex')
+    $('#spinner-container-filter').addClass('d-none');
+    $('#spinner-container-filter').removeClass('d-flex');
     let layers = [];
     if (config.geometries.includes('Point')) layers.push('assets-minmax-point');
     if (config.geometries.includes('LineString')) layers.push('assets-minmax-line');
@@ -545,8 +571,8 @@ function findLinkedAssets() {
     
     map.off('idle', findLinkedAssets);
     // since map not idle anymore reintroduce spinner 
-    $('#spinner-container-filter').addClass('d-none')
-    $('#spinner-container-filter').removeClass('d-flex')
+    $('#spinner-container-filter').addClass('d-none');
+    $('#spinner-container-filter').removeClass('d-flex');
     // config.preLinkedGeoJSON = JSON.parse(JSON.stringify(config.processedGeoJSON));
     config.preLinkedGeoJSON = config.processedGeoJSON;
     config.totalCount = 0;
@@ -640,10 +666,11 @@ function findLinkedAssets() {
         userInteracting = false;
         spinGlobe();
     } else {
-
         // Try here for fitBounds
         // if map projection is not mercator or globe do not do fitbounds 
         if (config.projection == 'globe'){
+            // wait setTimeout(enableUX, 3000);
+
             // fit to the highlighted projects and zoom in
             // let boundingBoxSet = getBoundingBox()
             let boundingBoxSet = findDensity(); // better function that will avoid anomalies and poles
@@ -653,39 +680,25 @@ function findLinkedAssets() {
             // if there are no search terms or filters
             // zoom out and spin 
             
+            // Only allow to fit bounds when userInteracting is done 
+            // currently it starts fitting to bounds before I've had a chance to finish selecting
+            // the filters
+
+            // Wait a short delay before running fitBounds
+            // actually do map.on('idle', functionThatCallsFitBounds)
 
             if (boundingBoxSet) {
-                // find diff 
-                // if difference between max and min longitude is more than 179  +/- 
-                // return to center and start spinning
-                // getZoom
-                // if (diff within range){
                 map.fitBounds(boundingBoxSet, {
                     padding: {top: 10, bottom:25, left: 15, right: 5},
-                    // maxZoom: {4},
-                    // linear: true,
                     maxZoom: 2,
-                    // pitch: 0,
-                    // bearing: 0,
-                    // offset: [0,0]
                 });
-                // }else {
-                    
-                // }
-            } else {
                 // if null for no features
                 // return back to start
                 // If nothing is selected, reset to initial center and resume spinning
 
                 // Using easeTo options. jumpTo without animation
                 // or try resetNorth and resetNorthPitch
-                map.jumpTo({
-                    center: [0, 0],
-                    zoom: 1,
 
-                })
-                userInteracting = false;
-                spinGlobe();
                 // map.easeTo({
                 //     center: [0,0],
                 //     zoom: 1,
@@ -697,12 +710,22 @@ function findLinkedAssets() {
                 //     }
                 // })
 
+            } else {
+                map.jumpTo({
+                    center: [0, 0],
+                    zoom: 1,
+                });
+                userInteracting = false;
+                spinGlobe();
             }
-            console.log('Just fired fitBounds in filterGeoJson')
+            console.log('Just fired fitBounds in filterGeoJson');
+
 
         }
+
     }
 }
+
 
 
 function generateIcon(icon) {
@@ -716,9 +739,12 @@ function generateIcon(icon) {
     // get the canvas context
     let context = canvas.getContext('2d');
     // context.globalAlpha = config.pointPaint["circle-opacity"];
-    context.globalAlpha = Number(document.getElementById('opacity-value').textContent)
-    console.log(context.globalAlpha + ' = ' + Number(document.getElementById('opacity-value').textContent))
-
+    if (devTesting === true){
+        context.globalAlpha = Number(document.getElementById('opacity-value').textContent)
+        console.log(context.globalAlpha + ' = ' + Number(document.getElementById('opacity-value').textContent))
+    } else {
+        context.globalAlpha = config.pointPaint["circle-opacity"];
+    }
     // calculate the coordinates of the center of the circle
     let centerX = canvas.width / 2;
     let centerY = canvas.height / 2;
@@ -792,8 +818,8 @@ function setMinMax() {
 function enableUX() {
     map.off('idle', enableUX);
     // since map not idle anymore reintroduce spinner 
-    $('#spinner-container-filter').addClass('d-none')
-    $('#spinner-container-filter').removeClass('d-flex')
+    $('#spinner-container-filter').addClass('d-none');
+    $('#spinner-container-filter').removeClass('d-flex');
     if (config.UXEnabled) {
         console.log('ux already enabled');
         return
@@ -818,37 +844,69 @@ function enableUX() {
     }
 }
 
+
 function addLayers() {
  
     config.layers = [];
     if (config.geometries.includes('LineString')) addLineLayer();
     if (config.geometries.includes('Point')) addPointLayer();
 
-    map.addLayer({
-        id: 'satellite',
-        source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
-        type: "raster",
-        layout: { 'visibility': 'none' }
-    }, config.layers[0]);
+    if (devTesting === true) {
+        devMap.addLayer({
+            id: 'satellite',
+            source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
+            type: "raster",
+            layout: { 'visibility': 'none' }
+        }, config.layers[0]);
 
-    map.addSource('countries', {
-        'type': 'vector',
-        'url': 'mapbox://mapbox.country-boundaries-v1'
-    });
-    map.addLayer(
-        {
-            'id': 'country-layer',
-            'type': 'fill',
-            'source': 'countries',
-            'source-layer': 'country_boundaries',
-            'layout': {},
-            'paint': {
-                'fill-color': 'hsla(219, 0%, 100%, 0%)'
+        devMap.addSource('countries', {
+            'type': 'vector',
+            'url': 'mapbox://mapbox.country-boundaries-v1'
+        });
+        devMap.addLayer(
+            {
+                'id': 'country-layer',
+                'type': 'fill',
+                'source': 'countries',
+                'source-layer': 'country_boundaries',
+                'layout': {},
+                'paint': {
+                    'fill-color': 'hsla(219, 0%, 100%, 0%)'
+                }
             }
-        }
-    , config.layers[0]);
+        , config.layers[0]);
 
-    addEvents();
+        addEvents();
+        // addDevEvents();
+    }else {
+        map.addLayer({
+            id: 'satellite',
+            source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
+            type: "raster",
+            layout: { 'visibility': 'none' }
+        }, config.layers[0]);
+
+        map.addSource('countries', {
+            'type': 'vector',
+            'url': 'mapbox://mapbox.country-boundaries-v1'
+        });
+        map.addLayer(
+            {
+                'id': 'country-layer',
+                'type': 'fill',
+                'source': 'countries',
+                'source-layer': 'country_boundaries',
+                'layout': {},
+                'paint': {
+                    'fill-color': 'hsla(219, 0%, 100%, 0%)'
+                }
+            }
+        , config.layers[0]);
+
+        addEvents();
+        // addDevEvents();
+    }
+
 }
 
 // function addLabelLayer( {
@@ -858,172 +916,238 @@ function addLayers() {
 function addPointLayer() {
     // First build circle layer
     // build style json for circle-color based on config.color
-    let paint = config.pointPaint;
-    if ('color' in config) {
-        paint["circle-color"] = [
-            "match",
-            ["get", config.color.field],
-            ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
-            "#000000"
-        ];
-    }
-    // LET"S ADD exponential NOT linear TODO Maisie 
-    // ["exponential", base] if base is 1 then it is linear the same, power of 1/2 to do squareroot area based
-
-    let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
-    paint['circle-radius'] = [
-        "interpolate", ["linear"], ["zoom"],
-        1, ["interpolate", interpolateExpression,
-            ["to-number",["get", config.capacityField]],
-            // config.minPointCapacity, config.minRadius,
-            // config.maxPointCapacity, config.maxRadius
-            config.minPointCapacity, Number(document.getElementById('minRadius-value').textContent),
-            config.maxPointCapacity, Number(document.getElementById('maxRadius-value').textContent)
-
-        ],
-        10, ["interpolate", interpolateExpression,
-            ["to-number",["get", config.capacityField]],
-            // config.minPointCapacity, config.highZoomMinRadius,
-            // config.maxPointCapacity, config.highZoomMaxRadius
-            config.minPointCapacity, Number(document.getElementById('highZoomMinRadius-value').textContent),
-            config.maxPointCapacity, Number(document.getElementById('highZoomMaxRadius-value').textContent)      
-        ],
-    ];
-
-    map.addLayer({
-        'id': 'assets-points',
-        'type': 'circle',
-        'source': 'assets-source',
-        'filter': ["==",["geometry-type"],'Point'],
-        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-        'layout': {},
-        'paint': paint
-    });
-    config.layers.push('assets-points');
-
-    // Add layer with proportional icons
-    map.addLayer({
-        'id': 'assets-symbol', 
-        'type': 'symbol',
-        'source': 'assets-source',
-        'filter': ["==",["geometry-type"],'Point'],
-        ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-        'layout': {
-            'icon-image': ["get", "icon"],
-            'icon-allow-overlap': true,
-            'icon-size': [
-                "interpolate", ["linear"], ["zoom"],
-                1, ['interpolate', interpolateExpression,
-                    ["to-number", ["get", config.capacityField]],
-                    // config.minPointCapacity, config.minRadius * 2 / 64,
-                    // config.maxPointCapacity, config.maxRadius * 2 / 64],
-                    config.minPointCapacity, Number(document.getElementById('minRadius-value').textContent * 2 / 64),
-                    config.maxPointCapacity, Number(document.getElementById('maxRadius-value').textContent * 2 / 64)],
-                10, ['interpolate', interpolateExpression,
-                    ["to-number", ["get", config.capacityField]],
-                    // config.minPointCapacity, config.highZoomMinRadius * 2 / 64,
-                    // config.maxPointCapacity, config.highZoomMaxRadius * 2 / 64]
-                    config.minPointCapacity, Number(document.getElementById('highZoomMinRadius-value').textContent * 2 / 64),
-                    config.maxPointCapacity, Number(document.getElementById('highZoomMaxRadius-value').textContent * 2 / 64)],  
-            ]
+    if (devTesting === true) {
+        // do same just pull values from user input not config
+        console.log('checking it still works')
+        let paint = {
+            'circle-opacity': Number(document.getElementById('opacity-value').textContent)
+            }
+        
+        if ('color' in config) {
+            paint["circle-color"] = [
+                "match",
+                ["get", config.color.field],
+                ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
+                "#000000"
+            ];
         }
-    });
+        // LET"S ADD exponential NOT linear TODO Maisie 
+        // ["exponential", base] if base is 1 then it is linear the same, power of 1/2 to do squareroot area based
 
-    // Add highlight layer
-    paint = config.pointPaint;
-    paint["circle-color"] = '#FFEA00';
-    map.addLayer(
-        {
-            'id': 'assets-points-highlighted',
+        let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
+        paint['circle-radius'] = [
+            "interpolate", ["linear"], ["zoom"],
+            1, ["interpolate", interpolateExpression,
+                ["to-number",["get", config.capacityField]],
+                // config.minPointCapacity, config.minRadius,
+                // config.maxPointCapacity, config.maxRadius
+                config.minPointCapacity, Number(document.getElementById('minRadius-value').textContent),
+                config.maxPointCapacity, Number(document.getElementById('maxRadius-value').textContent)
+
+            ],
+            10, ["interpolate", interpolateExpression,
+                ["to-number",["get", config.capacityField]],
+                // config.minPointCapacity, config.highZoomMinRadius,
+                // config.maxPointCapacity, config.highZoomMaxRadius
+                config.minPointCapacity, Number(document.getElementById('highZoomMinRadius-value').textContent),
+                config.maxPointCapacity, Number(document.getElementById('highZoomMaxRadius-value').textContent)      
+            ],
+        ];
+
+        devMap.addLayer({
+            'id': 'assets-points',
             'type': 'circle',
             'source': 'assets-source',
             'filter': ["==",["geometry-type"],'Point'],
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
             'layout': {},
-            'paint': paint,
-            'filter': ['in', (config.linkField), '']
-        }
-    );
+            'paint': paint
+        });
+        config.layers.push('assets-points');
 
-    // try moving this and calling it when basemap is toggled 
-    map.addLayer(
-        {
-            'id': 'assets-labels',
+        // Add layer with proportional icons
+        devMap.addLayer({
+            'id': 'assets-symbol', 
             'type': 'symbol',
             'source': 'assets-source',
             'filter': ["==",["geometry-type"],'Point'],
             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-            'minzoom': 8,
             'layout': {
-                'text-field': '{' + config.nameField + '}', 
-                'text-font': ["DIN Pro Italic"],
-                'text-variable-anchor': ['top'],
-                'text-offset': [0, 1],
-                'text-size': 14
-            },
-            'paint': {
-                'text-color': '#000000',
-                'text-halo-color': "hsla(220, 8%, 100%, 0.75)",
-                'text-halo-width': 1
+                'icon-image': ["get", "icon"],
+                'icon-allow-overlap': true,
+                'icon-size': [
+                    "interpolate", ["linear"], ["zoom"],
+                    1, ['interpolate', interpolateExpression,
+                        ["to-number", ["get", config.capacityField]],
+                        // config.minPointCapacity, config.minRadius * 2 / 64,
+                        // config.maxPointCapacity, config.maxRadius * 2 / 64],
+                        config.minPointCapacity, Number(document.getElementById('minRadius-value').textContent * 2 / 64),
+                        config.maxPointCapacity, Number(document.getElementById('maxRadius-value').textContent * 2 / 64)],
+                    10, ['interpolate', interpolateExpression,
+                        ["to-number", ["get", config.capacityField]],
+                        // config.minPointCapacity, config.highZoomMinRadius * 2 / 64,
+                        // config.maxPointCapacity, config.highZoomMaxRadius * 2 / 64]
+                        config.minPointCapacity, Number(document.getElementById('highZoomMinRadius-value').textContent * 2 / 64),
+                        config.maxPointCapacity, Number(document.getElementById('highZoomMaxRadius-value').textContent * 2 / 64)],  
+                ]
             }
+        });
+
+        // Add highlight layer
+        paint = {
+        'circle-opacity': Number(document.getElementById('opacity-value').textContent)
         }
-    );
+        paint["circle-color"] = '#FFEA00';
+        devMap.addLayer(
+            {
+                'id': 'assets-points-highlighted',
+                'type': 'circle',
+                'source': 'assets-source',
+                'filter': ["==",["geometry-type"],'Point'],
+                ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+                'layout': {},
+                'paint': paint,
+                'filter': ['in', (config.linkField), '']
+            }
+        );
+
+        // try moving this and calling it when basemap is toggled 
+        devMap.addLayer(
+            {
+                'id': 'assets-labels',
+                'type': 'symbol',
+                'source': 'assets-source',
+                'filter': ["==",["geometry-type"],'Point'],
+                ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+                'minzoom': 8,
+                'layout': {
+                    'text-field': '{' + config.nameField + '}', 
+                    'text-font': ["DIN Pro Italic"],
+                    'text-variable-anchor': ['top'],
+                    'text-offset': [0, 1],
+                    'text-size': 14
+                },
+                'paint': {
+                    'text-color': '#000000',
+                    'text-halo-color': "hsla(220, 8%, 100%, 0.75)",
+                    'text-halo-width': 1
+                }
+            }
+        );
+
+    } else{
+        let paint = config.pointPaint;
+        if ('color' in config) {
+            paint["circle-color"] = [
+                "match",
+                ["get", config.color.field],
+                ...Object.keys(config.color.values).flatMap(key => [key, config.color.values[key]]),
+                "#000000"
+            ];
+        }
+        // LET"S ADD exponential NOT linear TODO Maisie 
+        // ["exponential", base] if base is 1 then it is linear the same, power of 1/2 to do squareroot area based
+
+        let interpolateExpression = ('interpolate' in config ) ? config.interpolate :  ["linear"];
+        paint['circle-radius'] = [
+            "interpolate", ["linear"], ["zoom"],
+            1, ["interpolate", interpolateExpression,
+                ["to-number",["get", config.capacityField]],
+                // config.minPointCapacity, config.minRadius,
+                // config.maxPointCapacity, config.maxRadius
+                config.minPointCapacity, Number(document.getElementById('minRadius-value').textContent),
+                config.maxPointCapacity, Number(document.getElementById('maxRadius-value').textContent)
+
+            ],
+            10, ["interpolate", interpolateExpression,
+                ["to-number",["get", config.capacityField]],
+                // config.minPointCapacity, config.highZoomMinRadius,
+                // config.maxPointCapacity, config.highZoomMaxRadius
+                config.minPointCapacity, Number(document.getElementById('highZoomMinRadius-value').textContent),
+                config.maxPointCapacity, Number(document.getElementById('highZoomMaxRadius-value').textContent)      
+            ],
+        ];
+
+        map.addLayer({
+            'id': 'assets-points',
+            'type': 'circle',
+            'source': 'assets-source',
+            'filter': ["==",["geometry-type"],'Point'],
+            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+            'layout': {},
+            'paint': paint
+        });
+        config.layers.push('assets-points');
+
+        // Add layer with proportional icons
+        map.addLayer({
+            'id': 'assets-symbol', 
+            'type': 'symbol',
+            'source': 'assets-source',
+            'filter': ["==",["geometry-type"],'Point'],
+            ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+            'layout': {
+                'icon-image': ["get", "icon"],
+                'icon-allow-overlap': true,
+                'icon-size': [
+                    "interpolate", ["linear"], ["zoom"],
+                    1, ['interpolate', interpolateExpression,
+                        ["to-number", ["get", config.capacityField]],
+                        // config.minPointCapacity, config.minRadius * 2 / 64,
+                        // config.maxPointCapacity, config.maxRadius * 2 / 64],
+                        config.minPointCapacity, Number(document.getElementById('minRadius-value').textContent * 2 / 64),
+                        config.maxPointCapacity, Number(document.getElementById('maxRadius-value').textContent * 2 / 64)],
+                    10, ['interpolate', interpolateExpression,
+                        ["to-number", ["get", config.capacityField]],
+                        // config.minPointCapacity, config.highZoomMinRadius * 2 / 64,
+                        // config.maxPointCapacity, config.highZoomMaxRadius * 2 / 64]
+                        config.minPointCapacity, Number(document.getElementById('highZoomMinRadius-value').textContent * 2 / 64),
+                        config.maxPointCapacity, Number(document.getElementById('highZoomMaxRadius-value').textContent * 2 / 64)],  
+                ]
+            }
+        });
+
+        // Add highlight layer
+        paint = config.pointPaint;
+        paint["circle-color"] = '#FFEA00';
+        map.addLayer(
+            {
+                'id': 'assets-points-highlighted',
+                'type': 'circle',
+                'source': 'assets-source',
+                'filter': ["==",["geometry-type"],'Point'],
+                ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+                'layout': {},
+                'paint': paint,
+                'filter': ['in', (config.linkField), '']
+            }
+        );
+
+        // try moving this and calling it when basemap is toggled 
+        map.addLayer(
+            {
+                'id': 'assets-labels',
+                'type': 'symbol',
+                'source': 'assets-source',
+                'filter': ["==",["geometry-type"],'Point'],
+                ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
+                'minzoom': 8,
+                'layout': {
+                    'text-field': '{' + config.nameField + '}', 
+                    'text-font': ["DIN Pro Italic"],
+                    'text-variable-anchor': ['top'],
+                    'text-offset': [0, 1],
+                    'text-size': 14
+                },
+                'paint': {
+                    'text-color': '#000000',
+                    'text-halo-color': "hsla(220, 8%, 100%, 0.75)",
+                    'text-halo-width': 1
+                }
+            }
+        );
+    }
 }
-
-
-    // // Determine actual basemap style
-    // const styleUrl = map.getStyle().sprite || map.getStyle().name || map.getStyle().metadata?.['mapbox:origin'] || '';
-    // Check if satellite is visible
-    // const satelliteVisible = map.getLayer('Satellite') && map.getLayoutProperty('satellite', 'visibility') === 'visible';
-    // set satelliteVisible it in the actual toggle for basemap
-    // console.log('this is the satellite visibility' + config.satelliteVisible)
-    // if (config.satelliteVisible = true) {
-    //     map.addLayer(
-    //         {
-    //             'id': 'assets-labels',
-    //             'type': 'symbol',
-    //             'source': 'assets-source',
-    //             'filter': ["==",["geometry-type"],'Point'],
-    //             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-    //             'minzoom': 6,
-    //             'layout': {
-    //                 'text-field': '{' + config.nameField + '}',
-    //                 'text-font': ["DIN Pro Italic"],
-    //                 'text-variable-anchor': ['top'],
-    //                 'text-offset': [0, 1],
-    //             },
-    //             'paint': {
-    //                 'text-color': '#ffffff', // white
-    //                 'text-halo-color': "#000000", // Use a solid black 
-    //                 'text-halo-width': .00001, // Reduce width for less distraction
-    //                 'text-halo-blur': 10 // Add blur for smoother, less jagged halo
-    //             }
-    //         }
-    //     );
-    // } else {
-    //     map.addLayer(
-    //         {
-    //             'id': 'assets-labels',
-    //             'type': 'symbol',
-    //             'source': 'assets-source',
-    //             'filter': ["==",["geometry-type"],'Point'],
-    //             ...('tileSourceLayer' in config && {'source-layer': config.tileSourceLayer}),
-    //             'minzoom': 6,
-    //             'layout': {
-    //                 'text-field': '{' + config.nameField + '}',
-    //                 'text-font': ["DIN Pro Italic"],
-    //                 'text-variable-anchor': ['top'],
-    //                 'text-offset': [0, 1],
-    //             },
-    //             'paint': {
-    //                 'text-color': '#000000', // black
-    //                 'text-halo-color': "rgba(255,255,255,.85)", // Use a solid white with some transparency
-    //                 'text-halo-width': .00001, // Reduce width for less distraction
-    //                 'text-halo-blur': 10 // Add blur for smoother, less jagged halo
-    //             }
-    //         }
-    //     );
-    // }
 
 
 
@@ -1276,11 +1400,11 @@ function addEvents() {
             popup.remove()
             setHighlightFilter([]);
             // Reset highlight width
-            map.setPaintProperty('assets-lines-highlighted', 'line-width', [
-                "interpolate", ["linear"], ["zoom"],
-                1, config.maxLineWidth,
-                10, config.highZoomMaxLineWidth
-            ]);
+            // map.setPaintProperty('assets-lines-highlighted', 'line-width', [
+            //     "interpolate", ["linear"], ["zoom"],
+            //     1, config.maxLineWidth,
+            //     10, config.highZoomMaxLineWidth
+            // ]);
         });
     }
 
@@ -1352,8 +1476,6 @@ $('#projection-toggle').on("click", function() {
     if (config.projection == 'globe') {
         config.projection = "naturalEarth";
         map.setProjection('naturalEarth');
-        $('#btn-spin-toggle').hide();
-        $('#fit').hide();
         map.setCenter(config.center);
         map.setZoom(determineZoom());
 
@@ -1361,8 +1483,6 @@ $('#projection-toggle').on("click", function() {
         config.projection = "globe";
         map.setProjection("globe");
         map.setCenter(config.center);
-        $('#btn-spin-toggle').show();
-        $('#fit').show();
         spinGlobe();
         map.setZoom(determineZoom());
 
@@ -1370,30 +1490,82 @@ $('#projection-toggle').on("click", function() {
 })
 
 /* 
-    // TODO continue
-        // add event listeners to dev sliders
-    // re run addGeoJSON after opacity change 
+    dev testing 
 */
 
-$('#opacity-value').on("click", function(){
-    // start spinner to indicate it is re rendering
-    console.log('opa clicked!')
-
-    addGeoJSON()
-    // stop spinner 
-});
-
-$('#minRadius-value').on("click", function(){
-    // start spinner to indicate it is re rendering
-    console.log('minRad clicked!')
-    addGeoJSON()
-    // stop spinner 
+$('#dev-testing-toggle').on("click", function (){
+    console.log('clicked dev testing toggle')
+    // Show the previously hidden element when the button is clicked
+    // $('#sliders-container').removeClass('d-none').addClass('d-flex');
+    // if ($('#map').css({'visibility': 'hidden'}))
+    devTesting = true;
+    console.log(devTesting)
+    $('#sliders-container').css({'visibility': 'visible'})
+    $('#map').css({'visibility': 'hidden'})
+    $('#sidebar').css({'visibility': 'hidden'})
+    $('#devMap').css({'visibility': 'visible'})
     
+    // else {
+    //     devTesting = true;
+    //     $('#dev-testing-label').html("Enter Dev testing area");
+    //     $('#sliders-container').css({'visibility': 'hidden'})
+    //     $('#map').css({'visibility': 'visible'})
+    //     $('#sidebar').css({'visibility': 'visible'})        
+    // }
+})
+
+$('#paint-assets-btn').on("click", function (){
+    const sources = devMap.getStyle().sources;  
+    if (initialDevLoad){
+        console.log('painting with user inputs')
+        loadData(); // un comment this so it paints assets
+    }else {
+        // delete map and re do loadDat
+        // Remove all sources and layers from devMap before re-initializing
+        // Remove all layers
+        // const layers = devMap.getStyle().layers;
+        // if (layers) {
+        // // Remove from top to bottom to avoid dependency issues
+        // for (let i = layers.length - 1; i >= 0; i--) {
+        //     devMap.removeLayer(layers[i].id);
+        // }
+        // }
+
+        // Remove all sources
+        console.log('Removing sources from devMap')
+        Object.keys(sources).forEach(sourceId => {
+        devMap.removeSource(sourceId);
+        });
+        console.log('Running loadData for new devMap')
+
+        loadData();
+    }
+
+    // calls addGeoJSON() 
+    // which calls setMinMax(), findLinkedAssets(), addLayers(), enableUX()  
 })
 
 
+// function addDevEvents() {
+//     // remove all existing source layers so we can re call addLayers 
+//     // and have the new values from the sliders be fed into the style attributes 
+    
+//     // console.log('begin addDevEvents');
+//     // If #opacity-value is a span or div, make it focusable/clickable
+//     $('#opacity-value').css('cursor', 'pointer').attr('tabindex', 0);
 
+//     // Listen for input changes if #opacity-slider is an <input type="range">
+//     $('#opacity-slider').on('input', function() {
+    
+//         console.log('opacity slider changed:', this.value);  
 
+//         // // Update map icons with new opacity
+//         // config.icons = [];
+//         // addGeoJSON(config.geojson);
+
+//     });
+
+// }
 
 
 /*
@@ -1478,8 +1650,8 @@ function buildFilters() {
             $('#' + this.dataset.checkid).click();
             toggleFilter(this.dataset.checkid);
 
-            $('#spinner-container-filter').removeClass('d-none')
-            $('#spinner-container-filter').addClass('d-flex')
+            $('#spinner-container-filter').removeClass('d-none');
+            $('#spinner-container-filter').addClass('d-flex');
 
             filterData();
 
@@ -1502,8 +1674,8 @@ function selectAllFilter() {
         }
     });
 
-    $('#spinner-container-filter').removeClass('d-none')
-    $('#spinner-container-filter').addClass('d-flex')
+    $('#spinner-container-filter').removeClass('d-none');
+    $('#spinner-container-filter').addClass('d-flex');
 
     filterData();
 
@@ -1519,8 +1691,8 @@ function selectAllFilterSection(fieldRow) {
         }
     });
 
-    $('#spinner-container-filter').removeClass('d-none')
-    $('#spinner-container-filter').addClass('d-flex')
+    $('#spinner-container-filter').removeClass('d-none');
+    $('#spinner-container-filter').addClass('d-flex');
 
     filterData();
 }
@@ -1789,8 +1961,8 @@ function updateSummary() {
         }
     }
 
-    $('#spinner-container-filter').addClass('d-none')
-    $('#spinner-container-filter').removeClass('d-flex')
+    $('#spinner-container-filter').addClass('d-none');
+    $('#spinner-container-filter').removeClass('d-flex');
     console.log('aftr upat summary spinner addClass d-none, removes spinnr')
 }
 
@@ -1809,6 +1981,7 @@ function buildTable() {
             $('#basemap-toggle').hide();
             $('btn-spin-toggle').hide();
             $('#projection-toggle').hide();
+            $('#dev-testing-toggle').hide();
             updateTable(true);
         } else {
             $('#table-toggle-label').html("Table view <img src='../../src/img/arrow-right.svg' width='15' height='50' style='text-align: center;'>");
@@ -1819,6 +1992,7 @@ function buildTable() {
             $('#basemap-toggle').show();
             $('btn-spin-toggle').show();
             $('#projection-toggle').show();
+            $('#dev-testing-toggle').show();
 
         }
     });
@@ -2281,8 +2455,8 @@ function buildCountrySelect() {
             config.selectedCountryText = this.dataset.countrytext;
             config.selectedCountries = (this.dataset.countries.length > 0 ? this.dataset.countries.split(";") : []);
             $('#selectedCountryLabel').text(config.selectedCountryText || "all");
-            $('#spinner-container-filter').removeClass('d-none')
-            $('#spinner-container-filter').addClass('d-flex')
+            $('#spinner-container-filter').removeClass('d-none');
+            $('#spinner-container-filter').addClass('d-flex');
             filterData();
         });
     });
@@ -2371,8 +2545,8 @@ function enableSearchSelect() {
             config.selectedSearchFields = this.dataset.searchfields;
             $('#selectedSearchLabel').text(this.dataset.searchfieldtext);
 
-            $('#spinner-container-filter').removeClass('d-none')
-            $('#spinner-container-filter').addClass('d-flex')
+            $('#spinner-container-filter').removeClass('d-none');
+            $('#spinner-container-filter').addClass('d-flex');
             filterData();
         });
     });
@@ -2410,8 +2584,8 @@ function enableResetAll() { // not use anymor but keeping in case we want a clea
     // }); 
 
     // start the spinner
-    $('#spinner-container-filter').removeClass('d-none')
-    $('#spinner-container-filter').addClass('d-flex')
+    $('#spinner-container-filter').removeClass('d-none');
+    $('#spinner-container-filter').addClass('d-flex');
 
     // then filter data
     filterData();
@@ -2590,31 +2764,3 @@ map.on('mousedown', () => {
 map.on('moveend', () => {
     spinGlobe();
 });
-
-// document.getElementById('btn-spin-toggle').addEventListener('click', (e) => {
-//     spinEnabled = !spinEnabled;
-//     if (spinEnabled) {
-//         spinGlobe();
-//         e.target.innerHTML = 'Pause rotation';
-//     } else {
-//         map.stop(); // Immediately end ongoing animation
-//         e.target.innerHTML = 'Start rotation';
-//     }
-// });
-
-
-// // # adding option to pause spin with space important for smaller screens
-// document.addEventListener('keydown', (e) => {
-//     spinEnabled = !spinEnabled;
-//     if (e.code === "Space") {
-//         if (spinEnabled) {
-//             spinGlobe();
-//             btnSpinToggle.innerHTML = 'Pause rotation'; // not working not sure why
-//         } else {
-//             map.stop(); // Immediately end ongoing animation
-//             spinGlobe();
-//             btnSpinToggle.innerHTML = 'Start rotation';
-//         }
-//     }
-// });
-
