@@ -2,7 +2,6 @@ var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
     // csv: 'data.csv',
     csv: 'data/data-2024-07-17.csv',
-    projection: 'globe',
     /* zoom level to set map when viewing all phases */
     phasesZoom: 10,
     /* initial load zoom multiplier */
@@ -87,8 +86,8 @@ var config = {
     */
     detailView: {
         'project-name': {'display': 'heading'},
-        // 'status': {'label': 'Status'},
-        // 'capacity-(mw)': {'label': 'Capacity (MW)'},
+        'status': {'label': 'Status'},
+        'capacity-(mw)': {'label': 'Capacity (MW)'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'country' : {'label': 'Country/Area(s)'},

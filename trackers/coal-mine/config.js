@@ -1,6 +1,6 @@
 var config = {
 
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/mapfiles/gcmt_map_2025-06-02.geojson', //'compilation_output/gcmt_2025-05-05.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/mapfiles/gcmt_map_2025-05-05.geojson', //'compilation_output/gcmt_2025-05-05.geojson',
 
     colors: {
         'red': '#c74a48',
@@ -76,11 +76,10 @@ var config = {
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['name','owner', 'parent', 'capacity', 'prod-coal', 'prod-year', 'status', 'workforce', 'coalfield', 'areas', 'region', 'start-year', 'end-year'], 
-        labels: ['Project','Owner','Parent','Capacity (Mt)', 'Production (Mt)', 'Production year','Status', 'Workforce', 'Coal Field', 'Country/Area', 'Region','Opening year', 'Closing year'], // , 'Closing year'
+        values: ['name','owner', 'parent', 'capacity', 'prod-coal', 'prod-year', 'status', 'workforce', 'coalfield', 'areas', 'region', 'start-year', 'end-year'],
+        labels: ['Project','Owner','Parent','Capacity (Mt)', 'Production (Mt)', 'Production year','Status', 'Workforce', 'Coal Field', 'Country/Area', 'Region','Opening year', 'Closing year'],
         clickColumns: ['name'],
-        removeLastComma: ['areas'],
-        rightAlign: ['prod-coal','capacity','start-year'], //'end-year' 
+        rightAlign: ['prod-coal','capacity','start-year', 'end-year'],
         toLocaleString: ['capacity', 'prod-coal'],
     },
 
