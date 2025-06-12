@@ -848,10 +848,23 @@ function enableUX() {
 function addLayers() {
  
     config.layers = [];
+    // try devMap.setStyle(config.mapStyle);
+    // these layers below need it 
+    // if (initialDevLoad === true){
+    //     // devMap.setStyle(config.mapStyle, {
+    //     //     "diff": false
+    //     // });
+    //     console.log('initialDevLoad true')
+    // }else {
+    //     devMap.setStyle(config.mapStyle, {
+    //         "diff": false
+    //     });
+    // }
     if (config.geometries.includes('LineString')) addLineLayer();
     if (config.geometries.includes('Point')) addPointLayer();
 
     if (devTesting === true) {
+ 
         devMap.addLayer({
             id: 'satellite',
             source: { "type": "raster", "url": "mapbox://mapbox.satellite", "tileSize": 256 },
@@ -918,7 +931,8 @@ function addPointLayer() {
     // build style json for circle-color based on config.color
     if (devTesting === true) {
         // do same just pull values from user input not config
-        console.log('checking it still works')
+        console.log(Number(document.getElementById('opacity-value').textContent))
+
         let paint = {
             'circle-opacity': Number(document.getElementById('opacity-value').textContent)
             }
@@ -1515,30 +1529,35 @@ $('#dev-testing-toggle').on("click", function (){
 })
 
 $('#paint-assets-btn').on("click", function (){
-    const sources = devMap.getStyle().sources;  
     if (initialDevLoad){
         console.log('painting with user inputs')
         loadData(); // un comment this so it paints assets
+        initialDevLoad = false;
     }else {
         // delete map and re do loadDat
         // Remove all sources and layers from devMap before re-initializing
         // Remove all layers
-        // const layers = devMap.getStyle().layers;
-        // if (layers) {
-        // // Remove from top to bottom to avoid dependency issues
-        // for (let i = layers.length - 1; i >= 0; i--) {
-        //     devMap.removeLayer(layers[i].id);
-        // }
-        // }
+        const layers = devMap.getStyle().layers;
+        if (layers) {
+        // Remove from top to bottom to avoid dependency issues
+        for (let i = layers.length - 1; i >= 0; i--) {
+            devMap.removeLayer(layers[i].id);
+        }
+        }
 
         // Remove all sources
+        const sources = devMap.getStyle().sources;  
         console.log('Removing sources from devMap')
         Object.keys(sources).forEach(sourceId => {
         devMap.removeSource(sourceId);
         });
+        // Set the style of the devMap to the value from config
+        // so we get landcover etc back from mapBox Studio
+        // devMap.setStyle(config.mapStyle);
         console.log('Running loadData for new devMap')
 
         loadData();
+
     }
 
     // calls addGeoJSON() 
