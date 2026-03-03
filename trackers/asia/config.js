@@ -1,11 +1,11 @@
 var config = {
 
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/ggit/2026-02/asia_map_2026-02-20.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/GOGET/2026-03/asia_map_2026-03-02.geojson',
     geometries: ['Point','LineString'],
     center: [60, 20],
     zoomFactor: 1.9,
     img_detail_zoom: 10,
-    statusField: 'status-legend',
+    statusField: 'status-legend-regional-regional', // status_legend_regional
     statusDisplayField: 'status',
     // allCountrySelect: false,
 
@@ -31,10 +31,10 @@ var config = {
             primary: true
         },
         {
-            field: 'status-legend',
+            field: 'status-legend-regional',
             label: 'Status',
             values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved', 'not-found'],
-            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
+            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle','Shelved', 'Not Found']
         },
 
     ],
@@ -99,13 +99,16 @@ var config = {
         'Companies': ['owner', 'parent', 'owner-search', 'parent-search'],
         'Start Year': ['start-year'],
         'Infrastructure Type': ['tracker-display'],
-        'Status': ['status'],
+        'Status': ['status', 'status-legend-regional'],
         'Province/State': ['subnat']
     },
     detailView: {
         'name': {'display': 'heading'},
-        'prod-gas': {'label': 'Production (Million m³/y)'},
+        'location-accuracy': {'label': 'Location Accuracy'},
+        'prod-gas': {'label': 'Gas Production (million m³/y)'},
+        'prod-unspecified': {'label': 'Unspecified Hydrocarbons Production (million boe/y)'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
+        'prod-year-unspecified': {'label': 'Production Year - Hydrocarbons (unspecified)'},
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},
         'parent': {'label': 'Parent'},

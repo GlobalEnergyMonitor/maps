@@ -64,11 +64,15 @@ class TrackerObject:
 
         else:
             # when it's a tuple
-            main, prod = self.data
+            main, prod, dd_dfs = self.data # with new format should have 6 dfs
             for df in [main, prod]:
                 if internal_cols[0] in df.columns:
                     df.drop(columns=internal_cols, inplace=True)
-            df_official = (main, prod)
+            
+            if isinstance(dd_dfs, pd.DataFrame) and internal_cols[0] in dd_dfs.columns:
+                dd_dfs.drop(columns=internal_cols, inplace=True)
+        
+            df_official = (main, prod, dd_dfs)
 
         
         self.data_official = df_official
@@ -110,7 +114,7 @@ class TrackerObject:
                     gsheets = gspread_creds.open_by_key(self.about_pipe_key)
                     about_spreadsheet = gsheets.worksheet(tab)
                     time.sleep(6)
-                    about_df_temp = pd.DataFrame(about_spreadsheet.get_all_records(expected_headers=[]))
+                    about_df_temp = pd.DataFrame(about_spreadsheet.get_all_values(combine_merged_cells=True))
                     about_metadata_tabs.append(about_df_temp)
             else:
                 for about_tab in self.about_tabs:
@@ -118,7 +122,7 @@ class TrackerObject:
                     about_spreadsheet = gsheets.worksheet(about_tab)
                     time.sleep(6)
 
-                    about_df_temp = pd.DataFrame(about_spreadsheet.get_all_records(expected_headers=[]))
+                    about_df_temp = pd.DataFrame(about_spreadsheet.get_all_values(combine_merged_cells=True))
                     about_metadata_tabs.append(about_df_temp)
 
             
@@ -141,16 +145,17 @@ class TrackerObject:
         print(f'This is citation_full for {self.off_name}:\n{citation_full}')
         
         # Copyright and citation handling
+        num_cols = len(about_df.columns)
         if copyright_full in about_df.values:
             logger.info(f'Already has full copyright: {copyright_full}')
         elif about_df.apply(lambda row: row.astype(str).str.contains('Copyright').any(), axis=1).any():
             logger.info('Partial copyright, delete row and insert full')
             copyright_rows = about_df.apply(lambda row: row.astype(str).str.contains('Copyright').any(), axis=1)
             copyright_row_idx = about_df[copyright_rows].index[0]
-            about_df.iloc[copyright_row_idx] = [copyright_full] * len(about_df.columns)
+            about_df.iloc[copyright_row_idx] = [copyright_full] + [''] * (num_cols - 1)
         else:
-            logger.info('Inserting full copyright into second row') 
-            full_copy_row = pd.DataFrame([[copyright_full] * len(about_df.columns)], columns=about_df.columns)
+            logger.info('Inserting full copyright into second row')
+            full_copy_row = pd.DataFrame([[copyright_full] + [''] * (num_cols - 1)], columns=about_df.columns)
             about_df = pd.concat([about_df.iloc[:1], full_copy_row, about_df.iloc[1:]]).reset_index(drop=True)
 
         about_df.reset_index(drop=True, inplace=True)
@@ -161,17 +166,14 @@ class TrackerObject:
             logger.info('Partial citation, delete row and insert full')
             citation_rows = about_df.apply(lambda row: row.astype(str).str.contains('Recommended Citation').any(), axis=1)
             citation_row_idx = about_df[citation_rows].index[0]
-            about_df.iloc[citation_row_idx] = [citation_full] * len(about_df.columns)
+            about_df.iloc[citation_row_idx] = [citation_full] + [''] * (num_cols - 1)
         else:
-            logger.info('Inserting full citation_full into second row') 
-            full_copy_row = pd.DataFrame([[citation_full] * len(about_df.columns)], columns=about_df.columns)
+            logger.info('Inserting full citation_full into second row')
+            full_copy_row = pd.DataFrame([[citation_full] + [''] * (num_cols - 1)], columns=about_df.columns)
             about_df = pd.concat([about_df.iloc[:1], full_copy_row, about_df.iloc[1:]]).reset_index(drop=True)
-        
+
         about_df.reset_index(drop=True, inplace=True)
-        about_df = about_df.apply(lambda row: row.where(~row.duplicated(), ''), axis=1)
-        
-        if about_df.iloc[0].isnull().all() or (about_df.iloc[0] == '').all():
-            about_df = about_df.drop(0).reset_index(drop=True)
+        about_df = clean_about_df(about_df)
 
         self.about = about_df
         
@@ -287,16 +289,14 @@ class TrackerObject:
                 
 
             elif self.tab_name in ['Oil & Gas Extraction']:
-                df_tuple = self.create_df_goget()
+                df_tuple = self.create_df_goget() # TODO for new format
 
                 main = df_tuple[0]
                 prod = df_tuple[1]
                 
                 #assign df tuple to data 
-                self.data = df_tuple # not sure how to handle this, concat? 
+                self.data = df_tuple 
                 print(len(self.data))
-                # input('Check lenght of goget data should be two for tuple')
-                # COME BACK IF INTERACTIVE COLUMN THING WORKS ADD TO ALL NON NORMAL CASES!! 
 
             # NORMAL CASE JUST PULL FROM GSHEETS
             else:
@@ -666,28 +666,117 @@ class TrackerObject:
         
         return df
     
-    
+    # new for new format from db
+     
     def create_df_goget(self):
-        if 'Production & reserves' in self.tabs:
+        # March 2026+ format: separate field-level tabs for main, production, and reserves
+        # Old format (pre-2026): 'Main data' + 'Production & reserves' combined tab
+        gsheets = gspread_creds.open_by_key(self.key)
+
+        # New format tab names
+        new_main_tab = 'Field-level main data'
+        new_prod_tab = 'Field-level production data'
+        new_res_tab = 'Field-level reserves data'
+
+        # new_main_project_tab = 'Project-level main data'
+        # new_prod_project_tab = 'Project-level production data'
+        # new_res_project_tab = 'Project-level reserves data'
+        project_level_tabs = ['Project-level main data', 'Project-level data production', 'Project-level data reserves']
+
+        # Detect which format we're working with
+        available_tabs = [ws.title for ws in gsheets.worksheets()]
+        is_new_format = new_main_tab in available_tabs
+
+        if is_new_format:
+            logger.info('GOGET: Using new March 2026+ format (field-level tabs)')
+
+            spreadsheet = gsheets.worksheet(new_main_tab)
+            main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            print(main_df.info())
+            main_df.columns = main_df.columns.str.strip()
+
+            spreadsheet = gsheets.worksheet(new_prod_tab)
+            prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            print(prod_df.info())
+            prod_df.columns = prod_df.columns.str.strip()
+
+            spreadsheet = gsheets.worksheet(new_res_tab)
+            res_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            print(res_df.info())
+            res_df.columns = res_df.columns.str.strip()
+
+            # Remap new column names to match what downstream code expects
+            main_df.rename(columns={
+                'Subnational unit': 'Subnational unit (province, state)',
+                'Owner(s)': 'Owner',
+                'Parent(s)': 'Parent',
+                'Block(s)': 'Concession / block',
+                'Wiki URL (field)': 'Wiki URL',
+            }, inplace=True)
+
+            # New format has separate prod and reserves tabs — recombine into
+            # a single prod_res df matching the old 'Production & reserves' schema
+            # so downstream functions (get_most_recent_value_and_year_goget) work unchanged.
+
+            # Production tab: already has Quantity (converted) and Units (converted)
+            # Just align column names to match old combined schema
+            prod_df.rename(columns={
+                'Unit Name': 'Unit name',
+                'Data Year': 'Data year',
+                'Quantity': 'Quantity (original)',
+                'Units': 'Units (original)',
+            }, inplace=True)
+            prod_df['Production/reserves'] = 'production'
+
+            # Reserves tab: align column names to match old combined schema
+            # Old schema had 'Quantity (converted)' and 'Units (converted)' — new reserves tab has those too
+            # Old schema had 'Reserves classification (original)' — new has 'Reserves classification'
+            # old had 'Quantity (original)', and  'Units (original)', rename Quantity and Units to that
+            res_df.rename(columns={
+                'Unit Name': 'Unit name',
+                'Data Year': 'Data year',
+                'Quantity': 'Quantity (original)',
+                'Units': 'Units (original)',
+                'Reserves classification': 'Reserves classification (original)',
+            }, inplace=True)
+            res_df['Production/reserves'] = 'reserves'
+
+            # Combine into single df matching old schema
+            prod_res_df = pd.concat([prod_df, res_df], ignore_index=True, sort=False)
+            
+            # now pull project level tabs and concat as a df! 
+            # can later pull out prod res by that column prod_res
+            # TODO OR just keep sepearte and add each as their own df to tuple ... 
+            dd_project_tabs = []
+            for tab in project_level_tabs:
+                
+                spreadsheet = gsheets.worksheet(tab)
+                df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                df['tabname'] = tab
+                print(df.info())
+                df.columns = df.columns.str.strip()
+                dd_project_tabs.append(df)            
+            
+            dd_dfs = pd.concat(dd_project_tabs, sort=False).reset_index(drop=True) 
+                        
+
+        else:
+            # Old format (pre-2026): 'Main data' + 'Production & reserves'
+            logger.info('GOGET: Using old pre-2026 format (Main data + Production & reserves)')
+            dd_dfs = 'empty n/a for old format'
             for tab in self.tabs:
-                # input('Check prod tab for goget')
                 if tab == 'Main data':
-                    # input('Confirming Main Data Found')
-                    gsheets = gspread_creds.open_by_key(self.key)
                     spreadsheet = gsheets.worksheet(tab)
                     main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
                     print(main_df.info())
                     main_df.columns = main_df.columns.str.strip()
-
                 elif tab == 'Production & reserves':
-                    # input('Confirming Production & reserves Found')
-                    gsheets = gspread_creds.open_by_key(self.key)
                     spreadsheet = gsheets.worksheet(tab)
-                    prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                    print(prod_df.info())
-                    prod_df.columns = prod_df.columns.str.strip()
+                    prod_res_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                    print(prod_res_df.info())
+                    prod_res_df.columns = prod_res_df.columns.str.strip()
 
-        return main_df, prod_df            
+        return main_df, prod_res_df, dd_dfs            
 
     
     def set_fuel_filter_eu_and_maturity(self):
@@ -1463,7 +1552,7 @@ class TrackerObject:
         
         elif self.acro == 'GOGET':
             print(f'This is tuple for goget: {self.data}')
-            main, prod = self.data  # Unpack the tuple
+            main, prod, dd_dfs = self.data  # TO DO Unpack the tuple # should we prepare for all 6 tabs? 
             to_merge = []
             # fueldf = None
             for df in [main, prod]:
@@ -1484,6 +1573,7 @@ class TrackerObject:
             
             filtered_main = to_merge[0] # if there is a fuel filter this main would already be filtered since its the one with fuelcol
             filtered_prod = to_merge[1]
+                                               
             if fuel != ['none']:
                 # creates list of unit ids only on correct fuel type
                 # then filter
@@ -1498,7 +1588,15 @@ class TrackerObject:
             
             else:
                 logger.info('no fuel filter needed')
-            self.data = (filtered_main, filtered_prod)
+            
+            # apply same filtering to rest of dfs.. project level for data downlaods     
+            if isinstance(dd_dfs, pd.DataFrame):
+                dd_dfs.columns = dd_dfs.columns.str.strip()
+                dd_dfs['country_to_check'] = dd_dfs[self.geocol].apply(lambda x: split_countries(x) if isinstance(x, str) else []) 
+                filtered_dd_dfs = dd_dfs[dd_dfs['country_to_check'].apply(lambda x: check_list(x, needed_geo))]
+                if fuel != ['none'] and self.fuelcol in dd_dfs.columns:
+                    filtered_dd_dfs = create_filtered_fuel_df(filtered_dd_dfs, self)
+            self.data = (filtered_main, filtered_prod, filtered_dd_dfs)
             
         # elif self.acro == 'GOGPT-eu':
         #     logger.info('Pass for gogpt eu')
@@ -1622,7 +1720,8 @@ class TrackerObject:
                     'issue_type': 'duplicates_cleaned',
                     'original_unique': original_unique_count,
                     'new_unique': new_unique_count,
-                    'reduction': reduction
+                    'reduction': reduction,
+                    
                 })
 
         # Save cleaning issues report
@@ -1767,9 +1866,8 @@ class TrackerObject:
                     
                 else:
                     logger.info(f"Skipping non-numeric column: {col}")
-                            # write issues_coords dict to a csv file in gem_tracker_maps
-            issue_df = pd.DataFrame(missing_coordinate_row)
-            issue_df.to_csv(f'{logpath}missing_coordinates_geo-{self.acro}_{releaseiso}_{iso_today_date}.csv',  index=False)     
+            #                 # write issues_coords dict to a csv file in gem_tracker_maps
+            
         else:
             logger.info("Error: 'self.data' is not a DataFrame. And should be even for GOGET since it is run at a special point for it.")
             logger.info(msg=f"Error:'self.data' is {type(self.data).__name__}: {repr(self.data)}")
@@ -1824,7 +1922,7 @@ class TrackerObject:
         # first run process_goget_reserve_prod_data_dd to save for data download
         # split into two dfs
 
-        main, prod = self.data
+        main, prod, rest_dfs = self.data # dont need rest_dfs for map but stil in this data so need to unpack it.
         # TODO need to implement the below...
         # lower case and str.replace(' ', '-')
         # main.columns = main.columns.str.lower()
@@ -1896,7 +1994,8 @@ class TrackerObject:
         # print(set(filtered_main_data_df['Country/Area'].to_list()))
         # input('Check country list and country/area after apply')   
         
-        dropped_filtered_main_data = main.drop(['Government unit ID',  'Basin', 'Concession / block'], axis=1)
+        cols_to_drop = [c for c in ['Government unit ID', 'Basin', 'Concession / block'] if c in main.columns]
+        dropped_filtered_main_data = main.drop(cols_to_drop, axis=1)
         # average_production_total = filtered_main_data_df["Production - Total (Oil, Gas and Hydrocarbons)"].mean()
         # print("Average Production - Total (Oil, Gas and Hydrocarbons):", average_production_total)
         # input('check avg production total seems right, previous was 6.3041')
@@ -1933,7 +2032,8 @@ class TrackerObject:
         # print(dropped_production_Wiki_name.dtypes)
         # input('check thosul be objects for all but prod oil prod gas prod hydrocarbons prod total prod for map scaling, lat and lng')
         # drop superfluous columns
-        clean_export = dropped_production_Wiki_name.drop(['Unit type'], axis=1) # Fuel type
+        cols_to_drop_2 = [c for c in ['Unit type'] if c in dropped_production_Wiki_name.columns]
+        clean_export = dropped_production_Wiki_name.drop(cols_to_drop_2, axis=1) # Fuel type
         
         # Use not centroid but descriptive point
         # Set up DF of Units without locations
@@ -1981,9 +2081,10 @@ class TrackerObject:
         
         # Define a dictionary with old column names as keys and new names with units as values
         column_rename_map = {
-            'Production - Oil': 'Production - Oil (Million bbl/y)',
-            'Production - Gas': 'Production - Gas (Million m³/y)',
-            'Production - Total (Oil, Gas and Hydrocarbons)': 'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)',
+            'Production - Oil': 'Liquids Production (million bbl/y)',
+            'Production - Gas': 'Gas Production (million m³/y)', # kep Gas Production (million m³/y) because at asset level million m3/y better
+            'Production - Hydrocarbons (unspecified)': 'Unspecified Hydrocarbons Production (million boe/y)',
+            'Production - Total (Oil, Gas and Hydrocarbons)': 'Total Production (million boe/y)',
             # Add other columns you wish to rename similarly here
         }
         
@@ -2007,21 +2108,29 @@ class TrackerObject:
             'Owner',
             'Parent',
             'Project or complex',
-            'Production - Oil (Million bbl/y)',
+            'Liquids Production (million bbl/y)',
             'Production Year - Oil',
-            'Production - Gas (Million m³/y)',
+            'Gas Production (million m³/y)',
             'Production Year - Gas',
-            'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)',
+            'Unspecified Hydrocarbons Production (million boe/y)',
+            'Production Year - Hydrocarbons (unspecified)',
+            'Total Production (million boe/y)',
             'Wiki URL',
         ]
     
 
         # Rename the columns
         clean_export_center_clean_rename = clean_export_center_clean.rename(columns=column_rename_map)
-        
-        # Reorder the columns
-        clean_export_center_clean_reorder_rename = clean_export_center_clean_rename[desired_column_order]
 
+        # Only keep columns that actually exist (handles old vs new GOGET format differences)
+        available_desired = [c for c in desired_column_order if c in clean_export_center_clean_rename.columns]
+        missing = [c for c in desired_column_order if c not in clean_export_center_clean_rename.columns]
+        if missing:
+            logger.info(f'GOGET: desired columns not present (ok for new format): {missing}')
+        clean_export_center_clean_reorder_rename = clean_export_center_clean_rename[available_desired]
+
+        print(f'This is clean_export_center_clean_reorder_rename coming at end of process_goget_reserve_prod_data:')
+        print(clean_export_center_clean_reorder_rename)
         
         self.data = clean_export_center_clean_reorder_rename
     

@@ -1,10 +1,10 @@
 var config = {
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/ggit/2026-02/LATAM_map_2026-02-20.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/GOGET/2026-03/LATAM_map_2026-03-02.geojson',
     geometries: ['Point','LineString'],
     center: [-60, 0], //previously was -90, -14
     zoomFactor: 1.4,
     img_detail_zoom: 10,
-    statusField: 'status-legend',
+    statusField: 'status-legend-regional',
     statusDisplayField: 'status',
     color: {
         field: 'tracker-custom',
@@ -35,10 +35,10 @@ var config = {
             primary: true
         },
         {
-            field: 'status-legend',
+            field: 'status-legend-regional',
             label: 'Status',
             values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus','shelved', 'not-found'],
-            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle/Shut in','Shelved', 'Not Found']
+            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction/Pre-permit/Permitted', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle','Shelved', 'Not Found']
             //values_labels: ['Operating','Proposed+','Pre-construction+', 'Construction+','Retired+','Cancelled','Mothballed+','Shelved', 'Not Found']
 // /Announced/Discovered /Pre-permit/Permitted Closed/Decommissioned  /Idle/Shut in /In development
         },
@@ -90,8 +90,8 @@ var config = {
     multiCountry: true,
 
     tableHeaders: {
-        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-coal','prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'prod-coal', 'tracker-display',],
-        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (million tonnes coal/y)', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Production (Mt)','Facility Type'],
+        values: ['name','unit-name', 'owner', 'parent', 'capacity-table', 'units-of-m','status', 'areas', 'start-year', 'prod-coal','prod-oil', 'prod-year-oil', 'prod-gas', 'prod-year-gas', 'prod-coal', 'fuel', 'tracker-display',],
+        labels: ['Name','Unit','Owner', 'Parent','Capacity', '','Status','Country/Area(s)','Start year', 'Production (million tonnes coal/y)', 'Production (million bbl/y)','Production year (oil)', 'Production (Million m³/y)', 'Production year (gas)', 'Coal Production (Mt)', 'Fuel', 'Facility Type'],
         clickColumns: ['name'],
         rightAlign: ['unit','capacity-table','prod-oil', 'prod-gas','start-year', 'prod-year-oil', 'prod-year-gas'], 
         removeLastComma: ['areas'], 
@@ -101,15 +101,19 @@ var config = {
         'Companies': ['owner', 'parent', 'owner-search', 'parent-search'],
         'Start Year': ['start-year'],
         'Infrastructure Type': ['tracker-display'],
-        'Status': ['status'],
+        'Status': ['status', 'status-legend-regional'],
         'Province/State': ['subnat']
     },
     detailView: {
-        'name': {'display': 'heading'},     
-        'prod-oil': {'label': 'Production (million bbl/y)'},
-        'prod-gas': {'label': 'Production (million m³/y)'},
+        'name': {'display': 'heading'},   
+        'location-accuracy': {'label': 'Location Accuracy'},
+  
+        'prod-oil': {'label': 'Liquids Production (million bbl/y)'},
+        'prod-gas': {'label': 'Gas Production (million m³/y)'},
+        'prod-unspecified': {'label': 'Unspecified Hydrocarbons Production (million boe/y)'},
         'prod-year-oil': {'label': 'Production Year - Oil'},
         'prod-year-gas': {'label': 'Production Year - Gas'},
+        'prod-year-unspecified': {'label': 'Production Year - Hydrocarbons (unspecified)'},
         'prod-coal': {'label': 'Production (million tonnes coal/y)'}, 
         'start-year': {'label': 'Start Year'},
         'owner': {'label': 'Owner'},

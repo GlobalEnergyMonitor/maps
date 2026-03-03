@@ -1,6 +1,6 @@
 var config = {
     /* name of the data file; use key `csv` if data file is CSV format */
-    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/ggpt/Geothermal-map-file-2025-03-18.csv',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/geothermal/2026-03/geothermal_map_2026-02-13.geojson',
 
     colors: {
         'red greeninfo': '#c00',
@@ -41,13 +41,13 @@ var config = {
     ],
 
 
-    linkField: 'gem-location-id',
+    linkField: 'pid',
 
-    countryField: 'country/area',
+    countryField: 'areas',
     /* define the field for calculating and showing capacity along with label.
        this is defined per tracker since it varies widely */
-    capacityField: 'unit-capacity-(mw)',
-    capacityDisplayField: 'unit-capacity-(mw)',
+    capacityField: 'capacity',
+    capacityDisplayField: 'capacity',
     capacityLabel: 'Capacity (MW)',
 
     /* Labels for describing the assets */
@@ -55,23 +55,23 @@ var config = {
     assetLabel: 'units',
 
     /* the column that contains the asset name. this varies between trackers */
-    nameField: 'project-name',
+    nameField: 'name',
 
 
     /* configure the table view, selecting which columns to show, how to label them, 
         and designated which column has the link */
     tableHeaders: {
-        values: ['project-name', 'unit-name','unit-capacity-(mw)', 'technology', 'status', 'start-year', 'owner', 'operator',  'country/area'],
+        values: ['name', 'unit-name','capacity', 'technology', 'status', 'start-year', 'owner', 'operator',  'areas'],
         labels: ['Plant', 'Unit','Capacity (MW)','Technology','Status','Start year', 'Owner', 'Operator', 'Country/Area(s)'],
-        clickColumns: ['project-name'],
-        rightAlign: ['unit-capacity-(mw)','start-year'],
-        toLocaleString: ['unit-capacity-(mw)'],
+        clickColumns: ['name'],
+        rightAlign: ['capacity','start-year'],
+        toLocaleString: ['capacity'],
 
     },
 
     /* configure the search box; 
         each label has a value with the list of fields to search. Multiple fields might be searched */
-    searchFields: { 'Plant': ['project-name', 'project-name-in-local-language-/-script', 'other-name(s)'], 
+    searchFields: { 'Plant': ['name', 'name-in-local-language-/-script', 'other-name(s)'], 
         'Companies': ['owner', 'operator', 'operator-name-in-local-language-/-script', 'owner-name-in-local-language-/-script'],
         'Start Year': ['start-year']
     },
@@ -84,12 +84,12 @@ var config = {
       `'label': '...'` prepends a label. If a range, two values for singular and plural.
     */
     detailView: {
-        'project-name': {'display': 'heading'},
+        'name': {'display': 'heading'},
         'owner': {'label': 'Owner'},
         'operator': {'label': 'Operator'},
         'start-year': {'label': 'Start Year'},
-        'state/province': {'display': 'location'},
-        'country/area': {'display': 'location'},
+        // 'state/province': {'display': 'location'},
+        'areas-subnat-sat-display': {'display': 'location'},
 
     },
 

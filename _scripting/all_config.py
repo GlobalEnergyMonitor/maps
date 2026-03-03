@@ -40,10 +40,10 @@ list_of_all_official = [
 ]
 
 pm_preview_mode = False # For Baird's testing work
-trackers_to_update = ["Gas Pipelines"]  # tab name in map tracker log sheet # Gas Finance
+trackers_to_update = ["Oil & Gas Extraction"]  # tab name in map tracker log sheet # Gas Finance
 
-new_release_date = 'February_2026' # for within about page NEEDS TO BE FULL MONTH
-releaseiso = '2026-02'
+new_release_date = 'March_2026' # for within about page NEEDS TO BE FULL MONTH
+releaseiso = '2026-03'
 new_release_dateinput = input(f'In {new_release_date} format, with no spaces, tell me the public release date. Or press enter if {new_release_date} is the right month.')
 if new_release_dateinput == '':
     new_release_dateinput = new_release_date
@@ -52,13 +52,13 @@ dd_only = False
 nostopping = True
 # add test local
 localtestfile = '' #'../testinputfile.xlsx'
-testval = '' #'Toscana FSRU' #optional for debugging Canatxx LNG Terminal 
+testval = '' #Mampak Oil and Gas Field (Brunei) #'Toscana FSRU' #optional for debugging Canatxx LNG Terminal 
 testfilekey = '' # '1ivc-DkGvbAz8BW0LV2Q0XcZaB7s6q5hoUuVZTdxmxk8' #optional for debugging
 testtracker = ''  #'ggit-lng'
 simplified = False # True False to make a very barebones map files with coords and name and url (for speed tests gipt)
 new_h2_data = False
-priority = ["latam", "asia", "europe"]   # tracker_mapnames "europe", "asia", "latam", "africa", "ggit"
-force_refresh_flag = False 
+priority = ["latam"]   # tracker_mapnames "europe", "asia", "latam", "africa", "ggit"
+force_refresh_flag = True 
 tracker_mapnames = ["europe", "africa", "integrated", "asia", "latam", "ggit", "goit", "goget", "gctt", "gcpt", "gcmt", "gogpt", "gspt", "gwpt", "gnpt", "gbpt", "ggpt", "ghpt", "gist", "gmet", "giomt", "ggft"]
 about_templates_key = '1wrPJBqNuf5o-vzKYljlrWbjDtf_Ui7hR4JQM1p8gV7I' # new initiative to build about page for teams
 final_cols = []
@@ -227,12 +227,11 @@ gcmt_closed_tab = 'Global Coal Mine Tracker (Close'
 region_key = '1yaKdLauJ2n1FLSeqPsYNxZiuF5jBngIrQOIi9fXysAw'
 region_tab = ['mapping']
 
-# TODO TESTING swap out for rep points https://docs.google.com/spreadsheets/d/1Bu2RhxgvRW7yEJu6zbng_nudXBYRASNvRtgIOvrDN0c/edit?gid=975391128#gid=975391128 
 # gem standard representative points Latitude_rep_point	Longitude_rep_point	GEM Standard Country Name
-centroid_key = '1ETg632Bkwnr96YQbtmDwyWDpSHqmg5He0GQwJjJz8IU'  # Country/Area Copy of Fill In Coordinates from Country Centroid
-centroid_tab = ['centroids']
-rep_point_key = '1Yke2VQYWZn3UvbqenP2KXvOKR_ZuS43m6C0gd4lwLOQ', # GEM Standard Country Name
-rep_point_tab = ['lev1_reppoints']
+# centroid_key = '1ETg632Bkwnr96YQbtmDwyWDpSHqmg5He0GQwJjJz8IU'  # Country/Area Copy of Fill In Coordinates from Country Centroid
+# centroid_tab = ['centroids']
+centroid_key = '1Yke2VQYWZn3UvbqenP2KXvOKR_ZuS43m6C0gd4lwLOQ'  # GEM Standard Country Name
+centroid_tab = ['lev1reppoints']
 
 
 client_secret_full_path = os.path.expanduser("~/") + client_secret
@@ -433,7 +432,7 @@ latam_countries = [
     "Saint Kitts and Nevis", "Saint Lucia", "Saint Martin (French part)",
     "Saint Vincent and the Grenadines", "Sint Maarten (Dutch part)",
     "Trinidad and Tobago", "Turks and Caicos Islands", "Virgin Islands (British)",
-   # "Virgin Islands (U.S.)", "Puerto Rico", -  gregor excludes
+    "Virgin Islands (U.S.)", "Puerto Rico", 
 
     # Central America
     "Costa Rica", "El Salvador", "Guatemala", "Honduras", "Mexico",
