@@ -1,5 +1,5 @@
 var config = {
-    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/GOGET/2026-03/LATAM_map_2026-03-02.geojson',
+    geojson: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/GOGET/2026-03/LATAM_map_2026-03-03.geojson',
     geometries: ['Point','LineString'],
     center: [-60, 0], //previously was -90, -14
     zoomFactor: 1.4,
