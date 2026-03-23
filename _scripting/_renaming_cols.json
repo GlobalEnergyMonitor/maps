@@ -246,11 +246,14 @@
         "Owner": "owner",
         "Parent": "parent",
         "Wiki URL": "url",
-        "Production - Oil (Million bbl/y)": "prod_oil",
-        "Production - Gas (Million m\u00b3/y)": "prod_gas",
-        "Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)": "capacity",
+        "Liquids Production (million bbl/y)": "prod_oil",
+        "Gas Production (million m³/y)": "prod_gas",
+        "Unspecified Hydrocarbons Production (million boe/y)": "prod_unspecified",
+        "Total Production (million boe/y)" : "capacity",
+
         "Production Year - Oil": "prod_year_oil",
         "Production Year - Gas": "prod_year_gas",
+        "Production Year - Hydrocarbons (unspecified)": "prod_year_unspecified",
         "Country List": "mult_countries",
         "Fuel type": "fuel"
     },

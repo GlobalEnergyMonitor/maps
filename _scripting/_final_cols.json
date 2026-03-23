@@ -151,5 +151,8 @@
     "retired-nominal-bf-capacity-(ttpa)",
     "retired-nominal-bof-steel-capacity-(ttpa)",
     "retired-nominal-eaf-steel-capacity-(ttpa)",
-    "retired-nominal-ohf-steel-capacity-(ttpa)"
+    "retired-nominal-ohf-steel-capacity-(ttpa)",
+    "status-legend-global",
+    "status-legend-regional",
+    "location-accuracy"
 ]

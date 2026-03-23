@@ -30,8 +30,8 @@ var config = {
         {
             field: 'status-legend-regional',
             label: 'Status',
-            values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus', 'abandoned','shelved', 'ugs', 'not-found'],
-            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle','Abandoned','Shelved', 'UGS', 'Not Found']
+            values: ['operating','proposed-plus','pre-construction-plus','construction-plus','retired-plus','cancelled','mothballed-plus', 'shelved', 'not-found'],
+            values_labels: ['Operating','Proposed/Announced/Discovered','Pre-construction', 'Construction/In development','Retired/Closed/Decommissioned','Cancelled','Mothballed/Idle','Shelved', 'Not Found'] // removed abandoned and 'UGS', 
         },
 
     ],

@@ -78,6 +78,7 @@ def run_maps():
             df = remove_missing_coord_rows(df, tracker)
             
             print(f'length after df drops missing coords: {len(df)}')
+            input('check length difference!')
 
             # turn into a gdf and save as output_file2
             # Ensure lat/lng are numeric and drop rows with missing values
@@ -98,6 +99,8 @@ def run_maps():
             # save csv to digital ocean            
             # output_file
             save_csv_s3 = (
+                f'export aws_access_key_id={ACCESS_KEY} && '
+                f'export aws_secret_access_key={SECRET_KEY} && '
                 f'export BUCKETEER_BUCKET_NAME=publicgemdata && '
                 f'aws s3 cp {output_file} s3://$BUCKETEER_BUCKET_NAME/{tracker}/{releaseiso}/ '
                 f'--endpoint-url https://nyc3.digitaloceanspaces.com --acl public-read'
