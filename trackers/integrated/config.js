@@ -1,9 +1,9 @@
 var config = {
-    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Integrated/2026-02/gipt-data-2026-02-11.csv',
+    csv: 'https://publicgemdata.nyc3.cdn.digitaloceanspaces.com/Integrated/2026-04/gipt-data-2026-03-27.csv',
 
     tiles: [
         // 'https://gem.dev.c10e.org/2024-03-12/{z}/{x}/{y}.pbf'
-        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2026-02/{z}/{x}/{y}.pbf'
+        'https://mapsintegrated.nyc3.cdn.digitaloceanspaces.com/maps/integrated-2026-04/{z}/{x}/{y}.pbf'
     
         ],
     tileSourceLayer: 'integrated',
@@ -21,7 +21,7 @@ var config = {
             'hydropower': 'blue',
             'nuclear': 'blue',
             'oil/gas': 'red',
-            'solar': 'green',
+            'utility-scale solar': 'green',
             'wind': 'green'
         }
 
@@ -48,7 +48,7 @@ var config = {
     filters: [
         {
             field: 'type',
-            values: ['coal','oil/gas','nuclear','geothermal','hydropower','bioenergy','solar','wind'],
+            values: ['coal','oil/gas','nuclear','geothermal','hydropower','bioenergy','utility-scale solar','wind'],
             primary: true
         },
         {

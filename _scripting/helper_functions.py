@@ -24,7 +24,7 @@ from openpyxl.styles import Alignment
 import pickle
 from collections import Counter
 import subprocess
-import yaml
+# import yaml
 import sys
 import re
 from pathlib import Path
@@ -413,63 +413,45 @@ def gspread_access_file_read_only(key, tab_list):
         # authorized_user_filename=json_token_name,
     )
     list_of_dfs = []
-    if 'Production & reserves' in tab_list:
-        for tab in tab_list:
-            if tab == 'Main data':
-                gsheets = gspread_creds.open_by_key(key)
-                spreadsheet = gsheets.worksheet(tab)
-                main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                print(main_df.info())
-            elif tab == 'Production & reserves':
-                gsheets = gspread_creds.open_by_key(key)
-                spreadsheet = gsheets.worksheet(tab)
-                prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                print(prod_df.info())
-        
-        df = process_goget_reserve_prod_data(main_df, prod_df)
-        
+    for tab in tab_list:
+        if tab == gcmt_closed_tab:
+            # print(tab)
+            wait_time = 5
+            time.sleep(wait_time)
+            gsheets = gspread_creds.open_by_key(key)
+            # Access a specific tab
+            spreadsheet = gsheets.worksheet(tab)
 
-
-    else:
-        for tab in tab_list:
-            if tab == gcmt_closed_tab:
-                # print(tab)
-                wait_time = 5
-                time.sleep(wait_time)
-                gsheets = gspread_creds.open_by_key(key)
-                # Access a specific tab
-                spreadsheet = gsheets.worksheet(tab)
-
-                df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                if 'Status' in df.columns:
-                    print('Look at GCMT closed tab status col should not be there but is?')
-                else:
-                    df['Status'] = 'Retired'
-                list_of_dfs.append(df)
-                
-            else: 
-                print(tab)
-                wait_time = 5
-                time.sleep(wait_time)
-                gsheets = gspread_creds.open_by_key(key)
-                # Access a specific tab
-                # print(tab)
-                # input('review tab to diagnose error')
-                spreadsheet = gsheets.worksheet(tab)
-
-                try:
-                    df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                except APIError:
-                    print(f'getting an APIError')
-                    print(f'this is spreadsheet after loading tab into gsheets.worksheet:\n{spreadsheet}')
-                    df = pd.DataFrame(spreadsheet.get_all_records())
-
-
-                list_of_dfs.append(df)
-        if len(list_of_dfs) > 1: 
-            # df = pd.concat(list_of_dfs, sort=False).reset_index(drop=True).fillna('')
+            df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            if 'Status' in df.columns:
+                print('Look at GCMT closed tab status col should not be there but is?')
+            else:
+                df['Status'] = 'Retired'
+            list_of_dfs.append(df)
             
-            df = pd.concat(list_of_dfs, sort=False).reset_index(drop=True)
+        else: 
+            print(tab)
+            wait_time = 5
+            time.sleep(wait_time)
+            gsheets = gspread_creds.open_by_key(key)
+            # Access a specific tab
+            # print(tab)
+            # input('review tab to diagnose error')
+            spreadsheet = gsheets.worksheet(tab)
+
+            try:
+                df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            except APIError:
+                print(f'getting an APIError')
+                print(f'this is spreadsheet after loading tab into gsheets.worksheet:\n{spreadsheet}')
+                df = pd.DataFrame(spreadsheet.get_all_records())
+
+
+            list_of_dfs.append(df)
+    if len(list_of_dfs) > 1: 
+        # df = pd.concat(list_of_dfs, sort=False).reset_index(drop=True).fillna('')
+        
+        df = pd.concat(list_of_dfs, sort=False).reset_index(drop=True)
 
     return df
  
@@ -883,7 +865,6 @@ def get_key_tabs_prep_file(tracker):
         tabs = prep_dict[tracker]['gspread_tabs']
     return key, tabs
 
-
 # COMMENTING OUT FOR NOW CAN SHOULD BE ABLE TO REMOVE TESTING THAT THE MAP CLASS ONE IS USED FOR ALL
 # Needed for gipt integrated script - keep in for now
 # # TODO instances to remove from run_maps.py after tested, then in specifci_temp for asia, and in assign_hy_pci for europe
@@ -977,10 +958,14 @@ def add_goit_boedcap_from_baird(gdf):
     # input('Check the above...')
     return gdf    
 
+# not needed with db data!
 def create_goget_wiki_name(df):
     # df['Wiki name'] = df['Unit Name'] + ' Oil and Gas Field ('+ df['Country'] + ')'
     
-    df['Wiki name'] = df.apply(lambda row: f"{row['Unit Name']} Oil and Gas Field ({row['Country/Area']})", axis=1)
+    # df['Wiki name'] = df.apply(lambda row: f"{row['Unit Name']} Oil and Gas Field ({row['Country/Area']})", axis=1)
+    
+    df['Wiki name'] = df['Unit Name'] # for simplicity but this whole function can be removed
+
     # 'Wiki name'
     # print(df[['Country/Area', 'Unit Name', 'Wiki name']].head())
     # input('Check that Wiki name came out alright')
@@ -1059,51 +1044,26 @@ def apply_representative_point(df):
     
     return df
 
-# TODO explore this working or use something else
-# Workbook not a attribute of openpyxlWriter go with google api way
-# def bold_first_row(writer, sheet_name):
-#     workbook = writer.Workbook
-#     worksheet = workbook.sheets[sheet_name]
-#     for cell in worksheet[1]:  # First row
-#         cell.font = Font(bold=True)
-    
-#     return writer
+def bold_first_row(writer, sheet_name):
+    """Bold all cells in the first row of a sheet after writing with pd.ExcelWriter (openpyxl engine)."""
+    worksheet = writer.sheets[sheet_name]
+    bold_font = Font(bold=True)
+    for cell in worksheet[1]:
+        cell.font = bold_font
 
 
 
 
 def clean_about_df(df):
+    """Clean about page DataFrame: deduplicate row values (from merged cells), drop blank columns, remove blank first row."""
     df = df.copy()
+    # Remove duplicate values in the same row (from unmerged merged cells)
     df = df.apply(lambda row: row.where(~row.duplicated(), ''), axis=1)
-    # if first row is blank, remove it
-    if df.iloc[0].isnull().all() or (df.iloc[0] == '').all():
-        df = df.drop(0).reset_index(drop=True)
-
-
-    # Example usage:
-    # with pd.ExcelWriter('output.xlsx', engine='openpyxl') as writer:
-    #     df.to_excel(writer, sheet_name='Sheet1', index=False)
-    #     bold_first_row(writer, 'Sheet1')
-
-    # see if there are duplicate data on row or index or column? 
-
-    # for col in df.columns: # worked
-    #     print(f'This is col name: {col}')
-    #     for row in df.index:
-    #         print(f'This is row:')
-    #         print(row)
-    #         print(f'This is value for row and col: ')
-    #         print(df.loc[row, col])
-    
-    # input('Inspect if that fixed it!!')
-    # how can I print it to a file without includig the column names of the df?
-    # remove first row if blank (for coal!)
-    # bold About row or first row
-    
-    # the same row number but diff cols are duplicated at times 
-    # Drop duplicate cells in the same row, keeping the first occurrence
-    
-    
+    # Drop columns that are entirely blank/empty
+    df = df.loc[:, ~(df.fillna('').eq('').all())]
+    # Remove first row if blank
+    if len(df) > 0 and (df.iloc[0].isnull().all() or (df.iloc[0] == '').all()):
+        df = df.drop(df.index[0]).reset_index(drop=True)
     return df
 
 
@@ -1222,26 +1182,19 @@ def replace_old_date_about_page_reg(df): # TODO augu 28 make this better or dele
     # find replace the month and year
     # convert df column to string
     for row in df.index:
-        for month in months:
-            sub = str(month + ' 20')
-            year_chars = len(month) + 5
-            if sub in df.iloc[row,0]:
-                # replace the substring in the value (row string)
-                index = df.iloc[row,0].find(sub)
-
-                check = df.iloc[row,0][index-1]
-                # input('Check if it has ( before')
-                if check == '(':
-                    pass
-                else:
+        for col_idx in range(len(df.columns)):
+            cell_val = str(df.iloc[row, col_idx])
+            for month in months:
+                sub = month + ' 20'
+                year_chars = len(month) + 5
+                if sub in cell_val:
+                    index = cell_val.find(sub)
+                    # Skip if preceded by '(' (e.g. parenthetical dates)
+                    if index > 0 and cell_val[index - 1] == '(':
+                        continue
                     end = index + year_chars
-                    # input(f'Found a month! at index: {index}')
-                    startbit = df.iloc[row,0][:(index)]
-                    endbit = df.iloc[row,0][end:]
-                    df.iloc[row,0] = startbit + new_release_dateinput.replace('_', ' ') + endbit
-                    # df.iloc[row,0] = df.iloc[row,0].replace(sub, new_release_date)
-                    # input('Check find replace did the right thing') # works on main and dependents
-                        
+                    df.iloc[row, col_idx] = cell_val[:index] + new_release_dateinput.replace('_', ' ') + cell_val[end:]
+
     return df
 
 def rename_cols(df):
