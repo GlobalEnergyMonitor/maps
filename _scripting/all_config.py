@@ -48,7 +48,7 @@ new_release_dateinput = input(f'In {new_release_date} format, with no spaces, te
 if new_release_dateinput == '':
     new_release_dateinput = new_release_date
 
-dd_only = True
+dd_only = False
 nostopping = True
 # add test local
 localtestfile = '' #'../testinputfile.xlsx'
@@ -230,9 +230,10 @@ region_tab = ['mapping']
 # gem standard representative points Latitude_rep_point	Longitude_rep_point	GEM Standard Country Name
 # centroid_key = '1ETg632Bkwnr96YQbtmDwyWDpSHqmg5He0GQwJjJz8IU'  # Country/Area Copy of Fill In Coordinates from Country Centroid
 # centroid_tab = ['centroids']
-centroid_key = '1Yke2VQYWZn3UvbqenP2KXvOKR_ZuS43m6C0gd4lwLOQ'  # GEM Standard Country Name
-centroid_tab = ['lev1reppoints']
-
+# centroid_key = '1Yke2VQYWZn3UvbqenP2KXvOKR_ZuS43m6C0gd4lwLOQ'  # GEM Standard Country Name
+# centroid_tab = ['lev1reppoints']
+rep_point_key = '1mtlwSJfWy1gbIwXVgpP3d6CcUEWo2OM0IvPD6yztGXI'
+rep_point_tab = ['Countries']
 
 client_secret_full_path = os.path.expanduser("~/") + client_secret
 gem_path = os.path.join(os.path.dirname(__file__), 'trackers/')

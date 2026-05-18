@@ -1,5 +1,5 @@
 from requests import HTTPError
-from all_config import about_sheets_pkl_path, nostopping, renaming_cols_dict, final_cols, testtracker, testfilekey, force_refresh_flag, about_templates_key, logpath, local_pkl_dir, new_h2_data, logger, new_release_dateinput, iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, region_key, region_tab, centroid_key, centroid_tab, rep_point_key, rep_point_tab
+from all_config import about_sheets_pkl_path, nostopping, renaming_cols_dict, final_cols, testtracker, testfilekey, force_refresh_flag, about_templates_key, logpath, local_pkl_dir, new_h2_data, logger, new_release_dateinput, iso_today_date,trackers_to_update, geo_mapping, releaseiso, gspread_creds, region_key, region_tab, rep_point_key, rep_point_tab
 from helper_functions import update_col_formatting_config, check_list, split_countries, convert_coords_to_point, wait_n_sec, fix_prod_type_space, fix_status_space, split_coords, make_plant_level_status, make_prod_method_tier, clean_about_df, replace_old_date_about_page_reg, convert_google_to_gdf, check_and_convert_float, check_in_range, check_and_convert_int, get_most_recent_value_and_year_goget, calculate_total_production_goget, get_country_list, get_country_list, create_goget_wiki_name,create_goget_wiki_name, gspread_access_file_read_only
 import pandas as pd
 from numpy import absolute
@@ -436,9 +436,6 @@ class TrackerObject:
                             
             print(f'This is copyright_full for {self.off_name}:\n{copyright_full}')
             print(f'This is citation_full for {self.off_name}:\n{citation_full}')
-            # TEMP
-            # TODO redo this because it is so buggy if there are multiple headers or collapsed cells in about pages (re COAL), create about pages like wiki template
-            # currently I manually check the about pages to be sure it all looks ok and fix little things
             
             # if either are not in there fully then insert into the df after first row
             # elif partially in there, delete row and insert
@@ -681,7 +678,7 @@ class TrackerObject:
         # new_main_project_tab = 'Project-level main data'
         # new_prod_project_tab = 'Project-level production data'
         # new_res_project_tab = 'Project-level reserves data'
-        project_level_tabs = ['Project-level main data', 'Project-level data production', 'Project-level data reserves']
+        project_level_tabs = ['Project-level main data', 'Project-level production data', 'Project-level reserves data']
 
         # Detect which format we're working with
         available_tabs = [ws.title for ws in gsheets.worksheets()]
@@ -2253,14 +2250,14 @@ class TrackerObject:
         # input('check unique countries that need descriptive points') # TODO actually save this somewhere
         # normally would use descriptive point
         
-        centroid_df = gspread_access_file_read_only(centroid_key, centroid_tab) # TODO update this with descriptive point on subregion
-        # centroid_df = gspread_access_file_read_only(rep_point_key, rep_point_tab) # TODO update this with descriptive point on subregion
+        # centroid_df = gspread_access_file_read_only(centroid_key, centroid_tab) # TODO update this with descriptive point on subregion
+        reppt_df = gspread_access_file_read_only(rep_point_key, rep_point_tab) # TODO update this with descriptive point on subregion
 
         # print(centroid_df.head())
         # input('check centroid df')
-        centroid_df.rename(columns={'Latitude':'Latitude-centroid', 'Longitude':'Longitude-centroid'},inplace=True)
+        reppt_df.rename(columns={'Latitude':'Latitude-reppt', 'Longitude':'Longitude-reppt'},inplace=True)
         
-        clean_export_center = pd.merge(clean_export, centroid_df, how='left', on='Country/Area')
+        clean_export_center = pd.merge(clean_export, reppt_df, how='left', on='Country/Area')
 
         # Update 'Location accuracy' for filled-in values
         # print(clean_export_center.columns)
@@ -2273,11 +2270,11 @@ class TrackerObject:
         # Fill in missing latitudes and longitudes if lat lng is '' blank string
         clean_export_center[['Latitude', 'Longitude']] = clean_export_center[['Latitude', 'Longitude']].fillna('')
         
-        clean_export_center['Latitude'] = clean_export_center.apply(lambda row: row['Latitude-centroid'] if (row['Latitude'] == '') else row['Latitude'], axis=1)
-        clean_export_center['Longitude'] = clean_export_center.apply(lambda row: row['Longitude-centroid'] if (row['Longitude'] == '') else row['Longitude'], axis=1)
+        clean_export_center['Latitude'] = clean_export_center.apply(lambda row: row['Latitude-reppt'] if (row['Latitude'] == '') else row['Latitude'], axis=1)
+        clean_export_center['Longitude'] = clean_export_center.apply(lambda row: row['Longitude-reppt'] if (row['Longitude'] == '') else row['Longitude'], axis=1)
 
         #drop centroid fill in columns
-        clean_export_center_clean = clean_export_center.drop(['Latitude-centroid', 'Longitude-centroid'], axis=1)
+        clean_export_center_clean = clean_export_center.drop(['Latitude-reppt', 'Longitude-reppt'], axis=1)
         
         # mask to check if merge fills in missing coordinates
         empty_coord_mask = clean_export_center_clean[clean_export_center_clean['Latitude']=='']
@@ -2514,8 +2511,6 @@ def create_filtered_fuel_df(df, self):
         drop_row = []
         logger.info(f'Length of ggit before oil drop: {len(df)}')
         fuels = set(df['Fuel'].to_list())
-        # print(fuels)
-        # input(f'TEMP: len before drop {len(df)}') # passed 9 removed
         for row in df.index:
             if df.loc[row, 'Fuel'] == 'Oil':
                 drop_row.append(row)
