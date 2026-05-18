@@ -40,15 +40,15 @@ list_of_all_official = [
 ]
 
 pm_preview_mode = False # For Baird's testing work
-trackers_to_update = ["Geothermal"]  # tab name in map tracker log sheet # Gas Finance
+trackers_to_update = ["Coal Mines"]  # tab name in map tracker log sheet # Gas Finance
 
-new_release_date = 'March_2026' # for within about page NEEDS TO BE FULL MONTH
-releaseiso = '2026-03'
+new_release_date = 'May_2026' # for within about page NEEDS TO BE FULL MONTH
+releaseiso = '2026-05'
 new_release_dateinput = input(f'In {new_release_date} format, with no spaces, tell me the public release date. Or press enter if {new_release_date} is the right month.')
 if new_release_dateinput == '':
     new_release_dateinput = new_release_date
 
-dd_only = False
+dd_only = True
 nostopping = True
 # add test local
 localtestfile = '' #'../testinputfile.xlsx'

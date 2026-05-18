@@ -667,27 +667,111 @@ class TrackerObject:
         return df
     
     
+    # def create_df_goget(self):
+    #     if 'Production & reserves' in self.tabs:
+    #         for tab in self.tabs:
+    #             # input('Check prod tab for goget')
+    #             if tab == 'Main data':
+    #                 # input('Confirming Main Data Found')
+    #                 gsheets = gspread_creds.open_by_key(self.key)
+    #                 spreadsheet = gsheets.worksheet(tab)
+    #                 main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+    #                 print(main_df.info())
+    #                 main_df.columns = main_df.columns.str.strip()
+
+    #             elif tab == 'Production & reserves':
+    #                 # input('Confirming Production & reserves Found')
+    #                 gsheets = gspread_creds.open_by_key(self.key)
+    #                 spreadsheet = gsheets.worksheet(tab)
+    #                 prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+    #                 print(prod_df.info())
+    #                 prod_df.columns = prod_df.columns.str.strip()
+
+    #     return main_df, prod_df            
     def create_df_goget(self):
-        if 'Production & reserves' in self.tabs:
+        # March 2026+ format: separate field-level tabs for main, production, and reserves
+        # Old format (pre-2026): 'Main data' + 'Production & reserves' combined tab
+        gsheets = gspread_creds.open_by_key(self.key)
+
+        # New format tab names
+        new_main_tab = 'Field-level main data'
+        new_prod_tab = 'Field-level production data'
+        new_res_tab = 'Field-level reserves data'
+
+        # Detect which format we're working with
+        available_tabs = [ws.title for ws in gsheets.worksheets()]
+        is_new_format = new_main_tab in available_tabs
+
+        if is_new_format:
+            logger.info('GOGET: Using new March 2026+ format (field-level tabs)')
+
+            spreadsheet = gsheets.worksheet(new_main_tab)
+            main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            print(main_df.info())
+            main_df.columns = main_df.columns.str.strip()
+
+            spreadsheet = gsheets.worksheet(new_prod_tab)
+            prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            print(prod_df.info())
+            prod_df.columns = prod_df.columns.str.strip()
+
+            spreadsheet = gsheets.worksheet(new_res_tab)
+            res_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+            print(res_df.info())
+            res_df.columns = res_df.columns.str.strip()
+
+            # Remap new column names to match what downstream code expects
+            main_df.rename(columns={
+                'Subnational unit': 'Subnational unit (province, state)',
+                'Owner(s)': 'Owner',
+                'Parent(s)': 'Parent',
+                'Block(s)': 'Concession / block',
+                'Wiki URL (field)': 'Wiki URL',
+            }, inplace=True)
+
+            # New format has separate prod and reserves tabs — recombine into
+            # a single prod_res df matching the old 'Production & reserves' schema
+            # so downstream functions (get_most_recent_value_and_year_goget) work unchanged.
+
+            # Production tab: already has Quantity (converted) and Units (converted)
+            # Just align column names to match old combined schema
+            prod_df.rename(columns={
+                'Unit Name': 'Unit name',
+                'Data Year': 'Data year',
+            }, inplace=True)
+            prod_df['Production/reserves'] = 'production'
+
+            # Reserves tab: align column names to match old combined schema
+            # Old schema had 'Quantity (converted)' and 'Units (converted)' — new reserves tab has those too
+            # Old schema had 'Reserves classification (original)' — new has 'Reserves classification'
+            res_df.rename(columns={
+                'Unit Name': 'Unit name',
+                'Data Year': 'Data year',
+                'Quantity': 'Quantity (original)',
+                'Units': 'Units (original)',
+                'Reserves classification': 'Reserves classification (original)',
+            }, inplace=True)
+            res_df['Production/reserves'] = 'reserves'
+
+            # Combine into single df matching old schema
+            prod_res_df = pd.concat([prod_df, res_df], ignore_index=True, sort=False)
+
+        else:
+            # Old format (pre-2026): 'Main data' + 'Production & reserves'
+            logger.info('GOGET: Using old pre-2026 format (Main data + Production & reserves)')
             for tab in self.tabs:
-                # input('Check prod tab for goget')
                 if tab == 'Main data':
-                    # input('Confirming Main Data Found')
-                    gsheets = gspread_creds.open_by_key(self.key)
                     spreadsheet = gsheets.worksheet(tab)
                     main_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
                     print(main_df.info())
                     main_df.columns = main_df.columns.str.strip()
-
                 elif tab == 'Production & reserves':
-                    # input('Confirming Production & reserves Found')
-                    gsheets = gspread_creds.open_by_key(self.key)
                     spreadsheet = gsheets.worksheet(tab)
-                    prod_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
-                    print(prod_df.info())
-                    prod_df.columns = prod_df.columns.str.strip()
+                    prod_res_df = pd.DataFrame(spreadsheet.get_all_records(expected_headers=[]))
+                    print(prod_res_df.info())
+                    prod_res_df.columns = prod_res_df.columns.str.strip()
 
-        return main_df, prod_df            
+        return main_df, prod_res_df            
 
     
     def set_fuel_filter_eu_and_maturity(self):
@@ -1820,6 +1904,211 @@ class TrackerObject:
         self.data = df
 
 
+    # def process_goget_reserve_prod_data(self):
+    #     # output is to return df with scott's code adjustments
+    #     # first run process_goget_reserve_prod_data_dd to save for data download
+    #     # split into two dfs
+
+    #     main, prod = self.data
+    #     # TODO need to implement the below...
+    #     # lower case and str.replace(' ', '-')
+    #     # main.columns = main.columns.str.lower()
+    #     # prod.columns = prod.columns.str.lower()
+    #     # main.columns = main.columns.str.replace(' ', '-')
+    #     # prod.columns = prod.columns.str.replace(' ', '-')
+        
+    #     # Convert 'Data year' to integers in the 'production_reserves_df'
+    #     prod['Data year'] = pd.to_numeric(prod['Data year'], errors='coerce').fillna(-1).astype(int)
+
+    #     # Update for Production - Oil and its year
+    #     main[["Production - Oil", "Production Year - Oil"]] = main.apply(
+    #         lambda x: pd.Series(get_most_recent_value_and_year_goget(x["Unit ID"], "production", "million bbl/y", prod)),
+    #         axis=1
+    #     )
+    #     # Update for Production - Gas and its year
+    #     main[["Production - Gas", "Production Year - Gas"]] = main.apply(
+    #         lambda x: pd.Series(get_most_recent_value_and_year_goget(x["Unit ID"], "production", "million m³/y", prod)),
+    #         axis=1
+    #     )
+
+    #     # Update for Production - Hydrocarbons (unspecified) and its year
+    #     main[["Production - Hydrocarbons (unspecified)", "Production Year - Hydrocarbons (unspecified)"]] = main.apply(
+    #         lambda x: pd.Series(get_most_recent_value_and_year_goget(x["Unit ID"], "production", "million boe/y", prod)),
+    #         axis=1
+    #     )
+
+    #     # Calculate total reserves and production
+    #     #filtered_main_data_df['Reserves- Total (Oil, Gas and Hydrocarbons)'] = filtered_main_data_df.apply(calculate_total_reserves, axis=1)
+    #     main['Production - Total (Oil, Gas and Hydrocarbons)'] = main.apply(calculate_total_production_goget, axis=1)
+
+
+    #     # Convert Discovery Year to String
+    #     main['Discovery year'] = main['Discovery year'].astype(object)
+
+    #     # Ensure there are no NaN values in the year columns before conversion to avoid errors
+    #     main['Production Year - Oil'].fillna('', inplace=True)
+    #     main['Production Year - Gas'].fillna('', inplace=True)
+    #     main['Production Year - Hydrocarbons (unspecified)'].fillna('', inplace=True)
+
+    #     main['Production Year - Oil'] = main['Production Year - Oil'].astype(str)
+    #     main['Production Year - Gas'] = main['Production Year - Gas'].astype(str)
+    #     main['Production Year - Hydrocarbons (unspecified)'] = main['Production Year - Hydrocarbons (unspecified)'].astype(str)
+
+    #     # remove .0 -1.0
+    #     for col in ['Production Year - Oil', 'Production Year - Gas','Production Year - Hydrocarbons (unspecified)']:
+    #         main[col] = main[col].apply(lambda x: x.replace('.0',''))
+    #         main[col] = main[col].apply(lambda x: x.replace('-1','not stated'))
+
+    #     # Convert to integer first to remove the trailing zero, then to string
+    #     # filtered_main_data_df['Production Year - Oil'] = filtered_main_data_df['Production Year - Oil'].astype(int).astype(str)
+    #     # filtered_main_data_df['Production Year - Gas'] = filtered_main_data_df['Production Year - Gas'].astype(int).astype(str)
+    #     # filtered_main_data_df['Production Year - Hydrocarbons (unspecified)'] = filtered_main_data_df['Production Year - Hydrocarbons (unspecified)'].astype(int).astype(str)
+
+    #     # Ensure there are no nan in status, this is before renaming so still uppercase
+    #     main['Status'].fillna('', inplace=True)
+        
+    #     # Replace "0" with np.nan or a placeholder if you had NaN values initially
+    #     # filtered_main_data_df.replace('0', np.nan, inplace=True)
+
+    #     # Check the conversion by printing the dtypes again
+    #     # column_data_types = filtered_main_data_df.dtypes
+    #     # print(column_data_types)
+        
+    #     # Apply the function to create a new column 'Country List'
+    #     main['Country List'] = main['Country/Area'].apply(get_country_list)
+    #     # print(filtered_main_data_df[['Country List','Country/Area']]) 
+    #     # print(set(filtered_main_data_df['Country List'].to_list()))
+    #     # print(set(filtered_main_data_df['Country/Area'].to_list()))
+    #     # input('Check country list and country/area after apply')   
+        
+    #     dropped_filtered_main_data = main.drop(['Government unit ID',  'Basin', 'Concession / block'], axis=1)
+    #     # average_production_total = filtered_main_data_df["Production - Total (Oil, Gas and Hydrocarbons)"].mean()
+    #     # print("Average Production - Total (Oil, Gas and Hydrocarbons):", average_production_total)
+    #     # input('check avg production total seems right, previous was 6.3041')
+
+    #     # # Create new column for scaling where there is a fill in value based on average when data is not there.
+    #     # dropped_filtered_main_data["Production for Map Scaling"] = np.where(dropped_filtered_main_data["Production - Total (Oil, Gas and Hydrocarbons)"] != 0,
+    #     #                                                             dropped_filtered_main_data["Production - Total (Oil, Gas and Hydrocarbons)"],
+    #     #                                                             average_production_total)
+
+    #     dropped_production_Wiki_name = create_goget_wiki_name(dropped_filtered_main_data)
+    #     regions_df = gspread_access_file_read_only(region_key, region_tab)
+    #     # print(set(dropped_production_Wiki_name['Country List'].to_list()))
+    #     # print(set(dropped_production_Wiki_name['Country/Area'].to_list()))
+    #     # input('Check country list and country/area before merge') 
+        
+    #     # print(regions_df['GEM Standard Country Name'])
+    #     # input('inspect list of GEM standard names')
+
+
+    #     dropped_production_Wiki_name = pd.merge(
+    #         dropped_production_Wiki_name,
+    #         regions_df[['GEM Standard Country Name', 'GEM region']],
+    #         left_on='Country/Area',
+    #         right_on='GEM Standard Country Name',
+    #         how='left'
+    #     )
+
+        
+    #     # After the merge, you might have an extra column 'GEM Standard Country Name' which is a duplicate of 'Country'.
+    #     # You can drop this extra column if it's not needed.
+    #     dropped_production_Wiki_name.drop('GEM Standard Country Name', axis=1, inplace=True)
+    #     # print(dropped_production_Wiki_name.head())
+    #     # input('check that it matches Scotts after dropped_production_Wiki_name')
+    #     # print(dropped_production_Wiki_name.dtypes)
+    #     # input('check thosul be objects for all but prod oil prod gas prod hydrocarbons prod total prod for map scaling, lat and lng')
+    #     # drop superfluous columns
+    #     clean_export = dropped_production_Wiki_name.drop(['Unit type'], axis=1) # Fuel type
+        
+    #     # Use not centroid but descriptive point
+    #     # Set up DF of Units without locations
+    #     clean_export[['Longitude', 'Latitude']] = clean_export[['Longitude', 'Latitude']].fillna('')
+    #     missing_location_df = clean_export[clean_export['Latitude']=='']
+    #     # Get unique entries from the 'Country/Area' column
+    #     unique_countries_with_missing_locations = missing_location_df['Country/Area'].unique()
+
+    #     # Display the unique countries
+    #     unique_countries_df = pd.DataFrame(unique_countries_with_missing_locations, columns=['Country/Area'])
+    #     print(unique_countries_df)
+    #     # input('check unique countries that need descriptive points') # TODO actually save this somewhere
+    #     # normally would use descriptive point
+        
+    #     centroid_df = gspread_access_file_read_only(centroid_key, centroid_tab) # TODO update this with descriptive point on subregion
+    #     # centroid_df = gspread_access_file_read_only(rep_point_key, rep_point_tab) # TODO update this with descriptive point on subregion
+
+    #     # print(centroid_df.head())
+    #     # input('check centroid df')
+    #     centroid_df.rename(columns={'Latitude':'Latitude-centroid', 'Longitude':'Longitude-centroid'},inplace=True)
+        
+    #     clean_export_center = pd.merge(clean_export, centroid_df, how='left', on='Country/Area')
+
+    #     # Update 'Location accuracy' for filled-in values
+    #     # print(clean_export_center.columns)
+    #     clean_export_center['Location accuracy'] = clean_export_center.apply(lambda row: 'country level only' if pd.isna(row['Latitude']) or pd.isna(row['Longitude']) else row['Location accuracy'], axis=1)
+
+    #     # mask to check if merge fills in missing coordinates
+    #     empty_coord_mask = clean_export_center[clean_export_center['Latitude']=='']
+    #     print(f'How many missing coords before?: {len(empty_coord_mask)}')
+        
+    #     # Fill in missing latitudes and longitudes if lat lng is '' blank string
+    #     clean_export_center[['Latitude', 'Longitude']] = clean_export_center[['Latitude', 'Longitude']].fillna('')
+        
+    #     clean_export_center['Latitude'] = clean_export_center.apply(lambda row: row['Latitude-centroid'] if (row['Latitude'] == '') else row['Latitude'], axis=1)
+    #     clean_export_center['Longitude'] = clean_export_center.apply(lambda row: row['Longitude-centroid'] if (row['Longitude'] == '') else row['Longitude'], axis=1)
+
+    #     #drop centroid fill in columns
+    #     clean_export_center_clean = clean_export_center.drop(['Latitude-centroid', 'Longitude-centroid'], axis=1)
+        
+    #     # mask to check if merge fills in missing coordinates
+    #     empty_coord_mask = clean_export_center_clean[clean_export_center_clean['Latitude']=='']
+    #     # print(f'How many missing coords after?: {len(empty_coord_mask)}')
+    #     # input('Check before and after for empty coord logic!')
+        
+    #     # Define a dictionary with old column names as keys and new names with units as values
+    #     column_rename_map = {
+    #         'Production - Oil': 'Production - Oil (Million bbl/y)',
+    #         'Production - Gas': 'Production - Gas (Million m³/y)',
+    #         'Production - Total (Oil, Gas and Hydrocarbons)': 'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)',
+    #         # Add other columns you wish to rename similarly here
+    #     }
+        
+    #     # Set output order, dropping more columns
+    #     desired_column_order = [
+    #         'Unit ID',
+    #         'Fuel type',
+    #         'Wiki name',
+    #         'Status',
+    #         'Country/Area',
+    #         'Country List',
+    #         'Subnational unit (province, state)',
+    #         'GEM region',
+    #         'Latitude',
+    #         'Longitude',
+    #         'Location accuracy',
+    #         'Discovery year',
+    #         'FID Year',
+    #         'Production start year',
+    #         'Operator',
+    #         'Owner',
+    #         'Parent',
+    #         'Project or complex',
+    #         'Production - Oil (Million bbl/y)',
+    #         'Production Year - Oil',
+    #         'Production - Gas (Million m³/y)',
+    #         'Production Year - Gas',
+    #         'Production - Total (Oil, Gas and Hydrocarbons) (Million boe/y)',
+    #         'Wiki URL',
+    #     ]
+    
+
+    #     # Rename the columns
+    #     clean_export_center_clean_rename = clean_export_center_clean.rename(columns=column_rename_map)
+        
+    #     # Reorder the columns
+    #     clean_export_center_clean_reorder_rename = clean_export_center_clean_rename[desired_column_order]
+
+        
+    #     self.data = clean_export_center_clean_reorder_rename
     def process_goget_reserve_prod_data(self):
         # output is to return df with scott's code adjustments
         # first run process_goget_reserve_prod_data_dd to save for data download
@@ -1897,7 +2186,8 @@ class TrackerObject:
         # print(set(filtered_main_data_df['Country/Area'].to_list()))
         # input('Check country list and country/area after apply')   
         
-        dropped_filtered_main_data = main.drop(['Government unit ID',  'Basin', 'Concession / block'], axis=1)
+        cols_to_drop = [c for c in ['Government unit ID', 'Basin', 'Concession / block'] if c in main.columns]
+        dropped_filtered_main_data = main.drop(cols_to_drop, axis=1)
         # average_production_total = filtered_main_data_df["Production - Total (Oil, Gas and Hydrocarbons)"].mean()
         # print("Average Production - Total (Oil, Gas and Hydrocarbons):", average_production_total)
         # input('check avg production total seems right, previous was 6.3041')
@@ -1934,7 +2224,8 @@ class TrackerObject:
         # print(dropped_production_Wiki_name.dtypes)
         # input('check thosul be objects for all but prod oil prod gas prod hydrocarbons prod total prod for map scaling, lat and lng')
         # drop superfluous columns
-        clean_export = dropped_production_Wiki_name.drop(['Unit type'], axis=1) # Fuel type
+        cols_to_drop_2 = [c for c in ['Unit type'] if c in dropped_production_Wiki_name.columns]
+        clean_export = dropped_production_Wiki_name.drop(cols_to_drop_2, axis=1) # Fuel type
         
         # Use not centroid but descriptive point
         # Set up DF of Units without locations
@@ -2019,13 +2310,17 @@ class TrackerObject:
 
         # Rename the columns
         clean_export_center_clean_rename = clean_export_center_clean.rename(columns=column_rename_map)
-        
-        # Reorder the columns
-        clean_export_center_clean_reorder_rename = clean_export_center_clean_rename[desired_column_order]
 
-        
+        # Only keep columns that actually exist (handles old vs new GOGET format differences)
+        available_desired = [c for c in desired_column_order if c in clean_export_center_clean_rename.columns]
+        missing = [c for c in desired_column_order if c not in clean_export_center_clean_rename.columns]
+        if missing:
+            logger.info(f'GOGET: desired columns not present (ok for new format): {missing}')
+        clean_export_center_clean_reorder_rename = clean_export_center_clean_rename[available_desired]
+
+
         self.data = clean_export_center_clean_reorder_rename
-    
+        
         
     def transform_to_gdf(self): # This is dropping all geo rows for pipeline data
     # TODO FIX pipeline issue  
